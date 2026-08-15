@@ -117,8 +117,10 @@ header{
   padding:12px 14px;margin-bottom:12px;position:sticky;top:8px;z-index:1000;backdrop-filter:blur(10px);isolation:isolate;
 }
 .brand{display:flex;align-items:center;gap:8px;}
-.brand-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));
-  display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Fraunces',serif;color:#1c1509;font-size:14px;}
+.brand-mark{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.brand-mark img{width:100%;height:100%;display:block;object-fit:contain;}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Fraunces',serif;font-weight:800;font-size:30px;letter-spacing:.5px;color:var(--paper);text-align:center;}
+.auth-logo img{width:42px;height:42px;display:block;object-fit:contain;flex-shrink:0;}
 .brand-name{font-family:'Fraunces',serif;font-weight:700;font-size:15px;}
 .header-right{display:flex;align-items:center;gap:8px;position:relative;z-index:1001;}
 .balance-chip{
@@ -480,7 +482,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 /* ============ TOAST ============ */
 #appScreen{min-height:100dvh;background:var(--bg);}
 
-#toastBox{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;align-items:center;width:100%;padding:0 20px;}
+#toastBox{position:fixed;top:calc(12px + env(safe-area-inset-top));bottom:auto;left:50%;transform:translateX(-50%);z-index:100000;display:flex;flex-direction:column;gap:8px;align-items:center;width:100%;padding:0 20px;pointer-events:none;}
 .toast{
   background:var(--bg-2);border:1px solid var(--brass);color:var(--paper);padding:11px 18px;border-radius:12px;
   font-size:13px;font-weight:600;box-shadow:var(--shadow);animation:toastIn .25s ease, toastOut .3s ease 2.3s forwards;
@@ -516,7 +518,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authScreen">
   <div class="auth-card">
-    <div class="auth-logo">GD<span>PLAY</span></div>
+    <div class="auth-logo"><img src="/static/gdplay-logo.png" alt="GDPLAY"><span>GD<span>PLAY</span></span></div>
     <div class="auth-tag">Хранилище редких кубов</div>
     <div class="auth-tabs">
       <button class="auth-tab active" data-form="login" type="button">Вход</button>
@@ -543,7 +545,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   <div class="app-shell">
     <header>
       <div class="brand">
-        <div class="brand-mark">GD</div>
+        <div class="brand-mark"><img src="/static/gdplay-logo.png" alt="GD"></div>
         <div class="brand-name" onclick="handleSecretTap()">GDPLAY</div>
       </div>
       <div class="header-right">
@@ -733,6 +735,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   <div class="input-modal">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
       <h3 style="margin:0">⚙️ Управление аккаунтом</h3>
+      <button type="button" class="btn-ghost" id="adminAccountCloseBtn" style="flex-shrink:0">✕ Закрыть</button>
     </div>
     <p>Игрок ID: <span id="adminAccountUid" class="mono"></span></p>
     <div style="display:grid;gap:8px">
@@ -1073,7 +1076,7 @@ const CASES = [
     {name:"Doggie",rarity:"rare",value:487500,chance:26.68},
     {name:"wPopoff",rarity:"epic",value:780000,chance:30.0},
     {name:"Trick",rarity:"legendary",value:1040000,chance:8.0},
-    {name:"Nnfred",rarity:"mythic",value:1000000,chance:3.0},
+    {name:"Nnfret",rarity:"mythic",value:1000000,chance:3.0},
     {name:"nSwish",rarity:"divine",value:4875000,chance:0.95},
     {name:"Kuro",rarity:"emerald",value:17100000,chance:0.05}
   ]},
@@ -1309,6 +1312,11 @@ function applyServerState(u){
   if(JSON.stringify(data.cubes) !== beforeCubeValues) changed = true;
   if(Array.isArray(u.keys) && JSON.stringify(u.keys) !== JSON.stringify(data.keys)){ data.keys = u.keys; changed = true; }
   if(typeof u.cases_opened === 'number' && u.cases_opened !== data.cases_opened){ data.cases_opened = u.cases_opened; changed = true; }
+  if(u.daily_claimed !== undefined){
+    const serverLastDaily = u.daily_claimed ? Date.parse(u.daily_claimed) : 0;
+    if(Number(serverLastDaily || 0) !== Number(data.lastDaily || 0)){ data.lastDaily = Number(serverLastDaily || 0); changed = true; }
+  }
+  if(typeof u.daily_streak === 'number' && u.daily_streak !== Number(data.dailyStreak || 0)){ data.dailyStreak = Number(u.daily_streak || 0); changed = true; }
   if(typeof u.battle_winnings === 'number' && u.battle_winnings !== data.battle_winnings){ data.battle_winnings = u.battle_winnings; changed = true; }
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
@@ -1629,6 +1637,7 @@ function openAdminAccount(uid){
   openModal('adminAccountModal');
   document.getElementById('adminAccountModal').querySelector('.input-modal')?.scrollTo(0,0);
   const once=(id,fn)=>{const el=document.getElementById(id); el.onclick=fn;};
+  once('adminAccountCloseBtn', ()=>closeModal('adminAccountModal'));
   once('adminAccountNickBtn', async()=>{const v=document.getElementById('adminAccountNick').value.trim(); if(!v)return showToast('❌ Введи ник','error'); await adminAccountAction(uid,'username',{username:v});});
   once('adminAccountPasswordBtn', async()=>{const v=document.getElementById('adminAccountPassword').value; if(v.length<4)return showToast('❌ Пароль минимум 4 символа','error'); await adminAccountAction(uid,'password',{password:v}); document.getElementById('adminAccountPassword').value='';});
   once('adminAccount2faBtn', async()=>{ const enabled=!!u?.two_factor_enabled; if(await tgConfirm(enabled?'Отключить 2FA и сбросить незавершённые коды?':'Включить 2FA для этого аккаунта?')) await adminAccountAction(uid,'2fa',{enabled:!enabled}); });
@@ -3090,7 +3099,7 @@ function renderProfile(){
   document.getElementById('statCubes').textContent=data.cubes.length;
   document.getElementById('statBattles').textContent=data.battles||0;
   document.getElementById('statWins').textContent=data.wins||0;
-  const now=Date.now(); const can=now-(data.lastDaily||0)>=86400000;
+  const now=Date.now(); const lastDailyDate=Number(data.lastDaily||0)?new Date(Number(data.lastDaily)).toDateString():''; const can=lastDailyDate!==new Date(now).toDateString();
   const streak=Number(data.dailyStreak||0);
   const nextRewardBase=500+Math.max(0,Math.min(6,streak))*100;
   const nextReward=isPremium?nextRewardBase*2:nextRewardBase;
