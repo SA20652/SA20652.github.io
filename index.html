@@ -113,30 +113,29 @@ input,select,textarea{font-family:inherit;-webkit-appearance:none;appearance:non
 /* ============ HEADER / NAV ============ */
 header{
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--bg-2);border:1px solid var(--line);border-radius:13px;
-  padding:7px 9px;margin-bottom:8px;position:sticky;top:6px;z-index:1000;backdrop-filter:blur(10px);isolation:isolate;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:16px;
+  padding:12px 14px;margin-bottom:12px;position:sticky;top:8px;z-index:1000;backdrop-filter:blur(10px);isolation:isolate;
 }
-.brand{display:flex;align-items:center;gap:6px;}
-.brand-mark{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-mark{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
 .brand-mark img{width:100%;height:100%;display:block;object-fit:contain;}
 .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Fraunces',serif;font-weight:800;font-size:30px;letter-spacing:.5px;color:var(--paper);text-align:center;}
 .auth-logo img{width:42px;height:42px;display:block;object-fit:contain;flex-shrink:0;}
-.brand-name{font-family:'Fraunces',serif;font-weight:700;font-size:18px;letter-spacing:.1px;}
-.header-right{display:flex;align-items:center;gap:6px;position:relative;z-index:1001;}
+.brand-name{font-family:'Fraunces',serif;font-weight:700;font-size:23px;letter-spacing:.2px;}
+.header-right{display:flex;align-items:center;gap:8px;position:relative;z-index:1001;}
 .balance-chip{
-  display:flex;align-items:center;gap:4px;background:var(--bg-3);border:1px solid var(--line);
-  padding:6px 9px;border-radius:18px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;color:var(--brass-2);
+  display:flex;align-items:center;gap:5px;background:var(--bg-3);border:1px solid var(--line);
+  padding:9px 14px;border-radius:22px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--brass-2);
 }
-.icon-btn{background:var(--bg-3);border:1px solid var(--line);color:var(--paper);width:30px;height:30px;border-radius:50%;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.icon-btn{background:var(--bg-3);border:1px solid var(--line);color:var(--paper);width:34px;height:34px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;}
 .icon-btn:active{transform:scale(.9);}
 
-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;}
 .nav-btn{
-  background:var(--bg-2);border:1px solid var(--line);border-radius:11px;padding:6px 4px;
-  color:var(--muted);font-size:12px;font-weight:700;transition:.2s;
-  min-height:58px;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:8px 2px;
+  color:var(--muted);font-size:10.5px;font-weight:600;transition:.2s;
 }
-.nav-btn span{display:block;font-size:21px;margin-bottom:2px;}
+.nav-btn span{display:block;font-size:17px;margin-bottom:3px;}
 .nav-btn.active{background:rgba(201,151,77,.14);border-color:var(--brass-dim);color:var(--brass-2);}
 .nav-btn:active{transform:scale(.94);}
 
@@ -411,8 +410,8 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 }
 
 .header-right{position:relative;display:flex;align-items:center;gap:8px;}
-.menu-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg-3);color:var(--paper);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;}
-.menu-panel{position:absolute;right:0;top:41px;width:190px;pointer-events:auto;background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:7px;box-shadow:var(--shadow);z-index:250;display:none;}
+.menu-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--bg-3);color:var(--paper);font-size:23px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;}
+.menu-panel{position:absolute;right:0;top:48px;width:190px;pointer-events:auto;background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:7px;box-shadow:var(--shadow);z-index:250;display:none;}
 .menu-panel.open{display:block;}
 .menu-item{display:flex;width:100%;min-height:44px;box-sizing:border-box;padding:11px 12px;align-items:center;text-align:left;background:transparent;border:0;color:var(--paper);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;position:relative;z-index:1;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 .menu-item:hover{background:var(--bg-3);}
@@ -450,6 +449,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .public-profile-btn{margin-top:5px;font-size:10px;padding:5px 8px;}
 
 .admin-badges{margin-left:5px;white-space:nowrap;}
+.referral-card{margin-top:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}.referral-card .ref-title{font-weight:800;font-size:15px;margin-bottom:5px}.referral-card .ref-desc{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:10px}.referral-row{display:flex;gap:8px;align-items:center}.referral-link{flex:1;min-width:0;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}.referral-copy{flex-shrink:0;padding:10px 12px}.referral-stats{display:flex;gap:12px;margin-top:9px;font-size:11px;color:var(--muted)}
 .profile-edit{margin-top:8px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;min-width:112px;box-sizing:border-box;}
 .avatar-file{display:none;}
 .admin-avatar-row{display:flex;align-items:center;gap:12px;padding:10px 0 2px;}
@@ -575,7 +575,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div class="section-title">Сейфы хранилища</div>
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
       <div id="casesList"></div>
-      <div class="promo-card" style="margin-top:18px;"><div class="section-title" style="margin-top:0">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
       <div class="section-title" style="margin-top:24px">Последние дропы</div>
       <div class="section-sub">Только 3 последних выигрыша</div>
       <div id="recentDropsList"></div>
@@ -594,7 +593,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div class="section-title" style="margin-top:18px">🗝️ Ключи</div>
       <div class="section-sub">Ключи можно улучшать и выставлять в магазин.</div>
       <div id="keysInventoryList"></div>
-      
+      <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
     </div>
 
     <!-- MARKET -->
@@ -651,6 +650,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
         <div class="pstat"><b id="statBattles">0</b><span>батлов</span></div>
         <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
       </div>
+      <div class="referral-card"><div class="ref-title">👥 Реферальная программа</div><div class="ref-desc">Пригласи друга. После его первого открытия кейса тебе начислится <b>3500 💰</b>.</div><div class="referral-row"><div class="referral-link" id="referralLink">Загрузка ссылки…</div><button class="btn-ghost referral-copy" id="referralCopyBtn">Скопировать</button></div><div class="referral-stats"><span>Приглашено: <b id="referralTotal">0</b></span><span>Наград получено: <b id="referralRewarded">0</b></span></div></div>
       <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
@@ -917,6 +917,7 @@ const THEME_KEY = 'gdplay_theme_v1';
 const MARKET_KEY = 'gdplay_market_v1';
 const DEVICE_BACKUP_KEY = 'gdplay_device_backup_v1';
 const AUTH_TOKEN_KEY = 'gdplay_auth_token_v1';
+const LOGGED_OUT_KEY = 'gdplay_logged_out_v1';
 const KEY_CATALOG = [
   {id:'rust-key', name:'Ключ ржавого сейфа', rarity:'common', value:120, icon:'🗝️'},
   {id:'brass-key', name:'Латунный ключ', rarity:'rare', value:650, icon:'🔑'},
@@ -951,16 +952,8 @@ function storageRemove(key){
   delete memoryStore[key];
 }
 
-// One-time client-side wipe for v4: remove all old local accounts/session/market data.
-(function resetClientDataV4(){
-  const marker='gdplay_client_reset_v4_done';
-  if(!storageOK) return;
-  try{
-    if(localStorage.getItem(marker)==='1') return;
-    [USERS_KEY,SESSION_KEY,DROPS_KEY,MARKET_KEY,DEVICE_BACKUP_KEY,AUTH_TOKEN_KEY].forEach(k=>localStorage.removeItem(k));
-    localStorage.setItem(marker,'1');
-  }catch(e){}
-})();
+// ВАЖНО: данные клиента больше не очищаются при обновлении приложения.
+// Аккаунт и серверная сессия должны переживать новые версии HTML.
 
 // ===== RARITY META =====
 const RARITY_META = {
@@ -1070,18 +1063,18 @@ const CASES = [
     {name:"nng122",rarity:"common",value:209000,chance:17.81},
     {name:"Netermind",rarity:"rare",value:285000,chance:27.15},
     {name:"Taiago",rarity:"epic",value:456000,chance:27.55},
-    {name:"Attasha",rarity:"legendary",value:608000,chance:8.0},
+    {name:"Attasha",rarity:"legendary",value:1488888,chance:8.0},
     {name:"Bistik",rarity:"mythic",value:1292000,chance:3.0},
     {name:"workfornft",rarity:"divine",value:2850000,chance:1.0}
   ]},
   {id:"hall",name:"Зал славы GD",price:650000,icon:"🏛️",items:[
-    {name:"G4lvatron",rarity:"common",value:260000,chance:14.5},
-    {name:"Jeyzor",rarity:"common",value:357500,chance:16.82},
-    {name:"Serponge",rarity:"rare",value:487500,chance:26.68},
-    {name:"Knots",rarity:"epic",value:780000,chance:30.0},
-    {name:"Krazyman50",rarity:"legendary",value:1040000,chance:8.0},
+    {name:"Riot",rarity:"common",value:260000,chance:14.5},
+    {name:"Zoink",rarity:"common",value:357500,chance:16.82},
+    {name:"Doggie",rarity:"rare",value:487500,chance:26.68},
+    {name:"wPopoff",rarity:"epic",value:780000,chance:30.0},
+    {name:"Trick",rarity:"legendary",value:1040000,chance:8.0},
     {name:"Nnfret",rarity:"mythic",value:1000000,chance:3.0},
-    {name:"Lemons",rarity:"divine",value:4875000,chance:0.95},
+    {name:"nSwish",rarity:"divine",value:4875000,chance:0.95},
     {name:"Kuro",rarity:"emerald",value:17100000,chance:0.05}
   ]},
 ];
@@ -1340,6 +1333,8 @@ function applyServerState(u){
   if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }
   if(Array.isArray(u.buffs) && JSON.stringify(u.buffs)!==JSON.stringify(data.buffs)){ data.buffs=u.buffs; changed=true; }
   if(Array.isArray(u.best_drops) && JSON.stringify(u.best_drops)!==JSON.stringify(data.bestDrops)){ data.bestDrops=u.best_drops; changed=true; }
+  if(u.referral_code && data.referralCode !== u.referral_code){ data.referralCode=u.referral_code; changed=true; }
+  if(u.referrals && JSON.stringify(u.referrals)!==JSON.stringify(data.referrals||{})){ data.referrals=u.referrals; changed=true; }
   if(!changed) return;
   persistLocal();
   updateBalanceUI();
@@ -1403,9 +1398,10 @@ async function register(username, pass, pass2){
   if(pass!==pass2){ showAuthError('Пароли не совпадают'); return; }
   try{
     const j=await apiFetch('/api/auth/register',{username,password:pass});
-    currentUser=username.toLowerCase(); storageSet('GDPLAY_LAST_PASSWORD',pass);
+    currentUser=username.toLowerCase();
     data=serverUserToGame(j.user,username);
     storageSet(SESSION_KEY,currentUser);
+    storageRemove(LOGGED_OUT_KEY);
     if(j.token) storageSet(AUTH_TOKEN_KEY,j.token);
     showToast('✅ Аккаунт создан!','success');
     showApp();
@@ -1431,8 +1427,8 @@ async function confirm2FA(){
     currentUser=pending2FA.username.toLowerCase();
     data=serverUserToGame(j.user,pending2FA.username);
     storageSet(SESSION_KEY,currentUser);
+    storageRemove(LOGGED_OUT_KEY);
     if(j.token) storageSet(AUTH_TOKEN_KEY,j.token);
-    if(pending2FA.password) storageSet('GDPLAY_LAST_PASSWORD',pending2FA.password);
     pending2FA=null; closeModal('twofaModal');
     showToast('✅ Код принят','success'); showApp();
   }catch(e){ document.getElementById('twofaError').textContent=e.message; }
@@ -1445,12 +1441,12 @@ async function login(username, pass){
   if(!username || !pass){ showAuthError('Введи имя пользователя и пароль'); return; }
   try{
     const j=await apiFetch('/api/auth/login',{username,password:pass});
-    if(j.two_factor_required){ storageSet('GDPLAY_LAST_PASSWORD',pass); open2FAModal(j.user_id,username,pass); return; }
-    currentUser=username.toLowerCase(); storageSet('GDPLAY_LAST_PASSWORD',pass);
+    if(j.two_factor_required){ open2FAModal(j.user_id,username,pass); return; }
+    currentUser=username.toLowerCase();
     data=serverUserToGame(j.user,username);
     storageSet(SESSION_KEY,currentUser);
+    storageRemove(LOGGED_OUT_KEY);
     if(j.token) storageSet(AUTH_TOKEN_KEY,j.token);
-    storageSet('GDPLAY_LAST_PASSWORD',pass);
     showToast(`👋 С возвращением, ${data.username}!`,'success'); showApp();
   }catch(e){ showAuthError(e.message); }
 }
@@ -1467,6 +1463,7 @@ function serverUserToGame(u,fallbackName){
 }
 
 function logout(){
+  storageSet(LOGGED_OUT_KEY,'1');
   storageRemove(SESSION_KEY);
   storageRemove(AUTH_TOKEN_KEY);
   currentUser = null;
@@ -1559,6 +1556,28 @@ async function bootSafe(){
       // Недействительный/истёкший токен — только тогда показываем вход.
       storageRemove(AUTH_TOKEN_KEY);
     }
+  }
+
+  // Если после обновления браузер/Telegram потерял локальную сессию,
+  // восстанавливаем аккаунт по подписанному Telegram initData. Это безопасно:
+  // user_id на сервере = Telegram ID владельца аккаунта.
+  if(!storageGet(LOGGED_OUT_KEY) && tgInitData()){
+    try{
+      const j = await apiFetch('/api/me', {});
+      if(j && j.user){
+        const serverName = String(j.user.display_name || j.user.username || 'Игрок');
+        currentUser = String(j.user.username || serverName).toLowerCase();
+        data = serverUserToGame(j.user, serverName);
+        users = loadUsers();
+        users[currentUser] = users[currentUser] || {username:serverName, passHash:'', game:data};
+        users[currentUser].username = serverName;
+        users[currentUser].game = data;
+        saveUsers(users);
+        storageSet(SESSION_KEY,currentUser);
+        showApp();
+        return;
+      }
+    }catch(e){ console.warn('server account restore skipped', e); }
   }
 
   showAuth();
@@ -2244,6 +2263,7 @@ async function openCaseOnce(c, seq, total){
       else data.cubes.push({...won});
       normalizeAllCubeValues();
       data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
+      if(Number(j.referral_bonus||0)>0){data.referrals=data.referrals||{};data.referrals.rewarded=Number(data.referrals.rewarded||0)+1;showToast('🎁 Реферал открыл первый кейс: +3500 💰','success');}
     }else{
       data.cubes.push({ name: won.name, rarity: won.rarity, value: won.value, time: Date.now() });
       data.cases_opened = (data.cases_opened||0) + 1;
@@ -2319,32 +2339,8 @@ function renderInventory(){
   keyBox.innerHTML=data.keys.length ? data.keys.map((k,i)=>{
     const meta=RARITY_META[k.rarity]||RARITY_META.common;
     return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
-      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="key-market-list" data-index="${i}">На продажу</button><button type="button" class="btn-sell" data-action="key-sell-item" data-index="${i}">Боту ×${sellRatioLabel}</button><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="key">📈 Апгрейд</button></div></div>`;
+      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="key-market-list" data-index="${i}">На продажу</button><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="key">📈 Апгрейд</button></div></div>`;
   }).join('') : '<div class="empty-state">Ключей пока нет.</div>';
-}
-
-async function sellKeyItem(index){
-  const idx=Number(index);
-  if(isNaN(idx) || idx<0 || idx>=data.keys.length){ showToast('❌ Ключ не найден','error'); renderInventory(); return; }
-  const key=data.keys[idx];
-  if(!key){ showToast('❌ Ключ не найден','error'); return; }
-  const isPremium=!!(data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now());
-  const ratio=isPremium?0.85:0.7;
-  const gain=Math.floor(Number(key.value||0)*ratio);
-  if(gain<0){ showToast('❌ Некорректная стоимость ключа','error'); return; }
-  try{
-    // Ключи в текущей версии проекта хранятся в клиентском inventory,
-    // поэтому продажа боту выполняется здесь так же, как локальная продажа кубов.
-    data.balance=Number(data.balance||0)+gain;
-    data.keys.splice(idx,1);
-    persistLocal();
-    updateBalanceUI();
-    renderInventory();
-    showToast(`🗝️ Ключ продан боту за ${gain.toLocaleString('ru-RU')} 💰`, 'success');
-  }catch(e){
-    showToast('❌ '+e.message,'error');
-    renderInventory();
-  }
 }
 
 async function sellItem(index){
@@ -2731,11 +2727,11 @@ async function removeMarketItem(id){
     });
     storageSet(MARKET_KEY,JSON.stringify(local.filter(x=>String(x.id)!==String(id))));
     persistLocal(); renderMarket(); renderInventory();
-    showToast('↩️ Объявление убрано из магазина','success');
+    showToast('↩️ Куб убран из магазина','success');
     return;
   }
   try{
-    const j=await apiFetch('/api/mp/market/cancel',{item_id:id});
+    const j=await apiFetch('/api/mp/market/remove',{item_id:id});
     if(j.cubes) data.cubes=j.cubes;
     if(j.keys) data.keys=j.keys;
     persistLocal(); await renderMarket(); renderInventory();
@@ -3170,6 +3166,7 @@ function renderProfile(){
   const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/7*100)+'%';
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
+  const refCode=data.referralCode||''; const refLink=refCode?`https://t.me/GD_play_bot?startapp=ref_${encodeURIComponent(refCode)}`:'Ссылка появится после входа через Telegram'; const refEl=document.getElementById('referralLink'); if(refEl) refEl.textContent=refLink; const refTotal=document.getElementById('referralTotal'); if(refTotal) refTotal.textContent=Number(data.referrals?.total||0); const refRewarded=document.getElementById('referralRewarded'); if(refRewarded) refRewarded.textContent=Number(data.referrals?.rewarded||0);
   renderBestDrops(document.getElementById('profileBestDrops'), data.bestDrops);
   renderBuffs();
 }
@@ -3203,7 +3200,7 @@ async function refreshTwoFactorUI(){
 }
 async function toggleTwoFactor(){
   const b=document.getElementById('twoFactorToggle'); const enabled=b?.dataset.enabled==='1';
-  try{ let savedPass=storageGet('GDPLAY_LAST_PASSWORD',''); if(!enabled && !savedPass){ savedPass=window.prompt('Введите текущий пароль для включения 2FA:','')||''; if(!savedPass) throw new Error('Нужен пароль для включения 2FA'); storageSet('GDPLAY_LAST_PASSWORD',savedPass); } const j=await apiFetch('/api/security/2fa',{enabled:enabled?0:1,password:savedPass}); if(b){b.dataset.enabled=j.enabled?'1':'0';b.textContent=j.enabled?'Включена':'Выключена';} showToast(j.enabled?'🔐 2FA включена':'🔓 2FA выключена','success'); }catch(e){ showToast('❌ '+e.message,'error'); }
+  try{ const j=await apiFetch('/api/security/2fa',{enabled:enabled?0:1}); if(b){b.dataset.enabled=j.enabled?'1':'0';b.textContent=j.enabled?'Включена':'Выключена';} showToast(j.enabled?'🔐 2FA включена':'🔓 2FA выключена','success'); }catch(e){ showToast('❌ '+e.message,'error'); }
 }
 
 function getSetting(name, fallback=true){
@@ -3277,7 +3274,6 @@ function handleButton(button, e){
   if(action==='pick-upgrade-target'){ selectUpgradeTarget(button.dataset.name, button.dataset.rarity, button.dataset.value, button.dataset.kind||'cube', button.dataset.keyId||''); return; }
   if(action==='key-market-list'){ listKeyForSale(Number(button.dataset.index)); return; }
   if(action==='sell-item'){ sellItem(Number(button.dataset.index)); return; }
-  if(action==='key-sell-item'){ sellKeyItem(Number(button.dataset.index)); return; }
   if(action==='market-buy'){ buyMarketItem(button.dataset.marketBuy); return; }
   if(action==='market-remove'){ removeMarketItem(button.dataset.marketRemove); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
