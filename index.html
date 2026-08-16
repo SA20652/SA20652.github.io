@@ -3212,7 +3212,19 @@ async function refreshTwoFactorUI(){
 }
 async function toggleTwoFactor(){
   const b=document.getElementById('twoFactorToggle'); const enabled=b?.dataset.enabled==='1';
-  try{ let savedPass=storageGet('GDPLAY_LAST_PASSWORD',''); if(!enabled && !savedPass){ savedPass=window.prompt('Введите текущий пароль для включения 2FA:','')||''; if(!savedPass) throw new Error('Нужен пароль для включения 2FA'); storageSet('GDPLAY_LAST_PASSWORD',savedPass); } const j=await apiFetch('/api/security/2fa',{enabled:enabled?0:1,password:savedPass}); if(b){b.dataset.enabled=j.enabled?'1':'0';b.textContent=j.enabled?'Включена':'Выключена';} showToast(j.enabled?'🔐 2FA включена':'🔓 2FA выключена','success'); }catch(e){ showToast('❌ '+e.message,'error'); }
+  try{
+    let savedPass=storageGet('GDPLAY_LAST_PASSWORD','');
+    // Пароль уже задавался при регистрации/входе — повторно спрашивать его не нужно.
+    // Для старых аккаунтов без password_hash сервер один раз восстановит hash из этого пароля.
+    if(!enabled && !savedPass){
+      savedPass=window.prompt('Введите пароль, который был задан при регистрации:','')||'';
+      if(!savedPass) throw new Error('Нужен пароль для включения 2FA');
+      storageSet('GDPLAY_LAST_PASSWORD',savedPass);
+    }
+    const j=await apiFetch('/api/security/2fa',{enabled:enabled?0:1,password:savedPass});
+    if(b){b.dataset.enabled=j.enabled?'1':'0';b.textContent=j.enabled?'Включена':'Выключена';}
+    showToast(j.enabled?'🔐 2FA включена':'🔓 2FA выключена','success');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
 }
 
 function getSetting(name, fallback=true){
