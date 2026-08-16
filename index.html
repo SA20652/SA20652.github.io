@@ -66,6 +66,18 @@ input,select,textarea{font-family:inherit;-webkit-appearance:none;appearance:non
 .tip-card .tip-title{font-size:12px;font-weight:800;color:var(--brass-2);}
 .tip-card .tip-text{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45;}
 
+/* ============ FIRST RELEASE SPLASH ============ */
+#releaseSplash{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:var(--bg);color:var(--paper);padding:24px;overflow:hidden;}
+#releaseSplash.show{display:flex;animation:releaseFadeIn .25s ease-out;}
+.release-splash-inner{text-align:center;width:100%;max-width:360px;}
+.release-logo{width:92px;height:92px;margin:0 auto 22px;border-radius:24px;object-fit:cover;box-shadow:0 12px 35px rgba(0,0,0,.38);border:1px solid rgba(201,151,77,.25);}
+.release-title{font-family:'Fraunces',serif;font-size:30px;font-weight:800;letter-spacing:.02em;margin-bottom:9px;}
+.release-subtitle{font-size:15px;color:var(--muted);line-height:1.5;}
+.release-bar{height:4px;width:180px;margin:26px auto 0;border-radius:99px;background:rgba(236,228,211,.10);overflow:hidden;}
+.release-bar::after{content:'';display:block;height:100%;width:0;background:var(--brass-2);animation:releaseProgress 5s linear forwards;}
+@keyframes releaseProgress{to{width:100%;}}
+@keyframes releaseFadeIn{from{opacity:0}to{opacity:1}}
+
 /* ============ AUTH SCREEN ============ */
 #authScreen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
@@ -130,13 +142,13 @@ header{
 .icon-btn{background:var(--bg-3);border:1px solid var(--line);color:var(--paper);width:30px;height:30px;border-radius:50%;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .icon-btn:active{transform:scale(.9);}
 
-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
 .nav-btn{
-  background:var(--bg-2);border:1px solid var(--line);border-radius:11px;padding:6px 4px;
-  color:var(--muted);font-size:12px;font-weight:700;transition:.2s;
-  min-height:58px;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:12px 4px;
+  color:var(--muted);font-size:13px;font-weight:700;transition:.2s;
+  min-height:78px;
 }
-.nav-btn span{display:block;font-size:21px;margin-bottom:2px;}
+.nav-btn span{display:block;font-size:25px;margin-bottom:6px;}
 .nav-btn.active{background:rgba(201,151,77,.14);border-color:var(--brass-dim);color:var(--brass-2);}
 .nav-btn:active{transform:scale(.94);}
 
@@ -327,7 +339,6 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;
 
 .empty-state{text-align:center;color:var(--muted);font-size:12.5px;padding:34px 10px;line-height:1.6;}
 
-
 /* ============ PROFILE ============ */
 .profile-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow);}
 .profile-avatar{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:24px;color:#1c1509;}
@@ -430,7 +441,20 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-badge.premium{color:var(--brass-2);border-color:rgba(201,151,77,.45);}
 .profile-badge.creator{color:#8ed0ff;border-color:rgba(98,177,255,.45);}
 .profile-badge.tester{color:#c7a6ff;border-color:rgba(167,119,255,.5);}
-.public-profile-modal{max-height:88vh;overflow:auto;text-align:left;}
+.public-profile-modal{max-height:88vh;overflow:auto;text-align:left;}.notify-btn{position:relative;}
+.notification-badge{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;padding:0 3px;border-radius:10px;background:var(--danger);color:#fff;font:700 9px/15px Inter,sans-serif;text-align:center;border:2px solid var(--bg);}
+.notifications-list{display:grid;gap:7px;max-height:55dvh;overflow:auto;}
+.notification-item{background:var(--bg-3);border:1px solid var(--line);border-radius:11px;padding:10px 11px;}
+.notification-item.unread{border-color:var(--brass);background:rgba(201,151,77,.08);}
+.notification-item-title{font-weight:700;font-size:12px;}
+.notification-item-text{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.notification-item-time{font-size:9px;color:var(--muted-2);margin-top:5px;}
+.profile-rarest-cube{margin-top:10px;background:var(--bg-3);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;}
+.profile-rarest-cube.empty{color:var(--muted);font-size:11px;}
+.profile-rarest-head{font-size:10px;color:var(--muted);margin-bottom:4px;}
+.profile-rarest-name{font-weight:700;font-size:13px;}
+.profile-rarest-meta{font-size:10px;color:var(--muted);margin-top:3px;}
+
 .public-profile-head{display:flex;align-items:center;gap:12px;background:var(--bg-3);border:1px solid var(--line);border-radius:14px;padding:12px;}
 .public-profile-avatar{width:58px;height:58px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;color:#1c1509;font-weight:800;font-size:22px;flex:none;}
 .public-profile-avatar img{width:100%;height:100%;object-fit:cover;}
@@ -513,9 +537,25 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   .modal-overlay.open{overflow-y:auto;}
   .input-modal,.public-profile-modal{max-height:calc(100dvh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
 }
+
+/* GDPLAY floating in-app notifications */
+.gdplay-toast-container{position:fixed;right:14px;top:72px;z-index:99999;display:flex;flex-direction:column;gap:8px;width:min(340px,calc(100vw - 28px));pointer-events:none}
+.gdplay-toast{pointer-events:auto;background:var(--bg-2);color:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass-2);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow);font-size:12px;line-height:1.35;animation:gdplayToastIn .22s ease-out}
+.gdplay-toast-title{font-weight:800;margin-bottom:3px}.gdplay-toast-text{color:var(--muted)}
+.gdplay-toast.hide{animation:gdplayToastOut .2s ease-in forwards}
+@keyframes gdplayToastIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes gdplayToastOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-8px) scale(.98)}}
 </style>
 </head>
-<body>
+<body><div id="gdplayToastContainer" class="gdplay-toast-container" aria-live="polite"></div>
+<div id="releaseSplash" aria-hidden="true">
+  <div class="release-splash-inner">
+    <img class="release-logo" alt="GDPLAY" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='32' fill='%23221d19'/%3E%3Crect x='28' y='28' width='104' height='104' rx='20' fill='%23141110' stroke='%23c9974d' stroke-width='6'/%3E%3Cpath d='M55 58h50v18H55zM55 87h20v15H55zM85 87h20v15H85z' fill='none' stroke='%23e3b872' stroke-width='6'/%3E%3C/svg%3E">
+    <div class="release-title">Мы вышли в релиз!</div>
+    <div class="release-subtitle">GDPLAY теперь официально доступен</div>
+    <div class="release-bar" aria-hidden="true"></div>
+  </div>
+</div>
 
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authScreen">
@@ -552,10 +592,12 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       </div>
       <div class="header-right">
         <div class="balance-chip">💰 <span id="balanceDisplay">0</span></div>
+        <button class="icon-btn notify-btn" id="notificationsBtn" title="Уведомления">🔔<span id="notificationBadge" class="notification-badge" style="display:none">0</span></button>
         <button class="icon-btn" id="themeToggle" title="Тема">🌙</button>
         <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
+          <button class="menu-item" data-menu-tab="settings">Настройки</button>
           <button class="menu-item" id="adminMenuBtn" data-menu-tab="admin" style="display:none">🛡️ Админ-панель</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
@@ -568,7 +610,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <button class="nav-btn" data-tab="market"><span>🛒</span>Магазин</button>
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
-      <button class="nav-btn" data-tab="settings"><span>⚙️</span>Настройки</button>
     </nav>
 
     <!-- CASES -->
@@ -576,10 +617,10 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div class="section-title">Сейфы хранилища</div>
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
       <div id="casesList"></div>
-      <div class="promo-card" style="margin-top:18px;"><div class="section-title" style="margin-top:0">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
       <div class="section-title" style="margin-top:24px">Последние дропы</div>
       <div class="section-sub">Только 3 последних выигрыша</div>
       <div id="recentDropsList"></div>
+      <div class="promo-card" style="margin-top:18px;"><div class="section-title" style="margin-top:0">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
     </div>
 
     <!-- INVENTORY -->
@@ -633,7 +674,49 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div id="leaderboardList"></div>
     </div>
 
-    <!-- TRADE -->
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="profile-head">
+        <div class="profile-avatar-wrap"><div class="profile-avatar" id="profileAvatar">?</div></div>
+        <div class="profile-head-info">
+          <div class="profile-name" id="profileName">—</div>
+          <div id="profileBadges" class="profile-badges"></div>
+          <div class="profile-rank" id="profileRank">—</div>
+          <div class="mono" style="margin-top:5px;color:var(--brass-2)"><span id="profileBalance">0</span> 💰</div>
+          <label class="btn-ghost profile-edit" for="avatarInput">Сменить фото</label>
+          <input class="avatar-file" id="avatarInput" type="file" accept="image/*">
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="pstat"><b id="statCases">0</b><span>кейсов открыто</span></div>
+        <div class="pstat"><b id="statCubes">0</b><span>кубов в инвентаре</span></div>
+        <div class="pstat"><b id="statBattles">0</b><span>батлов</span></div>
+        <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
+        <div class="pstat"><b id="statLosses">0</b><span>поражений</span></div>
+      </div>
+      <div id="profileRarestCube" class="profile-rarest-cube"></div>
+      <div class="daily-card" style="margin-top:12px">
+        <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
+        <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
+      </div>
+      <div class="tip-card"><div class="tip-title">💡 Совет хранителя</div><div class="tip-text" id="dailyTip">Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.</div></div>
+      <div class="section-title" style="margin-top:15px">🏆 Лучшие дропы</div>
+      <div id="profileBestDrops" class="best-drops"></div>
+      <div class="section-title" style="margin-top:15px">⚡ Активные баффы</div>
+      <div id="buffList" class="buff-list"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="section-title">🛡️ Админ-панель</div>
+      <div class="section-sub">Управление игроками и серверной базой</div>
+      <div class="admin-card"><div class="admin-search"><input id="adminSearch" placeholder="Ник или Telegram ID"><button class="btn" id="adminSearchBtn">Найти</button></div><div id="adminUsersList"></div></div>
+      <div class="admin-grid">
+        <div class="admin-card"><h3>📊 Система</h3><div id="adminStats" style="font-size:12px;color:var(--muted)">Загрузка…</div></div>
+        <div class="admin-card"><h3>📜 Последние действия</h3><div id="adminLogs"></div></div>
+      </div>
+      <div class="admin-card"><h3>🎟️ Промокоды</h3><div class="section-sub">Создание кодов с монетами, VIP или обеими наградами.</div><div class="promo-admin-form"><input id="promoAdminCode" maxlength="32" placeholder="Код, например GDPLAY2026"><select id="promoAdminReward"><option value="coins">Только монеты</option><option value="vip">Только VIP</option><option value="both">Монеты + VIP</option></select><input id="promoAdminCoins" type="number" min="0" value="1000" placeholder="Монеты"><input id="promoAdminVipDays" type="number" min="0" value="7" placeholder="VIP дней"><input id="promoAdminMaxUses" type="number" min="1" value="1" placeholder="Использований"><button class="btn" id="promoAdminCreateBtn">Создать промокод</button></div><div id="promoAdminMessage" class="promo-message"></div><div id="promoAdminList" class="promo-admin-list"></div></div>
+    </div>
 
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
@@ -776,6 +859,17 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   </div>
 </div>
 
+<div class="modal-overlay" id="notificationsModal">
+  <div class="input-modal public-profile-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <h3 style="margin:0">🔔 Уведомления</h3>
+      <button class="btn-ghost" type="button" id="notificationsMarkRead">Прочитать всё</button>
+    </div>
+    <div id="notificationsList" class="notifications-list" style="margin-top:12px"></div>
+    <button class="btn" id="notificationsClose" style="width:100%;margin-top:14px">Закрыть</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="publicProfileModal">
   <div class="input-modal public-profile-modal">
     <div id="publicProfileBody"></div>
@@ -855,6 +949,10 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 
 <div id="toastBox"></div>
 
+
+<script>
+(function(){window.gdplayNotify=function(title,text,duration){const box=document.getElementById('gdplayToastContainer');if(!box)return;const el=document.createElement('div');el.className='gdplay-toast';el.innerHTML='<div class="gdplay-toast-title"></div><div class="gdplay-toast-text"></div>';el.querySelector('.gdplay-toast-title').textContent=title||'GDPLAY';el.querySelector('.gdplay-toast-text').textContent=text||'';box.appendChild(el);setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),220)},duration||4200)};window.showNotification=window.gdplayNotify;})();
+</script>
 <script>
 (function(){
 "use strict";
@@ -911,17 +1009,6 @@ function storageRemove(key){
   }
   delete memoryStore[key];
 }
-
-// One-time client-side wipe for v4: remove all old local accounts/session/market data.
-(function resetClientDataV4(){
-  const marker='gdplay_client_reset_v4_done';
-  if(!storageOK) return;
-  try{
-    if(localStorage.getItem(marker)==='1') return;
-    [USERS_KEY,SESSION_KEY,DROPS_KEY,MARKET_KEY,DEVICE_BACKUP_KEY,AUTH_TOKEN_KEY].forEach(k=>localStorage.removeItem(k));
-    localStorage.setItem(marker,'1');
-  }catch(e){}
-})();
 
 // ===== RARITY META =====
 const RARITY_META = {
@@ -1422,7 +1509,7 @@ function serverUserToGame(u,fallbackName){
     username:u?.display_name||u?.username||fallbackName, balance:Number(u?.balance||0), cubes,
     cases_opened:Number(u?.cases_opened||0), lastDaily:u?.daily_claimed?Date.parse(u.daily_claimed):0, dailyStreak:Number(u?.daily_streak||0),
     avatar:u?.avatar||'', buffs:Array.isArray(u?.buffs)?u.buffs:[], bestDrops:Array.isArray(u?.best_drops)?u.best_drops:[],
-    battles:0,wins:0,battle_winnings:Number(u?.battle_winnings||0), keys:Array.isArray(u?.keys)?u.keys:[],
+    battles:Number(u?.battles_played||0),wins:Number(u?.total_wins||0),losses:Number(u?.total_losses||0),battle_winnings:Number(u?.battle_winnings||0), keys:Array.isArray(u?.keys)?u.keys:[],
     creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
@@ -1453,6 +1540,8 @@ async function showApp(){
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
   renderAll();
+  updateNotificationBadge();
+  refreshServerNotifications();
   registerWithServer();
 }
 
@@ -1784,7 +1873,6 @@ async function adminReset(uid){
     loadAdminUsers(document.getElementById('adminSearch')?.value||'');
   }catch(e){ showToast('❌ '+e.message,'error'); }
 }
-
 
 function switchTab(tab){
   currentTab = tab;
@@ -2727,7 +2815,7 @@ async function renderBattles(){
       const mine = b.is_creator || false;
       const isDone = b.status === 'done';
       const statusBadge = isDone ? `<div class="battle-meta" style="margin-top:6px;color:var(--success)">🏆 Победил ${b.players.find(p=>String(p.user)===String(b.winner))?.name || ''} — ${Number(b.pot||0).toLocaleString('ru-RU')} 💰</div>` : '';
-      return `<div class="battle-card"><div class="battle-top"><div><div class="battle-title">${b.mode==='high'?'Большее число':'Рандом'}</div><div class="battle-meta">${b.players.length}/${b.max} игроков · ставка ${Number(b.stake).toLocaleString('ru-RU')} 💰</div></div><div class="battle-prize">${(b.stake*b.max).toLocaleString('ru-RU')} 💰</div></div><div>${b.players.map(p=>`<div class="battle-player"><span>${p.name}</span><span>${p.roll==null?'Ждёт':p.roll}</span></div>`).join('')}</div>${statusBadge}${mine&&b.status==='open'?`<button class="btn-ghost battle-cancel" data-action="cancel-battle" data-cancel-battle="${b.id}">Отменить батл</button>`:''}${!mine&&!joined&&!full&&b.status==='open'?`<button class="btn" data-action="join-battle" data-join-battle="${b.id}" style="width:100%;margin-top:9px">Присоединиться</button>`:''}</div>`;
+      return `<div class="battle-card"><div class="battle-top"><div><div class="battle-title">${b.mode==='high'?'Большее число':'Рандом'}</div><div class="battle-meta">${b.players.length}/${b.max} игроков · ставка ${Number(b.stake).toLocaleString('ru-RU')} 💰</div></div><div class="battle-prize">${(b.stake*b.max).toLocaleString('ru-RU')} 💰</div></div><div>${b.players.map(p=>`<div class="battle-player"><span>${p.name}</span><span>${p.roll==null?'Ждёт':p.roll}</span></div>`).join('')}</div>${statusBadge}${mine&&b.status==='open'?`<button class="btn-ghost battle-cancel" data-action="cancel-battle" data-cancel-battle="${b.id}">Отменить батл</button>`:''}${joined&&b.status==='open'?`<button class="btn-ghost battle-cancel" data-action="leave-battle" data-leave-battle="${b.id}">🚪 Покинуть батл (поражение)</button>`:''}${!mine&&!joined&&!full&&b.status==='open'?`<button class="btn" data-action="join-battle" data-join-battle="${b.id}" style="width:100%;margin-top:9px">Присоединиться</button>`:''}</div>`;
     }).join('');
 
     // Если батл только что завершился (авто-старт при заполнении) и я в нём участвовал,
@@ -2793,6 +2881,7 @@ async function joinBattle(id){
       persistLocal();
       updateBalanceUI();
       await animateBattleDice(j.result, myId);
+       notifyLocal(String(j.result.winner_id)===myId?'🏆 Победа в батле':'💥 Поражение в батле', String(j.result.winner_id)===myId?`Ты забрал ${Number(j.result.pot||0).toLocaleString('ru-RU')} 💰`:'Соперник забрал банк.');
     }else{
       showToast('⚔️ Ты присоединился к батлу','success');
     }
@@ -2800,6 +2889,17 @@ async function joinBattle(id){
   }catch(e){
     showToast('❌ '+e.message,'error');
   }
+}
+
+async function leaveBattle(id){
+  if(!await tgConfirm('Покинуть батл? Это будет засчитано как поражение, а ставка сгорит.')) return;
+  try{
+    const j=await apiFetch('/api/mp/battles/leave',{battle_id:id});
+    data.balance=j.balance; data.losses=(data.losses||0)+1;
+    persistLocal(); updateBalanceUI(); renderProfile();
+    notifyLocal('⚔️ Батл','Ты покинул батл — поражение засчитано.');
+    await renderBattles();
+  }catch(e){ showToast('❌ '+e.message,'error'); }
 }
 
 async function cancelBattle(id){
@@ -2966,39 +3066,6 @@ function timeAgo(ts){
   return new Date(ts).toLocaleDateString('ru-RU');
 }
 
-
-/* GDPLAY_GLOBAL_RARE_DROP: глобальные сообщения о суперредких дропах */
-let gdplayLastGlobalDropId = Number(storageGet('GDPLAY_GLOBAL_RARE_DROP_LAST_ID','0')) || 0;
-let gdplayGlobalDropReady = false;
-async function checkGlobalRareDrops(){
-  if(!data || !data.user_id) return;
-  try{
-    const j=await apiFetch('/api/drops/recent',{});
-    const drops=Array.isArray(j.drops)?j.drops:[];
-    if(!drops.length) return;
-    const newest=drops[0];
-    const newestId=Number(newest.id||0);
-    if(!gdplayGlobalDropReady){
-      gdplayLastGlobalDropId=Math.max(gdplayLastGlobalDropId,newestId);
-      storageSet('GDPLAY_GLOBAL_RARE_DROP_LAST_ID',String(gdplayLastGlobalDropId));
-      gdplayGlobalDropReady=true;
-      return;
-    }
-    const fresh=drops.filter(d=>Number(d.id||0)>gdplayLastGlobalDropId).sort((a,b)=>Number(a.id||0)-Number(b.id||0));
-    for(const d of fresh){
-      const rarity=String(d.rarity||'').toLowerCase();
-      if(['divine','mythic','emerald','secret'].includes(rarity)){
-        const who=escapeHtml(d.username||'Игрок');
-        const item=escapeHtml(d.cube_name||d.item||'суперредкий куб');
-        showToast(`🌟 ${who} выбил суперредкий куб!`, `💎 ${item}`, 'success');
-      }
-      gdplayLastGlobalDropId=Math.max(gdplayLastGlobalDropId,Number(d.id||0));
-    }
-    storageSet('GDPLAY_GLOBAL_RARE_DROP_LAST_ID',String(gdplayLastGlobalDropId));
-  }catch(e){ /* не мешаем игре при недоступности ленты дропов */ }
-}
-setInterval(checkGlobalRareDrops, 5000);
-
 async function renderRecentDrops(){
   const el = document.getElementById('recentDropsList');
   if(!el) return;
@@ -3104,7 +3171,13 @@ async function openPublicProfile(userId, seed={}){
   const best=Array.isArray(p.best_drops)?p.best_drops:(Array.isArray(p.bestDrops)?p.bestDrops:[]);
   const buffs=Array.isArray(p.buffs)?p.buffs:[];
   const cubeCount=Number(p.cube_count ?? (Array.isArray(p.cubes)?p.cubes.length:0));
-  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
+  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div><div class="public-profile-stat"><b>${Number(p.total_losses||p.losses||0).toLocaleString('ru-RU')}</b><span>поражений</span></div></div><div id="publicRarestCube" class="profile-rarest-cube"></div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
+  const publicRarest=document.getElementById('publicRarestCube');
+  const publicCubes=Array.isArray(p.cubes)?p.cubes:[];
+  const rareOrder={common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6};
+  if(publicRarest){
+    if(publicCubes.length){ const rc=[...publicCubes].sort((a,b)=>(rareOrder[b.rarity]||0)-(rareOrder[a.rarity]||0)||Number(b.value||0)-Number(a.value||0))[0]; publicRarest.innerHTML=`<div class="profile-rarest-head">💎 САМЫЙ РЕДКИЙ КУБ</div><div class="profile-rarest-name">${rc.name||'Куб'}</div><div class="profile-rarest-meta">${rc.rarity||'common'} · ${Number(rc.value||0).toLocaleString('ru-RU')} 💰</div>`; } else { publicRarest.className='profile-rarest-cube empty'; publicRarest.textContent='💎 Самого редкого куба пока нет'; }
+  }
   renderBestDrops(document.getElementById('publicBestDrops'),best);
   const now=Date.now();
   const list=buffs.filter(b=>!b.expires_at||new Date(b.expires_at).getTime()>now);
@@ -3116,6 +3189,17 @@ function rankForBalance(balance){
   if(balance >= 8000)   return 'Хранитель сейфа';
   if(balance >= 2000)   return 'Кладоискатель';
   return 'Новичок';
+}
+
+function renderRarestCube(){
+  const box=document.getElementById('profileRarestCube'); if(!box) return;
+  const cubes=Array.isArray(data?.cubes)?data.cubes:[];
+  const order={common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6};
+  if(!cubes.length){ box.className='profile-rarest-cube empty'; box.textContent='💎 Самый редкий куб: пока нет кубов'; return; }
+  const cube=[...cubes].sort((a,b)=>(order[b.rarity]||0)-(order[a.rarity]||0)||Number(b.value||0)-Number(a.value||0))[0];
+  const names={common:'Обычный',rare:'Редкий',epic:'Эпический',legendary:'Легендарный',mythic:'Мифический',divine:'Божественный',emerald:'Изумрудный'};
+  box.className='profile-rarest-cube';
+  box.innerHTML=`<div class="profile-rarest-head">💎 САМЫЙ РЕДКИЙ КУБ</div><div class="profile-rarest-name">${cube.name||'Куб'}</div><div class="profile-rarest-meta">${names[cube.rarity]||cube.rarity||'Обычный'} · ${Number(cube.value||0).toLocaleString('ru-RU')} 💰</div>`;
 }
 
 function renderProfile(){
@@ -3131,6 +3215,8 @@ function renderProfile(){
   document.getElementById('statCubes').textContent=data.cubes.length;
   document.getElementById('statBattles').textContent=data.battles||0;
   document.getElementById('statWins').textContent=data.wins||0;
+  const lossEl=document.getElementById('statLosses'); if(lossEl) lossEl.textContent=data.losses||0;
+  renderRarestCube();
   const now=Date.now(); const lastDailyDate=Number(data.lastDaily||0)?new Date(Number(data.lastDaily)).toDateString():''; const can=lastDailyDate!==new Date(now).toDateString();
   const streak=Number(data.dailyStreak||0);
   const nextRewardBase=500+Math.max(0,Math.min(6,streak))*100;
@@ -3157,6 +3243,7 @@ async function claimDaily(){
     renderProfile();
     const streakMsg = data.dailyStreak>=7 ? ' 🔥 7/7 — серия завершена!' : ' 🔥 Серия '+data.dailyStreak+'/7';
     showToast((j.premium ? '⭐ Premium x2! ' : '🎁 ')+'+'+j.reward+' 💰 Ежедневный бонус'+streakMsg,'success');
+    notifyLocal('🎁 Ежедневный бонус',`+${Number(j.reward||0).toLocaleString('ru-RU')} 💰 · серия ${j.streak}/7`);
   }catch(e){
     showToast('❌ '+e.message,'error');
   }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+700; }
@@ -3174,7 +3261,13 @@ async function refreshTwoFactorUI(){
 }
 async function toggleTwoFactor(){
   const b=document.getElementById('twoFactorToggle'); const enabled=b?.dataset.enabled==='1';
-  try{ let savedPass=storageGet('GDPLAY_LAST_PASSWORD',''); if(!enabled && !savedPass){ savedPass=window.prompt('Введите текущий пароль для включения 2FA:','')||''; if(!savedPass) throw new Error('Нужен пароль для включения 2FA'); storageSet('GDPLAY_LAST_PASSWORD',savedPass); } const j=await apiFetch('/api/security/2fa',{enabled:enabled?0:1,password:savedPass}); if(b){b.dataset.enabled=j.enabled?'1':'0';b.textContent=j.enabled?'Включена':'Выключена';} showToast(j.enabled?'🔐 2FA включена':'🔓 2FA выключена','success'); }catch(e){ showToast('❌ '+e.message,'error'); }
+  try{
+    // Пользователь уже авторизован и подтвердил пароль при входе/регистрации.
+    // Поэтому повторно спрашивать пароль для включения 2FA не нужно.
+    const j=await apiFetch('/api/security/2fa',{enabled:enabled?0:1});
+    if(b){b.dataset.enabled=j.enabled?'1':'0';b.textContent=j.enabled?'Включена':'Выключена';}
+    showToast(j.enabled?'🔐 2FA включена':'🔓 2FA выключена','success');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
 }
 
 function getSetting(name, fallback=true){
@@ -3253,6 +3346,7 @@ function handleButton(button, e){
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
+  if(action==='leave-battle'){ leaveBattle(button.dataset.leaveBattle); return; }
   if(action==='admin-money'){ adminMoney(button.dataset.uid, button.dataset.amount); return; }
   if(action==='admin-ban'){ adminBan(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-shadow'){ adminShadow(button.dataset.uid, button.dataset.val); return; }
@@ -3271,6 +3365,7 @@ function handleButton(button, e){
   switch(button.id){
     case 'themeToggle': case 'themeToggle2': toggleTheme(); break;
     case 'menuBtn': document.getElementById('menuPanel')?.classList.toggle('open'); break;
+    case 'notificationsBtn': openNotifications(); break;
     case 'menuLogout': case 'logoutBtn': logout(); break;
     case 'createBattleBtn': createBattle(); break;
     case 'dailyBtn': claimDaily(); break;
@@ -3323,12 +3418,21 @@ document.getElementById('adminSearch')?.addEventListener('keydown', function(e){
   if(e.key==='Enter'){ e.preventDefault(); loadAdminUsers(this.value||''); }
 });
 
+document.getElementById('notificationsClose')?.addEventListener('click',()=>closeModal('notificationsModal'));
+document.getElementById('notificationsMarkRead')?.addEventListener('click',()=>{const list=getLocalNotifications().map(x=>({...x,read:true}));saveLocalNotifications(list);renderLocalNotifications();updateNotificationBadge();});
+updateNotificationBadge();
 document.getElementById('loginForm')?.addEventListener('submit',function(e){
   e.preventDefault();
   login(document.getElementById('loginUsername').value,document.getElementById('loginPassword').value);
 });
 document.getElementById('passwordBtn')?.addEventListener('click',setAccountPassword);
 document.getElementById('twoFactorToggle')?.addEventListener('click',toggleTwoFactor);
+// Надёжный переход из выпадающего меню в личный профиль на Android/WebView.
+document.querySelector('[data-menu-tab="profile"]')?.addEventListener('click',function(e){
+  e.preventDefault(); e.stopPropagation();
+  document.getElementById('menuPanel')?.classList.remove('open');
+  switchTab('profile');
+});
 
 document.getElementById('registerForm')?.addEventListener('submit',function(e){
   e.preventDefault();
@@ -3421,6 +3525,7 @@ setInterval(()=>{
   if(currentTab==='market') renderMarket();
   if(currentTab==='cases') renderRecentDrops();
   refreshFromServer();
+  refreshServerNotifications();
 },5000);
 window.addEventListener('pagehide',persistDevice);
 window.addEventListener('beforeunload',persistDevice);
@@ -3435,7 +3540,28 @@ window.addEventListener('unhandledrejection', e=>{
   }
 });
 
-boot();
+async function firstReleaseLaunch(){
+  const RELEASE_SPLASH_KEY='gdplay_release_splash_v1';
+  let shouldShow=false;
+  try{ shouldShow=storageGet(RELEASE_SPLASH_KEY)!=='1'; }catch(e){ shouldShow=false; }
+  if(!shouldShow){ await boot(); return; }
+
+  const splash=document.getElementById('releaseSplash');
+  if(!splash){ await boot(); return; }
+  splash.classList.add('show');
+  splash.setAttribute('aria-hidden','false');
+
+  // Ставим флаг сразу: даже если WebView будет закрыт после показа,
+  // релизная заставка больше не появится повторно на этом устройстве.
+  try{ storageSet(RELEASE_SPLASH_KEY,'1'); }catch(e){}
+
+  await new Promise(resolve=>setTimeout(resolve,5000));
+  splash.classList.remove('show');
+  splash.setAttribute('aria-hidden','true');
+  await boot();
+}
+
+firstReleaseLaunch();
 
 })();
 </script>
