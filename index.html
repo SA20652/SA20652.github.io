@@ -408,7 +408,18 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .upgrade-fast-label{font-size:12px;font-weight:700;}
 .upgrade-fast-hint{font-size:10px;color:var(--muted);margin-top:2px;}
 .upgrade-fast-toggle{min-width:92px;}
-.cube-lock-btn{min-width:38px;padding:7px 9px!important;font-size:15px!important;}
+.inv-item[data-cube-index]{position:relative;padding-top:12px!important;padding-right:12px!important;}
+.inv-item[data-cube-index] .inv-actions{padding-right:0;}
+.cube-lock-btn{position:absolute;top:8px;right:8px;z-index:3;min-width:36px;width:36px;height:36px;padding:0!important;font-size:16px!important;display:flex;align-items:center;justify-content:center;border-radius:10px!important;background:var(--bg-3)!important;}
+.inv-item[data-cube-index] .inv-item-info{padding-right:42px;}
+.upgrade-switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;flex:0 0 auto;}
+.upgrade-switch input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;}
+.upgrade-switch-track{position:relative;width:48px;height:28px;border-radius:999px;background:var(--bg-2);border:1px solid var(--line);box-sizing:border-box;transition:background .2s,border-color .2s;flex:0 0 48px;}
+.upgrade-switch-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);box-shadow:0 2px 6px rgba(0,0,0,.35);transition:transform .2s,background .2s;}
+.upgrade-switch input:checked + .upgrade-switch-track{background:rgba(80,190,125,.18);border-color:var(--emerald);}
+.upgrade-switch input:checked + .upgrade-switch-track .upgrade-switch-thumb{transform:translateX(20px);background:var(--emerald);}
+.upgrade-switch-text{font-size:11px;color:var(--muted);min-width:66px;text-align:left;}
+
 .promo-photo-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .55s ease;}
 .promo-photo-overlay.show{opacity:1;pointer-events:auto;}
 .promo-photo-card{width:min(88vw,430px);max-height:82vh;border-radius:20px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.65);transform:scale(.88) translateY(14px);transition:transform .55s cubic-bezier(.2,1.35,.4,1);}
@@ -941,7 +952,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       </div>
       <div class="upgrade-fast-row">
         <div><div class="upgrade-fast-label">⚡ Открыть быстро</div><div class="upgrade-fast-hint">Ускоряет вращение результата. Сохраняется автоматически.</div></div>
-        <button type="button" class="btn-ghost upgrade-fast-toggle" id="upgradeFastToggle">Выключено</button>
+        <label class="upgrade-switch" title="Быстрое открытие"><input type="checkbox" id="upgradeFastToggle"><span class="upgrade-switch-track"><span class="upgrade-switch-thumb"></span></span><span class="upgrade-switch-text" id="upgradeFastLabel">Выключено</span></label>
       </div>
       <button class="btn" id="upgradeConfirmBtn" style="width:100%;margin-top:12px">Улучшить</button>
       <button class="btn-ghost" id="upgradeBackBtn" style="width:100%;margin-top:8px">Выбрать другой предмет</button>
@@ -1693,11 +1704,10 @@ function isUpgradeFast(){
 }
 function setUpgradeFast(enabled){
   storageSet(UPGRADE_FAST_KEY, enabled ? '1' : '0');
-  const b=document.getElementById('upgradeFastToggle');
-  if(b){
-    b.textContent=enabled ? 'Включено' : 'Выключено';
-    b.classList.toggle('active', !!enabled);
-  }
+  const input=document.getElementById('upgradeFastToggle');
+  const label=document.getElementById('upgradeFastLabel');
+  if(input) input.checked=!!enabled;
+  if(label) label.textContent=enabled ? 'Включено' : 'Выключено';
 }
 function refreshUpgradeFastButton(){
   setUpgradeFast(isUpgradeFast());
@@ -1722,7 +1732,7 @@ function showPromoSecretPhoto(){
   const overlay=document.getElementById('promoPhotoOverlay');
   if(!overlay) return;
   const img=document.getElementById('promoSecretImage');
-  if(img) img.src=(typeof API_BASE!=='undefined'?API_BASE:window.location.origin)+'/promo/2026samergermancrut.jpg';
+  if(img) img.src=PROMO_IMAGE_DATA_URI;
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
   clearTimeout(window.__promoPhotoTimer);
@@ -2862,7 +2872,7 @@ async function confirmUpgrade(){
 }
 
 document.getElementById('upgradeSearch')?.addEventListener('input',function(){renderUpgradeCatalog(this.value);});
-document.getElementById('upgradeFastToggle')?.addEventListener('click',()=>setUpgradeFast(!isUpgradeFast()));
+document.getElementById('upgradeFastToggle')?.addEventListener('change',function(){setUpgradeFast(this.checked);});
 refreshUpgradeFastButton();
 
 document.getElementById('upgradeStakeRange')?.addEventListener('input',function(){
