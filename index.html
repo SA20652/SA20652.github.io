@@ -511,14 +511,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   .modal-overlay.open{overflow-y:auto;}
   .input-modal,.public-profile-modal{max-height:calc(100dvh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
 }
-
-.chat-modal{max-height:88vh;display:flex;flex-direction:column;}
-.chat-list{display:flex;gap:7px;overflow-x:auto;padding:2px 0 8px;}
-.chat-tab{white-space:nowrap;border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:10px;padding:8px 11px;font-family:inherit;font-size:12px;}
-.chat-tab.active{border-color:var(--brass);background:rgba(201,151,77,.12);}
-.chat-messages{height:42vh;min-height:220px;overflow:auto;background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:10px;}
-.chat-msg{margin:0 0 9px;}.chat-msg-name{font-size:11px;color:var(--brass-2);font-weight:700}.chat-msg-text{font-size:13px;word-break:break-word}.chat-msg-time{font-size:9px;color:var(--muted);margin-left:5px}
-.chat-compose{display:flex;gap:7px;margin-top:8px}.chat-compose input{flex:1;min-width:0}.chat-actions{display:flex;gap:7px;margin-top:8px}.chat-actions>*{flex:1}.cube-lock{min-width:38px;padding:7px 9px}.inv-item.is-frozen{opacity:.82;border-style:dashed}.frozen-label{font-size:10px;color:var(--brass-2);margin-top:2px}
 </style>
 </head>
 <body>
@@ -563,7 +555,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
           <button class="menu-item" data-menu-tab="settings">Настройки</button>
-          <button class="menu-item" data-menu-tab="chat">💬 Чат</button>
           <button class="menu-item" id="adminMenuBtn" data-menu-tab="admin" style="display:none">🛡️ Админ-панель</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
@@ -583,26 +574,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div class="section-title">Сейфы хранилища</div>
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
       <div id="casesList"></div>
-      <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
       <div class="section-title" style="margin-top:24px">Последние дропы</div>
       <div class="section-sub">Только 3 последних выигрыша</div>
       <div id="recentDropsList"></div>
-    </div>
-
-    <!-- BATTLES -->
-    <div class="page" id="page-battles">
-      <div class="section-title" style="margin-top:24px">Батлы с кубиком</div>
-      <div class="section-sub">Создавай игру, выбирай ставку и жди соперников.</div>
-      <div class="battle-form">
-        <div class="battle-row">
-          <div><label>Ставка</label><input id="battleStake" type="number" min="1" step="1" value="100"></div>
-          <div><label>Игроков</label><select id="battlePlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
-        </div>
-        <label>Условие победы</label>
-        <select id="battleMode"><option value="high">У кого больше число</option><option value="random">Рандом</option></select>
-        <button class="btn" id="createBattleBtn" style="width:100%">Создать батл</button>
-      </div>
-      <div id="battlesList"></div>
     </div>
 
     <!-- INVENTORY -->
@@ -616,8 +590,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       </div>
       <div id="inventoryList"></div>
       <div class="section-title" style="margin-top:18px">🗝️ Ключи</div>
-      <div class="section-sub">Ключи можно улучшать и выставлять в магазин.</div>
+      <div class="section-sub">Ключи можно только улучшать — продажа в магазин отключена.</div>
       <div id="keysInventoryList"></div>
+      <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
     </div>
 
     <!-- MARKET -->
@@ -625,6 +600,22 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div class="section-title">Магазин игроков</div>
       <div class="section-sub">Покупай кубы у других аккаунтов или выставляй свои из инвентаря.</div>
       <div id="marketList"></div>
+    </div>
+
+    <!-- BATTLES -->
+    <div class="page" id="page-battles">
+      <div class="section-title">Батлы с кубиком</div>
+      <div class="section-sub">Создавай игру, выбирай ставку и жди соперников.</div>
+      <div class="battle-form">
+        <div class="battle-row">
+          <div><label>Ставка</label><input id="battleStake" type="number" min="1" step="1" value="100"></div>
+          <div><label>Игроков</label><select id="battlePlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+        </div>
+        <label>Условие победы</label>
+        <select id="battleMode"><option value="high">У кого больше число</option><option value="random">Рандом</option></select>
+        <button class="btn" id="createBattleBtn" style="width:100%">Создать батл</button>
+      </div>
+      <div id="battlesList"></div>
     </div>
 
     <!-- TOP -->
@@ -905,32 +896,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 (function(){
 "use strict";
 
-// Критические обработчики авторизации подключаем сразу. Если Telegram WebView
-// задержит/сломает какой-либо необязательный код ниже, Вход и Регистрация
-// всё равно должны оставаться рабочими.
-function bindCriticalAuth(){
-  const loginForm=document.getElementById('loginForm');
-  const registerForm=document.getElementById('registerForm');
-  const tabs=document.querySelectorAll('.auth-tab');
-  tabs.forEach(tab=>{
-    tab.addEventListener('click',function(e){
-      e.preventDefault(); e.stopPropagation();
-      tabs.forEach(t=>t.classList.toggle('active',t===tab));
-      document.querySelectorAll('.auth-form').forEach(f=>f.classList.toggle('active',f.id===tab.dataset.form+'Form'));
-      const err=document.getElementById('authError'); if(err) err.textContent='';
-    },true);
-  });
-  loginForm?.addEventListener('submit',function(e){
-    e.preventDefault(); e.stopPropagation();
-    login(document.getElementById('loginUsername')?.value||'',document.getElementById('loginPassword')?.value||'');
-  },true);
-  registerForm?.addEventListener('submit',function(e){
-    e.preventDefault(); e.stopPropagation();
-    register(document.getElementById('regUsername')?.value||'',document.getElementById('regPassword')?.value||'',document.getElementById('regPassword2')?.value||'');
-  },true);
-}
-bindCriticalAuth();
-
 const API_BASE = "https://spammf-production.up.railway.app";
 
 try{
@@ -1114,7 +1079,7 @@ const CASES = [
     {name:"wPopoff",rarity:"epic",value:780000,chance:30.0},
     {name:"Trick",rarity:"legendary",value:1040000,chance:8.0},
     {name:"Nnfret",rarity:"mythic",value:1000000,chance:3.0},
-    {name:"nSwish",rarity:"divine",value:4875000,chance:0.95},
+    {name:"nSwish",rarity:"divine",value:4875000,chance:0.99},
     {name:"Kuro",rarity:"emerald",value:5000000,chance:0.01}
   ]},
 ];
@@ -1908,7 +1873,6 @@ function renderCases(){
       </div>`;
   }).join('');
   renderRecentDrops();
-  renderBattles();
 }
 const caseOpenQty = {};
 
@@ -2329,6 +2293,15 @@ function collectSpinReward(){
   showToast('Награда забрана в инвентарь','success');
 }
 
+function isCubeLocked(c){return !!(c&&c.metadata&&c.metadata.locked);}
+async function toggleCubeLock(index){
+ const i=Number(index); if(!Number.isInteger(i)||i<0||i>=data.cubes.length)return showToast('❌ Куб не найден','error');
+ const next=!isCubeLocked(data.cubes[i]);
+ try{if(tgInitData()){const j=await apiFetch('/api/cube/lock',{index:i,locked:next});data.cubes=j.cubes||data.cubes;}
+ else{data.cubes[i].metadata=data.cubes[i].metadata||{};data.cubes[i].metadata.locked=next;}
+ persistLocal();renderInventory();showToast(next?'🔒 Куб заморожен':'🔓 Куб разморожен','success');}catch(e){showToast('❌ '+e.message,'error');}
+}
+
 function renderInventory(){
   normalizeGameState();
   const list=document.getElementById('inventoryList');
@@ -2338,16 +2311,13 @@ function renderInventory(){
   const sellRatioLabel=isPremium?'0,85':'0,7';
   list.innerHTML=data.cubes.length ? data.cubes.map((c,i)=>{
     const m=RARITY_META[c.rarity]||RARITY_META.common;
-    const frozen=!!(c.metadata&&c.metadata.frozen);
-    const disabled=frozen?'disabled':'';
-    return `<div class="inv-item ${frozen?'is-frozen':''}" style="border-left-color:${m.color}" data-cube-index="${i}">
+    return `<div class="inv-item" style="border-left-color:${m.color}" data-cube-index="${i}">
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
-      <div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div>${frozen?'<div class="frozen-label">🔒 Заморожен</div>':''}</div></div>
+      <div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div></div></div>
       <div class="inv-actions"><span class="inv-value">💰 ${Number(c.value).toLocaleString('ru-RU')}</span>
-      <button type="button" class="btn-sell cube-lock" data-action="toggle-freeze" data-index="${i}" title="${frozen?'Разморозить':'Заморозить'}">${frozen?'🔓':'🔒'}</button>
-      <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${disabled}>На продажу</button>
-      <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${disabled}>Боту ×${sellRatioLabel}</button>
-      <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${disabled}>📈 Апгрейд</button>
+      <button type="button" class="btn-sell" data-action="market-list" data-index="${i}">На продажу</button>
+      <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}">Боту ×${sellRatioLabel}</button>
+      <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube">📈 Апгрейд</button>
       </div></div>`;
   }).join('') : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>';
   const keyBox=document.getElementById('keysInventoryList');
@@ -2356,18 +2326,6 @@ function renderInventory(){
     return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
       <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="key">📈 Апгрейд</button></div></div>`;
   }).join('') : '<div class="empty-state">Ключей пока нет.</div>';
-}
-
-async function toggleCubeFreeze(index){
-  const idx=Number(index), cube=data.cubes[idx];
-  if(!cube){showToast('❌ Куб не найден','error');return;}
-  const frozen=!(cube.metadata&&cube.metadata.frozen);
-  cube.metadata={...(cube.metadata||{}),frozen};
-  renderInventory(); persistLocal();
-  if(tgInitData() && cube.id){
-    try{ const j=await apiFetch('/api/cube/freeze',{cube_id:cube.id,frozen}); if(Array.isArray(j.cubes)) data.cubes=j.cubes; persistLocal(); renderInventory(); }catch(e){ cube.metadata.frozen=!frozen; persistLocal(); renderInventory(); showToast('❌ '+e.message,'error'); return; }
-  }
-  showToast(frozen?'🔒 Куб заморожен':'🔓 Куб разморожен','success');
 }
 
 async function sellItem(index){
@@ -2380,7 +2338,7 @@ async function sellItem(index){
   }
   const item = data.cubes[idx];
   if(!item) return;
-  if(item.metadata?.frozen){ showToast('🔒 Куб заморожен — сначала сними замок','error'); return; }
+  if(isCubeLocked(item)){showToast('🔒 Куб заморожен — его нельзя продать','error');return;}
   const localPrice = Math.floor(item.value * (data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now() ? 0.85 : 0.7));
   try{
     if(tgInitData()){
@@ -2400,12 +2358,13 @@ async function sellItem(index){
 }
 
 function sellAll(){
-  const sellable=data.cubes.filter(c=>!(c.metadata&&c.metadata.frozen));
-  if(!sellable.length){ showToast('🔒 Все кубы заморожены','error'); return; }
+  if(!data.cubes.length){ showToast('Инвентарь и так пуст', 'error'); return; }
   const isPremium = data.premiumUntil && new Date(data.premiumUntil).getTime() > Date.now();
   const ratio = isPremium ? 0.85 : 0.7;
-  const total = sellable.reduce((sum,c)=>sum+Math.floor(c.value*ratio),0);
-  const full = sellable.reduce((sum,c)=>sum+c.value,0);
+  const unlocked=data.cubes.filter(c=>!isCubeLocked(c));
+  if(!unlocked.length){showToast('Все кубы заморожены','error');return;}
+  const total=unlocked.reduce((sum,c)=>sum+Math.floor(c.value*ratio),0);
+  const full=unlocked.reduce((sum,c)=>sum+c.value,0);
   document.getElementById('sellConfirmText').textContent = `От всей стоимости кубов (${full.toLocaleString('ru-RU')} монет) ты получишь ${isPremium?'85% (Premium)':'70%'} — ${total.toLocaleString('ru-RU')} монет.`;
   openModal('sellConfirmModal');
 }
@@ -2414,18 +2373,19 @@ async function executeSellAll(){
   serverActionInFlight++; serverBusyUntil=Date.now()+1500;
   if(!data.cubes.length){ serverActionInFlight=Math.max(0,serverActionInFlight-1); closeModal('sellConfirmModal'); return; }
   const localRatio = data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now() ? 0.85 : 0.7;
-  const localTotal = data.cubes.reduce((sum,c)=>sum+Math.floor(c.value*localRatio),0);
+  const unlocked=data.cubes.filter(c=>!isCubeLocked(c));
+  const localTotal=unlocked.reduce((sum,c)=>sum+Math.floor(c.value*localRatio),0);
   try{
     if(tgInitData()){
       const j = await apiFetch('/api/cube/sell-all', {});
       data.balance = j.balance;
-      data.cubes = Array.isArray(j.cubes) ? j.cubes : data.cubes.filter(c=>c.metadata&&c.metadata.frozen);
+      data.cubes = [];
       persistLocal(); updateBalanceUI(); renderInventory();
       closeModal('sellConfirmModal');
       showToast(`Продано всё сразу за ${j.gain.toLocaleString('ru-RU')} монет`, 'success');
     }else{
       data.balance += localTotal;
-      data.cubes = data.cubes.filter(c=>c.metadata&&c.metadata.frozen);
+      data.cubes = [];
       persistLocal(); updateBalanceUI(); renderInventory();
       closeModal('sellConfirmModal');
       showToast(`Продано всё сразу за ${localTotal.toLocaleString('ru-RU')} монет`, 'success');
@@ -2445,7 +2405,7 @@ async function renderMarket(){
   try{
     const j = await apiFetch('/api/mp/market', {});
     const localItems=JSON.parse(storageGet(MARKET_KEY)||'[]');
-    const items = (j.items || []).filter(x=>x.kind!=='key' && x.item_kind!=='key').concat(localItems.filter(x=>x.kind!=='key' && x.item_kind!=='key'));
+    const items = (j.items || []).concat(localItems);
     if(!items.length){
       el.innerHTML = '<div class="empty-state">Пока нет объявлений.<br>Выставь куб из инвентаря первым!</div>';
       return;
@@ -2558,7 +2518,7 @@ function getUpgradeChance(){
   const sourceValue=Number(source.value||0);
   const targetValue=Number(upgradeTarget.value||1);
   const effectiveCoverage=sourceValue+Number(upgradeStake||0);
-  return Math.max(0.1, Math.min(95, (effectiveCoverage/targetValue*100) * 0.80));
+  return Math.max(0.1, Math.min(95, effectiveCoverage/targetValue*100));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -2625,7 +2585,6 @@ function selectUpgradeTarget(name,rarity,value,kind='cube',keyId=''){
 }
 function performLocalUpgrade(){
   const source=getUpgradeSource(); if(!source||!upgradeTarget) throw new Error('Предмет для апгрейда не найден');
-  if(upgradeSource.kind==='cube' && source.metadata?.frozen) throw new Error('Куб заморожен — сначала сними замок');
   const sourceArr=upgradeSource.kind==='key'?data.keys:data.cubes;
   const sourceIndex=sourceArr.indexOf(source);
   if(sourceIndex<0) throw new Error('Предмет уже изменён или продан — открой апгрейдер заново');
@@ -2650,13 +2609,9 @@ async function confirmUpgrade(){
   if(!upgradeSource||!upgradeTarget) return;
   const btn=document.getElementById('upgradeConfirmBtn'); btn.disabled=true;
   try{
-    // Сначала списываем дополнительную ставку на сервере атомарно.
-    // Иначе следующий sync мог вернуть старый баланс и отменить локальное списание.
-    const stakeResult = await apiFetch('/api/upgrade/stake', {amount: Math.floor(Number(upgradeStake || 0))});
-    if(stakeResult && typeof stakeResult.balance === 'number') data.balance = stakeResult.balance;
+    // Выполняем сам бросок локально, чтобы денежная ставка гарантированно
+    // участвовала в расчёте даже при старом серверном /api/upgrade.
     const j=performLocalUpgrade();
-    // performLocalUpgrade меняет только локальный интерфейс; сервер уже списал ставку.
-    if(stakeResult && typeof stakeResult.balance === 'number') data.balance = stakeResult.balance;
     persistLocal(); renderInventory(); updateBalanceUI();
     try{ await syncToServer(); }catch(_){}
     document.getElementById('upgradeStepConfirm').style.display='none';
@@ -2698,12 +2653,12 @@ function listCubeForSale(index){
   }
   
   const item = data.cubes[idx];
+  if (isCubeLocked(item)) { showToast('🔒 Куб заморожен — сначала разблокируй его','error'); return; }
   if (!item) {
     showToast('❌ Куб не найден', 'error');
     renderInventory();
     return;
   }
-  if(item.metadata?.frozen){ showToast('🔒 Куб заморожен — сначала сними замок','error'); return; }
   
   askNumber('📦 Выставить куб', `Цена продажи для «${item.name}» в монетах.`, Math.max(10, Math.round(item.value * 0.8)), async price => {
     try{
@@ -3279,7 +3234,6 @@ function handleButton(button, e){
     // Кнопка меню — кликабельна всей площадью, а не только по тексту.
     // Не даём событию уйти на элементы страницы под выпадающим меню.
     if(e){ e.preventDefault?.(); e.stopPropagation?.(); }
-    if(tab==='chat'){ openChatModal(); document.getElementById('menuPanel')?.classList.remove('open'); return; }
     switchTab(tab);
     if(tab==='admin') renderAdmin();
     document.getElementById('menuPanel')?.classList.remove('open');
@@ -3288,12 +3242,11 @@ function handleButton(button, e){
 
   if(action==='open-case'){ if(!button.disabled) openCase(button.dataset.case); return; }
   if(action==='set-case-qty'){ caseOpenQty[button.dataset.case] = Number(button.dataset.qty); renderCases(); return; }
-  if(action==='toggle-freeze'){ toggleCubeFreeze(Number(button.dataset.index)); return; }
+  if(action==='toggle-cube-lock'){ toggleCubeLock(Number(button.dataset.index)); return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
   if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
   if(action==='pick-upgrade-target'){ selectUpgradeTarget(button.dataset.name, button.dataset.rarity, button.dataset.value, button.dataset.kind||'cube', button.dataset.keyId||''); return; }
   if(action==='sell-item'){ sellItem(Number(button.dataset.index)); return; }
-  if(action==='chat-select'){ currentChatId=button.dataset.chatId; loadChats(); return; }
   if(action==='market-buy'){ buyMarketItem(button.dataset.marketBuy); return; }
   if(action==='market-remove'){ removeMarketItem(button.dataset.marketRemove); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
@@ -3333,40 +3286,7 @@ function handleButton(button, e){
 }
 
 
-let currentChatId=null;
-let chatTimer=null;
-async function openChatModal(){
-  openModal('chatModal');
-  await loadChats();
-}
-async function loadChats(){
-  try{
-    const j=await apiFetch('/api/chat/list',{}); const chats=j.chats||[];
-    const box=document.getElementById('chatList');
-    box.innerHTML=chats.map(c=>`<button class="chat-tab ${String(c.id)===String(currentChatId)?'active':''}" data-action="chat-select" data-chat-id="${c.id}">${c.is_public?'🌐':'👥'} ${c.name}${c.has_password?' 🔒':''}</button>`).join('');
-    const pub=chats.find(c=>c.is_public); if(!currentChatId && pub) currentChatId=pub.id;
-    if(currentChatId){ const found=chats.find(c=>String(c.id)===String(currentChatId)); if(found){document.getElementById('chatCurrentName').textContent=found.name; await loadChatMessages();} }
-  }catch(e){showToast('❌ '+e.message,'error');}
-}
-async function loadChatMessages(){
-  if(!currentChatId)return;
-  try{const j=await apiFetch('/api/chat/messages',{chat_id:currentChatId}); const box=document.getElementById('chatMessages'); box.innerHTML=(j.messages||[]).map(m=>`<div class="chat-msg"><span class="chat-msg-name">${m.username||'Игрок'}</span><span class="chat-msg-time">${m.created_at||''}</span><div class="chat-msg-text">${escapeHtml(m.message||'')}</div></div>`).join('')||'<div class="empty-state">Пока сообщений нет.</div>'; box.scrollTop=box.scrollHeight;}catch(e){showToast('❌ '+e.message,'error');}
-}
-async function sendChatMessage(){const f=document.getElementById('chatMessageInput'); const message=f.value.trim(); if(!message||!currentChatId)return; try{await apiFetch('/api/chat/send',{chat_id:currentChatId,message}); f.value=''; await loadChatMessages();}catch(e){showToast('❌ '+e.message,'error');}}
-async function createChatGroup(){
-  const name=prompt('Название группы:'); if(!name)return; const password=prompt('Пароль группы (оставь пустым для группы без пароля):')||'';
-  try{const j=await apiFetch('/api/chat/create',{name,password}); currentChatId=j.chat.id; await loadChats(); showToast('👥 Группа создана','success');}catch(e){showToast('❌ '+e.message,'error');}
-}
-async function joinChatById(){const id=prompt('ID группы:'); if(!id)return; const password=prompt('Пароль (если есть):')||''; try{const j=await apiFetch('/api/chat/join',{chat_id:Number(id),password}); currentChatId=j.chat.id; await loadChats(); showToast('✅ Ты вступил в группу','success');}catch(e){showToast('❌ '+e.message,'error');}}
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
-
-document.getElementById('chatSendBtn')?.addEventListener('click',sendChatMessage);
-document.getElementById('chatCreateBtn')?.addEventListener('click',createChatGroup);
-document.getElementById('chatJoinBtn')?.addEventListener('click',joinChatById);
-document.getElementById('chatCloseBtn')?.addEventListener('click',()=>closeModal('chatModal'));
-document.getElementById('chatMessageInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChatMessage();}});
 
 // Быстрый и безопасный ввод для iOS/Telegram WebView.
 // Действие запускаем на pointerup, чтобы не ждать запаздывающий click в iOS.
@@ -3402,8 +3322,17 @@ document.getElementById('adminSearch')?.addEventListener('keydown', function(e){
   if(e.key==='Enter'){ e.preventDefault(); loadAdminUsers(this.value||''); }
 });
 
+document.getElementById('loginForm')?.addEventListener('submit',function(e){
+  e.preventDefault();
+  login(document.getElementById('loginUsername').value,document.getElementById('loginPassword').value);
+});
 document.getElementById('passwordBtn')?.addEventListener('click',setAccountPassword);
 document.getElementById('twoFactorToggle')?.addEventListener('click',toggleTwoFactor);
+
+document.getElementById('registerForm')?.addEventListener('submit',function(e){
+  e.preventDefault();
+  register(document.getElementById('regUsername').value,document.getElementById('regPassword').value,document.getElementById('regPassword2').value);
+});
 document.getElementById('twofaAccept')?.addEventListener('click',confirm2FA);
 document.getElementById('twofaCancel')?.addEventListener('click',()=>{ pending2FA=null; closeModal('twofaModal'); });
 document.getElementById('twofaCode')?.addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,6); });
@@ -3510,18 +3439,5 @@ boot();
 })();
 </script>
 
-
-<div class="modal-overlay" id="chatModal">
-  <div class="input-modal chat-modal">
-    <div class="modal-title">💬 Чат GDPLAY</div>
-    <div class="section-sub" style="margin-bottom:8px">Публичный чат доступен всем. Группы можно создать с паролем или без.</div>
-    <div class="chat-list" id="chatList"></div>
-    <div id="chatCurrentName" class="section-sub" style="margin-bottom:7px">Публичный чат</div>
-    <div id="chatMessages" class="chat-messages"></div>
-    <div class="chat-compose"><input id="chatMessageInput" maxlength="500" placeholder="Сообщение..."><button class="btn" id="chatSendBtn">Отправить</button></div>
-    <div class="chat-actions"><button class="btn-ghost" id="chatCreateBtn">➕ Создать группу</button><button class="btn-ghost" id="chatJoinBtn">🔑 Вступить по ID</button></div>
-    <button class="btn-ghost" id="chatCloseBtn" style="width:100%;margin-top:8px">Закрыть</button>
-  </div>
-</div>
 </body>
   </html>
