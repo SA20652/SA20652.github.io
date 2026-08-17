@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>GDPLAY — Хранилище</title>
-<script src="https://telegram.org/js/telegram-web-app.js">
-// ===== CHAT =====\nlet activeChat={type:'public',id:0,name:'Публичный чат'};\nlet chatPollTimer=null;\nfunction chatEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}\nasync function renderChat(){\n  await loadChatGroups();\n  await loadChatMessages();\n  if(chatPollTimer) clearInterval(chatPollTimer);\n  chatPollTimer=setInterval(()=>{if(currentTab==='chat')loadChatMessages();},4000);\n}\nasync function loadChatGroups(){\n  const box=document.getElementById('chatGroups'); if(!box)return;\n  try{\n    const j=await apiFetch('/api/chat/groups',{});\n    const groups=[{id:0,name:'Публичный чат',public:true},...(j.groups||[])];\n    box.innerHTML=groups.map(g=>`<button type="button" class="btn-sell chat-group ${activeChat.id===g.id&&activeChat.type===(g.public?'public':'group')?'locked':''}" data-chat-id="${g.id}" data-chat-type="${g.public?'public':'group'}">${g.public?'🌐':'👥'} ${chatEsc(g.name)}${g.password_required?' 🔒':''}</button>`).join('');\n  }catch(e){box.innerHTML='<span class="section-sub">Не удалось загрузить группы</span>';}\n}\nasync function loadChatMessages(){\n  const box=document.getElementById('chatMessages'); if(!box)return;\n  try{\n    const path=activeChat.type==='public'?'/api/chat/public':'/api/chat/messages';\n    const j=await apiFetch(path,activeChat.type==='public'?{}:{group_id:activeChat.id});\n    const msgs=j.messages||[];\n    box.innerHTML=msgs.length?msgs.map(m=>`<div class="chat-msg"><b>${chatEsc(m.username||'Игрок')}</b><div>${chatEsc(m.text||'')}</div><small>${new Date(Number(m.created_at||Date.now())).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join(''):'<div class="empty-state">Сообщений пока нет.</div>';\n    box.scrollTop=box.scrollHeight;\n  }catch(e){box.innerHTML='<div class="empty-state">Не удалось загрузить сообщения</div>';}\n}\nasync function sendChatMessage(){\n  const input=document.getElementById('chatInput'); const text=String(input?.value||'').trim(); if(!text)return;\n  try{await apiFetch('/api/chat/send',{type:activeChat.type,group_id:activeChat.id,text}); input.value=''; await loadChatMessages();}\n  catch(e){showToast('❌ '+e.message,'error');}\n}\nasync function createChatGroup(){\n  const name=String(document.getElementById('chatGroupName')?.value||'').trim();\n  const password=String(document.getElementById('chatGroupPassword')?.value||'');\n  if(name.length<2){showToast('❌ Название группы слишком короткое','error');return;}\n  try{const j=await apiFetch('/api/chat/create',{name,password});document.getElementById('chatGroupName').value='';document.getElementById('chatGroupPassword').value='';await loadChatGroups();if(j.group){activeChat={type:'group',id:j.group.id,name:j.group.name};await loadChatMessages();}}catch(e){showToast('❌ '+e.message,'error');}\n}\ndocument.addEventListener('click',e=>{\n  const b=e.target.closest?.('[data-chat-id]');\n  if(b){\n    const type=b.dataset.chatType||'public',id=Number(b.dataset.chatId||0);\n    if(type==='group' && b.textContent.includes('🔒')){const pw=prompt('Пароль группы:'); if(pw===null)return; apiFetch('/api/chat/join',{group_id:id,password:pw}).then(()=>{activeChat={type,id};loadChatGroups();loadChatMessages();}).catch(err=>showToast('❌ '+err.message,'error'));}\n    else{activeChat={type,id,name:b.textContent.trim()};loadChatMessages();}\n  }\n});\ndocument.getElementById('chatSendBtn')?.addEventListener('click',sendChatMessage);\ndocument.getElementById('chatCreateBtn')?.addEventListener('click',createChatGroup);\ndocument.getElementById('chatInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')sendChatMessage();});\n
-</script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -514,19 +512,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
   .input-modal,.public-profile-modal{max-height:calc(100dvh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
 }
 
-.inventory-locked{opacity:.82;box-shadow:inset 0 0 0 1px rgba(79,143,230,.25);}
-.lock-cube-btn{min-width:38px;padding:7px 9px!important;}
-.lock-cube-btn.locked{border-color:#4f8fe6;color:#4f8fe6;background:rgba(79,143,230,.10);}
-.quick-spin-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;}
-.quick-spin-btn{flex:1;min-height:38px;}
-.chat-shell{display:grid;gap:10px;}
-.chat-list{max-height:46vh;overflow:auto;display:grid;gap:7px;padding:2px;}
-.chat-msg{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:9px 11px;}
-.chat-msg b{font-size:12px;} .chat-msg small{display:block;color:var(--muted-2);font-size:9px;margin-top:3px;}
-.chat-compose{display:flex;gap:7px;position:sticky;bottom:6px;}
-.chat-compose input{flex:1;min-width:0;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:11px;padding:11px 12px;}
-.chat-groups{display:flex;gap:6px;overflow:auto;padding-bottom:2px;}
-.chat-group{white-space:nowrap;}
+.chat-modal{max-height:88vh;display:flex;flex-direction:column;}
+.chat-list{display:flex;gap:7px;overflow-x:auto;padding:2px 0 8px;}
+.chat-tab{white-space:nowrap;border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:10px;padding:8px 11px;font-family:inherit;font-size:12px;}
+.chat-tab.active{border-color:var(--brass);background:rgba(201,151,77,.12);}
+.chat-messages{height:42vh;min-height:220px;overflow:auto;background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:10px;}
+.chat-msg{margin:0 0 9px;}.chat-msg-name{font-size:11px;color:var(--brass-2);font-weight:700}.chat-msg-text{font-size:13px;word-break:break-word}.chat-msg-time{font-size:9px;color:var(--muted);margin-left:5px}
+.chat-compose{display:flex;gap:7px;margin-top:8px}.chat-compose input{flex:1;min-width:0}.chat-actions{display:flex;gap:7px;margin-top:8px}.chat-actions>*{flex:1}.cube-lock{min-width:38px;padding:7px 9px}.inv-item.is-frozen{opacity:.82;border-style:dashed}.frozen-label{font-size:10px;color:var(--brass-2);margin-top:2px}
 </style>
 </head>
 <body>
@@ -566,10 +558,12 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       </div>
       <div class="header-right">
         <div class="balance-chip">💰 <span id="balanceDisplay">0</span></div>
+        <button class="icon-btn" id="themeToggle" title="Тема">🌙</button>
         <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
           <button class="menu-item" data-menu-tab="settings">Настройки</button>
+          <button class="menu-item" data-menu-tab="chat">💬 Чат</button>
           <button class="menu-item" id="adminMenuBtn" data-menu-tab="admin" style="display:none">🛡️ Админ-панель</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
@@ -582,7 +576,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <button class="nav-btn" data-tab="market"><span>🛒</span>Магазин</button>
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
-      <button class="nav-btn" data-tab="chat"><span>💬</span>Чат</button>
     </nav>
 
     <!-- CASES -->
@@ -632,23 +625,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
       <div class="section-title">Магазин игроков</div>
       <div class="section-sub">Покупай кубы у других аккаунтов или выставляй свои из инвентаря.</div>
       <div id="marketList"></div>
-    </div>
-
-    <div class="page" id="page-chat">
-      <div class="section-title">💬 Чат</div>
-      <div class="chat-shell">
-        <div class="chat-groups" id="chatGroups"></div>
-        <div class="chat-list" id="chatMessages"><div class="empty-state">Загрузка чата…</div></div>
-        <div class="chat-compose">
-          <input id="chatInput" maxlength="300" placeholder="Написать сообщение…">
-          <button class="btn" id="chatSendBtn" type="button">Отправить</button>
-        </div>
-        <div style="display:flex;gap:7px">
-          <input id="chatGroupName" maxlength="32" placeholder="Название новой группы" style="flex:1;min-width:0;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:11px;padding:10px 12px">
-          <input id="chatGroupPassword" maxlength="64" placeholder="Пароль (необязательно)" style="flex:1;min-width:0;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:11px;padding:10px 12px">
-          <button class="btn-ghost" id="chatCreateBtn" type="button">+ Группа</button>
-        </div>
-      </div>
     </div>
 
     <!-- TOP -->
@@ -1041,7 +1017,7 @@ const CASES = [
     {name:"Sunix",rarity:"mythic",value:510,chance:3.0},
     {name:"nSwish",rarity:"divine",value:1125,chance:1.0}
   ]},
-  {id:"brass",name:"Латунный сейф",price:400,icon:"🟫",items:[
+  {id:"brass",name:"Латунный сейф",price:600,icon:"🟫",items:[
     {name:"BrianTheBurger",rarity:"common",value:240,chance:25.89},
     {name:"Surv",rarity:"common",value:330,chance:27.69},
     {name:"Knobbelboy",rarity:"rare",value:450,chance:28.97},
@@ -1138,7 +1114,7 @@ const CASES = [
     {name:"wPopoff",rarity:"epic",value:780000,chance:30.0},
     {name:"Trick",rarity:"legendary",value:1040000,chance:8.0},
     {name:"Nnfret",rarity:"mythic",value:1000000,chance:3.0},
-    {name:"nSwish",rarity:"divine",value:4875000,chance:0.99},
+    {name:"nSwish",rarity:"divine",value:4875000,chance:0.95},
     {name:"Kuro",rarity:"emerald",value:5000000,chance:0.01}
   ]},
 ];
@@ -1148,11 +1124,8 @@ const CASES = [
 // автоматически оставляем её не выше минимальной epic-награды. Цены кубов при
 // этом НЕ меняются.
 CASES.forEach(c=>{
-  const profitableRarities = c.id==='brass'
-    ? ['rare','epic','legendary','mythic','divine','emerald']
-    : ['epic','legendary','mythic','divine','emerald'];
-  const values=c.items.filter(it=>profitableRarities.includes(it.rarity)).map(it=>Number(it.value)||0).filter(v=>v>0);
-  if(values.length){ c.price=Math.min(Number(c.price)||0, Math.min(...values)); }
+  const epicValues=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).map(it=>Number(it.value)||0).filter(v=>v>0);
+  if(epicValues.length){ c.price=Math.min(Number(c.price)||0, Math.min(...epicValues)); }
 });
 
 // ===== ФИКСИРОВАННЫЕ ЦЕНЫ КУБОВ =====
@@ -1208,7 +1181,7 @@ function normalizeCubeValue(cube){
 }
 function normalizeAllCubeValues(){
   if(!data || !Array.isArray(data.cubes)) return;
-  data.cubes.forEach(c=>{ normalizeCubeValue(c); c.locked=!!c.locked; });
+  data.cubes.forEach(normalizeCubeValue);
 }
 
 // ===== STATE =====
@@ -1894,7 +1867,6 @@ function switchTab(tab){
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
   if(tab==='cases') renderCases();
-  if(tab==='chat') renderChat();
 }
 
 function updateBalanceUI(){
@@ -1933,7 +1905,6 @@ function renderCases(){
           </div>
         </div>
         <button type="button" class="btn open-case-btn" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?`Открыть ${qty>1?'×'+qty+' — '+(c.price*qty).toLocaleString('ru-RU')+' 💰':'сейф'}`:'Недостаточно монет'}</button>
-        <div class="quick-spin-row"><button type="button" class="btn-sell quick-spin-btn" data-action="toggle-quick-spin">⚡ Быстрая прокрутка: ${quickSpinEnabled?'ВКЛ':'ВЫКЛ'}</button></div>
       </div>`;
   }).join('');
   renderRecentDrops();
@@ -2043,7 +2014,7 @@ function spinWheelIn(container, dial, items, wonIndex){
   const targetCenter = REEL_TARGET_POS*REEL_ITEM_HEIGHT + REEL_ITEM_HEIGHT/2;
   const offset = targetCenter - containerHeight/2 + jitter;
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = reduced ? 500 : (quickSpinEnabled ? 1100 : 3000);
+  const duration = reduced ? 500 : 4200;
 
   dial.getBoundingClientRect();
 
@@ -2367,40 +2338,38 @@ function renderInventory(){
   const sellRatioLabel=isPremium?'0,85':'0,7';
   list.innerHTML=data.cubes.length ? data.cubes.map((c,i)=>{
     const m=RARITY_META[c.rarity]||RARITY_META.common;
-    return `<div class="inv-item ${c.locked?'inventory-locked':''}" style="border-left-color:${m.color}" data-cube-index="${i}">
+    const frozen=!!(c.metadata&&c.metadata.frozen);
+    const disabled=frozen?'disabled':'';
+    return `<div class="inv-item ${frozen?'is-frozen':''}" style="border-left-color:${m.color}" data-cube-index="${i}">
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
-      <div><div class="inv-name">${c.name} ${c.locked?'🔒':''}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div></div></div>
+      <div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div>${frozen?'<div class="frozen-label">🔒 Заморожен</div>':''}</div></div>
       <div class="inv-actions"><span class="inv-value">💰 ${Number(c.value).toLocaleString('ru-RU')}</span>
-      <button type="button" class="btn-sell lock-cube-btn ${c.locked?'locked':''}" data-action="toggle-lock" data-index="${i}" title="${c.locked?'Разморозить куб':'Заморозить куб'}">${c.locked?'🔒':'🔓'}</button>
-      <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${c.locked?'disabled':''}>На продажу</button>
-      <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${c.locked?'disabled':''}>Боту ×${sellRatioLabel}</button>
-      <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${c.locked?'disabled':''}>📈 Апгрейд</button>
+      <button type="button" class="btn-sell cube-lock" data-action="toggle-freeze" data-index="${i}" title="${frozen?'Разморозить':'Заморозить'}">${frozen?'🔓':'🔒'}</button>
+      <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${disabled}>На продажу</button>
+      <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${disabled}>Боту ×${sellRatioLabel}</button>
+      <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${disabled}>📈 Апгрейд</button>
       </div></div>`;
   }).join('') : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>';
   const keyBox=document.getElementById('keysInventoryList');
   keyBox.innerHTML=data.keys.length ? data.keys.map((k,i)=>{
     const meta=RARITY_META[k.rarity]||RARITY_META.common;
     return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
-      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="key-market-list" data-index="${i}">На продажу</button><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="key">📈 Апгрейд</button></div></div>`;
+      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="key">📈 Апгрейд</button></div></div>`;
   }).join('') : '<div class="empty-state">Ключей пока нет.</div>';
 }
 
-let quickSpinEnabled = !!(storageGet('gdplay_quick_spin')==='1');
-let upgradeWinHistory = [];
-function toggleCubeLock(index){
-  const c=data?.cubes?.[Number(index)]; if(!c) return;
-  c.locked=!c.locked; persistLocal(); renderInventory(); syncToServer();
-  showToast(c.locked?'🔒 Куб заморожен':'🔓 Куб разморожен','success');
+async function toggleCubeFreeze(index){
+  const idx=Number(index), cube=data.cubes[idx];
+  if(!cube){showToast('❌ Куб не найден','error');return;}
+  const frozen=!(cube.metadata&&cube.metadata.frozen);
+  cube.metadata={...(cube.metadata||{}),frozen};
+  renderInventory(); persistLocal();
+  if(tgInitData() && cube.id){
+    try{ const j=await apiFetch('/api/cube/freeze',{cube_id:cube.id,frozen}); if(Array.isArray(j.cubes)) data.cubes=j.cubes; persistLocal(); renderInventory(); }catch(e){ cube.metadata.frozen=!frozen; persistLocal(); renderInventory(); showToast('❌ '+e.message,'error'); return; }
+  }
+  showToast(frozen?'🔒 Куб заморожен':'🔓 Куб разморожен','success');
 }
-function getUpgradePenaltyMultiplier(){
-  const now=Date.now();
-  upgradeWinHistory=upgradeWinHistory.filter(t=>now-t<120000);
-  return upgradeWinHistory.length>=2 ? 0.33 : 1;
-}
-function recordUpgradeWin(){
-  upgradeWinHistory.push(Date.now());
-  upgradeWinHistory=upgradeWinHistory.filter(t=>Date.now()-t<120000);
-}
+
 async function sellItem(index){
   const idx = Number(index);
   serverActionInFlight++; serverBusyUntil=Date.now()+1500;
@@ -2411,7 +2380,7 @@ async function sellItem(index){
   }
   const item = data.cubes[idx];
   if(!item) return;
-  if(item.locked){ showToast('🔒 Куб заморожен — сначала разблокируй его','error'); return; }
+  if(item.metadata?.frozen){ showToast('🔒 Куб заморожен — сначала сними замок','error'); return; }
   const localPrice = Math.floor(item.value * (data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now() ? 0.85 : 0.7));
   try{
     if(tgInitData()){
@@ -2431,7 +2400,7 @@ async function sellItem(index){
 }
 
 function sellAll(){
-  const sellable=data.cubes.filter(c=>!c.locked);
+  const sellable=data.cubes.filter(c=>!(c.metadata&&c.metadata.frozen));
   if(!sellable.length){ showToast('🔒 Все кубы заморожены','error'); return; }
   const isPremium = data.premiumUntil && new Date(data.premiumUntil).getTime() > Date.now();
   const ratio = isPremium ? 0.85 : 0.7;
@@ -2443,20 +2412,20 @@ function sellAll(){
 
 async function executeSellAll(){
   serverActionInFlight++; serverBusyUntil=Date.now()+1500;
-  if(!data.cubes.some(c=>!c.locked)){ serverActionInFlight=Math.max(0,serverActionInFlight-1); closeModal('sellConfirmModal'); return; }
+  if(!data.cubes.length){ serverActionInFlight=Math.max(0,serverActionInFlight-1); closeModal('sellConfirmModal'); return; }
   const localRatio = data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now() ? 0.85 : 0.7;
-  const localTotal = data.cubes.filter(c=>!c.locked).reduce((sum,c)=>sum+Math.floor(c.value*localRatio),0);
+  const localTotal = data.cubes.reduce((sum,c)=>sum+Math.floor(c.value*localRatio),0);
   try{
     if(tgInitData()){
       const j = await apiFetch('/api/cube/sell-all', {});
       data.balance = j.balance;
-      data.cubes = data.cubes.filter(c=>c.locked);
+      data.cubes = Array.isArray(j.cubes) ? j.cubes : data.cubes.filter(c=>c.metadata&&c.metadata.frozen);
       persistLocal(); updateBalanceUI(); renderInventory();
       closeModal('sellConfirmModal');
       showToast(`Продано всё сразу за ${j.gain.toLocaleString('ru-RU')} монет`, 'success');
     }else{
       data.balance += localTotal;
-      data.cubes = data.cubes.filter(c=>c.locked);
+      data.cubes = data.cubes.filter(c=>c.metadata&&c.metadata.frozen);
       persistLocal(); updateBalanceUI(); renderInventory();
       closeModal('sellConfirmModal');
       showToast(`Продано всё сразу за ${localTotal.toLocaleString('ru-RU')} монет`, 'success');
@@ -2476,19 +2445,20 @@ async function renderMarket(){
   try{
     const j = await apiFetch('/api/mp/market', {});
     const localItems=JSON.parse(storageGet(MARKET_KEY)||'[]');
-    const items = (j.items || []).concat(localItems);
-    if(!items.length){ el.innerHTML='<div class="empty-state">Пока нет объявлений.<br>Выставь предмет из инвентаря первым!</div>'; return; }
+    const items = (j.items || []).filter(x=>x.kind!=='key' && x.item_kind!=='key').concat(localItems.filter(x=>x.kind!=='key' && x.item_kind!=='key'));
+    if(!items.length){
+      el.innerHTML = '<div class="empty-state">Пока нет объявлений.<br>Выставь куб из инвентаря первым!</div>';
+      return;
+    }
     el.innerHTML = items.map(x=>{
-      const kind=String(x.kind||x.type||x.item_type||((x.key_id||x.key)?'key':'cube')).toLowerCase();
-      const isKey=kind==='key' || kind==='keys' || !!x.key_id || !!x.key;
-      const name=isKey ? String(x.key_name||x.name||x.key?.name||x.cube_name||'Ключ') : String(x.cube_name||x.name||'Куб');
-      const rarity=x.cube_rarity||x.rarity||x.key_rarity||'common';
-      const m=RARITY_META[rarity]||RARITY_META.common;
-      const seller=String(x.seller_name||x.username||'Игрок');
-      const mine=seller===String(data.username||'') || String(x.seller_id||x.owner_id||'')===String(tgUserId()||'');
-      return `<div class="market-card" style="border-left:3px solid ${m.color}"><span class="inv-icon" style="color:${m.color}">${isKey?(x.icon||x.key?.icon||'🗝️'):m.icon}</span><div class="market-info"><div class="market-name">${isKey?'🗝️ ':''}${name}</div><div class="market-seller">Продавец: ${seller}</div><div class="market-price">💰 ${formatPrice(x.price)}</div></div>${mine ? `<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>` : `<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
+      const m = RARITY_META[x.cube_rarity] || RARITY_META.common;
+      const mine = String(x.seller_name||'') === String(data.username||'');
+      return `<div class="market-card" style="border-left:3px solid ${m.color}"><span class="inv-icon" style="color:${m.color}">${m.icon}</span><div class="market-info"><div class="market-name">${x.cube_name}</div><div class="market-seller">Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}</div></div>${mine ? `<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>` : `<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
     }).join('');
-  }catch(e){ el.innerHTML='<div class="empty-state">Ошибка загрузки магазина</div>'; console.error(e); }
+  }catch(e){
+    el.innerHTML = '<div class="empty-state">Ошибка загрузки магазина</div>';
+    console.error(e);
+  }
 }
 
 function askText(title,text,initial,maxLen,onAccept){
@@ -2588,8 +2558,7 @@ function getUpgradeChance(){
   const sourceValue=Number(source.value||0);
   const targetValue=Number(upgradeTarget.value||1);
   const effectiveCoverage=sourceValue+Number(upgradeStake||0);
-  const base=Math.max(0.1, Math.min(95, effectiveCoverage/targetValue*100));
-  return base*getUpgradePenaltyMultiplier();
+  return Math.max(0.1, Math.min(95, (effectiveCoverage/targetValue*100) * 0.80));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -2617,7 +2586,6 @@ function openUpgradeModal(index,kind='cube'){
     if(isNaN(idx)||idx<0||idx>=data.keys.length){showToast('❌ Ключ не найден','error');return;}
   }else if(isNaN(idx)||idx<0||idx>=data.cubes.length){showToast('❌ Куб не найден в инвентаре','error');return;}
   const arr=kind==='key'?data.keys:data.cubes; const src=arr[idx];
-  if(kind==='cube' && src?.locked){showToast('🔒 Куб заморожен — сначала разблокируй его','error');return;}
   upgradeSource={kind,index:idx,ref:src,uid:src?.uid||'',name:src?.name||'',rarity:src?.rarity||'',value:Number(src?.value||0)}; upgradeTarget=null; upgradeStake=0;
   document.getElementById('upgradeStepPick').style.display='block';
   document.getElementById('upgradeStepConfirm').style.display='none';
@@ -2657,6 +2625,7 @@ function selectUpgradeTarget(name,rarity,value,kind='cube',keyId=''){
 }
 function performLocalUpgrade(){
   const source=getUpgradeSource(); if(!source||!upgradeTarget) throw new Error('Предмет для апгрейда не найден');
+  if(upgradeSource.kind==='cube' && source.metadata?.frozen) throw new Error('Куб заморожен — сначала сними замок');
   const sourceArr=upgradeSource.kind==='key'?data.keys:data.cubes;
   const sourceIndex=sourceArr.indexOf(source);
   if(sourceIndex<0) throw new Error('Предмет уже изменён или продан — открой апгрейдер заново');
@@ -2672,7 +2641,6 @@ function performLocalUpgrade(){
     if(upgradeTarget.kind==='key') data.keys.push({...reward,id:upgradeTarget.id||('key-'+Date.now())});
     else data.cubes.push(reward);
     recordBestDrop(reward);
-    recordUpgradeWin();
   }
   if(upgradeSource.kind==='key') data.keys.splice(sourceIndex,1); else data.cubes.splice(sourceIndex,1);
   persistLocal(); updateBalanceUI(); renderInventory(); renderProfile(); syncToServer();
@@ -2682,9 +2650,13 @@ async function confirmUpgrade(){
   if(!upgradeSource||!upgradeTarget) return;
   const btn=document.getElementById('upgradeConfirmBtn'); btn.disabled=true;
   try{
-    // Выполняем сам бросок локально, чтобы денежная ставка гарантированно
-    // участвовала в расчёте даже при старом серверном /api/upgrade.
+    // Сначала списываем дополнительную ставку на сервере атомарно.
+    // Иначе следующий sync мог вернуть старый баланс и отменить локальное списание.
+    const stakeResult = await apiFetch('/api/upgrade/stake', {amount: Math.floor(Number(upgradeStake || 0))});
+    if(stakeResult && typeof stakeResult.balance === 'number') data.balance = stakeResult.balance;
     const j=performLocalUpgrade();
+    // performLocalUpgrade меняет только локальный интерфейс; сервер уже списал ставку.
+    if(stakeResult && typeof stakeResult.balance === 'number') data.balance = stakeResult.balance;
     persistLocal(); renderInventory(); updateBalanceUI();
     try{ await syncToServer(); }catch(_){}
     document.getElementById('upgradeStepConfirm').style.display='none';
@@ -2717,23 +2689,6 @@ document.getElementById('upgradeCloseBtn')?.addEventListener('click',()=>{closeM
 document.getElementById('publicProfileClose')?.addEventListener('click',()=>closeModal('publicProfileModal'));
 
 
-function listKeyForSale(index){
-  const idx=Number(index); const key=data.keys[idx];
-  if(!key){showToast('❌ Ключ не найден','error');return;}
-  askNumber('🗝️ Выставить ключ',`Цена продажи для «${key.name}».`,Math.max(10,Math.round(Number(key.value||0)*0.85)),async price=>{
-    // Новые ключи используют тот же marketplace endpoint; kind=key позволяет серверу отличить их.
-    try{
-      const j=await apiFetch('/api/mp/market/list',{index:idx,kind:'key',name:key.name,rarity:key.rarity,value:key.value,price,key_id:key.id,key:key});
-      if(Array.isArray(j.keys)) data.keys=j.keys; else data.keys.splice(idx,1);
-      if(j.kind && j.kind!=='key' && j.kind!=='keys') throw new Error('Сервер вернул объявление не ключа');
-      persistLocal(); await renderMarket(); renderInventory(); showToast('🗝️ Ключ выставлен в магазин','success');
-    }catch(e){
-      // Старые серверы могут не знать ключи — оставляем локальное объявление, чтобы UI не ломался.
-      const market=JSON.parse(storageGet(MARKET_KEY)||'[]'); market.push({id:'local-key-'+Date.now(),kind:'key',cube_name:key.name,cube_rarity:key.rarity,price,seller_name:data.username,key}); storageSet(MARKET_KEY,JSON.stringify(market)); data.keys.splice(idx,1); persistLocal(); renderInventory(); showToast('🗝️ Ключ выставлен в локальный магазин','success');
-    }
-  });
-}
-
 function listCubeForSale(index){
   const idx = Number(index);
   if (isNaN(idx) || idx < 0 || idx >= data.cubes.length) {
@@ -2743,12 +2698,12 @@ function listCubeForSale(index){
   }
   
   const item = data.cubes[idx];
-  if (item?.locked) { showToast('🔒 Куб заморожен — сначала разблокируй его','error'); return; }
   if (!item) {
     showToast('❌ Куб не найден', 'error');
     renderInventory();
     return;
   }
+  if(item.metadata?.frozen){ showToast('🔒 Куб заморожен — сначала сними замок','error'); return; }
   
   askNumber('📦 Выставить куб', `Цена продажи для «${item.name}» в монетах.`, Math.max(10, Math.round(item.value * 0.8)), async price => {
     try{
@@ -2795,7 +2750,7 @@ async function removeMarketItem(id){
     return;
   }
   try{
-    const j=await apiFetch('/api/mp/market/cancel',{item_id:id});
+    const j=await apiFetch('/api/mp/market/remove',{item_id:id});
     if(j.cubes) data.cubes=j.cubes;
     if(j.keys) data.keys=j.keys;
     persistLocal(); await renderMarket(); renderInventory();
@@ -3324,6 +3279,7 @@ function handleButton(button, e){
     // Кнопка меню — кликабельна всей площадью, а не только по тексту.
     // Не даём событию уйти на элементы страницы под выпадающим меню.
     if(e){ e.preventDefault?.(); e.stopPropagation?.(); }
+    if(tab==='chat'){ openChatModal(); document.getElementById('menuPanel')?.classList.remove('open'); return; }
     switchTab(tab);
     if(tab==='admin') renderAdmin();
     document.getElementById('menuPanel')?.classList.remove('open');
@@ -3332,13 +3288,12 @@ function handleButton(button, e){
 
   if(action==='open-case'){ if(!button.disabled) openCase(button.dataset.case); return; }
   if(action==='set-case-qty'){ caseOpenQty[button.dataset.case] = Number(button.dataset.qty); renderCases(); return; }
+  if(action==='toggle-freeze'){ toggleCubeFreeze(Number(button.dataset.index)); return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
   if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
   if(action==='pick-upgrade-target'){ selectUpgradeTarget(button.dataset.name, button.dataset.rarity, button.dataset.value, button.dataset.kind||'cube', button.dataset.keyId||''); return; }
-  if(action==='key-market-list'){ listKeyForSale(Number(button.dataset.index)); return; }
   if(action==='sell-item'){ sellItem(Number(button.dataset.index)); return; }
-  if(action==='toggle-lock'){ toggleCubeLock(Number(button.dataset.index)); return; }
-  if(action==='toggle-quick-spin'){ quickSpinEnabled=!quickSpinEnabled; storageSet('gdplay_quick_spin',quickSpinEnabled?'1':'0'); renderCases(); return; }
+  if(action==='chat-select'){ currentChatId=button.dataset.chatId; loadChats(); return; }
   if(action==='market-buy'){ buyMarketItem(button.dataset.marketBuy); return; }
   if(action==='market-remove'){ removeMarketItem(button.dataset.marketRemove); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
@@ -3360,7 +3315,8 @@ function handleButton(button, e){
   if(action==='admin-promo-disable'){ disableAdminPromo(button.dataset.promoId); return; }
 
   switch(button.id){
-        case 'menuBtn': document.getElementById('menuPanel')?.classList.toggle('open'); break;
+    case 'themeToggle': case 'themeToggle2': toggleTheme(); break;
+    case 'menuBtn': document.getElementById('menuPanel')?.classList.toggle('open'); break;
     case 'menuLogout': case 'logoutBtn': logout(); break;
     case 'createBattleBtn': createBattle(); break;
     case 'dailyBtn': claimDaily(); break;
@@ -3377,7 +3333,40 @@ function handleButton(button, e){
 }
 
 
+let currentChatId=null;
+let chatTimer=null;
+async function openChatModal(){
+  openModal('chatModal');
+  await loadChats();
+}
+async function loadChats(){
+  try{
+    const j=await apiFetch('/api/chat/list',{}); const chats=j.chats||[];
+    const box=document.getElementById('chatList');
+    box.innerHTML=chats.map(c=>`<button class="chat-tab ${String(c.id)===String(currentChatId)?'active':''}" data-action="chat-select" data-chat-id="${c.id}">${c.is_public?'🌐':'👥'} ${c.name}${c.has_password?' 🔒':''}</button>`).join('');
+    const pub=chats.find(c=>c.is_public); if(!currentChatId && pub) currentChatId=pub.id;
+    if(currentChatId){ const found=chats.find(c=>String(c.id)===String(currentChatId)); if(found){document.getElementById('chatCurrentName').textContent=found.name; await loadChatMessages();} }
+  }catch(e){showToast('❌ '+e.message,'error');}
+}
+async function loadChatMessages(){
+  if(!currentChatId)return;
+  try{const j=await apiFetch('/api/chat/messages',{chat_id:currentChatId}); const box=document.getElementById('chatMessages'); box.innerHTML=(j.messages||[]).map(m=>`<div class="chat-msg"><span class="chat-msg-name">${m.username||'Игрок'}</span><span class="chat-msg-time">${m.created_at||''}</span><div class="chat-msg-text">${escapeHtml(m.message||'')}</div></div>`).join('')||'<div class="empty-state">Пока сообщений нет.</div>'; box.scrollTop=box.scrollHeight;}catch(e){showToast('❌ '+e.message,'error');}
+}
+async function sendChatMessage(){const f=document.getElementById('chatMessageInput'); const message=f.value.trim(); if(!message||!currentChatId)return; try{await apiFetch('/api/chat/send',{chat_id:currentChatId,message}); f.value=''; await loadChatMessages();}catch(e){showToast('❌ '+e.message,'error');}}
+async function createChatGroup(){
+  const name=prompt('Название группы:'); if(!name)return; const password=prompt('Пароль группы (оставь пустым для группы без пароля):')||'';
+  try{const j=await apiFetch('/api/chat/create',{name,password}); currentChatId=j.chat.id; await loadChats(); showToast('👥 Группа создана','success');}catch(e){showToast('❌ '+e.message,'error');}
+}
+async function joinChatById(){const id=prompt('ID группы:'); if(!id)return; const password=prompt('Пароль (если есть):')||''; try{const j=await apiFetch('/api/chat/join',{chat_id:Number(id),password}); currentChatId=j.chat.id; await loadChats(); showToast('✅ Ты вступил в группу','success');}catch(e){showToast('❌ '+e.message,'error');}}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
+
+document.getElementById('chatSendBtn')?.addEventListener('click',sendChatMessage);
+document.getElementById('chatCreateBtn')?.addEventListener('click',createChatGroup);
+document.getElementById('chatJoinBtn')?.addEventListener('click',joinChatById);
+document.getElementById('chatCloseBtn')?.addEventListener('click',()=>closeModal('chatModal'));
+document.getElementById('chatMessageInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChatMessage();}});
 
 // Быстрый и безопасный ввод для iOS/Telegram WebView.
 // Действие запускаем на pointerup, чтобы не ждать запаздывающий click в iOS.
@@ -3521,5 +3510,18 @@ boot();
 })();
 </script>
 
+
+<div class="modal-overlay" id="chatModal">
+  <div class="input-modal chat-modal">
+    <div class="modal-title">💬 Чат GDPLAY</div>
+    <div class="section-sub" style="margin-bottom:8px">Публичный чат доступен всем. Группы можно создать с паролем или без.</div>
+    <div class="chat-list" id="chatList"></div>
+    <div id="chatCurrentName" class="section-sub" style="margin-bottom:7px">Публичный чат</div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-compose"><input id="chatMessageInput" maxlength="500" placeholder="Сообщение..."><button class="btn" id="chatSendBtn">Отправить</button></div>
+    <div class="chat-actions"><button class="btn-ghost" id="chatCreateBtn">➕ Создать группу</button><button class="btn-ghost" id="chatJoinBtn">🔑 Вступить по ID</button></div>
+    <button class="btn-ghost" id="chatCloseBtn" style="width:100%;margin-top:8px">Закрыть</button>
+  </div>
+</div>
 </body>
   </html>
