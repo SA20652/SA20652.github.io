@@ -764,7 +764,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
             <defs><linearGradient id="rushFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e3b872"/><stop offset="100%" stop-color="#c9974d" stop-opacity="0"/></linearGradient></defs>
             <polygon class="rush-area" id="rushArea" points="6,92 6,92 94,92"></polygon>
             <polyline class="rush-line" id="rushLine" points="6,92 6,92"></polyline>
-            <circle class="rush-dot" id="rushDot" cx="6" cy="92" r="1.9"></circle>
+            <ellipse class="rush-dot" id="rushDot" cx="6" cy="92" rx="1.9" ry="2.35"></ellipse>
           </svg>
           <div class="rush-mult active" id="rushMultiplier">x1.00</div>
         </div>
@@ -2172,6 +2172,9 @@ let rushBusy = false;
 let rushRound = null;
 let rushPollTimer = null;
 let rushAnimTimer = null;
+let rushPollInFlight = false;
+let rushCashoutInFlight = false;
+let rushTerminalNotified = false;
 let rushBetValue = 10;
 
 function rushDisplayMultiplier(v){
@@ -2237,6 +2240,13 @@ function setRushState(status,mult,payout=0){
 function stopRushTimers(){
   if(rushPollTimer){clearInterval(rushPollTimer);rushPollTimer=null;}
   if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}
+  rushPollInFlight=false;
+}
+function rushNotifyTerminal(status,payout=0){
+  if(rushTerminalNotified) return;
+  rushTerminalNotified=true;
+  if(status==='crashed') showToast('💥 Орб сорвался — ставка потеряна','error');
+  else if(status==='cashed') showToast(`🟡 Выигрыш: +${Number(payout||0).toLocaleString('ru-RU')} орбов`,'success');
 }
 function startRushAnimation(startedAtMs){
   stopRushTimers();
@@ -2251,21 +2261,27 @@ function startRushAnimation(startedAtMs){
   tick();
 }
 async function pollRushStatus(){
-  if(!rushRound || rushRound.status!=='active')return;
+  if(!rushRound || rushRound.status!=='active' || rushPollInFlight)return;
+  const roundId=rushRound.id;
+  rushPollInFlight=true;
   try{
-    const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.id});
+    const j=await apiFetch('/api/game/rush/status',{round_id:roundId});
+    // Ответ от старого/параллельного запроса больше не должен менять новый раунд.
+    if(!rushRound || rushRound.id!==roundId || rushRound.status!=='active')return;
     data.balance=Number(j.balance||data.balance); updateBalanceUI(); persistLocal();
     if(j.status==='crashed' || j.status==='cashed'){
       rushRound.status=j.status;
       stopRushTimers();
       drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
       setRushState(j.status,j.multiplier,j.payout||0);
-      if(j.status==='crashed') showToast('💥 Орб сорвался — ставка потеряна','error');
+      rushNotifyTerminal(j.status,j.payout||0);
       return;
     }
     drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
   }catch(e){
     // Краткий сетевой сбой не завершает игру локально; следующий тик попробует снова.
+  }finally{
+    rushPollInFlight=false;
   }
 }
 async function startRush(){
@@ -2274,7 +2290,7 @@ async function startRush(){
   setRushBet(bet);
   if(bet>Number(data.balance||0)){showToast('❌ Недостаточно орбов','error');return;}
   if(!tgInitData()){showToast('Открой игру через Telegram','error');return;}
-  rushBusy=true; serverActionInFlight++; serverBusyUntil=Date.now()+1200;
+  rushBusy=true; rushTerminalNotified=false; rushCashoutInFlight=false; serverActionInFlight++; serverBusyUntil=Date.now()+100;
   resetRushChart(); setRushState('active',1); 
   try{
     const j=await apiFetch('/api/game/rush/start',{round_id:rushRoundId(),bet});
@@ -2282,24 +2298,36 @@ async function startRush(){
     rushRound={id:j.round_id,bet:Number(j.bet),startedAt:Number(j.started_at_ms),status:'active'};
     setRushState('active',1);
     startRushAnimation(rushRound.startedAt);
-    rushPollTimer=setInterval(pollRushStatus,100);
+    rushPollTimer=setInterval(pollRushStatus,150);
     await pollRushStatus();
   }catch(e){
     rushRound=null; stopRushTimers(); resetRushChart(); setRushState('idle',1); showToast('❌ '+e.message,'error');
-  }finally{rushBusy=false;serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+500;}
+  }finally{rushBusy=false;serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+100;}
 }
 async function cashoutRush(){
-  if(!rushRound || rushRound.status!=='active')return;
+  if(!rushRound || rushRound.status!=='active' || rushCashoutInFlight)return;
+  const roundId=rushRound.id;
+  rushCashoutInFlight=true;
+  const cash=document.getElementById('rushCashoutBtn');
+  if(cash) cash.disabled=true;
   try{
-    const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.id});
+    const j=await apiFetch('/api/game/rush/cashout',{round_id:roundId});
+    if(!rushRound || rushRound.id!==roundId)return;
     data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
     rushRound.status=j.status;
     stopRushTimers();
     drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
     setRushState(j.status,j.multiplier,j.payout||0);
-    if(j.status==='cashed')showToast(`🟡 Выигрыш: +${Number(j.payout).toLocaleString('ru-RU')} орбов`,'success');
-    else showToast('💥 Слишком поздно — орб сорвался','error');
-  }catch(e){showToast('❌ '+e.message,'error');}
+    rushNotifyTerminal(j.status,j.payout||0);
+  }catch(e){
+    if(rushRound && rushRound.id===roundId && rushRound.status==='active'){
+      const b=document.getElementById('rushCashoutBtn');
+      if(b) b.disabled=false;
+    }
+    showToast('❌ '+e.message,'error');
+  }finally{
+    rushCashoutInFlight=false;
+  }
 }
 function renderPlinko(){
   setRushBet(rushBetValue);
@@ -2785,7 +2813,7 @@ function renderInventory(){
 
 async function sellItem(index){
   const idx = Number(index);
-  serverActionInFlight++; serverBusyUntil=Date.now()+1500;
+  serverActionInFlight++; serverBusyUntil=Date.now()+150;
   if (isNaN(idx) || idx < 0 || idx >= data.cubes.length) {
     showToast('❌ Куб не найден', 'error');
     renderInventory();
@@ -2809,7 +2837,7 @@ async function sellItem(index){
     persistLocal(); updateBalanceUI(); renderInventory();
   }catch(e){
     showToast('❌ '+e.message, 'error');
-  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+700; }
+  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+100; }
 }
 
 function sellAll(){
@@ -2825,7 +2853,7 @@ function sellAll(){
 }
 
 async function executeSellAll(){
-  serverActionInFlight++; serverBusyUntil=Date.now()+1500;
+  serverActionInFlight++; serverBusyUntil=Date.now()+150;
   if(!data.cubes.length){ serverActionInFlight=Math.max(0,serverActionInFlight-1); closeModal('sellConfirmModal'); return; }
   const localRatio = data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now() ? 0.85 : 0.7;
   const localTotal = data.cubes.reduce((sum,c)=>sum+Math.floor(c.value*localRatio),0);
@@ -2846,7 +2874,7 @@ async function executeSellAll(){
     }
   }catch(e){
     showToast('❌ '+e.message, 'error');
-  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+700; }
+  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+100; }
 }
 
 function acceptSellAll(){ executeSellAll(); }
@@ -3720,7 +3748,7 @@ function renderProfile(){
 }
 
 async function claimDaily(){
-  serverActionInFlight++; serverBusyUntil=Date.now()+1500;
+  serverActionInFlight++; serverBusyUntil=Date.now()+150;
   try{
     const j = await apiFetch('/api/daily', {});
     data.balance = j.balance;
@@ -3733,7 +3761,7 @@ async function claimDaily(){
     showToast((j.premium ? '⭐ Premium x2! ' : '🎁 ')+'+'+j.reward+' 💰 Ежедневный бонус'+streakMsg,'success');
   }catch(e){
     showToast('❌ '+e.message,'error');
-  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+700; }
+  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+100; }
 }
 
 async function setAccountPassword(){
