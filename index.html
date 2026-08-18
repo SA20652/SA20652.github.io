@@ -953,7 +953,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       <div class="upgrade-stake">
         <div class="upgrade-stake-row"><span class="section-sub" style="margin:0">Доп. ставка монетами</span><span id="upgradeStakeValue" class="upgrade-stake-value">0 💰</span></div>
         <input id="upgradeStakeRange" class="upgrade-range" type="range" min="0" max="0" step="10" value="0">
-        <div class="upgrade-note">Чем больше добавишь к ставке, тем выше текущий шанс.</div>
+        <div class="upgrade-note">Шанс зависит от редкости цели. Доп. ставка даёт отдельный небольшой бонус, но цена куба на шанс не влияет.</div>
       </div>
       <div class="upgrade-fast-row">
         <div><div class="upgrade-fast-label">⚡ Открыть быстро</div><div class="upgrade-fast-hint">Ускоряет вращение результата. Сохраняется автоматически.</div></div>
@@ -2956,17 +2956,9 @@ function getUpgradeSource(){
   if(found){upgradeSource.index=arr.indexOf(found); upgradeSource.ref=found; return found;}
   return arr[upgradeSource.index] || null;
 }
-function getUpgradeBaseChance(){
-  const source=getUpgradeSource();
-  if(!source || !upgradeTarget) return 0;
-  return Math.max(0.1, Math.min(95, Number(source.value||0)/Number(upgradeTarget.value||1)*100));
-}
 function getUpgradeChance(){
   const source=getUpgradeSource();
   if(!source || !upgradeTarget) return 0;
-  // Ставка НЕ даёт произвольный бонус. Она уменьшает эффективную
-  // стоимость цели: сумма исходного предмета + ставка сравнивается
-  // непосредственно со стоимостью целевого предмета.
   const sourceValue=Number(source.value||0);
   const targetValue=Number(upgradeTarget.value||1);
   const effectiveCoverage=sourceValue+Number(upgradeStake||0);
@@ -3014,7 +3006,7 @@ function renderUpgradeCatalog(filter){
   if(!list.length){box.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
   box.innerHTML=list.map(it=>{
     const m=RARITY_META[it.rarity]||RARITY_META.common;
-    const chance=Math.max(0.3,Math.min(95,Number(source.value||0)/Number(it.value||1)*100));
+    const chance=Math.max(0.3, Math.min(95, (Number(source.value||0)/Number(it.value||1))*100));
     return `<button type="button" class="upgrade-cat-item" data-action="pick-upgrade-target" data-kind="${it.kind}" data-name="${it.name}" data-rarity="${it.rarity}" data-value="${it.value}" data-key-id="${it.id||''}">
       <div><div class="upgrade-cat-name" style="color:${m.color}">${it.icon||m.icon||'◆'} ${it.name}</div><div class="upgrade-cat-value">${it.kind==='key'?'Ключ · ':''}${m.label}</div></div>
       <div class="upgrade-cat-value">💰${Number(it.value).toLocaleString('ru-RU')} · ${chance.toFixed(0)}%</div>
@@ -3043,7 +3035,7 @@ function performLocalUpgrade(){
   upgradeSource.index=sourceIndex; upgradeSource.ref=source; if(upgradeSource.kind==='cube' && source?.metadata?.locked) throw new Error('Куб заморожен — сначала разблокируй его');
   if(upgradeStake>Number(data.balance||0)) throw new Error('Недостаточно монет для дополнительной ставки');
   data.balance-=upgradeStake;
-  const chance=getUpgradeChance(); const roll=Math.random()*100; const success=roll<chance;
+  const chance=getUpgradeChance(); const roll=(window.crypto?.getRandomValues ? (()=>{const a=new Uint32Array(1); crypto.getRandomValues(a); return (a[0]/4294967296)*100;})() : Math.random()*100); const success=roll<chance;
   if(success){
     const reward={name:upgradeTarget.name,rarity:upgradeTarget.rarity,value:upgradeTarget.value,time:Date.now()};
     const targetCase=CASES.find(c=>c.items.some(it=>it.name===reward.name&&it.rarity===reward.rarity&&Number(it.value)===Number(reward.value)));
