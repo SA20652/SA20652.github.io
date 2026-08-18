@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>GDPLAY — Хранилище</title>
+<title>GDPLAY — Плинко</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -548,20 +548,20 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 /* ============ PLINKO ============ */
 .plinko-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 12px;}
 .plinko-balance{display:flex;align-items:center;gap:6px;background:var(--bg-3);border:1px solid var(--line);border-radius:18px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--paper);white-space:nowrap;}
-.orb-dot,.orb-glow{display:block;border-radius:50%;background:radial-gradient(circle at 32% 28%,#eaffef 0 8%,#73ff8d 12%,#12c93c 42%,#067b25 72%,#043b18 100%);box-shadow:0 0 10px rgba(44,220,87,.48),inset -2px -3px 5px rgba(0,0,0,.28);}
+.orb-dot,.orb-glow{display:block;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff8d8 0 7%,#ffe98a 12%,#f6c84b 34%,#d99a20 62%,#8a5b12 100%);box-shadow:0 0 12px rgba(227,184,114,.62),0 0 22px rgba(201,151,77,.18),inset -2px -3px 5px rgba(0,0,0,.28);}
 .orb-dot{width:14px;height:14px;flex:0 0 14px;}
 .plinko-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);}
 .plinko-board-wrap{position:relative;padding:4px 0 0;}
-.plinko-board{position:relative;height:360px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 0%,rgba(103,77,160,.24),transparent 42%),#1c192b;border:1px solid rgba(255,255,255,.055);}
+.plinko-board{position:relative;height:292px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 0%,rgba(201,151,77,.16),transparent 48%),radial-gradient(circle at 50% 100%,rgba(138,106,53,.10),transparent 50%),#171411;border:1px solid rgba(255,255,255,.055);}
 .plinko-board::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 25%,rgba(0,0,0,.08));pointer-events:none;}
-.plinko-peg{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#c8c6cf;box-shadow:0 0 5px rgba(255,255,255,.13);}
-.plinko-ball{position:absolute;left:50%;top:6px;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;z-index:3;transition:transform .18s cubic-bezier(.22,.72,.22,1);filter:drop-shadow(0 4px 5px rgba(0,0,0,.45));}
+.plinko-peg{position:absolute;width:8px;height:8px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#d8d0bf;box-shadow:0 0 7px rgba(227,184,114,.22),0 1px 0 rgba(255,255,255,.18) inset;}
+.plinko-ball{position:absolute;left:50%;top:8px;width:22px;height:22px;margin:-12px 0 0 -12px;border-radius:50%;z-index:3;transition:transform .18s cubic-bezier(.22,.72,.22,1);filter:drop-shadow(0 4px 5px rgba(0,0,0,.45));}
 .plinko-ball .orb-glow{width:100%;height:100%;}
 .plinko-ball.winner{animation:plinkoWin .6s ease 2;}
-@keyframes plinkoWin{50%{transform:scale(1.18);filter:drop-shadow(0 0 14px rgba(76,220,105,.75));}}
+@keyframes plinkoWin{50%{transform:scale(1.18);filter:drop-shadow(0 0 15px rgba(227,184,114,.9));}}
 .plinko-slots{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-top:7px;}
 .plinko-slot{height:36px;border-radius:10px;background:var(--bg-3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;color:var(--muted);transition:.2s;}
-.plinko-slot.hit{border-color:var(--brass);color:var(--brass-2);background:rgba(201,151,77,.14);box-shadow:0 0 14px rgba(201,151,77,.12);}
+.plinko-slot.hit{border-color:var(--brass-2);color:var(--brass-2);background:rgba(201,151,77,.16);box-shadow:0 0 16px rgba(201,151,77,.18),inset 0 0 12px rgba(201,151,77,.06);}
 .plinko-result{text-align:center;font-family:'Fraunces',serif;font-size:21px;font-weight:800;min-height:30px;margin:14px 0 10px;}
 .plinko-result.win{color:var(--success);}.plinko-result.loss{color:var(--danger);}
 .plinko-bet-row{display:grid;grid-template-columns:70px 1fr 70px;gap:7px;}
@@ -573,7 +573,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .plinko-play{width:100%;margin-top:9px;padding:13px 12px;}
 .plinko-play:disabled{opacity:.55;filter:none;}
 .plinko-note{text-align:center;color:var(--muted-2);font-size:10px;line-height:1.45;margin:9px 4px 1px;}
-@media (max-width:400px){.plinko-board{height:330px}.plinko-slots{gap:3px}.plinko-slot{font-size:10px;padding:0 2px}.plinko-bet-row{grid-template-columns:62px 1fr 62px;}}
+@media (max-width:400px){.plinko-board{height:258px}.plinko-slots{gap:3px}.plinko-slot{font-size:10px;padding:0 2px}.plinko-bet-row{grid-template-columns:62px 1fr 62px;}}
 
 /* ============ TOAST ============ */
 #appScreen{min-height:100dvh;background:var(--bg);}
@@ -693,7 +693,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       <button class="nav-btn" data-tab="inventory"><span>🎒</span>Кубы</button>
       <button class="nav-btn" data-tab="market"><span>🛒</span>Магазин</button>
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
-      <button class="nav-btn" data-tab="plinko"><span>🟢</span>Игра</button>
+      <button class="nav-btn" data-tab="plinko"><span>🟡</span>Плинко</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
     </nav>
 
@@ -743,7 +743,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         <div class="plinko-result" id="plinkoResult">Выбери ставку и брось орб</div>
         <div class="plinko-bet-row">
           <button class="plinko-step" data-plinko-bet="-10">−10</button>
-          <input id="plinkoBet" type="number" inputmode="numeric" min="1" max="100" step="1" value="10" aria-label="Ставка в орбах">
+          <input id="plinkoBet" type="number" inputmode="numeric" min="1" max="999999999999" step="1" value="10" aria-label="Ставка в орбах">
           <button class="plinko-step" data-plinko-bet="10">+10</button>
         </div>
         <div class="plinko-presets">
@@ -753,7 +753,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
           <button class="btn-ghost plinko-preset" data-plinko-preset="50">50</button>
           <button class="btn-ghost plinko-preset" data-plinko-preset="100">100</button>
         </div>
-        <button class="btn plinko-play" id="plinkoPlayBtn"><span>🟢</span> Бросить <b id="plinkoBetLabel">10</b> орбов</button>
+        <button class="btn plinko-play" id="plinkoPlayBtn"><span>🟡</span> Бросить <b id="plinkoBetLabel">10</b> орбов</button>
         <div class="plinko-note">Ставка списывается сервером до начала броска. Выигрыш начисляется только после завершения раунда.</div>
       </div>
     </div>
@@ -1419,6 +1419,20 @@ async function apiFetch(path, payload={}){
   payload = {...payload, initData};
   const authToken = storageGet(AUTH_TOKEN_KEY);
   if(authToken) payload.authToken = authToken;
+
+  // Для админских запросов поверх Telegram initData нужен отдельный короткий
+  // серверный session-токен. Сам токен без свежего initData бесполезен.
+  if(path.startsWith('/api/admin/') && path !== '/api/admin/session') {
+    let adminSession = storageGet(ADMIN_SESSION_KEY);
+    if(!adminSession){
+      const sr = await fetch(API_BASE + '/api/admin/session', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData})});
+      const sj = await sr.json().catch(()=>({error:'Не удалось открыть админ-сессию'}));
+      if(!sr.ok) throw new Error(sj.error||'Нет доступа');
+      adminSession=sj.adminSession;
+      storageSet(ADMIN_SESSION_KEY,adminSession);
+    }
+    payload.adminSession=adminSession;
+  }
 
   // Не даём WebView зависнуть навсегда, если Railway/сервер временно недоступен.
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -2112,19 +2126,21 @@ function hexA(hex, alpha){
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-const PLINKO_MULTIPLIERS = [5.0,2.0,0.7,0.4,0.1,0.4,0.7,2.0,5.0];
+const PLINKO_MULTIPLIERS = [5.0,2.0,0.7,0.4,0.1,0.4,2.0,5.0];
+const PLINKO_ROWS = 7;
+const PLINKO_MAX_BET = 999999999999;
+const ADMIN_SESSION_KEY = 'gdplay_admin_session_v1';
 let plinkoBusy = false;
 let plinkoBetValue = 10;
 
 function plinkoDisplayMultiplier(multiplier){
   const n = Number(multiplier);
-  // В интерфейсе показываем аккуратное значение, а сервер хранит исходный float.
   if(Number.isInteger(n)) return `x${n}`;
   return `x${n.toFixed(1).replace(/\.0$/,'')}`;
 }
 function clampPlinkoBet(v){
   const n = Math.round(Number(v)||1);
-  return Math.max(1, Math.min(100, n));
+  return Math.max(1, Math.min(PLINKO_MAX_BET, n));
 }
 function setPlinkoBet(v){
   plinkoBetValue = clampPlinkoBet(v);
@@ -2143,14 +2159,18 @@ function buildPlinkoBoard(){
   const slots=document.getElementById('plinkoSlots');
   if(!board||!slots||board.dataset.ready==='1') return;
   board.dataset.ready='1';
-  for(let row=0;row<8;row++){
-    const count=9;
-    for(let col=0;col<count;col++){
-      const peg=document.createElement('span'); peg.className='plinko-peg';
-      const x=(col + (row%2 ? .5 : 0));
-      const xPct=10 + (x/9)*80;
-      const yPct=12 + row*10.3;
-      peg.style.left=`${xPct}%`; peg.style.top=`${yPct}%`;
+  // 7 rows = 8 final pockets. Pegs are laid out as a compact triangular field,
+  // matching the actual path positions used by the physics animation.
+  const inset=8, usable=84;
+  for(let row=0;row<PLINKO_ROWS;row++){
+    const possible=row+1;
+    for(let col=0;col<possible;col++){
+      const xPct=50 + (col - row/2) * (usable/PLINKO_ROWS);
+      const yPct=14 + row*(70/(PLINKO_ROWS-1));
+      const peg=document.createElement('span');
+      peg.className='plinko-peg';
+      peg.style.left=`${Math.max(inset,Math.min(100-inset,xPct))}%`;
+      peg.style.top=`${yPct}%`;
       board.appendChild(peg);
     }
   }
@@ -2160,36 +2180,72 @@ function resetPlinkoBall(){
   const ball=document.getElementById('plinkoBall');
   if(!ball) return;
   ball.classList.remove('winner');
-  ball.style.transition='none'; ball.style.transform='translate(0,0)';
-  void ball.offsetWidth; ball.style.transition='transform .18s cubic-bezier(.22,.72,.22,1)';
+  ball.style.transition='none';
+  ball.style.transform='translate3d(-50%,0,0)';
+  void ball.offsetWidth;
+  ball.style.transition='';
   document.querySelectorAll('.plinko-slot').forEach(x=>x.classList.remove('hit'));
+}
+function plinkoXForState(rights,row){
+  const step=80/PLINKO_ROWS;
+  return 50 + (rights - row/2)*step;
 }
 function animatePlinko(path, finalMultiplier){
   return new Promise(resolve=>{
     const ball=document.getElementById('plinkoBall');
-    if(!ball){ resolve(); return; }
+    const board=document.getElementById('plinkoBoard');
+    if(!ball||!board){ resolve(); return; }
     resetPlinkoBall();
-    let step=0;
-    const tick=()=>{
-      if(step>=path.length){
-        const slot=PLINKO_MULTIPLIERS.findIndex(x=>Number(x)===Number(finalMultiplier));
-        const finalIndex=Math.max(0,Math.min(8, path[path.length-1] ?? 4));
-        const x=(finalIndex-4)*10;
-        ball.style.transition='transform .28s cubic-bezier(.22,.72,.22,1)';
-        ball.style.transform=`translate(${x}%, 0)`;
-        document.querySelectorAll('.plinko-slot')[finalIndex]?.classList.add('hit');
-        setTimeout(()=>{ball.classList.add('winner'); resolve();},320);
-        return;
+    const rect=board.getBoundingClientRect();
+    const startX=rect.width*0.5;
+    const startY=12;
+    const rowGap=(rect.height*0.70)/(PLINKO_ROWS-1);
+    const radius=11;
+    let index=0;
+
+    // Continuous, time-based motion. Each collision is a small physical arc:
+    // gravity pulls the orb down, then the collision redirects horizontal speed.
+    const points=[{x:startX,y:startY}];
+    for(let i=0;i<path.length;i++){
+      const row=i+1;
+      const rights=Number(path[i]||0);
+      const x=rect.width*(plinkoXForState(rights,row)/100);
+      const y=12 + rowGap*(row-1) + 3;
+      points.push({x,y});
+    }
+    const finalIndex=Math.max(0,Math.min(PLINKO_MULTIPLIERS.length-1,Number(path[path.length-1]??3)));
+    const finalX=rect.width*(10 + finalIndex*(80/(PLINKO_MULTIPLIERS.length-1)))/100;
+    points.push({x:finalX,y:rect.height-8});
+
+    let p=0;
+    function segment(a,b,duration){
+      return new Promise(done=>{
+        const t0=performance.now();
+        const dx=b.x-a.x;
+        const dy=b.y-a.y;
+        const lift=Math.min(28,Math.max(10,Math.abs(dx)*0.08+10));
+        function frame(now){
+          const t=Math.min(1,(now-t0)/duration);
+          // Ballistic-looking arc: downwards gravity with a slight bounce lift.
+          const ease=t*t*(3-2*t);
+          const arc=Math.sin(Math.PI*t)*lift;
+          const x=a.x+dx*ease;
+          const y=a.y+dy*ease-arc;
+          ball.style.transform=`translate3d(${x-startX}px,${y-startY}px,0)`;
+          if(t<1) requestAnimationFrame(frame); else done();
+        }
+        requestAnimationFrame(frame);
+      });
+    }
+    (async()=>{
+      while(p<points.length-1){
+        await segment(points[p],points[p+1],210);
+        p++;
       }
-      const rights=Number(path[step]||0), row=step+1;
-      const centered=rights-(row/2);
-      const x=centered*10;
-      const y=row*36;
-      ball.style.transform=`translate(${x}%, ${y}px)`;
-      step++;
-      setTimeout(tick,175);
-    };
-    tick();
+      document.querySelectorAll('.plinko-slot')[finalIndex]?.classList.add('hit');
+      ball.classList.add('winner');
+      setTimeout(resolve,260);
+    })();
   });
 }
 function renderPlinko(){
@@ -2219,7 +2275,7 @@ async function playPlinko(){
       result.className='plinko-result '+(won?'win':even?'':'loss');
       result.textContent=won?`+${Number(j.payout).toLocaleString('ru-RU')} орбов · ${plinkoDisplayMultiplier(j.multiplier)}`:`${Number(j.payout).toLocaleString('ru-RU')} орбов · ${plinkoDisplayMultiplier(j.multiplier)}`;
     }
-    showToast(won?`🟢 Выигрыш: +${Number(j.payout).toLocaleString('ru-RU')} орбов`:`🎲 Результат: ${Number(j.payout).toLocaleString('ru-RU')} орбов`,won?'success':'error');
+    showToast(won?`🟡 Выигрыш: +${Number(j.payout).toLocaleString('ru-RU')} орбов`:`🎲 Результат: ${Number(j.payout).toLocaleString('ru-RU')} орбов`,won?'success':'error');
   }catch(e){
     resetPlinkoBall();
     if(result){ result.className='plinko-result loss'; result.textContent='Не удалось начать раунд'; }
@@ -2923,7 +2979,7 @@ function getUpgradeChance(){
   const sourceValue=Number(source.value||0);
   const targetValue=Number(upgradeTarget.value||1);
   const effectiveCoverage=sourceValue+Number(upgradeStake||0);
-  return Math.max(0.1, Math.min(95, effectiveCoverage/targetValue*100 + 3));
+  return Math.max(0.3, Math.min(95, effectiveCoverage/targetValue*100));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -2967,7 +3023,7 @@ function renderUpgradeCatalog(filter){
   if(!list.length){box.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
   box.innerHTML=list.map(it=>{
     const m=RARITY_META[it.rarity]||RARITY_META.common;
-    const chance=Math.max(0.1,Math.min(95,Number(source.value||0)/Number(it.value||1)*100));
+    const chance=Math.max(0.3,Math.min(95,Number(source.value||0)/Number(it.value||1)*100));
     return `<button type="button" class="upgrade-cat-item" data-action="pick-upgrade-target" data-kind="${it.kind}" data-name="${it.name}" data-rarity="${it.rarity}" data-value="${it.value}" data-key-id="${it.id||''}">
       <div><div class="upgrade-cat-name" style="color:${m.color}">${it.icon||m.icon||'◆'} ${it.name}</div><div class="upgrade-cat-value">${it.kind==='key'?'Ключ · ':''}${m.label}</div></div>
       <div class="upgrade-cat-value">💰${Number(it.value).toLocaleString('ru-RU')} · ${chance.toFixed(0)}%</div>
