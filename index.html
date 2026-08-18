@@ -2104,6 +2104,9 @@ let rushAnimTimer = null;
 let rushPollInFlight = false;
 let rushCashoutInFlight = false;
 let rushTerminalNotified = false;
+let rushServerOffsetMs = 0;
+let rushAuthoritativeMultiplier = 1;
+let rushAuthoritativeAtClientMs = 0;
 let rushBetValue = 10;
 
 function rushDisplayMultiplier(v){
@@ -2181,11 +2184,14 @@ function startRushAnimation(startedAtMs){
   stopRushTimers();
   const tick=()=>{
     if(!rushRound || rushRound.status!=='active')return;
-    const elapsed=Math.max(0,Date.now()-Number(startedAtMs||Date.now()));
+    const clientNow=Date.now()+rushServerOffsetMs;
+    const elapsed=Math.max(0,clientNow-Number(startedAtMs||clientNow));
     const seconds=elapsed/1000;
-    // Та же серверная кривая: ещё более плавный старт без резкого рывка.
+    // Экран синхронизирован с серверными часами; локальная машина пользователя
+    // больше не может показать коэффициент, отличный от серверного из-за clock skew.
     const mult=Math.min(RUSH_MAX_MULTIPLIER,1+seconds/11.0+(seconds**1.4)/65.0);
-    drawRushPoint(mult,elapsed);
+    const shown = Math.max(rushAuthoritativeMultiplier, mult);
+    drawRushPoint(shown,elapsed);
     rushAnimTimer=requestAnimationFrame(tick);
   };
   tick();
@@ -2199,15 +2205,19 @@ async function pollRushStatus(){
     // Ответ от старого/параллельного запроса больше не должен менять новый раунд.
     if(!rushRound || rushRound.id!==roundId || rushRound.status!=='active')return;
     data.balance=Number(j.balance||data.balance); updateBalanceUI(); persistLocal();
+    if(j.server_now_ms) rushServerOffsetMs=Number(j.server_now_ms)-Date.now();
+    rushAuthoritativeMultiplier=Math.max(rushAuthoritativeMultiplier, Number(j.multiplier)||1);
+    rushAuthoritativeAtClientMs=Date.now();
+    const syncedElapsed=Math.max(0,Number(j.server_now_ms||Date.now()+rushServerOffsetMs)-rushRound.startedAt);
     if(j.status==='crashed' || j.status==='cashed'){
       rushRound.status=j.status;
       stopRushTimers();
-      drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
+      drawRushPoint(j.multiplier,syncedElapsed);
       setRushState(j.status,j.multiplier,j.payout||0);
       rushNotifyTerminal(j.status,j.payout||0);
       return;
     }
-    drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
+    drawRushPoint(j.multiplier,syncedElapsed);
   }catch(e){
     // Краткий сетевой сбой не завершает игру локально; следующий тик попробует снова.
   }finally{
@@ -2225,6 +2235,8 @@ async function startRush(){
   try{
     const j=await apiFetch('/api/game/rush/start',{round_id:rushRoundId(),bet});
     data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
+    rushServerOffsetMs=Number(j.server_now_ms||Date.now())-Date.now();
+    rushAuthoritativeMultiplier=1; rushAuthoritativeAtClientMs=Date.now();
     rushRound={id:j.round_id,bet:Number(j.bet),startedAt:Number(j.started_at_ms),status:'active'};
     setRushState('active',1);
     startRushAnimation(rushRound.startedAt);
@@ -2246,7 +2258,8 @@ async function cashoutRush(){
     data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
     rushRound.status=j.status;
     stopRushTimers();
-    drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
+    const cashoutElapsed=Math.max(0,Number(j.server_now_ms||Date.now()+rushServerOffsetMs)-rushRound.startedAt);
+    drawRushPoint(j.multiplier,cashoutElapsed);
     setRushState(j.status,j.multiplier,j.payout||0);
     rushNotifyTerminal(j.status,j.payout||0);
   }catch(e){
