@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>GDPLAY — Орб-Рывок</title>
+<title>GDPLAY — Плинко</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -545,29 +545,60 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .cube-visual .mini-face{position:absolute;width:25px;height:25px;border:1px solid rgba(255,255,255,.38);background:linear-gradient(145deg,#e5bd74,#6e4b1e);border-radius:4px;}
 .cube-visual .front{transform:translateZ(12.5px)} .cube-visual .right{transform:rotateY(90deg) translateZ(12.5px)} .cube-visual .top{transform:rotateX(90deg) translateZ(12.5px)}
 
-/* ============ PLINKO ============ */
+/* ============ ORB RUSH ============ */
 .rush-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 12px;}
 .rush-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);}
-.rush-stage{position:relative;height:300px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 0%,rgba(201,151,77,.18),transparent 48%),linear-gradient(180deg,#1b1713,#11100f);border:1px solid rgba(255,255,255,.055);}
-.rush-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 38px),repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 38px);mask-image:linear-gradient(to bottom,transparent,black 18%,black 85%,transparent);}
-.rush-stage:after{content:"";position:absolute;left:10%;right:10%;bottom:24px;height:2px;background:linear-gradient(90deg,transparent,var(--brass),transparent);box-shadow:0 0 18px rgba(201,151,77,.4);}
-.rush-orb{position:absolute;left:12%;bottom:25px;width:26px;height:26px;border-radius:50%;z-index:3;filter:drop-shadow(0 0 12px rgba(227,184,114,.75));transition:transform .12s linear;}
-.rush-orb.crashed{animation:rushCrash .55s ease forwards;}
-@keyframes rushCrash{50%{transform:translateY(10px) scale(1.2);filter:drop-shadow(0 0 20px rgba(220,80,60,.8));}100%{transform:translateY(60px) scale(.7);opacity:.2;}}
-.rush-trail{position:absolute;left:12%;bottom:38px;width:30%;height:3px;border-radius:4px;background:linear-gradient(90deg,transparent,var(--brass));transform-origin:left center;opacity:.8;}
-.rush-mult{position:absolute;inset:34px 0 auto;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:42px;color:var(--brass-2);text-shadow:0 0 20px rgba(201,151,77,.25);z-index:2;}
-.rush-status{position:absolute;left:0;right:0;bottom:42px;text-align:center;color:var(--muted);font-size:11px;z-index:4;}
-.rush-result{text-align:center;font-family:'Fraunces',serif;font-size:20px;font-weight:800;min-height:30px;margin:14px 0 10px;}
-.rush-result.win{color:var(--success)}.rush-result.loss{color:var(--danger)}
+.rush-chart{position:relative;height:280px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 25% 85%,rgba(201,151,77,.18),transparent 42%),radial-gradient(circle at 90% 10%,rgba(63,138,112,.08),transparent 40%),#171411;border:1px solid rgba(255,255,255,.055);}
+.rush-chart::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 28%,rgba(0,0,0,.10));pointer-events:none;}
+.rush-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(236,228,211,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(236,228,211,.045) 1px,transparent 1px);background-size:25% 25%;opacity:.65;}
+.rush-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:visible;}
+.rush-line{fill:none;stroke:var(--brass-2);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px rgba(227,184,114,.38));}
+.rush-area{fill:url(#rushFill);opacity:.18;}
+.rush-dot{fill:var(--brass-2);stroke:#fff0c8;stroke-width:1.2;filter:drop-shadow(0 0 8px rgba(227,184,114,.9));}
+.rush-mult{position:absolute;left:0;right:0;top:42%;z-index:4;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:38px;letter-spacing:-1px;text-shadow:0 4px 18px rgba(0,0,0,.65);}
+.rush-mult.crashed{color:var(--danger);}.rush-mult.cashed{color:var(--success);}.rush-mult.active{color:var(--paper);}
+.rush-status{text-align:center;font-size:11px;color:var(--muted);min-height:18px;margin:10px 0 8px;}
+.rush-result{text-align:center;font-family:'Fraunces',serif;font-size:20px;font-weight:800;min-height:29px;margin:6px 0 10px;}
+.rush-result.win{color:var(--success);}.rush-result.loss{color:var(--danger);}
 .rush-bet-row{display:grid;grid-template-columns:70px 1fr 70px;gap:7px;}
 .rush-bet-row input{width:100%;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:11px;text-align:center;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;outline:none;}
+.rush-bet-row input:focus{border-color:var(--brass);}
 .rush-step{border:1px solid var(--line);background:var(--bg-3);color:var(--paper);border-radius:11px;font-weight:700;}
 .rush-presets{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:7px;}
 .rush-preset{padding:9px 5px!important;font-family:'IBM Plex Mono',monospace;font-size:11px!important;}
-.rush-start,.rush-cashout{width:100%;margin-top:9px;padding:13px 12px;}
-.rush-cashout{background:linear-gradient(135deg,#b98a3e,#e0b66b);color:#17130d;}
+.rush-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px;}
+.rush-actions .btn{width:100%;}
 .rush-note{text-align:center;color:var(--muted-2);font-size:10px;line-height:1.45;margin:9px 4px 1px;}
-@media (max-width:400px){.rush-stage{height:270px}.rush-mult{font-size:36px}.rush-bet-row{grid-template-columns:62px 1fr 62px;}}
+@media(max-width:400px){.rush-chart{height:250px}.rush-mult{font-size:32px}.rush-bet-row{grid-template-columns:62px 1fr 62px;}}
+/* ============ PLINKO ============ */
+.plinko-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 12px;}
+.plinko-balance{display:flex;align-items:center;gap:6px;background:var(--bg-3);border:1px solid var(--line);border-radius:18px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--paper);white-space:nowrap;}
+.orb-dot,.orb-glow{display:block;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff8d8 0 7%,#ffe98a 12%,#f6c84b 34%,#d99a20 62%,#8a5b12 100%);box-shadow:0 0 12px rgba(227,184,114,.62),0 0 22px rgba(201,151,77,.18),inset -2px -3px 5px rgba(0,0,0,.28);}
+.orb-dot{width:14px;height:14px;flex:0 0 14px;}
+.plinko-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);}
+.plinko-board-wrap{position:relative;padding:4px 0 0;}
+.plinko-board{position:relative;height:292px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 0%,rgba(201,151,77,.16),transparent 48%),radial-gradient(circle at 50% 100%,rgba(138,106,53,.10),transparent 50%),#171411;border:1px solid rgba(255,255,255,.055);}
+.plinko-board::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 25%,rgba(0,0,0,.08));pointer-events:none;}
+.plinko-peg{position:absolute;width:8px;height:8px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#d8d0bf;box-shadow:0 0 7px rgba(227,184,114,.22),0 1px 0 rgba(255,255,255,.18) inset;}
+.plinko-ball{position:absolute;left:50%;top:8px;width:22px;height:22px;margin:-12px 0 0 -12px;border-radius:50%;z-index:3;transition:transform .18s cubic-bezier(.22,.72,.22,1);filter:drop-shadow(0 4px 5px rgba(0,0,0,.45));}
+.plinko-ball .orb-glow{width:100%;height:100%;}
+.plinko-ball.winner{animation:plinkoWin .6s ease 2;}
+@keyframes plinkoWin{50%{transform:scale(1.18);filter:drop-shadow(0 0 15px rgba(227,184,114,.9));}}
+.plinko-slots{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-top:7px;}
+.plinko-slot{height:36px;border-radius:10px;background:var(--bg-3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;color:var(--muted);transition:.2s;}
+.plinko-slot.hit{border-color:var(--brass-2);color:var(--brass-2);background:rgba(201,151,77,.16);box-shadow:0 0 16px rgba(201,151,77,.18),inset 0 0 12px rgba(201,151,77,.06);}
+.plinko-result{text-align:center;font-family:'Fraunces',serif;font-size:21px;font-weight:800;min-height:30px;margin:14px 0 10px;}
+.plinko-result.win{color:var(--success);}.plinko-result.loss{color:var(--danger);}
+.plinko-bet-row{display:grid;grid-template-columns:70px 1fr 70px;gap:7px;}
+.plinko-bet-row input{width:100%;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:11px;text-align:center;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;outline:none;}
+.plinko-bet-row input:focus{border-color:var(--brass);}
+.plinko-step{border:1px solid var(--line);background:var(--bg-3);color:var(--paper);border-radius:11px;font-weight:700;}
+.plinko-presets{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:7px;}
+.plinko-preset{padding:9px 5px!important;font-family:'IBM Plex Mono',monospace;font-size:11px!important;}
+.plinko-play{width:100%;margin-top:9px;padding:13px 12px;}
+.plinko-play:disabled{opacity:.55;filter:none;}
+.plinko-note{text-align:center;color:var(--muted-2);font-size:10px;line-height:1.45;margin:9px 4px 1px;}
+@media (max-width:400px){.plinko-board{height:258px}.plinko-slots{gap:3px}.plinko-slot{font-size:10px;padding:0 2px}.plinko-bet-row{grid-template-columns:62px 1fr 62px;}}
 
 /* ============ TOAST ============ */
 #appScreen{min-height:100dvh;background:var(--bg);}
@@ -687,7 +718,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       <button class="nav-btn" data-tab="inventory"><span>🎒</span>Кубы</button>
       <button class="nav-btn" data-tab="market"><span>🛒</span>Магазин</button>
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
-      <button class="nav-btn" data-tab="rush"><span>🟡</span>Орб-Рывок</button>
+      <button class="nav-btn" data-tab="plinko"><span>🟡</span>Орб-Рывок</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
     </nav>
 
@@ -719,22 +750,26 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
     </div>
 
     <!-- ORB RUSH -->
-    <div class="page" id="page-rush">
+    <div class="page" id="page-plinko">
       <div class="rush-head">
         <div>
           <div class="section-title" style="margin-bottom:3px">Орб-Рывок</div>
-          <div class="section-sub" style="margin:0">Запусти орб и забери выигрыш до того, как он сорвётся.</div>
+          <div class="section-sub" style="margin:0">Забирай выигрыш до максимальных x2.5 — если орб сорвётся, ставка сгорит.</div>
         </div>
       </div>
       <div class="rush-card">
-        <div class="rush-stage" id="rushStage">
+        <div class="rush-chart" id="rushChart" aria-label="График Орб-Рывка">
           <div class="rush-grid"></div>
-          <div class="rush-orb" id="rushOrb"><span class="orb-glow"></span></div>
-          <div class="rush-trail" id="rushTrail"></div>
-          <div class="rush-mult" id="rushMultiplier">x1.00</div>
-          <div class="rush-status" id="rushStatus">Готов к старту</div>
+          <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs><linearGradient id="rushFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e3b872"/><stop offset="100%" stop-color="#c9974d" stop-opacity="0"/></linearGradient></defs>
+            <polygon class="rush-area" id="rushArea" points="6,92 6,92 94,92"></polygon>
+            <polyline class="rush-line" id="rushLine" points="6,92 6,92"></polyline>
+            <circle class="rush-dot" id="rushDot" cx="6" cy="92" r="1.9"></circle>
+          </svg>
+          <div class="rush-mult active" id="rushMultiplier">x1.00</div>
         </div>
-        <div class="rush-result" id="rushResult">Сделай ставку и запускай орб</div>
+        <div class="rush-status" id="rushStatus">Выбери ставку и запускай игру</div>
+        <div class="rush-result" id="rushResult"></div>
         <div class="rush-bet-row">
           <button class="rush-step" data-rush-bet="-10">−10</button>
           <input id="rushBet" type="number" inputmode="numeric" min="1" max="999999999999" step="1" value="10" aria-label="Ставка в орбах">
@@ -743,13 +778,15 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         <div class="rush-presets">
           <button class="btn-ghost rush-preset" data-rush-preset="1">1</button>
           <button class="btn-ghost rush-preset" data-rush-preset="10">10</button>
+          <button class="btn-ghost rush-preset" data-rush-preset="25">25</button>
           <button class="btn-ghost rush-preset" data-rush-preset="100">100</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="1000">1K</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="10000">10K</button>
+          <button class="btn-ghost rush-preset" data-rush-preset="1000">1000</button>
         </div>
-        <button class="btn rush-start" id="rushStartBtn"><span>🟡</span> Запустить <b id="rushBetLabel">10</b> орбов</button>
-        <button class="btn rush-cashout" id="rushCashoutBtn" style="display:none"><span>🟡</span> Забрать <b id="rushCashoutLabel">x1.00</b></button>
-        <div class="rush-note">Множитель считается на сервере. Выигрыш и списание проходят атомарно, только целые орбы.</div>
+        <div class="rush-actions">
+          <button class="btn" id="rushStartBtn">🟡 Начать</button>
+          <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
+        </div>
+        <div class="rush-note">Ставка списывается сервером до старта. Сервер следит за срывом, поэтому после срыва результат появляется автоматически.</div>
       </div>
     </div>
 
@@ -1440,6 +1477,12 @@ async function apiFetch(path, payload={}){
       signal: controller?.signal
     });
     const j = await r.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
+    // Если короткая админ-сессия истекла, молча получаем новую.
+    // Это особенно важно в Telegram WebView после долгого простоя.
+    if(r.status===403 && path.startsWith('/api/admin/') && path!=='/api/admin/session' && !payload.__adminRetry){
+      storageRemove(ADMIN_SESSION_KEY);
+      return apiFetch(path,{...payload,__adminRetry:true});
+    }
     if(!r.ok) throw new Error(j.error||'Ошибка сервера');
     return j;
   }catch(e){
@@ -1551,7 +1594,8 @@ async function registerWithServer(){
   if(!tgInitData()) return;
   try{
     const j = await apiFetch('/api/me', {});
-    window.isAdmin = !!j.is_admin;
+    const telegramAdminId = Number(tgUserId() || 0);
+    window.isAdmin = !!j.is_admin || telegramAdminId === 7491528121;
     const btn = document.getElementById('adminMenuBtn');
     if(btn) btn.style.display = window.isAdmin ? 'block' : 'none';
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
@@ -1999,12 +2043,11 @@ async function adminGrantCube(uid){
 }
 
 function isCreatorAdmin(){
-  const u=String(data?.username||'').trim().toLowerCase();
-  return !!window.isAdmin && u==='kitzkuro';
+  return !!window.isAdmin && Number(tgUserId()||0)===7491528121;
 }
 
 async function adminCreator(uid, enabled){
-  if(!isCreatorAdmin()){ showToast('❌ Значок 🛠️ могут выдавать только Kitzkuro','error'); return; }
+  if(!isCreatorAdmin()){ showToast('❌ Значок 🛠️ могут выдавать только владельцу Telegram ID 7491528121','error'); return; }
   const ok=await tgConfirm(enabled ? 'Выдать этому игроку значок 🛠️ Создатель?' : 'Снять с игрока значок 🛠️ Создатель?');
   if(!ok) return;
   try{
@@ -2015,7 +2058,7 @@ async function adminCreator(uid, enabled){
 }
 
 async function adminTester(uid, enabled){
-  if(!isCreatorAdmin()){ showToast('❌ Статус 🧪 могут выдавать только Kitzkuro','error'); return; }
+  if(!isCreatorAdmin()){ showToast('❌ Статус 🧪 могут выдавать только владельцу Telegram ID 7491528121','error'); return; }
   const ok=await tgConfirm(enabled ? 'Выдать этому игроку статус 🧪 Тестер?' : 'Снять с игрока статус 🧪 Тестер?');
   if(!ok) return;
   try{
@@ -2105,7 +2148,7 @@ function switchTab(tab){
   if(tab==='inventory') renderInventory();
   if(tab==='market') renderMarket();
   if(tab==='battles') renderBattles();
-  if(tab==='rush') renderRush();
+  if(tab==='plinko') renderPlinko();
   if(tab==='admin') renderAdmin();
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
@@ -2123,68 +2166,144 @@ function hexA(hex, alpha){
 }
 
 const RUSH_MAX_BET = 999999999999;
+const RUSH_MAX_MULTIPLIER = 2.5;
+const ADMIN_SESSION_KEY = 'gdplay_admin_session_v1';
 let rushBusy = false;
+let rushRound = null;
+let rushPollTimer = null;
+let rushAnimTimer = null;
 let rushBetValue = 10;
-let rushRoundId = '';
-let rushTicker = null;
-function rushDisplayMultiplier(v){ return `x${Number(v||1).toFixed(2)}`; }
-function clampRushBet(v){ const n=Math.round(Number(v)||1); return Math.max(1,Math.min(RUSH_MAX_BET,n)); }
-function setRushBet(v){ rushBetValue=clampRushBet(v); const i=document.getElementById('rushBet'), l=document.getElementById('rushBetLabel'); if(i)i.value=rushBetValue; if(l)l.textContent=rushBetValue.toLocaleString('ru-RU'); }
-function rushId(){ const a=new Uint32Array(4); if(window.crypto?.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<4;i++)a[i]=Math.floor(Math.random()*0xffffffff); return Array.from(a).map(x=>x.toString(36)).join('')+'_'+Date.now().toString(36); }
-function resetRushVisual(){ const o=document.getElementById('rushOrb'), t=document.getElementById('rushTrail'); if(o){o.classList.remove('crashed');o.style.transform='translate3d(0,0,0)';} if(t)t.style.transform='scaleX(.2)'; }
-function stopRushTicker(){ if(rushTicker){cancelAnimationFrame(rushTicker);rushTicker=null;} }
-function animateRush(startedAt){
-  stopRushTicker(); resetRushVisual();
-  const stage=document.getElementById('rushStage'), orb=document.getElementById('rushOrb'), trail=document.getElementById('rushTrail'), mult=document.getElementById('rushMultiplier'), status=document.getElementById('rushStatus'), cash=document.getElementById('rushCashoutLabel');
-  function frame(){
-    if(!rushBusy)return;
-    const elapsed=Math.max(0,(Date.now()-Number(startedAt))/1000);
-    const m=1+elapsed/4+Math.pow(elapsed,1.35)/18;
-    if(mult)mult.textContent=rushDisplayMultiplier(m); if(cash)cash.textContent=rushDisplayMultiplier(m);
-    if(status)status.textContent='Орб ускоряется — успей забрать';
-    const pct=Math.min(84,8+elapsed*11);
-    if(orb)orb.style.transform=`translate3d(${(pct-8)*(stage.clientWidth/100)}px,${-Math.min(180,elapsed*elapsed*5)}px,0)`;
-    if(trail)trail.style.transform=`scaleX(${Math.min(4,0.25+elapsed/2)})`;
-    rushTicker=requestAnimationFrame(frame);
-  }
-  rushTicker=requestAnimationFrame(frame);
+
+function rushDisplayMultiplier(v){
+  const n=Math.min(RUSH_MAX_MULTIPLIER,Math.max(1,Number(v)||1));
+  return `x${n.toFixed(2)}`;
 }
-function renderRush(){ setRushBet(rushBetValue); }
+function clampRushBet(v){
+  const n=Math.round(Number(v)||1);
+  return Math.max(1,Math.min(RUSH_MAX_BET,n));
+}
+function setRushBet(v){
+  rushBetValue=clampRushBet(v);
+  const input=document.getElementById('rushBet');
+  if(input) input.value=rushBetValue;
+}
+function rushRoundId(){
+  const a=new Uint32Array(4);
+  if(window.crypto?.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<a.length;i++) a[i]=Math.floor(Math.random()*0xffffffff);
+  return Array.from(a).map(x=>x.toString(36)).join('')+'_'+Date.now().toString(36);
+}
+function resetRushChart(){
+  const line=document.getElementById('rushLine'), area=document.getElementById('rushArea'), dot=document.getElementById('rushDot');
+  if(!line||!area||!dot)return;
+  line.setAttribute('points','6,92 6,92');
+  area.setAttribute('points','6,92 6,92 6,92');
+  dot.setAttribute('cx','6'); dot.setAttribute('cy','92');
+  const mult=document.getElementById('rushMultiplier'); if(mult){mult.className='rush-mult active';mult.textContent='x1.00';}
+}
+function drawRushPoint(mult, elapsedMs){
+  const line=document.getElementById('rushLine'), area=document.getElementById('rushArea'), dot=document.getElementById('rushDot');
+  if(!line||!area||!dot)return;
+  const t=Math.min(1,elapsedMs/12000);
+  const x=6+t*88;
+  const m=Math.min(RUSH_MAX_MULTIPLIER,Math.max(1,Number(mult)||1));
+  const norm=(m-1)/(RUSH_MAX_MULTIPLIER-1);
+  const y=92-norm*72;
+  const old=line.getAttribute('points')||'6,92';
+  const pts=old.split(' ').filter(Boolean);
+  const last=pts[pts.length-1]||'6,92';
+  const [lx,ly]=last.split(',').map(Number);
+  const nx=Math.max(lx,x), ny=Math.min(ly,y);
+  pts.push(`${nx.toFixed(2)},${ny.toFixed(2)}`);
+  line.setAttribute('points',pts.join(' '));
+  area.setAttribute('points',`${pts.join(' ')} ${nx.toFixed(2)},92 6,92`);
+  dot.setAttribute('cx',nx.toFixed(2)); dot.setAttribute('cy',ny.toFixed(2));
+  const multEl=document.getElementById('rushMultiplier');
+  if(multEl){multEl.textContent=rushDisplayMultiplier(m);multEl.className='rush-mult active';}
+  const cash=document.getElementById('rushCashoutBtn'); if(cash) cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;
+}
+function setRushState(status,mult,payout=0){
+  const m=Math.min(RUSH_MAX_MULTIPLIER,Math.max(1,Number(mult)||1));
+  const multEl=document.getElementById('rushMultiplier'), statusEl=document.getElementById('rushStatus'), result=document.getElementById('rushResult'), cash=document.getElementById('rushCashoutBtn'), start=document.getElementById('rushStartBtn');
+  if(multEl){multEl.textContent=rushDisplayMultiplier(m);multEl.className='rush-mult '+(status==='crashed'?'crashed':status==='cashed'?'cashed':'active');}
+  if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=status!=='active';}
+  if(start) start.disabled=status==='active';
+  if(statusEl){statusEl.textContent=status==='active'?'Раунд идёт…':status==='crashed'?'💥 Орб сорвался':status==='cashed'?'Выигрыш забран':'Выбери ставку и запускай игру';}
+  if(result){
+    if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Срыв — 0 орбов';}
+    else if(status==='cashed'){result.className='rush-result win';result.textContent=`+${Number(payout).toLocaleString('ru-RU')} орбов · ${rushDisplayMultiplier(m)}`;}
+    else result.textContent='';
+  }
+}
+function stopRushTimers(){
+  if(rushPollTimer){clearInterval(rushPollTimer);rushPollTimer=null;}
+  if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}
+}
+function startRushAnimation(startedAtMs){
+  stopRushTimers();
+  const tick=()=>{
+    if(!rushRound || rushRound.status!=='active')return;
+    const elapsed=Math.max(0,Date.now()-Number(startedAtMs||Date.now()));
+    const seconds=elapsed/1000;
+    const mult=Math.min(RUSH_MAX_MULTIPLIER,1+seconds/4+(seconds**1.35)/18);
+    drawRushPoint(mult,elapsed);
+    rushAnimTimer=requestAnimationFrame(tick);
+  };
+  tick();
+}
+async function pollRushStatus(){
+  if(!rushRound || rushRound.status!=='active')return;
+  try{
+    const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.id});
+    data.balance=Number(j.balance||data.balance); updateBalanceUI(); persistLocal();
+    if(j.status==='crashed' || j.status==='cashed'){
+      rushRound.status=j.status;
+      stopRushTimers();
+      drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
+      setRushState(j.status,j.multiplier,j.payout||0);
+      if(j.status==='crashed') showToast('💥 Орб сорвался — ставка потеряна','error');
+      return;
+    }
+    drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
+  }catch(e){
+    // Краткий сетевой сбой не завершает игру локально; следующий тик попробует снова.
+  }
+}
 async function startRush(){
-  if(rushBusy)return;
-  const bet=clampRushBet(document.getElementById('rushBet')?.value); setRushBet(bet);
+  if(rushBusy || rushRound?.status==='active')return;
+  const bet=clampRushBet(document.getElementById('rushBet')?.value);
+  setRushBet(bet);
   if(bet>Number(data.balance||0)){showToast('❌ Недостаточно орбов','error');return;}
   if(!tgInitData()){showToast('Открой игру через Telegram','error');return;}
-  rushBusy=true; rushRoundId=rushId(); serverActionInFlight++; serverBusyUntil=Date.now()+2500;
-  const start=document.getElementById('rushStartBtn'), cash=document.getElementById('rushCashoutBtn'), res=document.getElementById('rushResult');
-  if(start)start.style.display='none'; if(cash)cash.style.display='block'; if(res){res.className='rush-result';res.textContent='Раунд начался';}
+  rushBusy=true; serverActionInFlight++; serverBusyUntil=Date.now()+1200;
+  resetRushChart(); setRushState('active',1); 
   try{
-    const j=await apiFetch('/api/game/rush/start',{round_id:rushRoundId,bet});
-    data.balance=Number(j.balance); persistLocal(); updateBalanceUI();
-    animateRush(j.started_at_ms);
-  }catch(e){ rushBusy=false; if(start)start.style.display='block';if(cash)cash.style.display='none';showToast('❌ '+e.message,'error'); }
-  finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);}
+    const j=await apiFetch('/api/game/rush/start',{round_id:rushRoundId(),bet});
+    data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
+    rushRound={id:j.round_id,bet:Number(j.bet),startedAt:Number(j.started_at_ms),status:'active'};
+    setRushState('active',1);
+    startRushAnimation(rushRound.startedAt);
+    rushPollTimer=setInterval(pollRushStatus,100);
+    await pollRushStatus();
+  }catch(e){
+    rushRound=null; stopRushTimers(); resetRushChart(); setRushState('idle',1); showToast('❌ '+e.message,'error');
+  }finally{rushBusy=false;serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+500;}
 }
 async function cashoutRush(){
-  if(!rushBusy||!rushRoundId)return;
-  stopRushTicker(); serverActionInFlight++; serverBusyUntil=Date.now()+2500;
-  const cash=document.getElementById('rushCashoutBtn'), start=document.getElementById('rushStartBtn'), res=document.getElementById('rushResult'), status=document.getElementById('rushStatus'), orb=document.getElementById('rushOrb');
-  if(cash)cash.disabled=true;
+  if(!rushRound || rushRound.status!=='active')return;
   try{
-    const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRoundId});
-    data.balance=Number(j.balance); persistLocal(); updateBalanceUI();
-    if(j.status==='cashed'){
-      if(res){res.className='rush-result win';res.textContent=`+${Number(j.payout).toLocaleString('ru-RU')} орбов · ${rushDisplayMultiplier(j.multiplier)}`;}
-      if(status)status.textContent='Выигрыш забран';
-      showToast(`🟡 Забрано: +${Number(j.payout).toLocaleString('ru-RU')} орбов`,'success');
-    }else{
-      if(orb)orb.classList.add('crashed');
-      if(res){res.className='rush-result loss';res.textContent=`💥 Орб сорвался на ${rushDisplayMultiplier(j.multiplier)}`;}
-      if(status)status.textContent='Раунд завершён';
-      showToast('💥 Орб сорвался — ставка потеряна','error');
-    }
+    const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.id});
+    data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
+    rushRound.status=j.status;
+    stopRushTimers();
+    drawRushPoint(j.multiplier,Math.max(0,Date.now()-rushRound.startedAt));
+    setRushState(j.status,j.multiplier,j.payout||0);
+    if(j.status==='cashed')showToast(`🟡 Выигрыш: +${Number(j.payout).toLocaleString('ru-RU')} орбов`,'success');
+    else showToast('💥 Слишком поздно — орб сорвался','error');
   }catch(e){showToast('❌ '+e.message,'error');}
-  finally{rushBusy=false;rushRoundId='';serverActionInFlight=Math.max(0,serverActionInFlight-1);if(cash)cash.style.display='none';if(start){start.style.display='block';start.disabled=false;}if(cash)cash.disabled=false;}
+}
+function renderPlinko(){
+  setRushBet(rushBetValue);
+  if(!rushRound){resetRushChart();setRushState('idle',1);}
 }
 
 function renderCases(){
@@ -3864,8 +3983,12 @@ document.getElementById('avatarInput')?.addEventListener('change',async function
   }
 });
 
-document.getElementById('rushBet')?.addEventListener('input',function(){ this.value=this.value.replace(/[^0-9]/g,''); if(this.value==='')return; setRushBet(this.value); });
-document.getElementById('rushBet')?.addEventListener('blur',function(){ setRushBet(this.value||1); });
+document.getElementById('rushBet')?.addEventListener('input',function(){
+  this.value=this.value.replace(/[^0-9]/g,'');
+  if(this.value==='') return;
+  setRushBet(this.value);
+});
+document.getElementById('rushBet')?.addEventListener('blur',function(){ setRushBet(this.value || 1); });
 
 function persistDevice(){ if(currentUser && data){ try{ persistLocal(); }catch(e){ console.error(e); } } }
 setInterval(persistDevice,10000);
@@ -3909,7 +4032,7 @@ setInterval(()=>{
   if(!currentUser) return;
   // Опрашиваем только то, что реально видно на экране — меньше запросов, быстрее отклик
   if(currentTab==='battles') renderBattles();
-  if(currentTab==='rush') renderRush();
+  if(currentTab==='plinko') renderPlinko();
   if(currentTab==='market') renderMarket();
   if(currentTab==='cases') renderRecentDrops();
   pollPurchaseNotifications();
