@@ -2254,7 +2254,8 @@ function startRushAnimation(startedAtMs){
     if(!rushRound || rushRound.status!=='active')return;
     const elapsed=Math.max(0,Date.now()-Number(startedAtMs||Date.now()));
     const seconds=elapsed/1000;
-    const mult=Math.min(RUSH_MAX_MULTIPLIER,1+seconds/4+(seconds**1.35)/18);
+    // Та же серверная кривая: плавный старт и рост в 1.8 раза медленнее.
+    const mult=Math.min(RUSH_MAX_MULTIPLIER,1+seconds/7.2+(seconds**1.35)/39.800670365946154);
     drawRushPoint(mult,elapsed);
     rushAnimTimer=requestAnimationFrame(tick);
   };
@@ -3919,6 +3920,14 @@ function runButtonAction(button,e){
 
 // Делегирование через обычный click совместимо с Telegram WebView, Android/iOS
 // и не ломает native controls вроде range/select/input.
+document.addEventListener('pointerup', e=>{
+  const button=e.target?.closest?.('button');
+  if(!button || button.disabled || button.id!=='rushCashoutBtn') return;
+  // Забрать выигрыш запускаем на pointerup — это заметно отзывчивее
+  // в Telegram WebView, где обычный click иногда приходит с задержкой.
+  runButtonAction(button,e);
+}, false);
+
 document.addEventListener('click', e=>{
   const button=e.target?.closest?.('button');
   if(!button || button.disabled) return;
