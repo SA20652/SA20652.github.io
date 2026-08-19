@@ -2330,7 +2330,7 @@ const CASE_KEY_REQUIREMENTS = {
 function countCaseKeys(caseId){
   const typeId=CASE_KEY_REQUIREMENTS[caseId];
   if(!typeId) return 0;
-  return (data.keys||[]).filter(k=>String(k.key_type_id||k.type_id||k.catalog_id||k.id)===typeId).length;
+  return (data.keys||[]).filter(k=>String(k.key_type_id||k.type_id||k.catalog_id||k.id)===typeId).reduce((n,k)=>n+Number(k.stack_count||1),0);
 }
 function renderCases(){
   const el = document.getElementById('casesList');
@@ -2823,11 +2823,14 @@ function renderInventory(){
   document.getElementById('invTotalValue').textContent=total.toLocaleString('ru-RU');
   const isPremium=data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now();
   const sellRatioLabel=isPremium?'0,85':'0,7';
-  list.innerHTML=data.cubes.length ? data.cubes.map((c,i)=>{
+  const cubeStacks={};
+  (data.cubes||[]).forEach((c,i)=>{ const id=String(c.name)+'|'+String(c.rarity)+'|'+String(c.value); if(!cubeStacks[id]) cubeStacks[id]={cube:c,count:0,index:i}; cubeStacks[id].count++; });
+  const stackedCubes=Object.values(cubeStacks);
+  list.innerHTML=stackedCubes.length ? stackedCubes.map(({cube:c,count,index:i})=>{
     const m=RARITY_META[c.rarity]||RARITY_META.common;
     return `<div class="inv-item" style="border-left-color:${m.color}" data-cube-index="${i}">
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
-      <div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div></div></div>
+      <div><div class="inv-name">${c.name} ×${count}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div></div></div>
       <div class="inv-actions"><span class="inv-value">💰 ${Number(c.value).toLocaleString('ru-RU')}</span>
        <button type="button" class="btn-ghost cube-lock-btn" title="${c.metadata?.locked?'Разблокировать':'Заморозить'}" data-action="toggle-cube-lock" data-index="${i}">${c.metadata?.locked?'🔓':'🔒'}</button>
        <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${c.metadata?.locked?'disabled':''}>На продажу</button>
