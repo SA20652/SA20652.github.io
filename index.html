@@ -2575,26 +2575,31 @@ async function openCaseBatch(c, qty){
   // can never differ from the item actually credited to the account.
   const wins = [];
   try{
-    for(let i=0;i<qty;i++){
-      if(tgInitData()){
-        const j = await apiFetch('/api/cube/open', {case_id: c.id});
-        if(j.drop){
-          wins.push({
-            name: j.drop.name,
-            rarity: j.drop.rarity,
-            value: Number(j.drop.value)||0,
-            source_case_id: j.drop.case_id
-          });
-        }else{
-          throw new Error('Сервер не вернул результат кейса');
-        }
-        data.balance = Number(j.balance)||0;
-        if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
-        if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
-        if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
-        data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
-        if(j.farm_action) handleFarmAction?.(j.farm_action);
-      }else{
+    if(tgInitData()){
+      // One atomic server call returns the three authoritative drops.
+      // No individual response can be reused for another reel.
+      const j = await apiFetch('/api/cube/open-batch', {case_id: c.id, qty});
+      if(!Array.isArray(j.drops) || j.drops.length !== qty){
+        throw new Error('Сервер вернул некорректные результаты кейсов');
+      }
+      j.drops.forEach(d=>{
+        wins.push({
+          name: String(d.name),
+          rarity: String(d.rarity),
+          value: Math.floor(Number(d.value)||0),
+          source_case_id: String(d.case_id||c.id)
+        });
+      });
+      data.balance = Number(j.balance)||0;
+      if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
+      if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
+      if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{
+        if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');
+      });
+      data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+qty;
+      if(j.farm_action) handleFarmAction?.(j.farm_action);
+    }else{
+      for(let i=0;i<qty;i++){
         const won = rollCaseItem(c);
         normalizeCubeValue(won);
         won.value = Math.floor(Number(won.value || 0));
@@ -2614,6 +2619,10 @@ async function openCaseBatch(c, qty){
     return;
   }
 
+  // Defensive check: every displayed result must be one of the exact server drops.
+  if(wins.some(w => !w.name || !Number.isFinite(w.value) || w.value < 0)){
+    throw new Error('Сервер вернул некорректную награду');
+  }
   for(let i=0;i<wins.length;i++){
     multiRow.insertAdjacentHTML('beforeend', `
       <div class="wheel-wrap" id="wheelWrapM${i}">
