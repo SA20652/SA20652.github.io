@@ -2417,45 +2417,61 @@ const REEL_ITEM_HEIGHT = 86;
 const REEL_LENGTH = 40;   // сколько плашек всего в ленте
 const REEL_TARGET_POS = 33; // на какой позиции гарантированно окажется выигрыш
 
-function buildWheelIn(dial, items, wonIndex, wonValue=null){
-  // ВАЖНО: центральная карточка рулетки должна показывать именно ту цену,
-  // которая была сгенерирована для этого конкретного открытия.
-  // Раньше здесь использовалось items[wonIndex].value — фиксированная цена
-  // предмета из каталога, из-за чего рулетка показывала, например, 240,
-  // а итог был 119.
+function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
+  // ВАЖНО: для каждой рулетки существует ровно один authoritativeDrop.
+  // Он же используется в карточке результата и был выбран сервером.
+  // Не пытаемся заново вычислять предмет/цену на клиенте.
+  const target = authoritativeDrop ? {
+    ...authoritativeDrop,
+    value: Math.floor(Number(authoritativeDrop.value)||0)
+  } : {
+    ...(items[wonIndex] || {}),
+    value: Math.floor(Number(
+      wonValue!==null && wonValue!==undefined ? wonValue : (items[wonIndex]?.value || 0)
+    )||0)
+  };
+
   const strip = [];
   for(let i=0;i<REEL_LENGTH;i++){
     if(i===REEL_TARGET_POS){
-      const target={...items[wonIndex]};
-      if(wonValue!==null && wonValue!==undefined) target.value=Math.floor(Number(wonValue)||0);
       strip.push(target);
     }else{
       strip.push(items[Math.floor(Math.random()*items.length)]);
     }
   }
-  let html = '';
-  strip.forEach(it=>{
+
+  let markup = '';
+  strip.forEach((it, idx)=>{
     const realValue = Math.floor(Number(it.value || 0));
     const m = RARITY_META[it.rarity] || RARITY_META.common;
-    html += `<div class="wheel-item" style="background:linear-gradient(180deg, ${m.color}22, transparent)">
+    const isTarget = idx === REEL_TARGET_POS;
+    markup += `<div class="wheel-item" ${isTarget ? 'data-reel-target="1"' : ''} style="background:linear-gradient(180deg, ${m.color}22, transparent)">
       <span>${m.icon}</span><small style="color:${m.color}">${realValue.toLocaleString('ru-RU')}</small>
     </div>`;
   });
-  dial.innerHTML = html;
+  dial.innerHTML = markup;
   dial.style.transition = 'none';
   dial.style.transform = 'translateY(0px)';
 }
-function buildWheel(items, wonIndex, wonValue=null){
-  buildWheelIn(document.getElementById('wheelDial'), items, wonIndex, wonValue);
+function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){
+  buildWheelIn(document.getElementById('wheelDial'), items, wonIndex, wonValue, authoritativeDrop);
 }
 
 function spinWheelIn(container, dial, items, wonIndex){
-  const containerHeight = container.offsetHeight;
-  const jitter = (Math.random()-0.5) * (REEL_ITEM_HEIGHT*0.7); // лёгкий разброс внутри плашки, линия всё равно попадает в неё
-  const targetCenter = REEL_TARGET_POS*REEL_ITEM_HEIGHT + REEL_ITEM_HEIGHT/2;
-  const offset = targetCenter - containerHeight/2 + jitter;
+  // Никогда не рассчитываем положение цели через константу высоты.
+  // На мобильных устройствах высота/масштаб multi-wheel может отличаться,
+  // из-за чего раньше в центре оказывался соседний элемент.
+  const targetEl = dial.querySelector('.wheel-item[data-reel-target="1"]');
+  if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
+
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const duration = reduced ? 500 : 4200;
+
+  // offsetTop/offsetHeight — фактическая геометрия DOM, а не предполагаемые
+  // 86px. Поэтому центр выбранного сервером дропа точно совпадает с линией.
+  const targetCenter = targetEl.offsetTop + targetEl.offsetHeight / 2;
+  const containerCenter = container.clientHeight / 2;
+  const offset = Math.max(0, targetCenter - containerCenter);
 
   dial.getBoundingClientRect();
 
@@ -2463,10 +2479,15 @@ function spinWheelIn(container, dial, items, wonIndex){
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
         dial.style.transition = `transform ${duration}ms cubic-bezier(0.1,0.7,0.15,1)`;
-        dial.style.transform = `translateY(-${offset}px)`;
+        dial.style.transform = `translate3d(0, -${offset}px, 0)`;
       });
     });
-    setTimeout(resolve, duration + 80);
+    setTimeout(()=>{
+      // Финально фиксируем математически точную позицию без jitter.
+      dial.style.transition = 'none';
+      dial.style.transform = `translate3d(0, -${offset}px, 0)`;
+      resolve();
+    }, duration + 80);
   });
 }
 function spinWheel(dial, items, wonIndex){
@@ -2637,7 +2658,7 @@ async function openCaseBatch(c, qty){
     const wonIndex = c.items.findIndex(it=>it.name===won.name);
     const dial = document.getElementById(`wheelDialM${i}`);
     const wrap = document.getElementById(`wheelWrapM${i}`);
-    buildWheelIn(dial, c.items, wonIndex, won.value);
+    buildWheelIn(dial, c.items, wonIndex, won.value, won);
     return spinWheelIn(wrap, dial, c.items, wonIndex);
   });
 
@@ -2742,7 +2763,7 @@ async function openCaseOnce(c, seq, total){
   }
 
   document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
-  buildWheel(c.items, wonIndex, won.value);
+  buildWheel(c.items, wonIndex, won.value, won);
   openModal('spinModal');
   const dial = document.getElementById('wheelDial');
   await spinWheel(dial, c.items, wonIndex);
