@@ -293,6 +293,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .inv-subitem{margin-bottom:7px;padding:8px 11px;}
 .inv-subitem .inv-name{font-size:12.5px;font-weight:500;}.inv-subitem .inv-actions{align-self:flex-start;flex:0 0 auto;}
 .inv-subid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass-2);opacity:.8;margin-left:4px;}
+.key-open-btn{margin-top:9px;width:100%;box-sizing:border-box;}
 .key-open-btn[disabled]{opacity:.5;}
 
 /* ============ LEADERBOARD / DROPS ============ */
@@ -417,8 +418,9 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .upgrade-fast-label{font-size:12px;font-weight:700;}
 .upgrade-fast-hint{font-size:10px;color:var(--muted);margin-top:2px;}
 .upgrade-fast-toggle{min-width:92px;}
-.inv-item[data-cube-index]{position:relative;padding-top:12px!important;padding-right:12px!important;}
-.inv-item[data-cube-index] .inv-actions{padding-right:0;}
+.inv-item[data-cube-index]{position:relative;padding-top:12px!important;padding-right:58px!important;}
+.inv-item[data-cube-index] .inv-actions{padding-right:0;max-width:100%;box-sizing:border-box;}
+.inv-subitem .inv-actions{width:100%;max-width:100%;flex:1 1 100%;justify-content:flex-start;box-sizing:border-box;padding-right:42px;}
 .cube-lock-btn{position:absolute;top:8px;right:8px;z-index:3;min-width:36px;width:36px;height:36px;padding:0!important;font-size:16px!important;display:flex;align-items:center;justify-content:center;border-radius:10px!important;background:var(--bg-3)!important;}
 .inv-item[data-cube-index] .inv-item-info{padding-right:42px;}
 .upgrade-switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;flex:0 0 auto;}
@@ -2330,11 +2332,11 @@ function renderPlinko(){
 }
 
 const CASE_KEY_REQUIREMENTS = {
-  rust:'rust-key',
-  brass:'brass-key',
-  obsidian:'obsidian-key',
-  vault:'vault-key',
-  master:'master-key'
+  rust:['rust-key'],
+  brass:['rust-key','brass-key'],
+  obsidian:['obsidian-key'],
+  vault:['vault-key'],
+  master:['master-key']
 };
 function keyCatalogId(k){
   const explicit=String(k?.key_type_id||k?.type_id||k?.catalog_id||'').trim();
@@ -2658,7 +2660,7 @@ async function openCaseBatch(c, qty, useKey=false){
         const won = rollCaseItem(c);
         normalizeCubeValue(won);
         won.value = Math.floor(Number(won.value || 0));
-        data.balance -= c.price;
+        if(!useKey) data.balance -= c.price;
         data.cubes.push({...won, source_case_id:c.id});
         data.cases_opened = (data.cases_opened||0)+1;
         wins.push({...won, source_case_id:c.id});
@@ -2772,7 +2774,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
       won = rollCaseItem(c);
       normalizeCubeValue(won);
       won.value = Math.floor(Number(won.value || 0));
-      data.balance -= c.price;
+      if(!useKey) data.balance -= c.price;
       data.cubes.push({...won, source_case_id:c.id});
       data.cases_opened = (data.cases_opened||0)+1;
     }
@@ -3964,8 +3966,8 @@ function handleButton(button, e){
   if(action==='set-case-qty'){ caseOpenQty[button.dataset.case] = Number(button.dataset.qty); renderCases(); return; }
   if(action==='toggle-stack'){ const sid=button.dataset.stackId||''; if(sid){ if(expandedCubeStacks.has(sid)) expandedCubeStacks.delete(sid); else expandedCubeStacks.add(sid); renderInventory(); } return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
-  if(action==='combine-key'){ combineKey(el.dataset.keyId); return; }
-    if(action==='open-case-key-stack'){ openCaseWithKeyStack(el.dataset.keyId); return; }
+  if(action==='combine-key'){ combineKey(button.dataset.keyId); return; }
+  if(action==='open-case-key-stack'){ openCaseWithKeyStack(button.dataset.keyId); return; }
     if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
   if(action==='toggle-cube-lock'){ toggleCubeLock(Number(button.dataset.index)); return; }
   if(action==='pick-upgrade-target'){ selectUpgradeTarget(button.dataset.name, button.dataset.rarity, button.dataset.value, button.dataset.kind||'cube', button.dataset.keyId||''); return; }
