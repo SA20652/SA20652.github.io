@@ -1110,7 +1110,7 @@ const RARITY_META = {
 
 // ===== CASES С НОВЫМИ ЦЕНАМИ КУБОВ =====
 const CASES = [
-  {id:"brass",name:"Латунный сейф",price:350,icon:"🟫",items:[
+  {id:"brass",name:"Латунный сейф",price:700,icon:"🟫",items:[
     {name:"BrianTheBurger",rarity:"common",value:240,chance:22.0},
     {name:"Surv",rarity:"common",value:330,chance:23.54},
     {name:"Knobbelboy",rarity:"rare",value:450,chance:29.51},
@@ -3053,7 +3053,7 @@ function getUpgradeChance(){
   const sourceValue=Number(source.value||0);
   const targetValue=Number(upgradeTarget.value||1);
   const effectiveCoverage=sourceValue+Number(upgradeStake||0);
-  return Math.max(0.3, Math.min(95, effectiveCoverage/targetValue*100));
+  return Math.max(0.3, Math.min(95, effectiveCoverage/targetValue*100-5));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -3097,7 +3097,7 @@ function renderUpgradeCatalog(filter){
   if(!list.length){box.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
   box.innerHTML=list.map(it=>{
     const m=RARITY_META[it.rarity]||RARITY_META.common;
-    const chance=Math.max(0.3, Math.min(95, (Number(source.value||0)/Number(it.value||1))*100));
+    const chance=Math.max(0.3, Math.min(95, (Number(source.value||0)/Number(it.value||1))*100-5));
     return `<button type="button" class="upgrade-cat-item" data-action="pick-upgrade-target" data-kind="${it.kind}" data-name="${it.name}" data-rarity="${it.rarity}" data-value="${it.value}" data-key-id="${it.id||''}">
       <div><div class="upgrade-cat-name" style="color:${m.color}">${it.icon||m.icon||'◆'} ${it.name}</div><div class="upgrade-cat-value">${it.kind==='key'?'Ключ · ':''}${m.label}</div></div>
       <div class="upgrade-cat-value">💰${Number(it.value).toLocaleString('ru-RU')} · ${chance.toFixed(0)}%</div>
@@ -3145,22 +3145,25 @@ async function confirmUpgrade(){
   const btn=document.getElementById('upgradeConfirmBtn'); btn.disabled=true;
   try{
     let j;
-    if(tgInitData() && upgradeSource.kind==='cube'){
-      j=await apiFetch('/api/upgrade',{
-        index:Number(upgradeSource.index),
+    if(tgInitData()){
+      const payload={
+        source_kind:upgradeSource.kind,
+        target_kind:upgradeTarget.kind||'cube',
         target_name:upgradeTarget.name,
         target_rarity:upgradeTarget.rarity,
         target_value:Number(upgradeTarget.value),
+        target_key_id:String(upgradeTarget.id||''),
         stake:Number(upgradeStake||0)
-      });
+      };
+      if(upgradeSource.kind==='key') payload.source_key_id=String(upgradeSource.ref?.id||'');
+      else payload.index=Number(upgradeSource.index);
+      j=await apiFetch('/api/upgrade',payload);
       data.balance=Number(j.balance);
       data.cubes=Array.isArray(j.cubes)?j.cubes:data.cubes;
+      data.keys=Array.isArray(j.keys)?j.keys:data.keys;
       persistLocal(); renderInventory(); updateBalanceUI();
     }else{
-      // Локальный режим / ключи: ставка всё равно списывается из локального баланса.
-      j=performLocalUpgrade();
-      persistLocal(); renderInventory(); updateBalanceUI();
-      try{ await syncToServer(); }catch(_){}
+      throw new Error('Апгрейдер требует соединения с сервером');
     }
     document.getElementById('upgradeStepConfirm').style.display='none';
     document.getElementById('upgradeCancelBtn').style.display='none';
@@ -3178,7 +3181,7 @@ async function confirmUpgrade(){
       pointer.style.transform=`rotate(${finalAngle}deg)`;
     });
     setTimeout(()=>{
-      document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»') : 'Не повезло — предмет потерян';
+      document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»' + (j.protected ? ' 🛡️ Защита от серии' : '')) : 'Не повезло — предмет потерян';
       playBeep(j.success?1200:300);
     },duration);
   }catch(e){showToast('❌ '+e.message,'error');}
