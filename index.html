@@ -285,6 +285,15 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .btn-sell:active{transform:scale(.94);}
 .inv-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:var(--bg-3);border:1px solid var(--line);border-radius:12px;padding:10px 13px;}
 .inv-total{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:13px;}
+.stack-toggle-btn{background:none;border:none;padding:0;margin:0;display:flex;flex-direction:column;align-items:flex-start;color:inherit;font:inherit;text-align:left;cursor:pointer;}
+.stack-toggle-btn .inv-name{display:flex;align-items:center;gap:6px;}
+.stack-arrow{font-size:10px;opacity:.75;transition:transform .15s ease;}
+.stack-toggle-btn.expanded .stack-arrow{transform:rotate(180deg);}
+.inv-stack-list{margin:2px 0 9px 10px;padding-left:11px;border-left:2px solid var(--line);}
+.inv-subitem{margin-bottom:7px;padding:8px 11px;}
+.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}
+.inv-subid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass-2);opacity:.8;margin-left:4px;}
+.key-open-btn[disabled]{opacity:.5;}
 
 /* ============ LEADERBOARD / DROPS ============ */
 .lb-item{
@@ -2358,7 +2367,7 @@ function renderCases(){
           </div>
         </div>
         <button type="button" class="btn open-case-btn" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?`Открыть ${qty>1?'×'+qty+' — '+(c.price*qty).toLocaleString('ru-RU')+' 💰':'сейф'}`:'Недостаточно монет'}</button>
-        ${countCaseKeys(c.id)>0 ? `<button type="button" class="btn-ghost open-case-key-btn" data-action="open-case-key" data-case="${c.id}" ${qty>1?'disabled':''}>🗝️ Открыть ключом (${countCaseKeys(c.id)})</button>` : ''}
+        ${CASE_KEY_REQUIREMENTS[c.id] ? (()=>{ const keyCount=countCaseKeys(c.id); const canUseKey=keyCount>0 && qty<=1; return `<button type="button" class="btn-ghost open-case-key-btn key-open-btn" data-action="open-case-key" data-case="${c.id}" ${canUseKey?'':'disabled'}>${keyCount>0?`🔑 Открыть за ключ (${keyCount})`:'🔑 Нет ключа'}</button>`; })() : ''}
       </div>`;
   }).join('');
   renderRecentDrops();
@@ -2816,6 +2825,7 @@ function collectSpinReward(){
   showToast('Награда забрана в инвентарь','success');
 }
 
+const expandedCubeStacks = new Set();
 function renderInventory(){
   normalizeGameState();
   const list=document.getElementById('inventoryList');
@@ -2824,24 +2834,45 @@ function renderInventory(){
   const isPremium=data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now();
   const sellRatioLabel=isPremium?'0,85':'0,7';
   const cubeStacks={};
-  (data.cubes||[]).forEach((c,i)=>{ const id=String(c.name)+'|'+String(c.rarity)+'|'+String(c.value); if(!cubeStacks[id]) cubeStacks[id]={cube:c,count:0,index:i}; cubeStacks[id].count++; });
+  (data.cubes||[]).forEach((c,i)=>{ const id=String(c.name)+'|'+String(c.rarity)+'|'+String(c.value); if(!cubeStacks[id]) cubeStacks[id]={cube:c,count:0,indices:[]}; cubeStacks[id].count++; cubeStacks[id].indices.push(i); });
   const stackedCubes=Object.values(cubeStacks);
-  list.innerHTML=stackedCubes.length ? stackedCubes.map(({cube:c,count,index:i})=>{
+  const cubeItemActions=(c,i)=>`
+       <button type="button" class="btn-ghost cube-lock-btn" title="${c.metadata?.locked?'Разблокировать':'Заморозить'}" data-action="toggle-cube-lock" data-index="${i}">${c.metadata?.locked?'🔓':'❄️'}</button>
+       <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${c.metadata?.locked?'disabled':''}>💰 Продать</button>
+       <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${c.metadata?.locked?'disabled':''}>⬆️ Апгрейд</button>
+       <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${c.metadata?.locked?'disabled':''}>🏷️ На продажу</button>`;
+  list.innerHTML=stackedCubes.length ? stackedCubes.map(({cube:c,count,indices})=>{
     const m=RARITY_META[c.rarity]||RARITY_META.common;
-    return `<div class="inv-item" style="border-left-color:${m.color}" data-cube-index="${i}">
+    const stackId=encodeURIComponent(String(c.name)+'|'+String(c.rarity)+'|'+String(c.value));
+    const isStack=count>1;
+    const expanded=isStack && expandedCubeStacks.has(stackId);
+    const headerNameHtml = isStack
+      ? `<button type="button" class="stack-toggle-btn ${expanded?'expanded':''}" data-action="toggle-stack" data-stack-id="${stackId}">
+           <span class="inv-name">${c.name} ×${count} <span class="stack-arrow">▼</span></span>
+           <span class="inv-rarity" style="color:${m.color}">${m.label}</span>
+         </button>`
+      : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div></div>`;
+    const header = `<div class="inv-item" style="border-left-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
-      <div><div class="inv-name">${c.name} ×${count}</div><div class="inv-rarity" style="color:${m.color}">${m.label}</div></div></div>
+      ${headerNameHtml}</div>
       <div class="inv-actions"><span class="inv-value">💰 ${Number(c.value).toLocaleString('ru-RU')}</span>
-       <button type="button" class="btn-ghost cube-lock-btn" title="${c.metadata?.locked?'Разблокировать':'Заморозить'}" data-action="toggle-cube-lock" data-index="${i}">${c.metadata?.locked?'🔓':'🔒'}</button>
-       <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${c.metadata?.locked?'disabled':''}>На продажу</button>
-       <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${c.metadata?.locked?'disabled':''}>Боту ×${sellRatioLabel}</button>
-       <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${c.metadata?.locked?'disabled':''}>📈 Апгрейд</button>
+       ${isStack ? '' : cubeItemActions(c,indices[0])}
        </div></div>`;
+    if(!isStack || !expanded) return header;
+    const rows = indices.map((idx,n)=>{
+      const it=data.cubes[idx]||c;
+      return `<div class="inv-item inv-subitem" data-cube-index="${idx}">
+        <div class="inv-item-info"><div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div></div>
+        <div class="inv-actions">${cubeItemActions(it,idx)}</div>
+      </div>`;
+    }).join('');
+    return header + `<div class="inv-stack-list">${rows}</div>`;
   }).join('') : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>';
   const keyBox=document.getElementById('keysInventoryList');
-  const keyStacks={};
-  (data.keys||[]).forEach((k)=>{ const id=String(k.key_type_id||k.type_id||k.catalog_id||k.id||k.name); if(!keyStacks[id]) keyStacks[id]={key:k,count:0}; keyStacks[id].count++; });
-  const stackedKeys=Object.values(keyStacks);
+  // Ключи уже застакованы сервером (см. database.get_keys: одна запись на тип
+  // ключа с полем stack_count) — используем это число напрямую, а не
+  // пересчитываем заново, иначе стак всегда показывал бы ×1.
+  const stackedKeys=(data.keys||[]).map(k=>({key:k,count:Math.max(1,Number(k.stack_count||1))}));
   keyBox.innerHTML=stackedKeys.length ? stackedKeys.map(({key:k,count})=>{
     const meta=RARITY_META[k.rarity]||RARITY_META.common;
     return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name} ×${count}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
@@ -3910,6 +3941,7 @@ function handleButton(button, e){
   if(action==='open-case'){ if(!button.disabled) openCase(button.dataset.case,false); return; }
   if(action==='open-case-key'){ if(!button.disabled) openCase(button.dataset.case,true); return; }
   if(action==='set-case-qty'){ caseOpenQty[button.dataset.case] = Number(button.dataset.qty); renderCases(); return; }
+  if(action==='toggle-stack'){ const sid=button.dataset.stackId||''; if(sid){ if(expandedCubeStacks.has(sid)) expandedCubeStacks.delete(sid); else expandedCubeStacks.add(sid); renderInventory(); } return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
   if(action==='combine-key'){ combineKey(el.dataset.keyId); return; }
     if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
