@@ -1889,7 +1889,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="500">+500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
-          <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Снять теневой':'Теневой бан'}</button>
+          <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
           <button type="button" class="btn-ghost" data-action="admin-premium" data-uid="${u.user_id}">Выдать Premium</button>
@@ -1931,8 +1931,6 @@ function openAdminAccount(uid){
     avatarPreview.innerHTML=u?.avatar ? `<img src="${u.avatar}" alt="Аватар">` : '?';
   }
   document.getElementById('adminAccount2faBtn').textContent=u?.two_factor_enabled?'🔐 Отключить 2FA':'🔐 Включить 2FA';
-  const lastIpEl=document.getElementById('adminAccountLastIp');
-  if(lastIpEl) lastIpEl.textContent='Последний IP: загрузка…';
   openModal('adminAccountModal');
   document.getElementById('adminAccountModal').querySelector('.input-modal')?.scrollTo(0,0);
   const once=(id,fn)=>{const el=document.getElementById(id); el.onclick=fn;};
@@ -1941,35 +1939,6 @@ function openAdminAccount(uid){
   once('adminAccountPasswordBtn', async()=>{const v=document.getElementById('adminAccountPassword').value; if(v.length<4)return showToast('❌ Пароль минимум 4 символа','error'); await adminAccountAction(uid,'password',{password:v}); document.getElementById('adminAccountPassword').value='';});
   once('adminAccount2faBtn', async()=>{ const enabled=!!u?.two_factor_enabled; if(await tgConfirm(enabled?'Отключить 2FA и сбросить незавершённые коды?':'Включить 2FA для этого аккаунта?')) await adminAccountAction(uid,'2fa',{enabled:!enabled}); });
   once('adminAccountSessionsBtn', async()=>{ if(await tgConfirm('Завершить все активные сессии этого аккаунта?')) await adminAccountAction(uid,'sessions'); });
-  once('adminAccountIpBanBtn', async()=>{
-    try{
-      const info=await apiFetch('/api/admin/account-ip',{user_id:Number(uid)});
-      const ip=String(info.ip||'');
-      const lastIpEl=document.getElementById('adminAccountLastIp');
-      if(lastIpEl) lastIpEl.textContent=ip ? 'Последний IP: '+ip : 'Последний IP: не зафиксирован';
-      if(!ip) return showToast('❌ У аккаунта нет сохранённого IP','error');
-      askReason('🌐 Бан IP аккаунта','Будет заблокирован именно последний зафиксированный публичный IP этого аккаунта. Укажи причину.', '', async reason=>{
-        const permanent=await tgConfirm('Заблокировать этот IP навсегда? Нажми «Отмена», чтобы выбрать срок.');
-        const doBan=async(minutes,isPermanent)=>{
-          try{
-            const j=await apiFetch('/api/admin/ip-ban-user',{user_id:Number(uid),reason,minutes,isPermanent,permanent:isPermanent});
-            if(lastIpEl) lastIpEl.textContent='Последний IP: '+j.ip+' · заблокирован';
-            showToast('🌐 IP '+j.ip+' заблокирован','success');
-          }catch(e){showToast('❌ '+e.message,'error');}
-        };
-        if(permanent){ await doBan(60,true); return; }
-        askNumber('⏱️ Срок IP-бана','Укажи срок блокировки IP в минутах.',60,minutes=>doBan(minutes,false));
-      });
-    }catch(e){showToast('❌ '+e.message,'error');}
-  });
-  once('adminAccountLastIp', async()=>{});
-  (async()=>{
-    try{
-      const info=await apiFetch('/api/admin/account-ip',{user_id:Number(uid)});
-      const lastIpEl=document.getElementById('adminAccountLastIp');
-      if(lastIpEl) lastIpEl.textContent=info.ip ? 'Последний IP: '+info.ip : 'Последний IP: не зафиксирован';
-    }catch(e){}
-  })();
   once('adminAccountBalanceBtn', async()=>{await adminAccountAction(uid,'balance',{value:Number(document.getElementById('adminAccountBalance').value||0)});});
   once('adminAccountLevelBtn', async()=>{await adminAccountAction(uid,'level',{value:Number(document.getElementById('adminAccountLevel').value||0)});});
   once('adminAccountAvatarClear', async()=>{
@@ -2583,6 +2552,7 @@ async function openCase(caseId){
 }
 
 async function openCaseBatch(c, qty){
+  if(spinning) return;
   spinning = true;
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = true);
 
@@ -2600,15 +2570,49 @@ async function openCaseBatch(c, qty){
   multiRow.style.display = 'flex';
   multiRow.innerHTML = '';
 
-  // Сначала сразу создаём все результаты и ленты. Раньше интерфейс ждал
-  // последовательные запросы к серверу, поэтому на 2/3 кейсах можно было
-  // увидеть пустое окно и ощущение, что ничего не происходит.
-  const wins = Array.from({length: qty}, () => {
-    const won = rollCaseItem(c);
-    normalizeCubeValue(won);
-    won.value = Math.floor(Number(won.value || 0));
-    return won;
-  });
+  // IMPORTANT: the server chooses the real drop first. The animation is
+  // built only after receiving that result, so the item shown in the wheel
+  // can never differ from the item actually credited to the account.
+  const wins = [];
+  try{
+    for(let i=0;i<qty;i++){
+      if(tgInitData()){
+        const j = await apiFetch('/api/cube/open', {case_id: c.id});
+        if(j.drop){
+          wins.push({
+            name: j.drop.name,
+            rarity: j.drop.rarity,
+            value: Number(j.drop.value)||0,
+            source_case_id: j.drop.case_id
+          });
+        }else{
+          throw new Error('Сервер не вернул результат кейса');
+        }
+        data.balance = Number(j.balance)||0;
+        if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
+        if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
+        if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
+        data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
+        if(j.farm_action) handleFarmAction?.(j.farm_action);
+      }else{
+        const won = rollCaseItem(c);
+        normalizeCubeValue(won);
+        won.value = Math.floor(Number(won.value || 0));
+        data.balance -= c.price;
+        data.cubes.push({...won, source_case_id:c.id});
+        data.cases_opened = (data.cases_opened||0)+1;
+        wins.push({...won, source_case_id:c.id});
+      }
+    }
+    persistLocal();
+    updateBalanceUI();
+  }catch(e){
+    showToast('❌ '+e.message,'error');
+    spinning = false;
+    closeModal('spinModal');
+    document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
+    return;
+  }
 
   for(let i=0;i<wins.length;i++){
     multiRow.insertAdjacentHTML('beforeend', `
@@ -2620,7 +2624,6 @@ async function openCaseBatch(c, qty){
 
   openModal('spinModal');
 
-  // Ленты запускаются сразу, без ожидания сетевых запросов.
   const spins = wins.map((won,i)=>{
     const wonIndex = c.items.findIndex(it=>it.name===won.name);
     const dial = document.getElementById(`wheelDialM${i}`);
@@ -2628,53 +2631,6 @@ async function openCaseBatch(c, qty){
     buildWheelIn(dial, c.items, wonIndex, won.value);
     return spinWheelIn(wrap, dial, c.items, wonIndex);
   });
-
-  // Одновременно подтверждаем каждый дроп на сервере.
-  try{
-    for(const won of wins){
-      if(tgInitData()){
-        const j = await apiFetch('/api/cube/open', {
-          price: c.price,
-          name: won.name,
-          rarity: won.rarity,
-          value: won.value,
-          source_case_id: c.id
-        });
-        data.balance = j.balance;
-        if(j.drop){
-          won.name=j.drop.name; won.rarity=j.drop.rarity; won.value=Number(j.drop.value)||0; won.source_case_id=j.drop.case_id;
-        }
-        if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
-        else data.cubes.push({...won});
-        normalizeAllCubeValues();
-        data.cases_opened = j.cases_opened != null
-          ? j.cases_opened
-          : (data.cases_opened||0) + 1;
-      }else{
-        data.balance -= c.price;
-        data.cubes.push({name:won.name, rarity:won.rarity, value:won.value, time:Date.now()});
-        data.cases_opened = (data.cases_opened||0) + 1;
-      }
-      persistLocal();
-      updateBalanceUI();
-
-      const bonusKey = maybeDropKey(c.price);
-      if(bonusKey) showToast('🗝️ Дополнительно найден ключ «'+bonusKey.name+'»','success');
-
-      pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});
-      recordBestDrop(won); persistLocal();
-      if(tgInitData()){
-        apiFetch('/api/drops/add',{name:won.name,rarity:won.rarity})
-          .catch(e=>console.error('drop publish error',e));
-      }
-    }
-  }catch(e){
-    showToast('❌ '+e.message,'error');
-    spinning = false;
-    closeModal('spinModal');
-    document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
-    return;
-  }
 
   await Promise.all(spins);
 
@@ -2685,7 +2641,7 @@ async function openCaseBatch(c, qty){
     const m=RARITY_META[w.rarity];
     return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}">
       <span>${m.icon} <b style="color:${m.color}">${w.name}</b></span>
-      <span class="mono">💰 ${w.value.toLocaleString('ru-RU')}</span>
+      <span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span>
     </div>`;
   }).join('');
 
@@ -2702,18 +2658,20 @@ async function openCaseBatch(c, qty){
     document.getElementById('spinCloseBtn').onclick=null;
   };
 
+  wins.forEach(won=>{
+    pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});
+    recordBestDrop(won);
+  });
+  persistLocal();
+
   spinning=false;
   renderCases();
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
 }
 async function openCaseOnce(c, seq, total){
   spinning = true;
-  data.balance -= c.price;
-  updateBalanceUI();
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = true);
 
-  // Полностью сбрасываем результаты мульти-открытия. Иначе после ×2/×3
-  // старый список выигрышей остаётся при следующем одиночном открытии.
   const staleMultiRow = document.getElementById('wheelMultiRow');
   const staleMultiResult = document.getElementById('spinResultMulti');
   if(staleMultiRow){ staleMultiRow.style.display='none'; staleMultiRow.innerHTML=''; }
@@ -2726,47 +2684,37 @@ async function openCaseOnce(c, seq, total){
   document.getElementById('wheelWrap').style.display = 'block';
   document.getElementById('vaultCrack').style.display = 'none';
 
-  // Любой дроп, включая редкие результаты, теперь подчиняется диапазону кейса.
-  const isSecret = false;
-  let won = rollCaseItem(c);
-  normalizeCubeValue(won);
-  const wonIndex = c.items.indexOf(c.items.find(it=>it.name===won.name));
-  document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
-  buildWheel(c.items, wonIndex, won.value);
-  openModal('spinModal');
-  const dial = document.getElementById('wheelDial');
-  await spinWheel(dial, c.items, wonIndex);
-
-  // Цена куба уже установлена в CASES
-  // Просто сохраняем как есть
-  won.value = Math.floor(Number(won.value || 0));
-
-  // Списание и добавление куба подтверждает сервер — это исключает гонки
-  // с админ-панелью (выдача/сброс всегда побеждают у клиента)
+  let won;
   try{
     if(tgInitData()){
+      // The authoritative result is requested BEFORE the animation is built.
+      // This guarantees that the wheel, result card and credited cube all
+      // refer to exactly the same server-selected item/value.
       const j = await apiFetch('/api/cube/open', {case_id: c.id});
-      data.balance = j.balance;
-      if(j.drop){
-        won.name=j.drop.name; won.rarity=j.drop.rarity; won.value=Number(j.drop.value)||0; won.source_case_id=j.drop.case_id;
-      }
-      if(Array.isArray(j.cubes)) applyServerCubes(j.cubes, [{...won,source_case_id:c.id}]);
-      else data.cubes.push({...won});
-      normalizeAllCubeValues();
+      if(!j.drop) throw new Error('Сервер не вернул результат кейса');
+      won = {
+        name: j.drop.name,
+        rarity: j.drop.rarity,
+        value: Number(j.drop.value)||0,
+        source_case_id: j.drop.case_id
+      };
+      data.balance = Number(j.balance)||0;
+      if(Array.isArray(j.cubes)) applyServerCubes(j.cubes, [{...won}]);
+      if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
+      if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
       data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
+      if(j.farm_action && typeof handleFarmAction === 'function') handleFarmAction(j.farm_action);
     }else{
-      data.cubes.push({ name: won.name, rarity: won.rarity, value: won.value, time: Date.now() });
-      data.cases_opened = (data.cases_opened||0) + 1;
+      won = rollCaseItem(c);
+      normalizeCubeValue(won);
+      won.value = Math.floor(Number(won.value || 0));
+      data.balance -= c.price;
+      data.cubes.push({...won, source_case_id:c.id});
+      data.cases_opened = (data.cases_opened||0)+1;
     }
     persistLocal();
     updateBalanceUI();
-    const bonusKey=maybeDropKey(c.price);
-    if(bonusKey) showToast('🗝️ Дополнительно найден ключ «'+bonusKey.name+'»','success');
   }catch(e){
-    // Сервер отказал (например, гонка по балансу) — откатываем оптимистичное списание
-    data.balance += c.price;
-    persistLocal();
-    updateBalanceUI();
     showToast('❌ '+e.message, 'error');
     spinning = false;
     closeModal('spinModal');
@@ -2774,18 +2722,32 @@ async function openCaseOnce(c, seq, total){
     return false;
   }
 
-  pushDrop({ username: data.username, item: won.name, rarity: won.rarity, value: won.value, time: Date.now() });
-  recordBestDrop(won); persistLocal();
-  // Публикуем дроп на сервер, чтобы его увидели остальные игроки в общей ленте
-  if(tgInitData()){
-    apiFetch('/api/drops/add', {name: won.name, rarity: won.rarity}).then(()=>renderRecentDrops()).catch(e=>console.error('drop publish error', e));
+  // The wheel target is the actual server-selected drop, never a local roll.
+  const isSecret = false;
+  const wonIndex = c.items.findIndex(it=>it.name===won.name);
+  if(wonIndex < 0){
+    showToast('❌ Сервер вернул предмет, которого нет в каталоге кейса','error');
+    spinning = false;
+    document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = false);
+    return false;
   }
 
-  playBeep(isSecret ? 1500 : (won.rarity==='divine'||won.rarity==='mythic' ? 1180 : 840));
-  showSpinResult(won, isSecret);
+  document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
+  buildWheel(c.items, wonIndex, won.value);
+  openModal('spinModal');
+  const dial = document.getElementById('wheelDial');
+  await spinWheel(dial, c.items, wonIndex);
 
-  spinning = false;
+  // Show exactly the same authoritative value that was stored on the server.
+  showSpinResult(won, isSecret);
+  pushDrop({ username:data.username, item:won.name, rarity:won.rarity, value:won.value, time:Date.now() });
+  recordBestDrop(won);
+  persistLocal();
+
+  spinning=false;
+  renderInventory();
   renderCases();
+  document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
   return true;
 }
 
