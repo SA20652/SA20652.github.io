@@ -2836,10 +2836,13 @@ function renderInventory(){
        </div></div>`;
   }).join('') : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>';
   const keyBox=document.getElementById('keysInventoryList');
-  keyBox.innerHTML=data.keys.length ? data.keys.map((k,i)=>{
+  const keyStacks={};
+  (data.keys||[]).forEach((k)=>{ const id=String(k.key_type_id||k.type_id||k.catalog_id||k.id||k.name); if(!keyStacks[id]) keyStacks[id]={key:k,count:0}; keyStacks[id].count++; });
+  const stackedKeys=Object.values(keyStacks);
+  keyBox.innerHTML=stackedKeys.length ? stackedKeys.map(({key:k,count})=>{
     const meta=RARITY_META[k.rarity]||RARITY_META.common;
-    return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
-      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="key">📈 Апгрейд</button><button type="button" class="btn-sell" data-action="combine-key" data-key-id="${k.id}" title="3 одинаковых ключа → ключ следующего уровня">🔧 ×3</button></div></div>`;
+    return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name} ×${count}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
+      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="open-upgrade" data-index="0" data-kind="key">📈 Апгрейд</button>${count>=3?`<button type="button" class="btn-sell" data-action="combine-key" data-key-id="${k.id}">⬆️ Улучшить</button><button type="button" class="btn-sell" data-action="open-case-key-stack" data-key-id="${k.id}">🔑 Открыть 3</button>`:''}</div></div>`;
   }).join('') : '<div class="empty-state">Ключей пока нет.</div>';
 }
 
