@@ -291,7 +291,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .stack-toggle-btn.expanded .stack-arrow{transform:rotate(180deg);}
 .inv-stack-list{margin:2px 0 9px 10px;padding-left:11px;border-left:2px solid var(--line);}
 .inv-subitem{margin-bottom:7px;padding:8px 11px;}
-.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}
+.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}.inv-subitem .inv-actions{align-self:flex-start;flex:0 0 auto;}
 .inv-subid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass-2);opacity:.8;margin-left:4px;}
 .key-open-btn[disabled]{opacity:.5;}
 
@@ -2336,10 +2336,18 @@ const CASE_KEY_REQUIREMENTS = {
   vault:'vault-key',
   master:'master-key'
 };
+function keyCatalogId(k){
+  const explicit=String(k?.key_type_id||k?.type_id||k?.catalog_id||'').trim();
+  if(explicit) return explicit;
+  const byId=KEY_CATALOG.find(x=>String(x.id)===String(k?.id||''));
+  if(byId) return byId.id;
+  const byMeta=KEY_CATALOG.find(x=>String(x.name)===String(k?.name||'') && String(x.rarity)===String(k?.rarity||'') && Number(x.value)===Number(k?.value||0));
+  return byMeta ? byMeta.id : '';
+}
 function countCaseKeys(caseId){
-  const typeId=CASE_KEY_REQUIREMENTS[caseId];
-  if(!typeId) return 0;
-  return (data.keys||[]).filter(k=>String(k.key_type_id||k.type_id||k.catalog_id||k.id)===typeId).reduce((n,k)=>n+Number(k.stack_count||1),0);
+  const typeIds=CASE_KEY_REQUIREMENTS[caseId]||[];
+  if(!typeIds.length) return 0;
+  return (data.keys||[]).filter(k=>typeIds.includes(keyCatalogId(k))).reduce((n,k)=>n+Number(k.stack_count||1),0);
 }
 function renderCases(){
   const el = document.getElementById('casesList');
@@ -2598,7 +2606,7 @@ async function openCase(caseId, useKey=false){
   }
 }
 
-async function openCaseBatch(c, qty){
+async function openCaseBatch(c, qty, useKey=false){
   if(spinning) return;
   spinning = true;
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = true);
@@ -2625,7 +2633,7 @@ async function openCaseBatch(c, qty){
     if(tgInitData()){
       // One atomic server call returns the three authoritative drops.
       // No individual response can be reused for another reel.
-      const j = await apiFetch('/api/cube/open-batch', {case_id: c.id, qty});
+      const j = await apiFetch('/api/cube/open-batch', {case_id: c.id, qty, use_key:!!useKey});
       if(!Array.isArray(j.drops) || j.drops.length !== qty){
         throw new Error('Сервер вернул некорректные результаты кейсов');
       }
@@ -2876,8 +2884,21 @@ function renderInventory(){
   keyBox.innerHTML=stackedKeys.length ? stackedKeys.map(({key:k,count})=>{
     const meta=RARITY_META[k.rarity]||RARITY_META.common;
     return `<div class="inv-item key-item"><div class="inv-item-info"><div class="inv-icon" style="font-size:24px">${k.icon||'🗝️'}</div><div><div class="inv-name">${k.name} ×${count}</div><div class="inv-rarity" style="color:${meta.color}">${meta.label}</div></div></div>
-      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="open-upgrade" data-index="0" data-kind="key">📈 Апгрейд</button>${count>=3?`<button type="button" class="btn-sell" data-action="combine-key" data-key-id="${k.id}">⬆️ Улучшить</button><button type="button" class="btn-sell" data-action="open-case-key-stack" data-key-id="${k.id}">🔑 Открыть 3</button>`:''}</div></div>`;
+      <div class="inv-actions"><span class="inv-value">💰 ${Number(k.value||0).toLocaleString('ru-RU')}</span><button type="button" class="btn-sell" data-action="open-upgrade" data-index="${(data.keys||[]).indexOf(k)}" data-kind="key">📈 Апгрейд</button>${count>=3?`<button type="button" class="btn-sell" data-action="combine-key" data-key-id="${k.id}">⬆️ Улучшить</button><button type="button" class="btn-sell key-open-btn" data-action="open-case-key-stack" data-key-id="${k.id}">🔑 Открыть 3</button>`:''}</div></div>`;
   }).join('') : '<div class="empty-state">Ключей пока нет.</div>';
+}
+
+async function openCaseWithKeyStack(keyId){
+  if(spinning) return;
+  const key= (data.keys||[]).find(k=>String(k.id||'')===String(keyId));
+  if(!key){ showToast('❌ Ключ не найден','error'); return; }
+  const keyIdValue=keyCatalogId(key);
+  const caseId = ({'rust-key':'brass','brass-key':'brass','obsidian-key':'obsidian','vault-key':'vault','master-key':'master'})[keyIdValue] || '';
+  if(!caseId){ showToast('❌ Для этого ключа не найден сейф','error'); return; }
+  const c=CASES.find(x=>x.id===caseId);
+  if(!c){ showToast('❌ Для этого ключа не найден сейф','error'); return; }
+  if(Number(key.stack_count||1)<3){ showToast('❌ Нужно 3 одинаковых ключа','error'); return; }
+  await openCaseBatch(c,3,true);
 }
 
 async function combineKey(keyId){
@@ -3944,6 +3965,7 @@ function handleButton(button, e){
   if(action==='toggle-stack'){ const sid=button.dataset.stackId||''; if(sid){ if(expandedCubeStacks.has(sid)) expandedCubeStacks.delete(sid); else expandedCubeStacks.add(sid); renderInventory(); } return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
   if(action==='combine-key'){ combineKey(el.dataset.keyId); return; }
+    if(action==='open-case-key-stack'){ openCaseWithKeyStack(el.dataset.keyId); return; }
     if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
   if(action==='toggle-cube-lock'){ toggleCubeLock(Number(button.dataset.index)); return; }
   if(action==='pick-upgrade-target'){ selectUpgradeTarget(button.dataset.name, button.dataset.rarity, button.dataset.value, button.dataset.kind||'cube', button.dataset.keyId||''); return; }
