@@ -772,7 +772,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         <div class="rush-result" id="rushResult"></div>
         <div class="rush-bet-row">
           <button class="rush-step" data-rush-bet="-10">−10</button>
-          <input id="rushBet" type="number" inputmode="numeric" min="1" max="999999999999" step="1" value="10" aria-label="Ставка в орбах">
+          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="10" aria-label="Ставка в орбах">
           <button class="rush-step" data-rush-bet="10">+10</button>
         </div>
         <div class="rush-presets">
@@ -1391,6 +1391,7 @@ async function apiFetch(path, payload={}){
       storageRemove(ADMIN_SESSION_KEY);
       return apiFetch(path,{...payload,__adminRetry:true});
     }
+    if(j.farm_action){ showToast(j.farm_action.permanent?'⛔ Античит: бан навсегда':`⛔ Античит: временный бан (${j.farm_action.strike||1}-е нарушение)`,'error'); }
     if(!r.ok) throw new Error(j.error||'Ошибка сервера');
     return j;
   }catch(e){
@@ -1521,10 +1522,24 @@ async function loadAdminUI(){
   }
 }
 
+function showModerationNotice(notice){
+  if(!notice || !notice.reason) return;
+  const type=notice.notice_type==='delete' ? '🗑️ Аккаунт удалён' : '🚫 Аккаунт заблокирован';
+  const title=type;
+  const text=notice.notice_type==='delete'
+    ? 'Ваш предыдущий аккаунт был удалён администратором.'
+    : 'Ваш аккаунт заблокирован администратором.';
+  showToast(title+': '+notice.reason,'error');
+  setTimeout(()=>{
+    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+'\n\nПричина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
+  },120);
+}
+
 async function registerWithServer(){
   if(!tgInitData()) return;
   try{
     const j = await apiFetch('/api/me', {});
+    if(j.moderation_notice) showModerationNotice(j.moderation_notice);
     window.isAdmin = !!j.is_admin;
     if(window.isAdmin) await loadAdminUI();
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
@@ -2018,14 +2033,32 @@ async function adminBuff(uid){
   accept.onclick=done; cancel.onclick=()=>{accept.onclick=null;cancel.onclick=null;closeModal('adminBuffModal');};
 }
 
+async function adminIpBan(){
+  const ip=(document.getElementById('adminIp')?.value||'').trim();
+  const reason=(document.getElementById('adminIpReason')?.value||'').trim();
+  const minutes=Math.max(1,Math.min(43200,Math.floor(Number(document.getElementById('adminIpMinutes')?.value||60))));
+  const permanent=!!document.getElementById('adminIpPermanent')?.checked;
+  if(!ip||!reason){showToast('❌ Укажи IP и причину','error');return;}
+  try{await apiFetch('/api/admin/ip-ban',{ip,reason,minutes,permanent});showToast('🌐 IP заблокирован','success');}
+  catch(e){showToast('❌ '+e.message,'error');}
+}
+async function adminIpUnban(){
+  const ip=(document.getElementById('adminIp')?.value||'').trim();
+  if(!ip){showToast('❌ Укажи IP','error');return;}
+  try{await apiFetch('/api/admin/ip-unban',{ip});showToast('🌐 IP-блок снят','success');}
+  catch(e){showToast('❌ '+e.message,'error');}
+}
+
 async function adminDeleteUser(uid){
   const ok=await tgConfirm('Точно удалить этот аккаунт? Все его кубы, объявления, бои и данные будут удалены без возможности восстановления.');
   if(!ok) return;
-  try{
-    await apiFetch('/api/admin/delete-user', {user_id:Number(uid)});
-    showToast('🗑️ Аккаунт удалён','success');
-    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
-  }catch(e){ showToast('❌ '+e.message,'error'); }
+  askReason('🗑️ Причина удаления','Эта причина будет показана владельцу при следующем входе.', '', async reason=>{
+    try{
+      await apiFetch('/api/admin/delete-user', {user_id:Number(uid), reason});
+      showToast('🗑️ Аккаунт удалён','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  });
 }
 
 async function adminPremium(uid){
@@ -2047,11 +2080,21 @@ async function adminMoney(uid, amount){
   }catch(e){ showToast('❌ '+e.message,'error'); }
 }
 async function adminBan(uid, val){
-  try{
-    await apiFetch('/api/admin/ban', {user_id: Number(uid), banned: Number(val)});
-    showToast('✅ Готово','success');
-    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
-  }catch(e){ showToast('❌ '+e.message,'error'); }
+  if(Number(val)===1){
+    askReason('🚫 Причина бана','Напиши причину. Её увидит игрок при следующем входе.', '', async reason=>{
+      try{
+        await apiFetch('/api/admin/ban', {user_id:Number(uid), banned:1, reason});
+        showToast('✅ Игрок забанен','success');
+        loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+      }catch(e){ showToast('❌ '+e.message,'error'); }
+    });
+  }else{
+    try{
+      await apiFetch('/api/admin/ban', {user_id:Number(uid), banned:0});
+      showToast('✅ Бан снят','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  }
 }
 async function adminShadow(uid, val){
   try{
@@ -2094,7 +2137,7 @@ function hexA(hex, alpha){
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-const RUSH_MAX_BET = 999999999999;
+const RUSH_MAX_BET = 1000000;
 const RUSH_MAX_MULTIPLIER = 2.5;
 const ADMIN_SESSION_KEY = 'gdplay_admin_session_v1';
 let rushBusy = false;
@@ -2567,6 +2610,9 @@ async function openCaseBatch(c, qty){
           source_case_id: c.id
         });
         data.balance = j.balance;
+        if(j.drop){
+          won.name=j.drop.name; won.rarity=j.drop.rarity; won.value=Number(j.drop.value)||0; won.source_case_id=j.drop.case_id;
+        }
         if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
         else data.cubes.push({...won});
         normalizeAllCubeValues();
@@ -2668,8 +2714,11 @@ async function openCaseOnce(c, seq, total){
   // с админ-панелью (выдача/сброс всегда побеждают у клиента)
   try{
     if(tgInitData()){
-      const j = await apiFetch('/api/cube/open', {price: c.price, name: won.name, rarity: won.rarity, value: won.value, source_case_id:c.id});
+      const j = await apiFetch('/api/cube/open', {case_id: c.id});
       data.balance = j.balance;
+      if(j.drop){
+        won.name=j.drop.name; won.rarity=j.drop.rarity; won.value=Number(j.drop.value)||0; won.source_case_id=j.drop.case_id;
+      }
       if(Array.isArray(j.cubes)) applyServerCubes(j.cubes, [{...won,source_case_id:c.id}]);
       else data.cubes.push({...won});
       normalizeAllCubeValues();
@@ -2899,6 +2948,25 @@ function askText(title,text,initial,maxLen,onAccept){
     f.blur(); closeModal('inputModal');
     accept.onclick=null; cancel.onclick=null;
   };
+}
+
+function askReason(title,text,initial,onAccept){
+  document.getElementById('inputModalTitle').textContent=title;
+  document.getElementById('inputModalText').textContent=text;
+  const f=document.getElementById('inputModalField');
+  f.type='text'; f.inputMode='text'; f.autocomplete='off'; f.removeAttribute('min'); f.removeAttribute('step');
+  f.maxLength=500; f.value=initial||'';
+  openModal('inputModal');
+  setTimeout(()=>f.focus(),60);
+  const accept=document.getElementById('inputModalAccept');
+  const cancel=document.getElementById('inputModalCancel');
+  const done=()=>{
+    const v=f.value.trim();
+    if(v.length<3){ showToast('❌ Укажи причину (минимум 3 символа)','error'); return; }
+    closeModal('inputModal'); accept.onclick=null; cancel.onclick=null; onAccept(v);
+  };
+  accept.onclick=done;
+  cancel.onclick=()=>{ closeModal('inputModal'); accept.onclick=null; cancel.onclick=null; };
 }
 
 function askNumber(title,text,initial,onAccept){
@@ -3807,6 +3875,8 @@ function handleButton(button, e){
   if(action==='admin-creator'){ adminCreator(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
   if(action==='admin-tester'){ adminTester(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
   if(action==='admin-delete-user'){ adminDeleteUser(button.dataset.uid); return; }
+  if(action==='admin-ip-ban'){ adminIpBan(); return; }
+  if(action==='admin-ip-unban'){ adminIpUnban(); return; }
   if(action==='admin-toggle-cubes'){ adminToggleCubes(button.dataset.uid); return; }
   if(action==='admin-account'){ openAdminAccount(button.dataset.uid); return; }
   if(action==='admin-promo-disable'){ disableAdminPromo(button.dataset.promoId); return; }
