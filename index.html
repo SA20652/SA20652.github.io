@@ -786,7 +786,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
           <button class="btn" id="rushStartBtn">🟡 Начать</button>
           <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
         </div>
-        <div class="rush-note">Ставка списывается сервером до старта. Сервер следит за срывом, поэтому после срыва результат появляется автоматически.<br><b>⭐ Premium:</b> до 10 игр в час вместо 5.</div>
+        <div class="rush-note">Ставка списывается сервером до старта. Сервер следит за срывом, поэтому после срыва результат появляется автоматически.</div>
       </div>
     </div>
 
@@ -1931,6 +1931,8 @@ function openAdminAccount(uid){
     avatarPreview.innerHTML=u?.avatar ? `<img src="${u.avatar}" alt="Аватар">` : '?';
   }
   document.getElementById('adminAccount2faBtn').textContent=u?.two_factor_enabled?'🔐 Отключить 2FA':'🔐 Включить 2FA';
+  const lastIpEl=document.getElementById('adminAccountLastIp');
+  if(lastIpEl) lastIpEl.textContent='Последний IP: загрузка…';
   openModal('adminAccountModal');
   document.getElementById('adminAccountModal').querySelector('.input-modal')?.scrollTo(0,0);
   const once=(id,fn)=>{const el=document.getElementById(id); el.onclick=fn;};
@@ -1939,6 +1941,35 @@ function openAdminAccount(uid){
   once('adminAccountPasswordBtn', async()=>{const v=document.getElementById('adminAccountPassword').value; if(v.length<4)return showToast('❌ Пароль минимум 4 символа','error'); await adminAccountAction(uid,'password',{password:v}); document.getElementById('adminAccountPassword').value='';});
   once('adminAccount2faBtn', async()=>{ const enabled=!!u?.two_factor_enabled; if(await tgConfirm(enabled?'Отключить 2FA и сбросить незавершённые коды?':'Включить 2FA для этого аккаунта?')) await adminAccountAction(uid,'2fa',{enabled:!enabled}); });
   once('adminAccountSessionsBtn', async()=>{ if(await tgConfirm('Завершить все активные сессии этого аккаунта?')) await adminAccountAction(uid,'sessions'); });
+  once('adminAccountIpBanBtn', async()=>{
+    try{
+      const info=await apiFetch('/api/admin/account-ip',{user_id:Number(uid)});
+      const ip=String(info.ip||'');
+      const lastIpEl=document.getElementById('adminAccountLastIp');
+      if(lastIpEl) lastIpEl.textContent=ip ? 'Последний IP: '+ip : 'Последний IP: не зафиксирован';
+      if(!ip) return showToast('❌ У аккаунта нет сохранённого IP','error');
+      askReason('🌐 Бан IP аккаунта','Будет заблокирован именно последний зафиксированный публичный IP этого аккаунта. Укажи причину.', '', async reason=>{
+        const permanent=await tgConfirm('Заблокировать этот IP навсегда? Нажми «Отмена», чтобы выбрать срок.');
+        const doBan=async(minutes,isPermanent)=>{
+          try{
+            const j=await apiFetch('/api/admin/ip-ban-user',{user_id:Number(uid),reason,minutes,isPermanent,permanent:isPermanent});
+            if(lastIpEl) lastIpEl.textContent='Последний IP: '+j.ip+' · заблокирован';
+            showToast('🌐 IP '+j.ip+' заблокирован','success');
+          }catch(e){showToast('❌ '+e.message,'error');}
+        };
+        if(permanent){ await doBan(60,true); return; }
+        askNumber('⏱️ Срок IP-бана','Укажи срок блокировки IP в минутах.',60,minutes=>doBan(minutes,false));
+      });
+    }catch(e){showToast('❌ '+e.message,'error');}
+  });
+  once('adminAccountLastIp', async()=>{});
+  (async()=>{
+    try{
+      const info=await apiFetch('/api/admin/account-ip',{user_id:Number(uid)});
+      const lastIpEl=document.getElementById('adminAccountLastIp');
+      if(lastIpEl) lastIpEl.textContent=info.ip ? 'Последний IP: '+info.ip : 'Последний IP: не зафиксирован';
+    }catch(e){}
+  })();
   once('adminAccountBalanceBtn', async()=>{await adminAccountAction(uid,'balance',{value:Number(document.getElementById('adminAccountBalance').value||0)});});
   once('adminAccountLevelBtn', async()=>{await adminAccountAction(uid,'level',{value:Number(document.getElementById('adminAccountLevel').value||0)});});
   once('adminAccountAvatarClear', async()=>{
@@ -2615,21 +2646,20 @@ async function openCaseBatch(c, qty){
         }
         if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
         else data.cubes.push({...won});
-        if(Array.isArray(j.keys)) data.keys=j.keys;
         normalizeAllCubeValues();
         data.cases_opened = j.cases_opened != null
           ? j.cases_opened
           : (data.cases_opened||0) + 1;
-        if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
       }else{
         data.balance -= c.price;
         data.cubes.push({name:won.name, rarity:won.rarity, value:won.value, time:Date.now()});
         data.cases_opened = (data.cases_opened||0) + 1;
-        const bonusKey = maybeDropKey(c.price);
-        if(bonusKey) showToast('🗝️ Дополнительно найден ключ «'+bonusKey.name+'»','success');
       }
       persistLocal();
       updateBalanceUI();
+
+      const bonusKey = maybeDropKey(c.price);
+      if(bonusKey) showToast('🗝️ Дополнительно найден ключ «'+bonusKey.name+'»','success');
 
       pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});
       recordBestDrop(won); persistLocal();
@@ -2722,18 +2752,16 @@ async function openCaseOnce(c, seq, total){
       }
       if(Array.isArray(j.cubes)) applyServerCubes(j.cubes, [{...won,source_case_id:c.id}]);
       else data.cubes.push({...won});
-      if(Array.isArray(j.keys)) data.keys=j.keys;
       normalizeAllCubeValues();
       data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
-      if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
     }else{
       data.cubes.push({ name: won.name, rarity: won.rarity, value: won.value, time: Date.now() });
       data.cases_opened = (data.cases_opened||0) + 1;
-      const bonusKey=maybeDropKey(c.price);
-      if(bonusKey) showToast('🗝️ Дополнительно найден ключ «'+bonusKey.name+'»','success');
     }
     persistLocal();
     updateBalanceUI();
+    const bonusKey=maybeDropKey(c.price);
+    if(bonusKey) showToast('🗝️ Дополнительно найден ключ «'+bonusKey.name+'»','success');
   }catch(e){
     // Сервер отказал (например, гонка по балансу) — откатываем оптимистичное списание
     data.balance += c.price;
@@ -3033,7 +3061,7 @@ function getUpgradeChance(){
   const sourceValue=Number(source.value||0);
   const targetValue=Number(upgradeTarget.value||1);
   const effectiveCoverage=sourceValue+Number(upgradeStake||0);
-  return Math.max(0.3, Math.min(95, effectiveCoverage/targetValue*100 - 5));
+  return Math.max(0.3, Math.min(95, effectiveCoverage/targetValue*100));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -3125,15 +3153,9 @@ async function confirmUpgrade(){
   const btn=document.getElementById('upgradeConfirmBtn'); btn.disabled=true;
   try{
     let j;
-    if(tgInitData()){
-      const source=getUpgradeSource();
-      if(!source) throw new Error('Предмет для апгрейда не найден');
+    if(tgInitData() && upgradeSource.kind==='cube'){
       j=await apiFetch('/api/upgrade',{
-        source_kind: upgradeSource.kind,
-        source_key_id: upgradeSource.kind==='key' ? String(source.id||'') : '',
-        index: upgradeSource.kind==='cube' ? Number(upgradeSource.index) : -1,
-        target_kind: upgradeTarget.kind,
-        target_key_id: upgradeTarget.kind==='key' ? String(upgradeTarget.id||'') : '',
+        index:Number(upgradeSource.index),
         target_name:upgradeTarget.name,
         target_rarity:upgradeTarget.rarity,
         target_value:Number(upgradeTarget.value),
@@ -3141,12 +3163,12 @@ async function confirmUpgrade(){
       });
       data.balance=Number(j.balance);
       data.cubes=Array.isArray(j.cubes)?j.cubes:data.cubes;
-      data.keys=Array.isArray(j.keys)?j.keys:data.keys;
       persistLocal(); renderInventory(); updateBalanceUI();
     }else{
-      // Локальный режим остаётся только для автономного предпросмотра.
+      // Локальный режим / ключи: ставка всё равно списывается из локального баланса.
       j=performLocalUpgrade();
       persistLocal(); renderInventory(); updateBalanceUI();
+      try{ await syncToServer(); }catch(_){}
     }
     document.getElementById('upgradeStepConfirm').style.display='none';
     document.getElementById('upgradeCancelBtn').style.display='none';
