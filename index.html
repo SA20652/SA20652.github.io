@@ -4334,6 +4334,79 @@ boot();
 @keyframes floatIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 </style>
 
+
+<script>
+(function(){
+"use strict";
+// Final music/settings patch
+const KEYVOL="gdplay_music_volume_final", KEYLOOP="gdplay_music_loop_final";
+let fadeTimer=null;
+function musicFade(audio,target,duration=900,callback){
+ if(!audio)return;
+ if(fadeTimer) clearInterval(fadeTimer);
+ const start=audio.volume, startTime=performance.now();
+ fadeTimer=setInterval(()=>{
+  const t=Math.min(1,(performance.now()-startTime)/duration);
+  audio.volume=start+(target-start)*t;
+  if(t>=1){clearInterval(fadeTimer);fadeTimer=null;if(callback)callback();}
+ },20);
+}
+function applyAudio(audio){
+ if(!audio||audio.__finalPatch)return;
+ audio.__finalPatch=true;
+ audio.volume=Number(localStorage.getItem(KEYVOL)??0.42);
+ audio.loop=localStorage.getItem(KEYLOOP)==="1";
+ const oldPlay=audio.play.bind(audio);
+ audio.play=async function(){
+   const r=await oldPlay();
+   audio.volume=0;
+   musicFade(audio,Number(localStorage.getItem(KEYVOL)??0.42),1000);
+   return r;
+ };
+ const oldPause=audio.pause.bind(audio);
+ audio.pause=function(){
+   musicFade(audio,0,700,()=>oldPause());
+ };
+ audio.addEventListener("ended",()=>{
+   if(audio.loop){
+     audio.currentTime=0;
+     musicFade(audio,Number(localStorage.getItem(KEYVOL)??0.42),900);
+   }
+ });
+}
+const obs=new MutationObserver(()=>{if(window.menuAudio)applyAudio(window.menuAudio);});
+obs.observe(document.documentElement,{childList:true,subtree:true});
+setInterval(()=>{if(window.menuAudio)applyAudio(window.menuAudio)},500);
+
+// Smooth theme transition
+document.documentElement.style.setProperty("transition","background-color .5s ease,color .5s ease");
+const style=document.createElement("style");
+style.textContent=`*,*::before,*::after{transition:background-color .45s ease,border-color .45s ease,color .45s ease,box-shadow .45s ease!important}.music-settings-card{padding:16px;border-radius:18px;margin-bottom:14px;background:var(--card-bg,rgba(128,128,128,.12));}`;
+document.head.appendChild(style);
+
+// Music settings card
+function addMusicSettings(){
+ if(document.getElementById("finalMusicSettings"))return;
+ let host=document.querySelector("#settings")||document.querySelector(".settings")||document.body;
+ const box=document.createElement("div");
+ box.id="finalMusicSettings";
+ box.className="music-settings-card";
+ box.innerHTML=`<h3>🎵 Музыка</h3>
+ <div style="font-weight:700">All the things she said<br><span style="opacity:.7">t.A.T.u.</span></div>
+ <label>Громкость музыки <input id="finalMusicVol" type="range" min="0" max="1" step="0.01"></label>
+ <label style="display:flex;gap:10px;margin-top:10px">Зациклить <input id="finalMusicLoop" type="checkbox"></label>`;
+ host.prepend(box);
+ const vol=box.querySelector("#finalMusicVol"), loop=box.querySelector("#finalMusicLoop");
+ vol.value=localStorage.getItem(KEYVOL)??0.42;
+ loop.checked=localStorage.getItem(KEYLOOP)==="1";
+ vol.oninput=()=>{localStorage.setItem(KEYVOL,vol.value);if(window.menuAudio)window.menuAudio.volume=Number(vol.value)};
+ loop.onchange=()=>{localStorage.setItem(KEYLOOP,loop.checked?"1":"0");if(window.menuAudio)window.menuAudio.loop=loop.checked};
+}
+setInterval(addMusicSettings,1000);
+// hide old menu music controls
+setInterval(()=>{["menuMusicCard","menuMusicSelect","menuMusicToggle","menuMusicNext"].forEach(id=>{let e=document.getElementById(id);if(e)e.style.display="none";});},1000);
+})();
+</script>
 </body>
   </html>
 
