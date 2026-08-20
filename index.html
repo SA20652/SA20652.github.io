@@ -832,6 +832,10 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
 }
 @keyframes clickerFloat{0%{opacity:0;transform:translateY(8px) scale(.8)}20%{opacity:1}100%{opacity:0;transform:translateY(-46px) scale(1.05)}}
 </style>
+
+<style>
+.online-users-list{max-height:55vh;overflow:auto;margin-top:10px}.online-user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.online-user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 40px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1c1509}.online-user-avatar img{width:100%;height:100%;object-fit:cover}.online-user-name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis}.share-modal .input-modal{max-height:80vh;overflow:auto}.share-search{margin-top:10px}.share-amount-row{display:flex;gap:8px;margin-top:10px}.share-amount-row input{flex:1}.share-selected{font-weight:700;margin-top:8px}.menu-item[data-menu-action="share-orbs"]{color:var(--brass-2)}
+</style>
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
@@ -883,6 +887,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
+          <button class="menu-item" data-menu-action="share-orbs">💰 Поделиться орбами</button>
           <button class="menu-item" data-menu-tab="settings">Настройки</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
@@ -1186,6 +1191,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
   </div>
 </div>
 
+<div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>💰 Поделиться орбами</h3><div class="section-sub">Игроки, которые сейчас онлайн</div><input id="shareSearch" class="share-search" placeholder="Поиск игрока…" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <h3 id="spinCaseTitle">Сейф</h3>
@@ -2791,85 +2797,16 @@ function maybeDropKey(casePrice){
 // +1 монета за каждый подтверждённый клик. Локальная защита: >14 кликов/с
 // или непрерывный тапинг дольше 2 минут блокируется. Сервер повторяет проверки.
 const CLICKER_REWARD = 1;
-const CLICKER_MIN_INTERVAL = 50;
-const CLICKER_WINDOW_MS = 1000;
-const CLICKER_MAX_WINDOW_CLICKS = 17;
-const CLICKER_AREA_SIZE = 48;
-const CLICKER_AREA_MAX_CLICKS = 13;
-const CLICKER_MAX_SESSION_MS = 120000;
-const CLICKER_SESSION_GAP_MS = 2500;
-let clickerOpen=false, clickerLockedUntil=0, clickerLastAt=0;
-let clickerIntervals=[], clickerSessionStarted=0, clickerInFlight=0, clickerLocalCoins=0;
-let clickerAreaIntervals=[];
-
-function clickerSetStatus(text,error=false){
-  const el=document.getElementById('clickerStatus');
-  if(el){el.textContent=text;el.style.color=error?'var(--danger)':'var(--muted)';}
-}
-function clickerRender(){
-  const el=document.getElementById('clickerCoinsValue');
-  if(el) el.textContent=Number(clickerLocalCoins||0).toLocaleString('ru-RU');
-  const fill=document.getElementById('clickerProgressFill');
-  if(fill){
-    const now=Date.now(); clickerIntervals=clickerIntervals.filter(t=>now-t<CLICKER_WINDOW_MS);
-    fill.style.width=Math.min(100,clickerIntervals.length/CLICKER_MAX_WINDOW_CLICKS*100)+'%';
-  }
-}
-function openClicker(){
-  if(!data) return;
-  clickerOpen=true; clickerLocalCoins=0; clickerIntervals=[]; clickerAreaIntervals=[]; clickerLastAt=0; clickerSessionStarted=0; clickerLockedUntil=0; clickerInFlight=0;
-  clickerRender(); clickerSetStatus('До 13 кликов/с в одной области. Непрерывный тапинг дольше 2 минут блокируется.'); openModal('clickerModal');
-}
+let clickerOpen=false, clickerInFlight=0, clickerLocalCoins=0;
+function clickerSetStatus(text,error=false){const el=document.getElementById('clickerStatus');if(el){el.textContent=text;el.style.color=error?'var(--danger)':'var(--muted)';}}
+function clickerRender(){const el=document.getElementById('clickerCoinsValue');if(el)el.textContent=Number(clickerLocalCoins||0).toLocaleString('ru-RU');}
+function openClicker(){if(!data)return;clickerOpen=true;clickerLocalCoins=0;clickerInFlight=0;clickerRender();clickerSetStatus('Нажимай — за каждый клик начисляется 1 💰.');openModal('clickerModal');}
 function closeClicker(){clickerOpen=false;closeModal('clickerModal');}
-function clickerFloatReward(){
-  const orb=document.getElementById('clickerOrb'); if(!orb) return;
-  const r=orb.getBoundingClientRect(),el=document.createElement('div');
-  el.className='clicker-float';el.textContent='+1 💰';el.style.left=(r.left+r.width/2-18)+'px';el.style.top=(r.top+18)+'px';
-  document.body.appendChild(el);setTimeout(()=>el.remove(),500);
-}
-function clickerPoint(e){
-  const orb=document.getElementById('clickerOrb');
-  if(!orb) return {x:63,y:63,zone:'1:1'};
-  const r=orb.getBoundingClientRect();
-  const x=Math.max(0,Math.min(r.width-1,(e.clientX||r.left+r.width/2)-r.left));
-  const y=Math.max(0,Math.min(r.height-1,(e.clientY||r.top+r.height/2)-r.top));
-  return {x,y,zone:`${Math.floor(x/CLICKER_AREA_SIZE)}:${Math.floor(y/CLICKER_AREA_SIZE)}`};
-}
-function clickerAntiSpam(now, point){
-  if(document.hidden) return 'Кликер активен только когда приложение на экране.';
-  if(now<clickerLockedUntil) return `Кликер заблокирован ещё ${Math.ceil((clickerLockedUntil-now)/1000)} сек.`;
-  if(clickerLastAt && now-clickerLastAt>CLICKER_SESSION_GAP_MS) clickerSessionStarted=now;
-  if(!clickerSessionStarted) clickerSessionStarted=now;
-  if(now-clickerSessionStarted>=CLICKER_MAX_SESSION_MS){clickerLockedUntil=now+10000;return 'Более 2 минут без перерыва — анти-автокликер сработал. Сделай паузу.';}
-  clickerIntervals=clickerIntervals.filter(t=>now-t<CLICKER_WINDOW_MS);
-  clickerAreaIntervals=clickerAreaIntervals.filter(v=>now-v.t<CLICKER_WINDOW_MS);
-  const sameArea=clickerAreaIntervals.filter(v=>v.zone===point.zone);
-  if(sameArea.length>=CLICKER_AREA_MAX_CLICKS){clickerLockedUntil=now+3000;return 'Больше 13 нажатий в секунду в одной области — анти-автокликер сработал.';}
-  if(clickerLastAt && now-clickerLastAt<CLICKER_MIN_INTERVAL) return '';
-  return '';
-}
-async function clickerClaim(e){
-  if(!data) return;
-  const now=Date.now(), point=clickerPoint(e), reason=clickerAntiSpam(now,point);
-  if(reason){clickerSetStatus(reason,true);clickerRender();return;}
-  clickerLastAt=now; clickerIntervals.push(now); clickerAreaIntervals.push({t:now,zone:point.zone}); clickerInFlight++;
-  clickerLocalCoins+=CLICKER_REWARD; clickerRender(); clickerFloatReward(); updateBalanceUI();
-  const requestId=(crypto?.randomUUID?crypto.randomUUID():`click-${now}-${Math.random().toString(36).slice(2)}`);
-  try{
-    if(!tgInitData()) throw new Error('Кликер доступен только внутри Telegram.');
-    const j=await apiFetch('/api/clicker/claim',{request_id:requestId,x:point.x,y:point.y});
-    if(j && Number.isFinite(Number(j.balance))) data.balance=Number(j.balance);
-    clickerSetStatus('Зачислено +1 монета.'); persistLocal(); updateBalanceUI();
-  }catch(e){
-    clickerLocalCoins=Math.max(0,clickerLocalCoins-CLICKER_REWARD);
-    clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);
-    if(e.message&&/17|2 минут|автокликер/i.test(e.message)) clickerLockedUntil=Date.now()+5000;
-  }finally{clickerInFlight=Math.max(0,clickerInFlight-1);clickerRender();}
-}
+function clickerFloatReward(){const orb=document.getElementById('clickerOrb');if(!orb)return;const r=orb.getBoundingClientRect(),el=document.createElement('div');el.className='clicker-float';el.textContent='+1 💰';el.style.left=(r.left+r.width/2-18)+'px';el.style.top=(r.top+18)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),500);}
+async function clickerClaim(e){if(!data)return;clickerInFlight++;clickerLocalCoins+=CLICKER_REWARD;clickerRender();clickerFloatReward();updateBalanceUI();const requestId=(crypto?.randomUUID?crypto.randomUUID():`click-${Date.now()}-${Math.random().toString(36).slice(2)}`);try{const j=await apiFetch('/api/clicker/claim',{request_id:requestId});if(j&&Number.isFinite(Number(j.balance)))data.balance=Number(j.balance);clickerSetStatus('Зачислено +1 монета.');persistLocal();updateBalanceUI();}catch(e){clickerLocalCoins=Math.max(0,clickerLocalCoins-CLICKER_REWARD);clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);}finally{clickerInFlight=Math.max(0,clickerInFlight-1);clickerRender();}}
 document.getElementById('clickerOrb')?.addEventListener('pointerdown',e=>{e.preventDefault();clickerClaim(e);});
 document.getElementById('balancePlusBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openClicker();});
 document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicker);
-setInterval(()=>{if(clickerOpen)clickerRender();},250);
 
 async function openCase(caseId, useKey=false){
   if(spinning) return;
@@ -4240,6 +4177,15 @@ function renderAll(){
   updateSettingsUI();
 }
 
+let shareTarget=null;
+async function openShareOrbs(){shareTarget=null;document.getElementById('shareSelected').textContent='';document.getElementById('shareAmountRow').style.display='none';document.getElementById('shareAmount').value='';openModal('shareOrbsModal');await loadOnlineUsers();}
+async function loadOnlineUsers(){const list=document.getElementById('onlineUsersList');if(!list)return;list.innerHTML='<div class="section-sub">Загрузка…</div>';try{const j=await apiFetch('/api/online-users',{search:document.getElementById('shareSearch')?.value||''});const users=j.users||[];list.innerHTML=users.length?users.map(u=>{const n=(u.display_name||u.username||'Игрок').replace(/"/g,'&quot;');const av=u.avatar?`<img src="${u.avatar}" alt="">`:(n[0]||'И');return `<div class="online-user-row"><div class="online-user-avatar">${av}</div><div class="online-user-name">${n}</div><button class="btn-ghost" data-share-user="${u.user_id}">Поделиться</button></div>`}).join(''):'<div class="section-sub">Сейчас онлайн никого нет.</div>';}catch(e){list.innerHTML='<div class="section-sub">❌ '+(e.message||'Не удалось загрузить игроков')+'</div>';}}
+function selectShareUser(uid,name){shareTarget={uid:Number(uid),name};document.getElementById('shareSelected').textContent='Получатель: '+name;document.getElementById('shareAmountRow').style.display='flex';document.getElementById('shareAmount').focus();}
+async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.getElementById('shareAmount').value);if(!Number.isInteger(amount)||amount<1){toast('Введите целое число орбов');return;}const btn=document.getElementById('shareSendBtn');btn.disabled=true;try{const j=await apiFetch('/api/orbs/transfer',{user_id:shareTarget.uid,amount});data.balance=Number(j.balance||0);persistLocal();updateBalanceUI();toast(`Отправлено ${amount.toLocaleString('ru-RU')} 💰 игроку ${shareTarget.name}`);closeModal('shareOrbsModal');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
+document.getElementById('shareSearch')?.addEventListener('input',()=>loadOnlineUsers());
+document.getElementById('onlineUsersList')?.addEventListener('click',e=>{const b=e.target.closest('[data-share-user]');if(b)selectShareUser(b.dataset.shareUser,b.parentElement.querySelector('.online-user-name')?.textContent||'Игрок');});
+document.getElementById('shareSendBtn')?.addEventListener('click',sendOrbs);document.getElementById('shareCloseBtn')?.addEventListener('click',()=>closeModal('shareOrbsModal'));
+
 function handleButton(button, e){
   const action=button.dataset.action || '';
 
@@ -4250,6 +4196,7 @@ function handleButton(button, e){
   }
   if(button.matches('.nav-btn')){ switchTab(button.dataset.tab); return; }
   if(button.matches('.top-tab') || action==='top-sort'){ renderLeaderboard(button.dataset.topSort||'cases'); return; }
+  if(button.dataset.menuAction==='share-orbs'){ if(e){e.preventDefault();e.stopPropagation();} document.getElementById('menuPanel')?.classList.remove('open'); openShareOrbs(); return; }
   if(button.matches('[data-menu-tab]')){
     const tab=button.dataset.menuTab;
     // Кнопка меню — кликабельна всей площадью, а не только по тексту.
