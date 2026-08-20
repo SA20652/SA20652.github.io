@@ -795,6 +795,42 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
 @keyframes gdPageInStrong{from{opacity:0;transform:translateY(14px) scale(.985);filter:blur(3px)}55%{opacity:1;transform:translateY(-1px) scale(1.002);filter:blur(0)}to{opacity:1;transform:none}}
 @keyframes gdAmbientDrift{from{transform:translate3d(-2%, -1%,0) scale(.96)}to{transform:translate3d(2%,2%,0) scale(1.05)}}
 @keyframes gdSweep{to{transform:rotate(360deg)}}
+
+/* ===== CLICKER ===== */
+.balance-chip{position:relative}
+.balance-plus-btn{
+  width:22px;height:22px;border:1px solid var(--line);border-radius:50%;
+  background:var(--bg-2);color:var(--brass-2);font-weight:900;font-size:16px;
+  line-height:18px;padding:0;margin-left:2px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .12s ease,background .12s ease,border-color .12s ease;
+}
+.balance-plus-btn:hover{background:var(--bg-1);border-color:var(--brass-2)}
+.balance-plus-btn:active{transform:scale(.9)}
+.clicker-modal{max-width:430px;width:calc(100% - 28px);text-align:center}
+.clicker-balance{
+  margin:14px auto 8px;padding:18px;border:1px solid var(--line);
+  border-radius:18px;background:linear-gradient(145deg,var(--bg-3),var(--bg-2));
+}
+.clicker-balance-value{font-size:32px;font-weight:900;color:var(--brass-2)}
+.clicker-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.clicker-orb{
+  width:150px;height:150px;border-radius:50%;margin:20px auto 14px;
+  border:2px solid var(--brass-2);background:radial-gradient(circle at 35% 30%,var(--bg-1),var(--bg-3));
+  box-shadow:0 0 0 7px rgba(255,255,255,.025),0 14px 45px rgba(0,0,0,.28);
+  color:var(--brass-2);font-size:46px;cursor:pointer;user-select:none;
+  -webkit-user-select:none;touch-action:manipulation;transition:transform .08s ease,filter .12s ease;
+}
+.clicker-orb:active{transform:scale(.94);filter:brightness(1.15)}
+.clicker-orb.disabled{opacity:.55;cursor:not-allowed}
+.clicker-progress{height:5px;border-radius:999px;background:var(--bg-3);overflow:hidden;margin:10px 0 8px}
+.clicker-progress>div{height:100%;width:0%;background:var(--brass-2);transition:width .12s linear}
+.clicker-status{min-height:18px;font-size:12px;color:var(--muted)}
+.clicker-float{
+  position:fixed;pointer-events:none;font-weight:900;color:var(--brass-2);
+  animation:clickerFloat .7s ease-out forwards;z-index:99999;
+}
+@keyframes clickerFloat{0%{opacity:0;transform:translateY(8px) scale(.8)}20%{opacity:1}100%{opacity:0;transform:translateY(-46px) scale(1.05)}}
 </style>
 </head>
 <body>
@@ -842,7 +878,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         <div class="brand-name" onclick="handleSecretTap()">GDPLAY</div>
       </div>
       <div class="header-right">
-        <div class="balance-chip">💰 <span id="balanceDisplay">0</span></div>
+        <div class="balance-chip" id="balanceChip">💰 <span id="balanceDisplay">0</span><button type="button" class="balance-plus-btn" id="balancePlusBtn" aria-label="Заработать монеты" title="Заработать монеты">+</button></div>
         
         <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
         <div class="menu-panel" id="menuPanel">
@@ -1132,6 +1168,21 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       <button class="btn" id="upgradeCloseBtn" style="width:100%;margin-top:16px">Готово</button>
     </div>
     <button class="btn-ghost" id="upgradeCancelBtn" style="width:100%;margin-top:8px">Закрыть</button>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="clickerModal">
+  <div class="input-modal clicker-modal">
+    <h3>💰 Монетный кликер</h3>
+    <div class="clicker-balance">
+      <div class="clicker-balance-value"><span id="clickerCoinsValue">0</span> 💰</div>
+      <div class="clicker-sub">+0,25 монеты за честный клик · награда подтверждается сервером</div>
+    </div>
+    <button type="button" class="clicker-orb" id="clickerOrb" aria-label="Кликнуть">💰</button>
+    <div class="clicker-progress"><div id="clickerProgressFill"></div></div>
+    <div class="clicker-status" id="clickerStatus">Нажимай в нормальном темпе — слишком частые клики блокируются.</div>
+    <button type="button" class="btn-ghost" id="clickerCloseBtn" style="width:100%;margin-top:14px">Закрыть</button>
   </div>
 </div>
 
@@ -2507,7 +2558,7 @@ function renderCases(){
       return `<span class="chip" style="background:${hexA(m.color,.16)};color:${m.color}">${m.icon} ${it.chance}%</span>`;
     }).join('');
     const qty = caseOpenQty[c.id] || 1;
-    const affordable = data.balance >= c.price*qty;
+    const balanceNow = Number(data?.balance); const totalPrice = Number(c.price)*qty; const affordable = Number.isFinite(balanceNow) && balanceNow >= totalPrice;
     return `
       <div class="case-card">
         <div class="case-card-top">
@@ -2524,7 +2575,7 @@ function renderCases(){
             ${[1,2,3].map(n=>`<button type="button" class="case-qty-btn ${qty===n?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="${n}">${n}</button>`).join('')}
           </div>
         </div>
-        <button type="button" class="btn open-case-btn" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?`Открыть ${qty>1?'×'+qty+' — '+(c.price*qty).toLocaleString('ru-RU')+' 💰':'сейф'}`:'Недостаточно монет'}</button>
+        <button type="button" class="btn open-case-btn" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?`Открыть ${qty>1?'×'+qty+' — '+totalPrice.toLocaleString('ru-RU')+' 💰':'сейф'}`:`Не хватает ${Math.max(0,totalPrice-(Number.isFinite(balanceNow)?balanceNow:0)).toLocaleString('ru-RU')} монет`}</button>
       </div>`;
   }).join('');
   renderRecentDrops();
@@ -2735,6 +2786,103 @@ function maybeDropKey(casePrice){
   return key;
 }
 
+
+// ===== COIN CLICKER =====
+// Клиентская защита снижает spam/auto-clicker, но не заменяет серверную.
+// В Telegram награда должна подтверждаться /api/clicker/claim.
+const CLICKER_REWARD = 0.25;
+const CLICKER_MIN_INTERVAL = 180;
+const CLICKER_WINDOW_MS = 3000;
+const CLICKER_MAX_WINDOW_CLICKS = 12;
+const CLICKER_MAX_BURST = 4;
+let clickerOpen = false, clickerLockedUntil = 0, clickerLastAt = 0;
+let clickerIntervals = [], clickerBurst = 0, clickerBurstStarted = 0;
+let clickerBusy = false, clickerLocalCoins = 0;
+
+function clickerSetStatus(text,error=false){
+  const el=document.getElementById('clickerStatus');
+  if(el){el.textContent=text;el.style.color=error?'var(--danger)':'var(--muted)';}
+}
+function clickerRender(){
+  const el=document.getElementById('clickerCoinsValue');
+  if(el) el.textContent=Number(clickerLocalCoins||0).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fill=document.getElementById('clickerProgressFill');
+  if(fill){
+    const now=Date.now();
+    const active=clickerIntervals.filter(t=>now-t<CLICKER_WINDOW_MS).length;
+    fill.style.width=Math.min(100,active/CLICKER_MAX_WINDOW_CLICKS*100)+'%';
+  }
+}
+function openClicker(){
+  if(!data) return;
+  clickerOpen=true; clickerLocalCoins=0; clickerIntervals=[]; clickerBurst=0;
+  clickerLastAt=0; clickerLockedUntil=0; clickerRender();
+  clickerSetStatus('Нажимай в нормальном темпе — слишком частые клики блокируются.');
+  openModal('clickerModal');
+}
+function closeClicker(){clickerOpen=false;closeModal('clickerModal');}
+function clickerFloatReward(){
+  const orb=document.getElementById('clickerOrb'); if(!orb) return;
+  const r=orb.getBoundingClientRect(), el=document.createElement('div');
+  el.className='clicker-float'; el.textContent='+0,25 💰';
+  el.style.left=(r.left+r.width/2-25)+'px'; el.style.top=(r.top+20)+'px';
+  document.body.appendChild(el); setTimeout(()=>el.remove(),750);
+}
+function clickerAntiSpam(now){
+  if(document.hidden) return 'Кликер активен только когда приложение на экране.';
+  if(now<clickerLockedUntil) return `Слишком быстро. Подожди ${Math.ceil((clickerLockedUntil-now)/1000)} сек.`;
+  if(clickerLastAt && now-clickerLastAt<CLICKER_MIN_INTERVAL){
+    clickerLockedUntil=now+700; return 'Слишком быстрые клики — антиспам сработал.';
+  }
+  clickerIntervals=clickerIntervals.filter(t=>now-t<CLICKER_WINDOW_MS);
+  if(clickerIntervals.length>=CLICKER_MAX_WINDOW_CLICKS){
+    clickerLockedUntil=now+2500; return 'Слишком много кликов подряд — небольшая пауза.';
+  }
+  if(now-clickerBurstStarted>1200){clickerBurst=0;clickerBurstStarted=now;}
+  if(!clickerBurstStarted) clickerBurstStarted=now;
+  clickerBurst++;
+  if(clickerBurst>CLICKER_MAX_BURST){
+    clickerLockedUntil=now+1800; clickerBurst=0;
+    return 'Подозрительно быстрый темп — кликер временно заблокирован.';
+  }
+  return '';
+}
+async function clickerClaim(){
+  if(clickerBusy || !data) return;
+  const now=Date.now(), reason=clickerAntiSpam(now);
+  if(reason){clickerSetStatus(reason,true);clickerRender();return;}
+  clickerBusy=true; clickerLastAt=now; clickerIntervals.push(now); clickerRender();
+  const orb=document.getElementById('clickerOrb'); if(orb) orb.classList.add('disabled');
+  try{
+    if(tgInitData()){
+      const requestId=(crypto?.randomUUID ? crypto.randomUUID() : `click-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const j=await apiFetch('/api/clicker/claim',{request_id:requestId});
+      if(j && Number.isFinite(Number(j.balance))) data.balance=Number(j.balance);
+      clickerLocalCoins+=CLICKER_REWARD; updateBalanceUI(); persistLocal();
+    }else{
+      throw new Error('Кликер доступен только внутри Telegram, где награда подтверждается сервером.');
+    }
+    clickerLocalCoins+=CLICKER_REWARD;
+    updateBalanceUI(); persistLocal();
+    if(Number(j?.credited||0)>0){
+      clickerSetStatus('Зачислено +0,25 монеты. Целая монета добавлена в кошелёк.');
+    }else{
+      const q=Number(j?.quarter_progress||0);
+      clickerSetStatus(`Зачислено +0,25 монеты. Накоплено ${q}/4 до целой монеты.`);
+    }
+    clickerFloatReward();
+  }catch(e){clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);}
+  finally{clickerBusy=false;if(orb)orb.classList.remove('disabled');clickerRender();}
+}
+document.getElementById('clickerOrb')?.addEventListener('pointerdown',e=>{
+  if(e.isPrimary!==false){e.preventDefault();clickerClaim();}
+});
+document.getElementById('balancePlusBtn')?.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();openClicker();
+});
+document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicker);
+setInterval(()=>{if(clickerOpen)clickerRender();},250);
+
 async function openCase(caseId, useKey=false){
   if(spinning) return;
   const c = CASES.find(x=>x.id===caseId);
@@ -2744,8 +2892,9 @@ async function openCase(caseId, useKey=false){
     showToast('❌ Ключ открывает только один сейф за раз','error');
     return;
   }
-  if(!useKey && data.balance < c.price*qty){
-    showToast('❌ Недостаточно монет', 'error');
+  if(!useKey && (!Number.isFinite(Number(data.balance)) || Number(data.balance) < Number(c.price)*qty)){
+    const missing = Math.max(0, Number(c.price)*qty - (Number.isFinite(Number(data.balance)) ? Number(data.balance) : 0));
+    showToast(`❌ Не хватает ${missing.toLocaleString('ru-RU')} монет`, 'error');
     return;
   }
   if(qty === 1){
@@ -2782,7 +2931,8 @@ async function openCaseBatch(c, qty, useKey=false){
     if(tgInitData()){
       // One atomic server call returns the three authoritative drops.
       // No individual response can be reused for another reel.
-      const j = await apiFetch('/api/cube/open-batch', {case_id: c.id, qty, use_key:!!useKey});
+      const requestId = (crypto?.randomUUID ? crypto.randomUUID() : `open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const j = await apiFetch('/api/cube/open-batch', {case_id: c.id, qty, use_key:!!useKey, request_id:requestId});
       if(!Array.isArray(j.drops) || j.drops.length !== qty){
         throw new Error('Сервер вернул некорректные результаты кейсов');
       }
@@ -2903,7 +3053,8 @@ async function openCaseOnce(c, seq, total, useKey=false){
       // The authoritative result is requested BEFORE the animation is built.
       // This guarantees that the wheel, result card and credited cube all
       // refer to exactly the same server-selected item/value.
-      const j = await apiFetch('/api/cube/open', {case_id: c.id, use_key: !!useKey});
+      const requestId = (crypto?.randomUUID ? crypto.randomUUID() : `open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const j = await apiFetch('/api/cube/open', {case_id: c.id, use_key: !!useKey, request_id: requestId});
       if(!j.drop) throw new Error('Сервер не вернул результат кейса');
       won = {
         name: j.drop.name,
