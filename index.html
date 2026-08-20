@@ -834,7 +834,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
 </style>
 
 <style>
-.online-users-list{max-height:55vh;overflow:auto;margin-top:10px}.online-user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.online-user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 40px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1c1509}.online-user-avatar img{width:100%;height:100%;object-fit:cover}.online-user-name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis}.share-modal .input-modal{max-height:80vh;overflow:auto}.share-search{margin-top:10px}.share-amount-row{display:flex;gap:8px;margin-top:10px}.share-amount-row input{flex:1}.share-selected{font-weight:700;margin-top:8px}.menu-item[data-menu-action="share-orbs"]{color:#fff !important;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;width:100%;min-height:44px;padding:11px 12px;margin:0;line-height:20px;}
+.online-users-list{max-height:55vh;overflow:auto;margin-top:10px}.online-user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.online-user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 40px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1c1509}.online-user-avatar img{width:100%;height:100%;object-fit:cover}.online-user-name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis}.share-modal .input-modal{max-height:80vh;overflow:auto}.share-search{margin-top:10px}.share-amount-row{display:flex;gap:8px;margin-top:10px}.share-amount-row input{flex:1}.share-selected{font-weight:700;margin-top:8px}.menu-item[data-menu-action="share-orbs"]{color:#fff !important;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;text-overflow:clip;box-sizing:border-box;width:100%;height:44px;min-height:44px;padding:0 14px;margin:0;line-height:44px;font-size:14px;font-weight:600;border:0;}
 </style>
 </head>
 <body>
@@ -2794,16 +2794,16 @@ function maybeDropKey(casePrice){
 
 
 // ===== COIN CLICKER =====
-// +1 монета за каждый подтверждённый клик. Локальная защита: >14 кликов/с
-// или непрерывный тапинг дольше 2 минут блокируется. Сервер повторяет проверки.
+// +1 монета за каждый подтверждённый клик. 2 минуты активности (паузы до 10с
+// не сбрасывают сессию) -> бан кликера на 1 час. Дневной лимит 4000 монет.
 const CLICKER_REWARD = 1;
 let clickerOpen=false, clickerInFlight=0, clickerLocalCoins=0;
 function clickerSetStatus(text,error=false){const el=document.getElementById('clickerStatus');if(el){el.textContent=text;el.style.color=error?'var(--danger)':'var(--muted)';}}
 function clickerRender(){const el=document.getElementById('clickerCoinsValue');if(el)el.textContent=Number(clickerLocalCoins||0).toLocaleString('ru-RU');}
-function openClicker(){if(!data)return;clickerOpen=true;clickerLocalCoins=0;clickerInFlight=0;clickerRender();clickerSetStatus('Нажимай — за каждый клик начисляется 1 💰.');openModal('clickerModal');}
+function openClicker(){if(!data)return;clickerOpen=true;clickerLocalCoins=0;clickerInFlight=0;clickerRender();clickerSetStatus('За клик +1 💰. Лимит кликера — 4 000 монет в день.');openModal('clickerModal');}
 function closeClicker(){clickerOpen=false;closeModal('clickerModal');}
 function clickerFloatReward(){const orb=document.getElementById('clickerOrb');if(!orb)return;const r=orb.getBoundingClientRect(),el=document.createElement('div');el.className='clicker-float';el.textContent='+1 💰';el.style.left=(r.left+r.width/2-18)+'px';el.style.top=(r.top+18)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),500);}
-async function clickerClaim(e){if(!data)return;clickerInFlight++;clickerLocalCoins+=CLICKER_REWARD;clickerRender();clickerFloatReward();updateBalanceUI();const requestId=(crypto?.randomUUID?crypto.randomUUID():`click-${Date.now()}-${Math.random().toString(36).slice(2)}`);try{const j=await apiFetch('/api/clicker/claim',{request_id:requestId});if(j&&Number.isFinite(Number(j.balance)))data.balance=Number(j.balance);clickerSetStatus('Зачислено +1 монета.');persistLocal();updateBalanceUI();}catch(e){clickerLocalCoins=Math.max(0,clickerLocalCoins-CLICKER_REWARD);clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);}finally{clickerInFlight=Math.max(0,clickerInFlight-1);clickerRender();}}
+async function clickerClaim(e){if(!data)return;clickerInFlight++;clickerLocalCoins+=CLICKER_REWARD;clickerRender();clickerFloatReward();updateBalanceUI();const requestId=(crypto?.randomUUID?crypto.randomUUID():`click-${Date.now()}-${Math.random().toString(36).slice(2)}`);try{const j=await apiFetch('/api/clicker/claim',{request_id:requestId});if(j&&Number.isFinite(Number(j.balance)))data.balance=Number(j.balance);clickerSetStatus(Number(j.daily_earned)>=4000?'Достигнут дневной лимит кликера: 4 000 монет.':'Зачислено +1 монета.');persistLocal();updateBalanceUI();}catch(e){clickerLocalCoins=Math.max(0,clickerLocalCoins-CLICKER_REWARD);clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);}finally{clickerInFlight=Math.max(0,clickerInFlight-1);clickerRender();}}
 document.getElementById('clickerOrb')?.addEventListener('pointerdown',e=>{e.preventDefault();clickerClaim(e);});
 document.getElementById('balancePlusBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openClicker();});
 document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicker);
