@@ -486,7 +486,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .menu-item{display:flex;width:100%;min-height:44px;box-sizing:border-box;padding:11px 12px;align-items:center;text-align:left;background:transparent;border:0;color:var(--paper);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;position:relative;z-index:1;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 .menu-item:hover{background:var(--bg-3);}
 .menu-item:active{background:var(--bg-3);transform:none;}
-.menu-panel{pointer-events:auto;isolation:isolate;}
+.menu-panel{pointer-events:auto;isolation:isolate;box-sizing:border-box;width:220px;overflow:hidden;}
 .profile-head{display:flex;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:var(--radius);padding:17px;margin-bottom:12px;box-shadow:var(--shadow);}
 .profile-avatar-wrap{position:relative;flex-shrink:0;}
 .profile-avatar{margin:0;width:76px;height:76px;overflow:hidden;}
@@ -834,7 +834,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
 </style>
 
 <style>
-.online-users-list{max-height:55vh;overflow:auto;margin-top:10px}.online-user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.online-user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 40px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1c1509}.online-user-avatar img{width:100%;height:100%;object-fit:cover}.online-user-name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis}.share-modal .input-modal{max-height:80vh;overflow:auto}.share-search{margin-top:10px}.share-amount-row{display:flex;gap:8px;margin-top:10px}.share-amount-row input{flex:1}.share-selected{font-weight:700;margin-top:8px}.menu-item[data-menu-action="share-orbs"]{color:var(--brass-2)}
+.online-users-list{max-height:55vh;overflow:auto;margin-top:10px}.online-user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.online-user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 40px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1c1509}.online-user-avatar img{width:100%;height:100%;object-fit:cover}.online-user-name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis}.share-modal .input-modal{max-height:80vh;overflow:auto}.share-search{margin-top:10px}.share-amount-row{display:flex;gap:8px;margin-top:10px}.share-amount-row input{flex:1}.share-selected{font-weight:700;margin-top:8px}.menu-item[data-menu-action="share-orbs"]{color:#fff !important;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;width:100%;min-height:44px;padding:11px 12px;margin:0;line-height:20px;}
 </style>
 </head>
 <body>
@@ -887,7 +887,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
-          <button class="menu-item" data-menu-action="share-orbs">💰 Поделиться орбами</button>
+          <button class="menu-item" data-menu-action="share-orbs">Поделиться орбами</button>
           <button class="menu-item" data-menu-tab="settings">Настройки</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
@@ -1191,7 +1191,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
   </div>
 </div>
 
-<div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>💰 Поделиться орбами</h3><div class="section-sub">Игроки, которые сейчас онлайн</div><input id="shareSearch" class="share-search" placeholder="Поиск игрока…" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
+<div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Поделиться орбами</h3><div class="section-sub">Игроки, которые сейчас онлайн</div><input id="shareSearch" class="share-search" placeholder="Поиск игрока…" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <h3 id="spinCaseTitle">Сейф</h3>
