@@ -1447,7 +1447,7 @@ const CASES = [
     {name:"Trick",rarity:"legendary",value:1040000,chance:8.67},
     {name:"Nnfret",rarity:"mythic",value:1000000,chance:3.9},
     {name:"nSwish",rarity:"divine",value:4875000,chance:2.07},
-    {name:"Kuro",rarity:"emerald",value:17100000,chance:1.39},{name:"squezzy",rarity:"emerald",value:1,chance:1.39}
+    {name:"Kuro",rarity:"emerald",value:17100000,chance:1.39},{name:"squezzy",rarity:"common",value:500000,chance:82}
   ]},
 ];
 
@@ -4765,16 +4765,20 @@ boot();
 })();
 
 async function loadImportantNotifications(){
+ const el=document.getElementById('notificationsList');
  try{
-  if(typeof getAuthData!=='function') return;
-  const auth=getAuthData()||{};
+  if(el) el.innerHTML='Загрузка уведомлений...';
+  const auth=(typeof getAuthData==='function'?getAuthData():window.__tgInit)||{};
   const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(auth)});
+  if(!r.ok) throw new Error('HTTP '+r.status);
   const d=await r.json();
-  const el=document.getElementById('notificationsList');
-  if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title}</b><br>${n.text}</div>`).join('')||'Нет важных уведомлений';
+  if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
   const badge=document.getElementById('importantNotifBadge');
-  if(badge) badge.style.display=(d.unread||0)>0?'block':'none';
- }catch(e){ console.log('notifications error',e); }
+  if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
+ }catch(e){
+  if(el) el.innerHTML='Не удалось загрузить уведомления';
+  console.log('notifications error',e);
+ }
 }
 setInterval(loadImportantNotifications,5000);
 window.addEventListener('load',loadImportantNotifications);
