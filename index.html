@@ -4773,6 +4773,11 @@ setInterval(loadImportantNotifications,15000);
 </script>
 
 
-</body>
+<script>
+// Important notifications badge + music state
+const importantNotifications = JSON.parse(localStorage.getItem('importantNotifications')||'[]');
+function saveMusicState(playing,track){localStorage.setItem('musicState',JSON.stringify({playing:!!playing,track:track||''}));}
+function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||'{"playing":false,"track":""}');}
+</script></body>
   </html>
 
