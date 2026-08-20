@@ -4699,7 +4699,7 @@ boot();
 
   async function updateImportantNotifBadge(){
     try{
-      const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(getAuthData?getAuthData():{})});
+      const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(window.__tgInit||{})});
       const d=await r.json();
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
@@ -4766,16 +4766,18 @@ boot();
 
 async function loadImportantNotifications(){
  try{
-  const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(getAuthData?getAuthData():{})});
+  if(typeof getAuthData!=='function') return;
+  const auth=getAuthData()||{};
+  const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(auth)});
   const d=await r.json();
   const el=document.getElementById('notificationsList');
-  if(!el)return;
-  el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title}</b><br>${n.text}</div>`).join('')||'Нет важных уведомлений';
-  await fetch('/api/notifications/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(getAuthData?getAuthData():{})});
-  const badge=document.getElementById('importantNotifBadge'); if(badge) badge.style.display='none';
- }catch(e){}
+  if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title}</b><br>${n.text}</div>`).join('')||'Нет важных уведомлений';
+  const badge=document.getElementById('importantNotifBadge');
+  if(badge) badge.style.display=(d.unread||0)>0?'block':'none';
+ }catch(e){ console.log('notifications error',e); }
 }
-setInterval(loadImportantNotifications,15000);
+setInterval(loadImportantNotifications,5000);
+window.addEventListener('load',loadImportantNotifications);
 </script>
 
 
