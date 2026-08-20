@@ -898,9 +898,9 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         </div>
         <div class="settings-music-controls">
           <label class="settings-range-row">
-            <span>Громкость</span><output id="menuMusicVolumeValue">42%</output>
+            <span>Громкость</span><output id="menuMusicVolumeValue">100%</output>
           </label>
-          <input id="menuMusicVolume" class="settings-range" type="range" min="0" max="100" step="1" value="42" aria-label="Громкость музыки">
+          <input id="menuMusicVolume" class="settings-range" type="range" min="0" max="100" step="1" value="100" aria-label="Громкость музыки">
           <div class="settings-music-actions">
             <button type="button" class="btn-ghost music-action-btn" id="menuMusicNext">Следующая</button>
             <button type="button" class="btn-ghost music-action-btn" id="menuMusicLoopToggle" aria-pressed="false">Зациклить: выкл.</button>
@@ -4265,12 +4265,34 @@ boot();
   let audioCtx=null;
   function ctx(){ if(!audioCtx){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; audioCtx=new C(); } if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{}); return audioCtx; }
   function tone(freq,dur,type='sine',gain=.045,delay=0){ if(!soundOn()) return; const c=ctx(); if(!c) return; try{ const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.setValueAtTime(freq,c.currentTime+delay); g.gain.setValueAtTime(.0001,c.currentTime+delay); g.gain.exponentialRampToValueAtTime(gain,c.currentTime+delay+.015); g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+delay+dur); o.connect(g);g.connect(c.destination);o.start(c.currentTime+delay);o.stop(c.currentTime+delay+dur+.03);}catch(_){} }
-  function sfx(kind){ if(!soundOn()) return; const patterns={click:[[520,.06,'triangle',.025]],success:[[660,.08,'sine',.035],[880,.12,'sine',.035,.07]],error:[[170,.12,'sawtooth',.025],[120,.14,'sawtooth',.02,.08]],open:[[330,.08,'triangle',.03],[495,.08,'triangle',.035,.08],[660,.18,'sine',.04,.16]],upgrade:[[440,.06,'triangle',.03],[554,.06,'triangle',.03,.06],[740,.18,'sine',.04,.12]],sell:[[620,.07,'triangle',.025],[780,.1,'sine',.03,.07]],battle:[[260,.07,'square',.02],[330,.07,'square',.025,.07],[440,.13,'triangle',.035,.14]],freeze:[[740,.08,'sine',.025],[980,.12,'sine',.03,.08]]}; (patterns[kind]||patterns.click).forEach(x=>tone(...x)); }
+  function sfx(kind){ if(!soundOn()) return; const patterns={
+    click:[[520,.06,'triangle',.025]],
+    hover:[[740,.045,'sine',.012]],
+    tab:[[380,.045,'triangle',.018],[570,.07,'sine',.016,.035]],
+    toggle:[[440,.055,'triangle',.02],[660,.08,'sine',.024,.045]],
+    whoosh:[[180,.10,'sine',.018],[360,.12,'triangle',.022,.045],[620,.14,'sine',.014,.09]],
+    success:[[660,.08,'sine',.035],[880,.12,'sine',.035,.07],[1040,.16,'sine',.025,.13]],
+    error:[[170,.12,'sawtooth',.025],[120,.14,'sawtooth',.02,.08]],
+    open:[[330,.08,'triangle',.03],[495,.08,'triangle',.035,.08],[660,.18,'sine',.04,.16]],
+    upgrade:[[440,.06,'triangle',.03],[554,.06,'triangle',.03,.06],[740,.18,'sine',.04,.12]],
+    sell:[[620,.07,'triangle',.025],[780,.1,'sine',.03,.07]],
+    battle:[[260,.07,'square',.02],[330,.07,'square',.025,.07],[440,.13,'triangle',.035,.14]],
+    freeze:[[740,.08,'sine',.025],[980,.12,'sine',.03,.08]]
+  }; (patterns[kind]||patterns.click).forEach(x=>tone(...x)); }
   window.gdSfx=sfx;
 
-  function getMusicVolume(){ const n=Number(localStorage.getItem(MENU_MUSIC_VOLUME_KEY)); return Number.isFinite(n)?Math.max(0,Math.min(1,n)):0.42; }
-  function getMusicLoop(){ return localStorage.getItem(MENU_MUSIC_LOOP_KEY)==='1'; }
-  function setMusicVolume(v){ v=Math.max(0,Math.min(1,Number(v))); localStorage.setItem(MENU_MUSIC_VOLUME_KEY,String(v)); if(menuAudio && !menuAudio.__fading) menuAudio.volume=v; updateMusicUI(); }
+  function getMusicDisplayVolume(){
+    const n=Number(localStorage.getItem(MENU_MUSIC_VOLUME_KEY));
+    return Number.isFinite(n)?Math.max(0,Math.min(1,n)):1;
+  }
+  // UI shows 0–100%, while real music output is intentionally capped at 25%.
+  function getMusicVolume(){ return getMusicDisplayVolume()*0.25; }
+  function setMusicVolume(v){
+    v=Math.max(0,Math.min(1,Number(v)));
+    localStorage.setItem(MENU_MUSIC_VOLUME_KEY,String(v));
+    if(menuAudio && !menuAudio.__fading) menuAudio.volume=getMusicVolume();
+    updateMusicUI();
+  }
   function setMusicLoop(v){ localStorage.setItem(MENU_MUSIC_LOOP_KEY,v?'1':'0'); updateMusicUI(); }
 
   function ensureAudio(){
@@ -4297,7 +4319,7 @@ boot();
     if(btn) btn.textContent=playing?'⏸️':'▶️';
     if(card) card.classList.toggle('music-playing',playing);
     const vol=document.getElementById('menuMusicVolume'); const out=document.getElementById('menuMusicVolumeValue');
-    const vp=Math.round(getMusicVolume()*100);
+    const vp=Math.round(getMusicDisplayVolume()*100);
     if(vol && document.activeElement!==vol) vol.value=String(vp);
     if(out) out.textContent=vp+'%';
     const loopBtn=document.getElementById('menuMusicLoopToggle');
@@ -4438,6 +4460,54 @@ boot();
   window.addEventListener('pointerdown',firstGesture,true); window.addEventListener('keydown',firstGesture,true);
   updateMusicUI();
 })();
+
+/* ============ EXTRA POLISH: CLEAN TABS + MICRO FEEDBACK ============ */
+(function(){
+  function cleanVisibleEscapedNewlines(root){
+    if(!root) return;
+    const walker=document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes=[];
+    while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node=>{
+      if(typeof node.nodeValue==='string' && /\\n/.test(node.nodeValue)){
+        node.nodeValue=node.nodeValue.replace(/\\n+/g,' ');
+      }
+    });
+  }
+  function cleanActivePage(){
+    document.querySelectorAll('.page').forEach(cleanVisibleEscapedNewlines);
+  }
+  function addAmbientOrbs(){
+    if(document.querySelector('.gd-ambient-orb')) return;
+    const a=document.createElement('div'), b=document.createElement('div');
+    a.className='gd-ambient-orb orb-a';
+    b.className='gd-ambient-orb orb-b';
+    a.style.left='7vw'; a.style.top='18vh';
+    b.style.right='8vw'; b.style.bottom='16vh';
+    document.body.append(a,b);
+  }
+  function installFeedback(){
+    document.addEventListener('click', e=>{
+      const nav=e.target.closest?.('.nav-btn');
+      if(nav){ window.gdSfx?.('tab'); return; }
+      const toggle=e.target.closest?.('button[id*="Toggle"], input[type="checkbox"]');
+      if(toggle){ window.gdSfx?.('toggle'); return; }
+      const action=e.target.closest?.('button, .btn, .btn-ghost');
+      if(action && !action.disabled) window.gdSfx?.('click');
+    }, true);
+    document.addEventListener('pointerover', e=>{
+      const el=e.target.closest?.('button, .btn, .btn-ghost');
+      if(el && !el.__gdHoverSound){ el.__gdHoverSound=true; window.gdSfx?.('hover'); }
+    }, true);
+  }
+  const boot=()=>{
+    cleanActivePage(); addAmbientOrbs(); installFeedback();
+    const observer=new MutationObserver(()=>cleanActivePage());
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+})();
 </script>\n
 
 </body>
@@ -4450,4 +4520,87 @@ boot();
 .inv-item[data-cube-index]{position:relative!important;padding-right:58px!important;}
 .inv-subitem{position:relative!important;padding-top:48px!important;}
 .inv-subitem .inv-actions{padding-right:0!important;justify-content:flex-start!important;}
+
+/* ============ POLISHED MOTION / AUDIO FEEDBACK ============ */
+@media (prefers-reduced-motion: no-preference){
+  .page.active{
+    animation: gdPageIn .42s cubic-bezier(.22,1,.36,1) both;
+  }
+  .nav-btn{
+    transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s ease, background .28s ease;
+  }
+  .nav-btn:hover{ transform: translateY(-3px); filter: brightness(1.12); }
+  .nav-btn:active{ transform: translateY(0) scale(.96); }
+  .nav-btn.active span{
+    animation: gdNavPop .5s cubic-bezier(.22,1,.36,1);
+  }
+  .settings-music-card{
+    position:relative;
+    overflow:hidden;
+    transition: transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s ease;
+  }
+  .settings-music-card:hover{ transform: translateY(-3px); box-shadow: 0 18px 45px rgba(0,0,0,.22); }
+  .settings-music-card::after{
+    content:"";
+    position:absolute;
+    inset:-40%;
+    pointer-events:none;
+    background: radial-gradient(circle, rgba(227,184,114,.14), transparent 58%);
+    opacity:0;
+    transform:scale(.75);
+    transition:opacity .5s ease, transform .8s cubic-bezier(.22,1,.36,1);
+  }
+  .settings-music-card.music-playing::after{
+    opacity:1;
+    transform:scale(1.05);
+    animation: gdMusicAura 2.8s ease-in-out infinite;
+  }
+  .settings-music-disc{
+    transition: transform .6s cubic-bezier(.22,1,.36,1), filter .5s ease;
+  }
+  .settings-music-card.music-playing .settings-music-disc{
+    animation: gdDiscSpin 7s linear infinite;
+    filter: drop-shadow(0 0 14px rgba(227,184,114,.32));
+  }
+  .settings-music-actions .music-action-btn,
+  .settings-music-play{
+    transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, filter .25s ease;
+  }
+  .settings-music-actions .music-action-btn:hover,
+  .settings-music-play:hover{ transform: translateY(-2px) scale(1.025); filter: brightness(1.08); }
+  .settings-music-actions .music-action-btn:active,
+  .settings-music-play:active{ transform: scale(.96); }
+  .settings-range{
+    transition: filter .25s ease;
+  }
+  .settings-range:hover{ filter: brightness(1.08); }
+  @keyframes gdPageIn{
+    from{opacity:0; transform:translateY(9px) scale(.992); filter:blur(2px)}
+    to{opacity:1; transform:none; filter:none}
+  }
+  @keyframes gdNavPop{
+    0%{transform:scale(.8) rotate(-8deg)}
+    60%{transform:scale(1.16) rotate(3deg)}
+    100%{transform:scale(1) rotate(0)}
+  }
+  @keyframes gdDiscSpin{to{transform:rotate(360deg)}}
+  @keyframes gdMusicAura{
+    0%,100%{opacity:.55; transform:scale(.94)}
+    50%{opacity:1; transform:scale(1.08)}
+  }
+  .gd-ambient-orb{
+    position:fixed;
+    width:110px;height:110px;border-radius:50%;
+    pointer-events:none; z-index:0;
+    opacity:.07;
+    filter:blur(28px);
+    background:radial-gradient(circle, rgba(227,184,114,.9), transparent 68%);
+    animation:gdOrbFloat 9s ease-in-out infinite;
+  }
+  .gd-ambient-orb.orb-b{width:80px;height:80px;animation-delay:-4s;animation-duration:11s}
+  @keyframes gdOrbFloat{
+    0%,100%{transform:translate3d(0,0,0) scale(.9)}
+    50%{transform:translate3d(18px,-22px,0) scale(1.08)}
+  }
+}
 </style>
