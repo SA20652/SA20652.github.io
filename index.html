@@ -4699,7 +4699,7 @@ boot();
 
   async function updateImportantNotifBadge(){
     try{
-      const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(window.__tgInit||{})});
+      const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(getAuthData?getAuthData():{})});
       const d=await r.json();
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
