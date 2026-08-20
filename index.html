@@ -696,6 +696,8 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
   margin-bottom:12px;
 }
 
+.notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
+.menu-has-notifications{position:relative;}
 </style>
 
 <!-- GDPLAY embedded promo image -->
@@ -898,11 +900,12 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       <div class="header-right">
         <div class="balance-chip" id="balanceChip">💰 <span id="balanceDisplay">0</span><button type="button" class="balance-plus-btn" id="balancePlusBtn" aria-label="Заработать монеты" title="Заработать монеты">+</button></div>
         
-        <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
+        <button class="menu-btn" id="menuBtn" title="Меню">☰<span id="importantNotifBadge" class="notif-badge"></span></button>
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
           <button class="menu-item" data-menu-action="share-orbs">Поделиться орбами</button>
-          <button class="menu-item" data-menu-tab="settings">Настройки</button>
+          <button class="menu-item" id="notificationsMenuBtn" data-menu-tab="notifications">🔔 Уведомления</button>
+<button class="menu-item" data-menu-tab="settings">Настройки</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
       </div>
@@ -1048,7 +1051,12 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
     </div>
 
     <!-- SETTINGS -->
-    <div class="page" id="page-settings">
+    <div class="page" id="page-notifications">
+<div class="section-title">🔔 Важные уведомления</div>
+<div class="section-sub">Только события, которые требуют внимания</div>
+<div id="notificationsList" class="admin-card">Загрузка...</div>
+</div>
+<div class="page" id="page-settings">
       <div class="section-title">Настройки</div>
       <div class="settings-music-card" id="menuMusicCard">
         <div class="settings-music-head">
@@ -4478,6 +4486,7 @@ boot();
   const MENU_MUSIC_KEY = 'gdplay_menu_music_v4';
   const MENU_MUSIC_VOLUME_KEY = 'gdplay_menu_music_volume_v2';
   const MENU_MUSIC_LOOP_KEY = 'gdplay_menu_music_loop_v2';
+  const MENU_MUSIC_PLAY_KEY = 'gdplay_menu_music_playing_v1';
   let menuTracks = [EMBEDDED_TRACK];
   let menuTrackIndex = 0;
   let menuAudio = null;
@@ -4574,6 +4583,7 @@ boot();
   }
 
   async function playTrack(){
+    localStorage.setItem(MENU_MUSIC_PLAY_KEY,'1');
     if(!soundOn()) return;
     const a=ensureAudio(); if(!a?.src) return;
     musicFadeToken++;
@@ -4584,6 +4594,7 @@ boot();
   }
 
   async function pauseTrack(){
+    localStorage.setItem(MENU_MUSIC_PLAY_KEY,'0');
     const a=menuAudio; if(!a) return;
     const token=++musicFadeToken;
     const from=a.volume, start=performance.now(); a.__fading=true;
@@ -4681,9 +4692,21 @@ boot();
   });
   document.getElementById('menuMusicFile')?.addEventListener('change',e=>{ addTracks(e.target.files); e.target.value=''; });
 
+
+  async function updateImportantNotifBadge(){
+    try{
+      const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(window.__tgInit||{})});
+      const d=await r.json();
+      const b=document.getElementById('importantNotifBadge');
+      if(b) b.style.display=(d.notifications&&d.notifications.length)?'block':'none';
+    }catch(e){}
+  }
+  updateImportantNotifBadge();
+
   let savedTrack=Number(localStorage.getItem(MENU_MUSIC_KEY));
   if(Number.isInteger(savedTrack) && savedTrack>=0 && savedTrack<menuTracks.length) menuTrackIndex=savedTrack;
   updateMusicUI();
+  if(localStorage.getItem(MENU_MUSIC_PLAY_KEY)==='1'){ setTimeout(()=>{ try{playTrack();}catch(e){} },300); }
   window.addEventListener('pointerdown',firstGesture,true); window.addEventListener('keydown',firstGesture,true);
   updateMusicUI();
 })();
@@ -4736,6 +4759,17 @@ boot();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 })();
+
+async function loadImportantNotifications(){
+ try{
+  const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(getAuthData?getAuthData():{})});
+  const d=await r.json();
+  const el=document.getElementById('notificationsList');
+  if(!el)return;
+  el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title}</b><br>${n.text}</div>`).join('')||'Нет важных уведомлений';
+ }catch(e){}
+}
+setInterval(loadImportantNotifications,15000);
 </script>
 
 
