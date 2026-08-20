@@ -780,6 +780,17 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
   }
 }
 
+
+/* === MAX PARTICLE FIELD === */
+#gdParticleCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:block;mix-blend-mode:screen;opacity:.96}
+body{position:relative}
+body > *:not(#gdParticleCanvas):not(.gd-motion-glow):not(.gd-ambient-orb){position:relative;z-index:1}
+.gd-motion-glow{z-index:0!important;opacity:.38!important}
+.gd-ambient-orb{z-index:0!important;opacity:.16!important;filter:blur(22px)!important}
+@keyframes gdScreenPulse{0%,100%{opacity:.72}50%{opacity:1}}
+#gdParticleCanvas{animation:gdScreenPulse 4.5s ease-in-out infinite}
+body.reduce-motion #gdParticleCanvas{animation:none;opacity:.45}
+
 /* === FINAL POLISH: stronger smooth motion + ambient UI === */
 .gd-motion-glow{position:fixed;inset:-20%;pointer-events:none;z-index:0;opacity:.22;background:radial-gradient(circle at 20% 20%,rgba(227,184,114,.12),transparent 28%),radial-gradient(circle at 80% 75%,rgba(75,210,170,.08),transparent 26%);animation:gdAmbientDrift 16s ease-in-out infinite alternate;}
 .page,.card,.daily-card,.tip-card,.settings-row,.settings-music-card,.nav-btn{will-change:transform,opacity,filter;}
@@ -4618,6 +4629,74 @@ boot();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 })();
+
+
+/* === EXTRA VISIBLE ANIMATED PARTICLES === */
+(function(){
+  function startParticleField(){
+    if(document.getElementById('gdParticleCanvas')) return;
+    const c=document.createElement('canvas'); c.id='gdParticleCanvas';
+    document.body.prepend(c);
+    const ctx=c.getContext('2d'); if(!ctx) return;
+    let w=0,h=0,dpr=1, particles=[], streaks=[], raf=0, last=performance.now();
+    let mx=0,my=0, tx=0,ty=0;
+    const reduce=()=>document.body.classList.contains('reduce-motion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rand=(a,b)=>a+Math.random()*(b-a);
+    function resize(){
+      dpr=Math.min(devicePixelRatio||1,2); w=innerWidth; h=innerHeight;
+      c.width=Math.floor(w*dpr); c.height=Math.floor(h*dpr); c.style.width=w+'px'; c.style.height=h+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const count=Math.min(280, Math.max(130, Math.floor(w*h/7000)));
+      particles=Array.from({length:count},()=>({
+        x:rand(0,w),y:rand(0,h),r:rand(.8,2.8),a:rand(.35,1),
+        hue:Math.random()<.55?rand(255,305):rand(185,225),
+        vx:rand(-.16,.16),vy:rand(-.28,.28),tw:rand(0,Math.PI*2),ts:rand(.012,.035),
+        layer:rand(.25,1),phase:rand(0,Math.PI*2)
+      }));
+      streaks=Array.from({length:Math.min(24,Math.max(10,Math.floor(w/80)))},()=>({
+        x:rand(-w,w),y:rand(0,h),len:rand(25,90),speed:rand(1.2,3.5),alpha:rand(.35,.9),width:rand(1,2.8),phase:rand(0,10)
+      }));
+    }
+    function draw(now){
+      const dt=Math.min(32,now-last); last=now;
+      ctx.clearRect(0,0,w,h);
+      tx+=(mx-tx)*.025; ty+=(my-ty)*.025;
+      const motion=!reduce();
+      // luminous haze
+      const g1=ctx.createRadialGradient(w*.18+tx*.015,h*.22+ty*.015,0,w*.18,h*.22,Math.min(w,h)*.34);
+      g1.addColorStop(0,'rgba(190,70,255,.11)'); g1.addColorStop(1,'rgba(190,70,255,0)'); ctx.fillStyle=g1; ctx.fillRect(0,0,w,h);
+      const g2=ctx.createRadialGradient(w*.82-tx*.02,h*.72-ty*.02,0,w*.82,h*.72,Math.min(w,h)*.38);
+      g2.addColorStop(0,'rgba(30,120,255,.10)'); g2.addColorStop(1,'rgba(30,120,255,0)'); ctx.fillStyle=g2; ctx.fillRect(0,0,w,h);
+      // particles + halos
+      for(let i=0;i<particles.length;i++){
+        const p=particles[i];
+        if(motion){p.x+=p.vx*dt;p.y+=p.vy*dt;p.tw+=p.ts*dt}
+        if(p.x<-10)p.x=w+10;if(p.x>w+10)p.x=-10;if(p.y<-10)p.y=h+10;if(p.y>h+10)p.y=-10;
+        const pulse=.55+.45*Math.sin(p.tw+p.phase), a=p.a*pulse;
+        const px=p.x+tx*.025*p.layer, py=p.y+ty*.025*p.layer;
+        if(p.r>1.5){ctx.beginPath();ctx.arc(px,py,p.r*3.5,0,Math.PI*2);ctx.fillStyle=`hsla(${p.hue},100%,65%,${a*.10})`;ctx.fill()}
+        ctx.beginPath();ctx.arc(px,py,p.r*(.72+.3*pulse),0,Math.PI*2);ctx.fillStyle=`hsla(${p.hue},100%,78%,${a})`;ctx.fill();
+        if(p.r>2.2){ctx.beginPath();ctx.moveTo(px-p.r*4,py);ctx.lineTo(px+p.r*4,py);ctx.moveTo(px,py-p.r*4);ctx.lineTo(px,py+p.r*4);ctx.strokeStyle=`hsla(${p.hue},100%,80%,${a*.42})`;ctx.lineWidth=1;ctx.stroke()}
+      }
+      // occasional bright shooting streaks
+      ctx.lineCap='round';
+      for(const s of streaks){
+        if(motion){s.x+=s.speed*dt*.08;s.y+=s.speed*dt*.03}
+        if(s.x>w+120 || s.y>h+80){s.x=rand(-180,-30);s.y=rand(0,h*.85)}
+        const grad=ctx.createLinearGradient(s.x,s.y,s.x-s.len,s.y-s.len*.28);
+        grad.addColorStop(0,`rgba(255,255,255,${s.alpha})`);grad.addColorStop(.18,`rgba(120,170,255,${s.alpha*.65})`);grad.addColorStop(1,'rgba(120,80,255,0)');
+        ctx.strokeStyle=grad;ctx.lineWidth=s.width;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.len,s.y-s.len*.28);ctx.stroke();
+      }
+      raf=requestAnimationFrame(draw);
+    }
+    addEventListener('resize',resize,{passive:true});
+    addEventListener('pointermove',e=>{mx=(e.clientX-w/2);my=(e.clientY-h/2)},{passive:true});
+    resize(); raf=requestAnimationFrame(draw);
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf)}else{last=performance.now();raf=requestAnimationFrame(draw)}});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startParticleField,{once:true}); else startParticleField();
+})();
+
 </script>
 
 
