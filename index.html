@@ -2355,7 +2355,7 @@ window.loadImportantNotifications = async function(){
   if(!box) return;
   box.textContent = 'Загрузка...';
   try{
-    const d = await apiFetch('/api/notifications', {method:'POST'});
+    const d = await apiFetch('/api/notifications', {});
     const list = Array.isArray(d.notifications) ? d.notifications : [];
     if(!list.length){
       box.innerHTML = '<div class="empty-state">Нет важных уведомлений</div>';
@@ -2369,7 +2369,7 @@ window.loadImportantNotifications = async function(){
         <div class="notif-date">${escapeHtml(date)}</div>
       </div>`;
     }).join('');
-    await apiFetch('/api/notifications/read', {method:'POST'});
+    await apiFetch('/api/notifications/read', {});
     const badge=document.getElementById('importantNotifBadge');
     if(badge) badge.style.display='none';
   }catch(e){
@@ -3513,7 +3513,7 @@ async function confirmUpgrade(){
         stake:Number(upgradeStake||0)
       };
       if(upgradeSource.kind==='key') payload.source_key_id=String(upgradeSource.ref?.id||'');
-      else { payload.cube_id=Number(upgradeSource.ref?.id); payload.index=Number(upgradeSource.index); }
+      else { payload.cube_id=Number(upgradeSource.ref?.id || upgradeSource.ref?.uid || 0); payload.index=Number(upgradeSource.index); }
       j=await apiFetch('/api/upgrade',payload);
       // В интерфейсе апгрейдера шанс всегда означает шанс ПОБЕДЫ.
       // Колесо и результат используют тот же самый шанс, что показан игроку.
@@ -4743,7 +4743,7 @@ boot();
   let lastNotificationIds=new Set();
   async function updateImportantNotifBadge(){
     try{
-      const d=await apiFetch('/api/notifications', {method:'POST'});
+      const d=await apiFetch('/api/notifications', {});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
       (d.notifications||[]).filter(n=>(!n.type || String(n.type)==='important')).forEach(n=>{
@@ -4817,7 +4817,7 @@ async function loadImportantNotifications(){
  const el=document.getElementById('notificationsList');
  try{
   if(el) el.innerHTML='Загрузка уведомлений...';
-  const d=await apiFetch('/api/notifications', {method:'POST'});
+  const d=await apiFetch('/api/notifications', {});
   if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
   const badge=document.getElementById('importantNotifBadge');
   if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
@@ -4847,7 +4847,7 @@ function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||
 
   async function loadImportantNotifications(){
     try{
-      const d = await apiFetch('/api/notifications', {method:'POST'});
+      const d = await apiFetch('/api/notifications', {});
       const list = Array.isArray(d.notifications) ? d.notifications : [];
       const important = list.filter(n => !n.type || n.type === 'important');
 
