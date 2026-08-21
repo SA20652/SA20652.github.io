@@ -4533,6 +4533,7 @@ boot();
     if(menuAudio && !menuAudio.__fading) menuAudio.volume=getMusicVolume();
     updateMusicUI();
   }
+  function getMusicLoop(){ return localStorage.getItem(MENU_MUSIC_LOOP_KEY)==='1'; }
   function setMusicLoop(v){ localStorage.setItem(MENU_MUSIC_LOOP_KEY,v?'1':'0'); updateMusicUI(); }
 
   function ensureAudio(){
@@ -4699,7 +4700,7 @@ boot();
 
   async function updateImportantNotifBadge(){
     try{
-      const d=await apiFetch('/api/notifications',{});
+      const d=await apiFetch('/api/notifications', {method:'POST'});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
     }catch(e){}
@@ -4767,7 +4768,7 @@ async function loadImportantNotifications(){
  const el=document.getElementById('notificationsList');
  try{
   if(el) el.innerHTML='Загрузка уведомлений...';
-  const d=await apiFetch('/api/notifications',{});
+  const d=await apiFetch('/api/notifications', {method:'POST'});
   if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
   const badge=document.getElementById('importantNotifBadge');
   if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
