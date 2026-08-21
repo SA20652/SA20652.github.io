@@ -4798,6 +4798,68 @@ window.addEventListener('load',loadImportantNotifications);
 const importantNotifications = JSON.parse(localStorage.getItem('importantNotifications')||'[]');
 function saveMusicState(playing,track){localStorage.setItem('musicState',JSON.stringify({playing:!!playing,track:track||''}));}
 function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||'{"playing":false,"track":""}');}
-</script></body>
+</script>
+<script>
+(function(){
+  let lastNotifIds = new Set();
+
+  function escapeNotif(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+
+  async function loadImportantNotifications(){
+    try{
+      const d = await apiFetch('/api/notifications', {method:'POST'});
+      const list = Array.isArray(d.notifications) ? d.notifications : [];
+      const important = list.filter(n => !n.type || n.type === 'important');
+
+      const box = document.getElementById('notificationsList');
+      if(box){
+        box.innerHTML = important.length ? important.map(n =>
+          `<div class="admin-card" style="margin-bottom:8px">
+             <b>🔔 ${escapeNotif(n.title)}</b><br>
+             <span>${escapeNotif(n.text)}</span>
+           </div>`
+        ).join('') : 'Нет важных уведомлений';
+      }
+
+      for(const n of important){
+        if(!lastNotifIds.has(n.id)){
+          if(lastNotifIds.size){
+            showImportantToast(`🔔 ${n.title}: ${n.text}`);
+          }
+          lastNotifIds.add(n.id);
+        }
+      }
+      if(lastNotifIds.size > 100) lastNotifIds = new Set([...lastNotifIds].slice(-50));
+
+      const badge=document.getElementById('importantNotifBadge');
+      if(badge) badge.style.display = Number(d.unread||0)>0 ? 'block':'none';
+    }catch(e){
+      console.warn('notifications error', e);
+    }
+  }
+
+  function showImportantToast(text){
+    let t=document.createElement('div');
+    t.style.cssText='position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:99999;background:#221d19;color:#ece4d3;border:1px solid #c9974d;border-radius:12px;padding:12px 16px;max-width:90%;font-size:14px;box-shadow:0 8px 30px #000;';
+    t.textContent=text;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),4500);
+  }
+
+  window.loadImportantNotifications = loadImportantNotifications;
+  document.addEventListener('DOMContentLoaded', ()=>{
+    loadImportantNotifications();
+    setInterval(loadImportantNotifications, 10000);
+  });
+
+  document.addEventListener('click', e=>{
+    const b=e.target.closest('[data-menu-tab="notifications"]');
+    if(b) setTimeout(loadImportantNotifications,100);
+  });
+})();
+</script>
+</body>
   </html>
 
