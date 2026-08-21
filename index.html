@@ -411,7 +411,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .market-form input{width:100%;box-sizing:border-box;}
 
 /* ===== KEYS / UPGRADE STAKE ===== */
-.key-item{border-left-color:var(--brass)!important;}
+.key-item{display:none!important;border-left-color:var(--brass)!important;}
 .key-badge{font-size:11px;font-weight:700;color:var(--brass-2);background:rgba(201,151,77,.12);padding:3px 7px;border-radius:7px;}
 .upgrade-stake{margin-top:12px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:12px;}
 .upgrade-fast-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 0;padding:10px 12px;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;}
@@ -2965,7 +2965,7 @@ async function openCaseBatch(c, qty, useKey=false){
   openModal('spinModal');
 
   const spins = wins.map((won,i)=>{
-    const wonIndex = c.items.findIndex(it=>it.name===won.name);
+    const wonIndex = c.items.findIndex(it=>it.name===won.name && Number(it.value)===Number(won.value));
     const dial = document.getElementById(`wheelDialM${i}`);
     const wrap = document.getElementById(`wheelWrapM${i}`);
     buildWheelIn(dial, c.items, wonIndex, won.value, won);
@@ -3065,7 +3065,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
 
   // The wheel target is the actual server-selected drop, never a local roll.
   const isSecret = false;
-  const wonIndex = c.items.findIndex(it=>it.name===won.name);
+  const wonIndex = c.items.findIndex(it=>it.name===won.name && Number(it.value)===Number(won.value));
   if(wonIndex < 0){
     showToast('❌ Сервер вернул предмет, которого нет в каталоге кейса','error');
     spinning = false;
@@ -3431,6 +3431,7 @@ function refreshUpgradeChance(){
   document.getElementById('upgradeStakeValue').textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
 }
 function openUpgradeModal(index,kind='cube'){
+  if(kind==='key'){ showToast('❌ Ключи нельзя улучшать','error'); return; }
   const idx=Number(index);
   if(kind==='key'){
     if(isNaN(idx)||idx<0||idx>=data.keys.length){showToast('❌ Ключ не найден','error');return;}
@@ -3447,7 +3448,7 @@ function openUpgradeModal(index,kind='cube'){
 function renderUpgradeCatalog(filter){
   const source=getUpgradeSource(); if(!source) return;
   const q=(filter||'').trim().toLowerCase();
-  const list=UPGRADE_CATALOG.filter(it=>it.name.toLowerCase().includes(q) && !(it.kind===upgradeSource.kind && it.name===source.name && Number(it.value)===Number(source.value)));
+  const list=UPGRADE_CATALOG.filter(it=>it.kind!=='key' && it.name.toLowerCase().includes(q) && !(it.kind===upgradeSource.kind && it.name===source.name && Number(it.value)===Number(source.value)));
   const box=document.getElementById('upgradeCatalogList');
   if(!list.length){box.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
   box.innerHTML=list.map(it=>{
@@ -3461,7 +3462,8 @@ function renderUpgradeCatalog(filter){
 }
 function selectUpgradeTarget(name,rarity,value,kind='cube',keyId=''){
   const source=getUpgradeSource(); if(!source) return;
-  upgradeTarget={kind,name,rarity,value:Number(value),id:keyId};
+  if(kind==='key'){ showToast('❌ Ключи нельзя получать через апгрейд','error'); return; }
+  upgradeTarget={kind:'cube',name,rarity,value:Number(value),id:''};
   const sm=RARITY_META[source.rarity]||RARITY_META.common, tm=RARITY_META[rarity]||RARITY_META.common;
   document.getElementById('upgradeSourceName').textContent=(upgradeSource.kind==='key'?'🗝️ ':'')+source.name;
   document.getElementById('upgradeSourceName').style.color=sm.color;
@@ -3558,7 +3560,7 @@ async function confirmUpgrade(){
     pointer.style.transition='none'; pointer.style.transform='rotate(0deg)'; void pointer.offsetWidth; pointer.style.transition='';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const finalAngle=360*4+(Number(j.roll||Math.random()*100)/100)*360-90;
+    const finalAngle=360*4+(Number(j.roll||0)/100)*360-90;
     requestAnimationFrame(()=>{
       pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
       pointer.style.transform=`rotate(${finalAngle}deg)`;
