@@ -4701,7 +4701,7 @@ boot();
 
   async function updateImportantNotifBadge(){
     try{
-      const d=await apiFetch('/api/notifications', {method:'POST'});
+      const d=await apiFetch('/api/notifications', {});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
     }catch(e){}
@@ -4765,12 +4765,21 @@ boot();
   else boot();
 })();
 
+const seenImportantNotifications = new Set();
 async function loadImportantNotifications(){
  const el=document.getElementById('notificationsList');
  try{
   if(el) el.innerHTML='Загрузка уведомлений...';
-  const d=await apiFetch('/api/notifications', {method:'POST'});
-  if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
+  const d=await apiFetch('/api/notifications', {});
+  const list = d.notifications || [];
+  list.filter(n=>Number(n.read||0)===0).slice(0,5).forEach(n=>{
+    const id=String(n.id||'');
+    if(id && !seenImportantNotifications.has(id)){
+      seenImportantNotifications.add(id);
+      showToast(`🔔 ${n.text||n.title||'Новое важное уведомление'}`, 'success');
+    }
+  });
+  if(el) el.innerHTML=list.map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
   const badge=document.getElementById('importantNotifBadge');
   if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
  }catch(e){
