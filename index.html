@@ -4715,7 +4715,7 @@ boot();
       const d=await apiFetch('/api/notifications', {method:'POST'});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
-      (d.notifications||[]).filter(n=>String(n.type||'')==='important').forEach(n=>{
+      (d.notifications||[]).filter(n=>(!n.type || String(n.type)==='important')).forEach(n=>{
         if(!lastNotificationIds.has(n.id)){
           if(n.read===0) showToastSafe('🔔 '+(n.text||n.title||'Новое уведомление'),'success');
           lastNotificationIds.add(n.id);
@@ -4723,7 +4723,7 @@ boot();
       });
     }catch(e){}
   }
-  updateImportantNotifBadge();
+  updateImportantNotifBadge(); setInterval(updateImportantNotifBadge, 3000);
 
   let savedTrack=Number(localStorage.getItem(MENU_MUSIC_KEY));
   if(Number.isInteger(savedTrack) && savedTrack>=0) menuTrackIndex=savedTrack;
@@ -4867,6 +4867,43 @@ function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||
   });
 })();
 </script>
+
+<script>
+// Final notifications menu fix: load only when opening the ☰ -> Уведомления page
+(function(){
+  async function refreshMenuNotifications(){
+    const box=document.getElementById('notificationsList');
+    if(!box) return;
+    try{
+      const d=await apiFetch('/api/notifications',{method:'POST'});
+      const list=Array.isArray(d.notifications)?d.notifications:[];
+      box.innerHTML=list.length?list.map(n=>`
+        <div class="buff-card" style="margin-bottom:8px">
+          <b>🔔 ${String(n.title||'Уведомление')}</b><br>
+          ${String(n.text||'')}
+        </div>`).join(''):'Нет уведомлений';
+    }catch(e){
+      box.innerHTML='Не удалось загрузить уведомления';
+    }
+  }
+  window.refreshMenuNotifications=refreshMenuNotifications;
+  document.addEventListener('click',e=>{
+    if(e.target.closest('[data-menu-tab="notifications"]')){
+      setTimeout(refreshMenuNotifications,100);
+    }
+  });
+})();
+</script>
 </body>
   </html>
 
+
+<style>
+/* Keys disabled globally */
+.key-item,.key-badge,[data-key],.upgrade-key,.required-key,.key-requirement{display:none!important;}
+</style>
+<script>
+(function(){
+ const oldText=(document.body.innerHTML||'');
+})();
+</script>
