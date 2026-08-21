@@ -4709,11 +4709,18 @@ boot();
   document.getElementById('menuMusicFile')?.addEventListener('change',e=>{ addTracks(e.target.files); e.target.value=''; });
 
 
+  let lastNotificationIds=new Set();
   async function updateImportantNotifBadge(){
     try{
       const d=await apiFetch('/api/notifications', {method:'POST'});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
+      (d.notifications||[]).filter(n=>String(n.type||'')==='important').forEach(n=>{
+        if(!lastNotificationIds.has(n.id)){
+          if(n.read===0) showToastSafe('🔔 '+(n.text||n.title||'Новое уведомление'),'success');
+          lastNotificationIds.add(n.id);
+        }
+      });
     }catch(e){}
   }
   updateImportantNotifBadge();
