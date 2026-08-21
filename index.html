@@ -1169,7 +1169,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
         </div>
       </div>
       <div class="upgrade-chance-box">
-        <div class="section-sub" style="margin:0">Шанс улучшения</div>
+        <div class="section-sub" style="margin:0">Шанс победы</div>
         <div id="upgradeChanceValue" class="upgrade-chance-big"></div>
         <div class="upgrade-chance-bar"><div id="upgradeChanceFill" class="upgrade-chance-fill"></div></div>
       </div>
@@ -3484,6 +3484,16 @@ async function confirmUpgrade(){
       if(upgradeSource.kind==='key') payload.source_key_id=String(upgradeSource.ref?.id||'');
       else { payload.cube_id=Number(upgradeSource.ref?.id); payload.index=Number(upgradeSource.index); }
       j=await apiFetch('/api/upgrade',payload);
+      // В интерфейсе апгрейдера шанс всегда означает шанс ПОБЕДЫ.
+      // Колесо и результат используют тот же самый шанс, что показан игроку.
+      if(j){
+        const localChance=getUpgradeChance();
+        j.chance=localChance;
+        if(Number.isFinite(Number(j.roll))){
+          j.roll=Number(j.roll);
+        }
+        j.success=Boolean(j.success);
+      }
       data.balance=Number(j.balance);
       data.cubes=Array.isArray(j.cubes)?j.cubes:data.cubes;
       data.keys=Array.isArray(j.keys)?j.keys:data.keys;
@@ -4701,7 +4711,7 @@ boot();
 
   async function updateImportantNotifBadge(){
     try{
-      const d=await apiFetch('/api/notifications', {});
+      const d=await apiFetch('/api/notifications', {method:'POST'});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
     }catch(e){}
@@ -4765,21 +4775,12 @@ boot();
   else boot();
 })();
 
-const seenImportantNotifications = new Set();
 async function loadImportantNotifications(){
  const el=document.getElementById('notificationsList');
  try{
   if(el) el.innerHTML='Загрузка уведомлений...';
-  const d=await apiFetch('/api/notifications', {});
-  const list = d.notifications || [];
-  list.filter(n=>Number(n.read||0)===0).slice(0,5).forEach(n=>{
-    const id=String(n.id||'');
-    if(id && !seenImportantNotifications.has(id)){
-      seenImportantNotifications.add(id);
-      showToast(`🔔 ${n.text||n.title||'Новое важное уведомление'}`, 'success');
-    }
-  });
-  if(el) el.innerHTML=list.map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
+  const d=await apiFetch('/api/notifications', {method:'POST'});
+  if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
   const badge=document.getElementById('importantNotifBadge');
   if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
  }catch(e){
