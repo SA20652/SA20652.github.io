@@ -2363,6 +2363,7 @@ function switchTab(tab){
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
   if(tab==='cases') renderCases();
+  if(tab==='notifications') window.loadImportantNotifications?.();
 }
 
 function updateBalanceUI(){
