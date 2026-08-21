@@ -4906,7 +4906,7 @@ function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||
     const box=document.getElementById('notificationsList');
     if(!box) return;
     try{
-      const d=await apiFetch('/api/notifications',{method:'POST'});
+      const d=await apiFetch('/api/notifications',{});
       const list=Array.isArray(d.notifications)?d.notifications:[];
       box.innerHTML=list.length?list.map(n=>`
         <div class="buff-card" style="margin-bottom:8px">
