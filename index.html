@@ -4699,8 +4699,7 @@ boot();
 
   async function updateImportantNotifBadge(){
     try{
-      const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(window.__tgInit||{})});
-      const d=await r.json();
+      const d=await apiFetch('/api/notifications',{});
       const b=document.getElementById('importantNotifBadge');
       if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
     }catch(e){}
@@ -4768,10 +4767,7 @@ async function loadImportantNotifications(){
  const el=document.getElementById('notificationsList');
  try{
   if(el) el.innerHTML='Загрузка уведомлений...';
-  const auth=(typeof getAuthData==='function'?getAuthData():window.__tgInit)||{};
-  const r=await fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(auth)});
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const d=await r.json();
+  const d=await apiFetch('/api/notifications',{});
   if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
   const badge=document.getElementById('importantNotifBadge');
   if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
