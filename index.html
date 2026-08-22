@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>GDPLAY — Плинко</title>
+<title>GDPLAY</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1211,7 +1211,7 @@ window.lockUpgradeResult=function(result,angle){
   margin:10px auto 13px;
   border-radius:50%;
   isolation:isolate;
-  filter:drop-shadow(0 20px 35px rgba(0,0,0,.42));
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.32));
 }
 .upgrade-gauge-wrap::before{
   content:"";
@@ -1231,7 +1231,7 @@ window.lockUpgradeResult=function(result,angle){
   border-radius:50%;
   border:1px dashed rgba(236,228,211,.12);
   pointer-events:none;
-  animation:gdUpgradeOrbit 16s linear infinite;
+  animation:none;
 }
 @keyframes gdUpgradeOrbit{to{transform:rotate(360deg)}}
 
@@ -1679,53 +1679,20 @@ window.lockUpgradeResult=function(result,angle){
 </style>
 
 
-<style id="gdplay-case-ladder-and-opening-v4">
-/* === CASE LADDER V4: always visible, bottom of every case === */
-.bot-case-ladder{position:relative;margin:2px 0 14px;padding:10px 0 2px;overflow:hidden;}
-.bot-case-ladder-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px;font:800 8px 'IBM Plex Mono',monospace;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
-.bot-case-ladder-head b{color:var(--brass-2);font-size:8px;}
-.bot-case-ladder-track{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 7px;scroll-behavior:smooth;}
-.bot-case-ladder-track::-webkit-scrollbar{display:none;}
-.bot-case-ladder-item{flex:0 0 78px;height:76px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(0,0,0,.18));border:1px solid rgba(236,228,211,.08);transition:transform .35s ease,opacity .35s ease,border-color .35s ease,box-shadow .35s ease;opacity:.52;transform:scale(.94);}
-.bot-case-ladder-item .ladder-icon{font-size:22px;line-height:1;margin-bottom:5px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4));}
-.bot-case-ladder-item .ladder-name{max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;font-weight:800;}
-.bot-case-ladder-item .ladder-value{font:800 8px 'IBM Plex Mono',monospace;margin-top:3px;color:var(--muted);}
-.bot-case-ladder-item.active{opacity:1;transform:translateY(-3px) scale(1.035);border-color:var(--ladder-color);box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 18px color-mix(in srgb,var(--ladder-color) 20%,transparent),inset 0 0 18px color-mix(in srgb,var(--ladder-color) 9%,transparent);}
-.bot-case-ladder-item.active::before{content:"";position:absolute;left:10px;right:10px;bottom:-5px;height:2px;border-radius:99px;background:var(--ladder-color);box-shadow:0 0 10px var(--ladder-color);}
-.bot-case-ladder-item.passed{opacity:.82;}
-.bot-case-ladder-arrow{position:absolute;right:0;top:38px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-2);border:1px solid var(--line);color:var(--brass-2);font-size:11px;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.35);}
-@keyframes ladderPulseV4{0%,100%{box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 12px color-mix(in srgb,var(--ladder-color) 14%,transparent)}50%{box-shadow:0 8px 22px rgba(0,0,0,.35),0 0 27px color-mix(in srgb,var(--ladder-color) 32%,transparent)}}
-.bot-case-ladder-item.active{animation:ladderPulseV4 1.5s ease-in-out infinite;}
-
-/* === CASE OPENING V4 === */
+<style id="gdplay-case-optimized-v5">
+/* Lightweight case opening: no extra case animation, only a smooth reel reveal. */
 #spinModal .case-open-stage{display:none!important;}
-#spinModal .spin-modal{max-width:448px;background:radial-gradient(circle at 50% 8%,rgba(227,184,114,.12),transparent 34%),linear-gradient(165deg,#241d17,#0e0b09 78%);border:1px solid rgba(227,184,114,.35);}
-.case-open-stage{height:116px;position:relative;margin:4px auto 13px;display:flex;align-items:center;justify-content:center;perspective:700px;overflow:hidden;border-radius:20px;background:radial-gradient(circle,rgba(227,184,114,.13),transparent 60%),#0b0908;border:1px solid rgba(227,184,114,.15);}
-/* CASE OPENING: only the reel appears, no extra case animation */
-#spinModal .wheel-wrap.reel-opening{animation:reelOpenSmooth .48s cubic-bezier(.22,1,.36,1) both;}
-@keyframes reelOpenSmooth{from{opacity:0;transform:translateY(12px) scale(.965);filter:blur(5px);}55%{opacity:1;transform:translateY(-2px) scale(1.008);filter:blur(0);}to{opacity:1;transform:none;filter:none;}}
-#spinModal .wheel-multi-row.reel-opening{animation:reelOpenSmooth .48s cubic-bezier(.22,1,.36,1) both;}
-
-.case-open-stage .stage-ring{position:absolute;width:94px;height:94px;border-radius:50%;border:1px solid rgba(227,184,114,.3);box-shadow:0 0 28px rgba(227,184,114,.12),inset 0 0 24px rgba(227,184,114,.08);animation:stageRingV4 2.4s linear infinite;}
-.case-open-stage .stage-ring.r2{width:72px;height:72px;border-style:dashed;animation-direction:reverse;animation-duration:1.8s;}
-.case-open-box{position:relative;width:72px;height:62px;transform-style:preserve-3d;animation:boxFloatV4 1.7s ease-in-out infinite;z-index:2;}
-.case-open-box .box-body{position:absolute;left:7px;right:7px;bottom:4px;height:43px;border-radius:10px;background:linear-gradient(145deg,#b77b35,#4d2d12);border:1px solid rgba(255,231,178,.5);box-shadow:inset 0 7px 15px rgba(255,255,255,.08),0 12px 25px rgba(0,0,0,.5);}
-.case-open-box .box-lid{position:absolute;left:4px;right:4px;top:4px;height:19px;border-radius:8px;background:linear-gradient(145deg,#e0ae5f,#6b431b);border:1px solid rgba(255,235,190,.6);transform-origin:bottom center;animation:lidOpenV4 1.8s cubic-bezier(.2,.8,.2,1) infinite;box-shadow:0 0 15px rgba(227,184,114,.18);}
-.case-open-box .box-lock{position:absolute;left:50%;top:23px;transform:translateX(-50%);width:14px;height:18px;border-radius:4px;background:#f0c776;box-shadow:0 0 12px rgba(240,199,118,.7);z-index:4;}
-.case-open-stage .stage-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,232,168,.65),transparent 45%);opacity:0;animation:stageFlashV4 1.8s ease-in-out infinite;}
-@keyframes stageRingV4{to{transform:rotate(360deg)}}
-@keyframes boxFloatV4{0%,100%{transform:translateY(3px) rotateX(0) rotateY(-5deg)}50%{transform:translateY(-5px) rotateX(3deg) rotateY(5deg)}}
-@keyframes lidOpenV4{0%,45%{transform:rotateX(0)}70%,100%{transform:rotateX(-48deg) translateY(-4px)}}
-@keyframes stageFlashV4{0%,55%,100%{opacity:0}70%{opacity:.75}}
-#spinModal .reel-mask{border-radius:20px;border:1px solid rgba(227,184,114,.42);box-shadow:inset 0 0 45px rgba(0,0,0,.82),0 0 35px rgba(227,184,114,.12);}
-#spinModal .wheel-item{width:112px;min-width:112px;transition:transform .22s,filter .22s,opacity .22s;}
-#spinModal .wheel-dial.is-spinning .wheel-item{animation:reelItemV4 .42s linear infinite alternate;}
-@keyframes reelItemV4{from{transform:translateY(-2px) scale(.98);filter:blur(.9px);opacity:.65}to{transform:translateY(2px) scale(1.02);filter:blur(.35px);opacity:.92}}
-#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.14);filter:none;opacity:1;box-shadow:0 0 25px rgba(227,184,114,.2);}
-#spinModal .reel-line{width:3px;box-shadow:0 0 20px rgba(227,184,114,1),0 0 45px rgba(227,184,114,.35);}
-#spinModal .spin-result{animation:resultPopV4 .55s cubic-bezier(.2,1.4,.3,1);}
-@keyframes resultPopV4{from{opacity:0;transform:translateY(16px) scale(.94)}to{opacity:1;transform:none}}
-@media(max-width:430px){.bot-case-ladder-item{flex-basis:72px;height:72px}.bot-case-ladder-item .ladder-name{max-width:62px}#spinModal .wheel-item{width:100px;min-width:100px}.case-open-stage{height:105px;}}
+#spinModal .spin-modal{max-width:448px;background:radial-gradient(circle at 50% 8%,rgba(227,184,114,.10),transparent 34%),linear-gradient(165deg,#241d17,#0e0b09 78%);border:1px solid rgba(227,184,114,.30);}
+#spinModal .wheel-wrap.reel-opening,#spinModal .wheel-multi-row.reel-opening{animation:reelOpenLite .28s ease-out both;}
+@keyframes reelOpenLite{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+#spinModal .reel-mask{border-radius:20px;border:1px solid rgba(227,184,114,.35);box-shadow:inset 0 0 28px rgba(0,0,0,.72),0 0 18px rgba(227,184,114,.08);}
+#spinModal .wheel-item{width:112px;min-width:112px;transition:transform .18s,opacity .18s;}
+#spinModal .wheel-dial.is-spinning{filter:blur(.35px);}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.10);opacity:1;box-shadow:0 0 16px rgba(227,184,114,.16);}
+#spinModal .reel-line{width:3px;box-shadow:0 0 12px rgba(227,184,114,.75);}
+#spinModal .spin-result{animation:resultPopLite .32s ease-out;}
+@keyframes resultPopLite{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@media(max-width:430px){#spinModal .wheel-item{width:100px;min-width:100px;}}
 </style>
 
 </head>
@@ -3461,31 +3428,6 @@ function countCaseKeys(caseId){
   if(!typeIds.length) return 0;
   return (data.keys||[]).filter(k=>typeIds.includes(keyCatalogId(k))).reduce((n,k)=>n+Number(k.stack_count||1),0);
 }
-const casePreviewState = Object.create(null);
-let casePreviewTimer = null;
-function updateCasePreviewCard(card, c, index){
-  if(!card || !c?.items?.length) return;
-  const sorted=c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0));
-  const i=((Number(index)||0)%sorted.length+sorted.length)%sorted.length;
-  card.querySelectorAll('.bot-case-ladder-item').forEach((el,n)=>{
-    el.classList.toggle('active',n===i);
-    el.classList.toggle('passed',n<i);
-    if(n===i){el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}
-  });
-  const counter=card.querySelector('[data-ladder-counter]'); if(counter) counter.textContent=`${i+1} / ${sorted.length}`;
-}
-function startCasePreviewRotation(){
-  if(casePreviewTimer) clearInterval(casePreviewTimer);
-  casePreviewTimer=setInterval(()=>{
-    document.querySelectorAll('[data-case-ladder]').forEach(card=>{
-      const id=card.getAttribute('data-case-ladder');
-      const c=CASES.find(x=>String(x.id)===String(id)); if(!c?.items?.length)return;
-      const next=((casePreviewState[id]??0)+1)%c.items.length;
-      casePreviewState[id]=next;
-      updateCasePreviewCard(card,c,next);
-    });
-  },3000);
-}
 function renderCases(){
   const el = document.getElementById('casesList');
   if(!el) return;
@@ -3519,13 +3461,6 @@ function renderCases(){
           <div class="bot-case-price">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div>
         </div>
         <div class="bot-case-drops">${dropRows}</div>
-        <div class="bot-case-ladder" data-case-ladder="${c.id}">
-          <div class="bot-case-ladder-head"><span>ЛЕСТНИЦА КУБОВ</span><b data-ladder-counter>1 / ${c.items.length}</b></div>
-          <div class="bot-case-ladder-track">
-            ${c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0)).map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common; return `<div class="bot-case-ladder-item ${idx===0?'active':''}" data-ladder-index="${idx}" style="--ladder-color:${m.color}"><div class="ladder-icon">${m.icon}</div><div class="ladder-name">${it.name}</div><div class="ladder-value">${Number(it.value||0).toLocaleString('ru-RU')} 💰</div></div>`;}).join('')}
-          </div>
-          <div class="bot-case-ladder-arrow">›</div>
-        </div>
         <div class="bot-case-bottom">
           <div class="bot-case-qty">
             <span>Открыть</span>
@@ -3537,12 +3472,6 @@ function renderCases(){
         </div>
       </article>`;
   }).join('');
-  document.querySelectorAll('[data-case-ladder]').forEach(card=>{
-    const id=card.getAttribute('data-case-ladder');
-    const c=CASES.find(x=>String(x.id)===String(id));
-    if(c){ if(casePreviewState[id]==null) casePreviewState[id]=0; updateCasePreviewCard(card,c,casePreviewState[id]); }
-  });
-  startCasePreviewRotation();
   renderRecentDrops();
   renderBattles();
 }
@@ -3610,8 +3539,8 @@ try{
 
 const REEL_ITEM_HEIGHT = 86;
 const REEL_ITEM_WIDTH = 104;
-const REEL_LENGTH = 56;
-const REEL_TARGET_POS = 47;
+const REEL_LENGTH = 40;
+const REEL_TARGET_POS = 33;
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
   const target = authoritativeDrop ? {...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)} : {...(items[wonIndex]||{}),value:Math.floor(Number(wonValue ?? items[wonIndex]?.value ?? 0)||0)};
@@ -3635,17 +3564,17 @@ function spinWheelIn(container,dial,items,wonIndex){
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const vertical=dial.classList.contains('wheel-dial--vertical');
-  const duration=reduced?550:4700;
+  const duration=reduced?450:3600;
   const targetCenter=vertical ? targetEl.offsetTop+targetEl.offsetHeight/2 : targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=vertical ? container.clientHeight/2 : container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');
   dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
       dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
       dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
-    }));
+    });
     setTimeout(()=>{
       dial.style.transition='none';
       dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
@@ -3660,16 +3589,12 @@ function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementBy
 
 function runSecretReveal(){
   document.getElementById('wheelWrap').style.display = 'none';
-  const old = document.getElementById('vaultCrack');
-  const fresh = old.cloneNode(true);
-  fresh.id = 'vaultCrack';
-  fresh.style.display = 'block';
-  old.parentNode.replaceChild(fresh, old);
-  return new Promise(resolve=>setTimeout(resolve, 2100));
+  const crack=document.getElementById('vaultCrack'); if(crack) crack.style.display='none';
+  return Promise.resolve();
 }
 
 function spawnConfetti(container, color){
-  for(let i=0;i<20;i++){
+  for(let i=0;i<8;i++){
     const s = document.createElement('span');
     s.className = 'confetti-piece';
     s.style.left = (42 + Math.random()*16) + '%';
@@ -3848,7 +3773,14 @@ async function openCaseBatch(c, qty, useKey=false){
   void multiRow.offsetWidth;
   multiRow.classList.add('reel-opening');
   const spins = wins.map((won,i)=>{
-    const wonIndex = c.items.findIndex(it=>it.name===won.name && Number(it.value)===Number(won.value));
+    let wonIndex = c.items.findIndex(it=>
+      String(it.name)===String(won.name) &&
+      String(it.rarity||'')===String(won.rarity||'') &&
+      Number(it.value)===Number(won.value)
+    );
+    if(wonIndex < 0) wonIndex = c.items.findIndex(it=>String(it.name)===String(won.name));
+    if(wonIndex < 0) wonIndex = c.items.findIndex(it=>String(it.rarity||'')===String(won.rarity||''));
+    if(wonIndex < 0) wonIndex = 0;
     const dial = document.getElementById(`wheelDialM${i}`);
     const wrap = document.getElementById(`wheelWrapM${i}`);
     buildWheelIn(dial, c.items, wonIndex, won.value, won);
@@ -3949,14 +3881,24 @@ async function openCaseOnce(c, seq, total, useKey=false){
   }
 
   // The wheel target is the actual server-selected drop, never a local roll.
+  // The server may return an older/legacy catalog item (for example after
+  // key/catalog cleanup). That must NOT cancel the opening: the authoritative
+  // drop itself is used as the reel target, even when it is absent locally.
   const isSecret = false;
-  const wonIndex = c.items.findIndex(it=>it.name===won.name && Number(it.value)===Number(won.value));
+  let wonIndex = c.items.findIndex(it=>
+    String(it.name)===String(won.name) &&
+    String(it.rarity||'')===String(won.rarity||'') &&
+    Number(it.value)===Number(won.value)
+  );
   if(wonIndex < 0){
-    showToast('❌ Сервер вернул предмет, которого нет в каталоге кейса','error');
-    spinning = false;
-    document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = false);
-    return false;
+    wonIndex = c.items.findIndex(it=>String(it.name)===String(won.name));
   }
+  if(wonIndex < 0){
+    wonIndex = c.items.findIndex(it=>String(it.rarity||'')===String(won.rarity||''));
+  }
+  // A valid index is required only to build the filler strip. The exact
+  // authoritative server item is still passed separately to buildWheel().
+  if(wonIndex < 0) wonIndex = 0;
 
   document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
   const spinIcon=document.getElementById('spinCaseIcon'); if(spinIcon) spinIcon.textContent=c.icon;
@@ -3966,7 +3908,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   buildWheel(c.items, wonIndex, won.value, won);
   const dial = document.getElementById('wheelDial');
   const wheelWrap = document.getElementById('wheelWrap');
-  if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
+  if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); requestAnimationFrame(()=>wheelWrap.classList.add('reel-opening')); }
   if(dial) dial.style.opacity='1';
   openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
@@ -4429,7 +4371,7 @@ async function confirmUpgrade(){
       // После ответа апгрейдера коротко обновляем состояние с сервера.
       // Если успех уже отражён в инвентаре — выходим из цикла через break.
       const sourceId=upgradeSource.kind==='cube'?String(upgradeSource.ref?.id||''):'';
-      for(let refreshTry=0; refreshTry<8; refreshTry++){
+      for(let refreshTry=0; refreshTry<2; refreshTry++){
         if(j.success){
           const fresh=await apiFetch('/api/me',{});
           if(fresh?.user){
@@ -4441,7 +4383,7 @@ async function confirmUpgrade(){
             if(sourceGone && targetPresent) break;
           }
         } else break;
-        await new Promise(r=>setTimeout(r,180));
+        await new Promise(r=>setTimeout(r,120));
       }
       persistLocal(); renderInventory(); updateBalanceUI();
     }else{
@@ -5403,7 +5345,7 @@ setInterval(()=>{
   if(currentTab==='market') renderMarket();
   if(currentTab==='cases') renderRecentDrops();
   refreshFromServer();
-},5000);
+},10000);
 window.addEventListener('pagehide',persistDevice);
 window.addEventListener('beforeunload',persistDevice);
 
