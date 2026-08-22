@@ -932,6 +932,376 @@ window.lockUpgradeResult=function(result,angle){
   return {result:result, targetAngle:angle, locked:true};
 };
 </script>
+
+<style id="gdplay-upgrade-v28">
+/* ===== GDPLAY UPGRADE // v28 — completely redesigned wheel ===== */
+#upgradeModal{
+  align-items:flex-end;
+  padding:0;
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(8px);
+}
+#upgradeModal .upgrade-modal{
+  width:100%;
+  max-width:480px;
+  max-height:94dvh;
+  margin:0 auto;
+  padding:0 16px calc(16px + env(safe-area-inset-bottom));
+  border:1px solid rgba(201,151,77,.22);
+  border-bottom:0;
+  border-radius:30px 30px 0 0;
+  overflow-y:auto;
+  background:
+    radial-gradient(130% 55% at 50% -8%,rgba(201,151,77,.18),transparent 55%),
+    radial-gradient(80% 50% at 100% 20%,rgba(63,138,112,.11),transparent 60%),
+    linear-gradient(180deg,#211b17 0%,#161210 48%,#12100e 100%);
+  box-shadow:0 -20px 70px rgba(0,0,0,.58),0 -1px 0 rgba(236,228,211,.08) inset;
+}
+#upgradeModal .upgrade-modal::before{
+  content:"";
+  display:block;
+  width:46px;height:4px;
+  margin:9px auto 17px;
+  border-radius:99px;
+  background:rgba(236,228,211,.18);
+}
+#upgradeModal .upgrade-modal h3{
+  position:relative;
+  display:block;
+  margin:0;
+  padding:0 2px 16px;
+  font-family:'Fraunces',serif;
+  font-size:28px;
+  line-height:1;
+  letter-spacing:-.4px;
+  color:var(--paper);
+}
+#upgradeModal .upgrade-modal h3::after{
+  content:"РИСК / НАГРАДА";
+  display:block;
+  margin-top:7px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;
+  line-height:1;
+  letter-spacing:2.2px;
+  color:var(--brass-2);
+  opacity:.72;
+}
+#upgradeStepPick .section-sub{
+  color:#a69b90;
+}
+#upgradeSearch{
+  height:46px;
+  border-radius:14px!important;
+  padding:0 15px!important;
+  border:1px solid rgba(236,228,211,.10)!important;
+  background:rgba(255,255,255,.035)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+#upgradeSearch:focus{
+  border-color:rgba(227,184,114,.55)!important;
+  box-shadow:0 0 0 3px rgba(201,151,77,.09)!important;
+}
+.upgrade-catalog-list{
+  max-height:50dvh;
+  padding:3px 1px 4px 0;
+  gap:8px;
+}
+.upgrade-cat-item{
+  min-height:67px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(236,228,211,.075);
+  background:
+    linear-gradient(100deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),
+    #191512;
+  box-shadow:0 5px 16px rgba(0,0,0,.18);
+  transition:.18s ease;
+}
+.upgrade-cat-item:hover{
+  transform:translateY(-1px);
+  border-color:rgba(201,151,77,.38);
+  background:#211b17;
+}
+.upgrade-cat-item:active{
+  transform:scale(.985);
+}
+.upgrade-cat-item::before{
+  content:"↗";
+  width:34px;height:34px;flex:0 0 34px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:11px;
+  background:rgba(201,151,77,.10);
+  border:1px solid rgba(201,151,77,.18);
+  color:var(--brass-2);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;
+}
+.upgrade-cat-name{
+  flex:1;
+  min-width:0;
+  font-size:13px;
+  letter-spacing:.1px;
+}
+.upgrade-cat-value{
+  padding:6px 8px;
+  border-radius:9px;
+  background:rgba(255,255,255,.035);
+  color:#b7aca1;
+  white-space:nowrap;
+}
+
+/* confirmation becomes a compact "deal ticket" */
+.upgrade-compare{
+  display:grid;
+  grid-template-columns:1fr 34px 1fr;
+  gap:7px;
+  margin:4px 0 10px;
+}
+.upgrade-compare-item{
+  min-height:105px;
+  padding:13px 10px;
+  border-radius:18px;
+  border:1px solid rgba(236,228,211,.08);
+  background:#181411;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.upgrade-compare-item:first-child{
+  opacity:.78;
+}
+.upgrade-compare-item:last-child{
+  border-color:rgba(201,151,77,.40);
+  background:
+    radial-gradient(circle at 50% 0,rgba(201,151,77,.12),transparent 65%),
+    #1d1713;
+  box-shadow:0 0 0 1px rgba(201,151,77,.06) inset;
+}
+.upgrade-arrow{
+  align-self:center;
+  width:34px;height:34px;
+  background:var(--brass);
+  color:#1b140c;
+  border:0;
+  font-weight:900;
+  box-shadow:0 7px 20px rgba(201,151,77,.20);
+}
+.upgrade-item-name{
+  font-size:13px;
+  line-height:1.2;
+}
+.upgrade-compare-item .section-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px!important;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+.upgrade-chance-box{
+  margin:9px 0;
+  padding:16px;
+  border-radius:19px;
+  border:1px solid rgba(76,154,118,.20);
+  background:
+    radial-gradient(circle at 50% 0,rgba(76,154,118,.10),transparent 70%),
+    rgba(255,255,255,.025);
+}
+.upgrade-chance-box::before{
+  content:"ПРОГНОЗ";
+  display:block;
+  font:600 8px 'IBM Plex Mono',monospace;
+  letter-spacing:2px;
+  color:#80776f;
+}
+.upgrade-chance-big{
+  font-size:46px;
+  line-height:1;
+  margin:8px 0 7px;
+  text-shadow:0 0 25px rgba(76,154,118,.18);
+}
+.upgrade-chance-bar{
+  height:7px;
+  margin-top:9px;
+  border:0;
+  background:#0e0d0b;
+}
+.upgrade-chance-fill{
+  background:linear-gradient(90deg,#2f7658,#6fd6a8,var(--brass-2));
+  box-shadow:0 0 12px rgba(76,154,118,.28);
+}
+
+/* stake section */
+.upgrade-stake{
+  margin:9px 0;
+  padding:14px;
+  border:1px solid rgba(236,228,211,.07);
+  border-radius:17px;
+  background:rgba(255,255,255,.022);
+}
+.upgrade-stake-row{
+  align-items:center;
+}
+.upgrade-stake-value{
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--brass-2);
+  font-size:12px;
+}
+.upgrade-range{
+  accent-color:var(--brass);
+  margin-top:9px;
+}
+.upgrade-note{
+  margin-top:8px;
+  font-size:9px!important;
+  line-height:1.45;
+  color:#756d66!important;
+}
+
+/* fast mode */
+.upgrade-fast-row{
+  margin-top:9px;
+  padding:13px 14px;
+  border-radius:17px;
+  border:1px solid rgba(236,228,211,.07);
+  background:rgba(255,255,255,.022);
+}
+.upgrade-fast-label{
+  font-size:12px!important;
+  font-weight:800!important;
+}
+.upgrade-fast-hint{
+  margin-top:3px;
+  color:#777068!important;
+  font-size:9px!important;
+}
+.upgrade-switch-track{
+  background:#0f0e0c!important;
+  border-color:rgba(236,228,211,.12)!important;
+}
+.upgrade-switch input:checked + .upgrade-switch-track{
+  background:var(--brass)!important;
+}
+
+/* action buttons */
+#upgradeConfirmBtn{
+  height:50px;
+  border-radius:15px!important;
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.1px;
+  background:linear-gradient(135deg,#e3b872,#b9843d)!important;
+  color:#1b140b!important;
+  box-shadow:0 10px 28px rgba(201,151,77,.18);
+}
+#upgradeConfirmBtn:active{
+  transform:scale(.985);
+}
+#upgradeBackBtn,#upgradeCancelBtn,#upgradeCloseBtn{
+  border-radius:14px!important;
+  height:44px;
+}
+
+/* ===== THE WHEEL ===== */
+#upgradeStepResult{
+  padding-top:2px;
+}
+.upgrade-gauge-wrap{
+  width:min(292px,78vw);
+  height:min(292px,78vw);
+  margin:10px auto 13px;
+  border-radius:50%;
+  isolation:isolate;
+  filter:drop-shadow(0 20px 35px rgba(0,0,0,.42));
+}
+.upgrade-gauge-wrap::before{
+  content:"";
+  position:absolute;
+  inset:-17px;
+  border-radius:50%;
+  border:1px solid rgba(201,151,77,.18);
+  box-shadow:
+    0 0 0 8px rgba(201,151,77,.025),
+    0 0 35px rgba(201,151,77,.10);
+  pointer-events:none;
+}
+.upgrade-gauge-wrap::after{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  border-radius:50%;
+  border:1px dashed rgba(236,228,211,.12);
+  pointer-events:none;
+  animation:gdUpgradeOrbit 16s linear infinite;
+}
+@keyframes gdUpgradeOrbit{to{transform:rotate(360deg)}}
+
+.upgrade-gauge{
+  overflow:hidden;
+  border-radius:50%;
+  border:9px solid #211b17;
+  box-shadow:
+    inset 0 0 0 2px rgba(236,228,211,.09),
+    inset 0 0 28px rgba(0,0,0,.65),
+    0 0 0 1px rgba(0,0,0,.7);
+}
+.upgrade-gauge::before{
+  content:"";
+  position:absolute;
+  inset:17px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.10);
+  background:
+    repeating-conic-gradient(from -90deg,rgba(255,255,255,.16) 0deg 1deg,transparent 1deg 30deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 64%,#000 65% 67%,transparent 68%);
+  mask:radial-gradient(circle,transparent 0 64%,#000 65% 67%,transparent 68%);
+  pointer-events:none;
+  z-index:2;
+}
+.upgrade-gauge::after{
+  inset:10px;
+  box-shadow:inset 0 0 38px rgba(0,0,0,.48);
+  z-index:1;
+}
+.upgrade-gauge-center{
+  width:58px;height:58px;
+  background:
+    radial-gradient(circle at 38% 30%,#f1cc8d 0 8%,#d19b4e 28%,#8a652f 62%,#4b351c 100%);
+  border:5px solid #16120f;
+  box-shadow:
+    0 0 0 2px rgba(227,184,114,.35),
+    0 8px 20px rgba(0,0,0,.55),
+    0 0 24px rgba(201,151,77,.20);
+  z-index:5;
+}
+.upgrade-pointer{
+  width:116px;
+  height:18px;
+  margin-top:-9px;
+  background:linear-gradient(90deg,#6f5128 0%,#d6a85d 72%,#f1d09a 100%);
+  clip-path:polygon(0 28%,78% 28%,78% 0,100% 50%,78% 100%,78% 72%,0 72%);
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.7));
+  z-index:4;
+}
+#upgradeResultText{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 15px;
+  border-radius:15px;
+  border:1px solid rgba(236,228,211,.08);
+  background:rgba(255,255,255,.025);
+  font-family:'Fraunces',serif;
+  font-size:18px;
+  white-space:normal;
+}
+#upgradeCloseBtn{
+  background:var(--bg-3)!important;
+  border:1px solid rgba(201,151,77,.25)!important;
+  color:var(--paper)!important;
+}
+</style>
+
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
