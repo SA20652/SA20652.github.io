@@ -1224,21 +1224,7 @@ window.lockUpgradeResult=function(result,angle){
     0 0 35px rgba(201,151,77,.10);
   pointer-events:none;
 }
-.upgrade-gauge-wrap::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-18px;
-  width:0;
-  height:0;
-  transform:translateX(-50%);
-  border-left:10px solid transparent;
-  border-right:10px solid transparent;
-  border-top:16px solid var(--brass-2);
-  filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
-  pointer-events:none;
-  z-index:20;
-}
+.upgrade-gauge-wrap::after{display:none!important;}
 @keyframes gdUpgradeOrbit{to{transform:rotate(360deg)}}
 
 .upgrade-gauge{
@@ -1280,13 +1266,22 @@ window.lockUpgradeResult=function(result,angle){
   z-index:5;
 }
 .upgrade-pointer{
-  width:116px;
-  height:18px;
-  margin-top:-9px;
-  background:linear-gradient(90deg,#6f5128 0%,#d6a85d 72%,#f1d09a 100%);
-  clip-path:polygon(0 28%,78% 28%,78% 0,100% 50%,78% 100%,78% 72%,0 72%);
-  filter:drop-shadow(0 4px 7px rgba(0,0,0,.7));
-  z-index:4;
+  position:absolute!important;
+  left:50%!important;
+  top:auto!important;
+  bottom:-23px!important;
+  width:0!important;
+  height:0!important;
+  margin:0!important;
+  transform:translateX(-50%)!important;
+  border-left:12px solid transparent!important;
+  border-right:12px solid transparent!important;
+  border-top:20px solid var(--brass-2)!important;
+  background:none!important;
+  clip-path:none!important;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.7));
+  z-index:30!important;
+  pointer-events:none;
 }
 #upgradeResultText{
   min-height:48px;
@@ -1594,7 +1589,7 @@ window.lockUpgradeResult=function(result,angle){
 .upgrade-gauge-wrap{position:relative!important;width:min(292px,78vw)!important;height:min(292px,78vw)!important;margin:12px auto 15px!important;display:block!important;}
 .upgrade-gauge{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border-radius:50%!important;}
 .upgrade-gauge-center{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;}
-.upgrade-pointer{position:absolute!important;left:50%!important;top:50%!important;width:43%!important;height:18px!important;margin:0!important;transform-origin:0% 50%!important;transform:rotate(-90deg);pointer-events:none;}
+.upgrade-pointer{position:absolute!important;left:50%!important;top:auto!important;bottom:-23px!important;width:0!important;height:0!important;margin:0!important;transform:translateX(-50%)!important;transform-origin:center!important;border-left:12px solid transparent!important;border-right:12px solid transparent!important;border-top:20px solid var(--brass-2)!important;background:none!important;clip-path:none!important;filter:drop-shadow(0 4px 5px rgba(0,0,0,.7));pointer-events:none;z-index:30!important;}
 .upgrade-gauge::before,.upgrade-gauge::after{pointer-events:none;}
 </style>
 </style>
@@ -3009,11 +3004,38 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
   const img=document.getElementById('promoSecretImage');
   const frame=document.getElementById('promoSecretFrame');
   const isAttasha=String(code).toUpperCase()==='ATTASHA';
+  clearTimeout(window.__promoPhotoTimer);
+
   if(isAttasha){
-    if(img){ img.style.display='none'; img.removeAttribute('src'); }
-    if(frame){
-      frame.style.display='block';
-      frame.src='https://ibb.co/7dQy9z8f';
+    // ImgBB share URLs are HTML pages, not image files, so putting the
+    // ibb.co URL directly into <img> or an iframe is unreliable. Resolve
+    // its OpenGraph image through a lightweight public fetch proxy, then
+    // display the actual image URL.
+    const pageUrl='https://ibb.co/7dQy9z8f';
+    if(frame){ frame.style.display='none'; frame.src=''; }
+    if(img){
+      img.style.display='block';
+      img.removeAttribute('src');
+      img.alt='ATTASHA';
+      img.onerror=()=>{
+        img.onerror=null;
+        // Last-resort fallback: open the exact ImgBB page inside the modal.
+        if(frame){
+          frame.style.display='block';
+          frame.src=pageUrl;
+        }
+      };
+      fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(pageUrl),{cache:'no-store'})
+        .then(r=>{if(!r.ok) throw new Error('proxy'); return r.text();})
+        .then(html=>{
+          const m=html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+            || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+          if(!m||!m[1]) throw new Error('image');
+          img.src=m[1].replace(/&amp;/g,'&');
+        })
+        .catch(()=>{
+          if(frame){ frame.style.display='block'; frame.src=pageUrl; }
+        });
     }
   }else{
     if(frame){ frame.style.display='none'; frame.src=''; }
@@ -3023,9 +3045,9 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
       img.src='/promo/2026samergermancrut.jpg';
     }
   }
+
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
-  clearTimeout(window.__promoPhotoTimer);
   window.__promoPhotoTimer=setTimeout(()=>{
     overlay.classList.remove('show');
     overlay.setAttribute('aria-hidden','true');
@@ -4544,16 +4566,19 @@ async function confirmUpgrade(){
     if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
     if(!j.success) visualDeg=Math.max(serverChance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
 
-    pointer.style.transition='none';
-    pointer.style.transform='rotate(-90deg)';
-    void pointer.offsetWidth;
+    // Fixed indicator under the spindle: the wheel rotates beneath it.
+    // This keeps the arrow straight and makes the stopped segment line up
+    // with the exact server roll.
+    pointer.style.transform='translateX(-50%)';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const finalAngle=-90 + (360*5) + visualDeg;
-    pointer.dataset.resultAngle=String(finalAngle);
+    const finalAngle=90 - visualDeg + (360*5);
+    gauge.style.transition='none';
+    gauge.style.transform='rotate(0deg)';
+    void gauge.offsetWidth;
     requestAnimationFrame(()=>{
-      pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
-      pointer.style.transform=`rotate(${finalAngle}deg)`;
+      gauge.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
+      gauge.style.transform=`rotate(${finalAngle}deg)`;
     });
     setTimeout(()=>{
       document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»' + (j.protected ? ' 🛡️ Защита от серии' : '')) : 'Не повезло — предмет потерян';
