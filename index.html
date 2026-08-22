@@ -3009,18 +3009,19 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
   const img=document.getElementById('promoSecretImage');
   const frame=document.getElementById('promoSecretFrame');
   const isAttasha=String(code).toUpperCase()==='ATTASHA';
-  if(frame){
-    frame.style.display='none';
-    frame.src='';
-  }
-  if(img){
-    img.style.display='block';
-    img.onerror=()=>{
-      img.onerror=null;
-      if(isAttasha) img.src=PROMO_IMAGE_DATA_URI;
-      else img.src=PROMO_IMAGE_DATA_URI;
-    };
-    img.src=isAttasha?'/promo/attasha.jpg':'/promo/2026samergermancrut.jpg';
+  if(isAttasha){
+    if(img){ img.style.display='none'; img.removeAttribute('src'); }
+    if(frame){
+      frame.style.display='block';
+      frame.src='https://ibb.co/7dQy9z8f';
+    }
+  }else{
+    if(frame){ frame.style.display='none'; frame.src=''; }
+    if(img){
+      img.style.display='block';
+      img.onerror=()=>{ img.onerror=null; img.src=PROMO_IMAGE_DATA_URI; };
+      img.src='/promo/2026samergermancrut.jpg';
+    }
   }
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
@@ -3029,6 +3030,7 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
     overlay.classList.remove('show');
     overlay.setAttribute('aria-hidden','true');
     if(frame) frame.src='';
+    if(img) img.removeAttribute('src');
   },5000);
 }
 
@@ -3062,7 +3064,7 @@ async function redeemPromo(){
       updateBalanceUI();renderProfile();
       syncToServer();
       if(i)i.value='';
-      promoSetMessage(adminUnlimited ? 'ATTASHA активирован: +1 488 монет ✨ (для администратора без ограничений)' : 'Промокод ATTASHA активирован: +1 488 монет ✨',true);
+      promoSetMessage('Промокод ATTASHA активирован: +1 488 монет ✨',true);
       showPromoSecretPhoto('ATTASHA');
       return;
     }
@@ -4531,7 +4533,7 @@ async function confirmUpgrade(){
     const chance=Math.max(0,Math.min(100,serverChance));
     const chanceDeg=chance*3.6;
     gauge.innerHTML='';
-    gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, #6a3431 ${chanceDeg}deg 360deg)`;
+    gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, #6a3431 ${chanceDeg}deg 360deg)`; gauge.style.setProperty('--upgrade-chance', chance+'%');
 
     // The roll is also mapped directly: 0..100 -> 0..360 degrees.
     // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
