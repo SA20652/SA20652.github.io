@@ -1409,6 +1409,146 @@ window.lockUpgradeResult=function(result,angle){
   #upgradeModal .upgrade-cat-item > div:last-of-type.upgrade-cat-value{padding:0 8px !important;font-size:10.5px !important;}
 }
 </style>
+
+<style id="gdplay-upgrade-final-fix-v30">
+/* FINAL UPGRADE MOBILE LAYOUT FIX */
+#upgradeModal{
+  position:fixed !important;
+  inset:0 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:16px !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+#upgradeModal.open{
+  display:flex !important;
+}
+#upgradeModal > .upgrade-modal{
+  position:relative !important;
+  width:min(660px,100%) !important;
+  max-width:660px !important;
+  height:auto !important;
+  max-height:calc(100dvh - 32px) !important;
+  min-height:0 !important;
+  margin:0 auto !important;
+  padding:0 14px 14px !important;
+  border-radius:24px !important;
+  border:1px solid rgba(201,151,77,.30) !important;
+  border-bottom:1px solid rgba(201,151,77,.30) !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  box-sizing:border-box !important;
+  transform:none !important;
+}
+#upgradeModal > .upgrade-modal::before{
+  margin:9px auto 12px !important;
+}
+#upgradeModal > .upgrade-modal h3{
+  margin:0 !important;
+  padding:0 2px 12px !important;
+}
+
+/* Rows: icon, content and price sit close together; no forced empty middle area. */
+#upgradeModal .upgrade-cat-item{
+  display:grid !important;
+  grid-template-columns:32px minmax(0,1fr) auto !important;
+  align-items:center !important;
+  column-gap:8px !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:64px !important;
+  padding:9px 10px !important;
+  box-sizing:border-box !important;
+}
+#upgradeModal .upgrade-cat-item::before{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:32px !important;
+  height:32px !important;
+  min-width:32px !important;
+  flex:none !important;
+  margin:0 !important;
+}
+#upgradeModal .upgrade-cat-item > div:first-of-type{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  min-width:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  text-align:left !important;
+}
+#upgradeModal .upgrade-cat-item > div:last-of-type{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  max-width:none !important;
+  min-width:0 !important;
+  margin:0 !important;
+  align-self:center !important;
+}
+#upgradeModal .upgrade-cat-name{
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1.15 !important;
+  text-align:left !important;
+}
+#upgradeModal .upgrade-cat-item > div:first-of-type .upgrade-cat-value{
+  width:max-content !important;
+  max-width:100% !important;
+  min-height:25px !important;
+  height:25px !important;
+  margin:4px 0 0 !important;
+  padding:0 9px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  box-sizing:border-box !important;
+  border-radius:8px !important;
+  line-height:1 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+#upgradeModal .upgrade-cat-item > div:last-of-type.upgrade-cat-value{
+  min-height:32px !important;
+  height:32px !important;
+  padding:0 8px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-sizing:border-box !important;
+  border-radius:9px !important;
+  white-space:nowrap !important;
+  font-size:11px !important;
+}
+@media (max-width:430px){
+  #upgradeModal{padding:10px !important;}
+  #upgradeModal > .upgrade-modal{
+    width:100% !important;
+    max-width:none !important;
+    max-height:calc(100dvh - 20px) !important;
+    padding-left:10px !important;
+    padding-right:10px !important;
+    border-radius:22px !important;
+  }
+  #upgradeModal .upgrade-cat-item{
+    grid-template-columns:30px minmax(0,1fr) auto !important;
+    column-gap:7px !important;
+    min-height:61px !important;
+    padding:8px !important;
+  }
+  #upgradeModal .upgrade-cat-item::before{
+    width:30px !important;height:30px !important;min-width:30px !important;
+  }
+  #upgradeModal .upgrade-cat-item > div:last-of-type.upgrade-cat-value{
+    font-size:10px !important;
+    padding:0 7px !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
