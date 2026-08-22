@@ -900,12 +900,11 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
       <div class="header-right">
         <div class="balance-chip" id="balanceChip">💰 <span id="balanceDisplay">0</span><button type="button" class="balance-plus-btn" id="balancePlusBtn" aria-label="Заработать монеты" title="Заработать монеты">+</button></div>
         
-        <button class="menu-btn" id="menuBtn" title="Меню">☰<span id="importantNotifBadge" class="notif-badge"></span></button>
+        <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
         <div class="menu-panel" id="menuPanel">
           <button class="menu-item" data-menu-tab="profile">Профиль</button>
           <button class="menu-item" data-menu-action="share-orbs">Поделиться орбами</button>
-          <button class="menu-item" id="notificationsMenuBtn" data-menu-tab="notifications">Уведомления</button>
-<button class="menu-item" data-menu-tab="settings">Настройки</button>
+          <button class="menu-item" data-menu-tab="settings">Настройки</button>
           <button class="menu-item" id="menuLogout">Выйти</button>
         </div>
       </div>
@@ -1051,11 +1050,6 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
     </div>
 
     <!-- SETTINGS -->
-    <div class="page" id="page-notifications">
-<div class="section-title">🔔 Важные уведомления</div>
-<div class="section-sub">Только события, которые требуют внимания</div>
-<div id="notificationsList" class="admin-card">Загрузка...</div>
-</div>
 <div class="page" id="page-settings">
       <div class="section-title">Настройки</div>
       <div class="settings-music-card" id="menuMusicCard">
@@ -2350,61 +2344,6 @@ async function adminReset(uid){
 }
 
 
-// Единый источник логики уведомлений. Раньше в разных местах файла было
-// сразу несколько конкурирующих реализаций (разные интервалы + разные
-// обработчики клика по пункту меню), которые одновременно дёргали
-// /api/notifications. Из-за гонки более медленный/неудачный запрос иногда
-// перезаписывал уже успешно отрисованный список текстом об ошибке —
-// это и была причина "Не удалось загрузить уведомления" в меню.
-// Теперь есть один рендер-метод и один лёгкий фоновый опрос бейджа.
-window.notifSeenIds = window.notifSeenIds || new Set();
-
-window.loadImportantNotifications = async function(){
-  const box = document.getElementById('notificationsList');
-  if(!box) return;
-  box.textContent = 'Загрузка...';
-  try{
-    const d = await apiFetch('/api/notifications', {});
-    const list = Array.isArray(d.notifications) ? d.notifications : [];
-    list.forEach(n=>window.notifSeenIds.add(n.id));
-    if(!list.length){
-      box.innerHTML = '<div class="empty-state">Нет важных уведомлений</div>';
-    } else {
-      box.innerHTML = list.map(n=>{
-        const date = n.created_at ? new Date(n.created_at).toLocaleString('ru-RU') : '';
-        return `<div class="notif-card">
-          <div class="notif-title">${escapeHtml(n.title || 'Уведомление')}</div>
-          <div class="notif-text">${escapeHtml(n.text || '')}</div>
-          <div class="notif-date">${escapeHtml(date)}</div>
-        </div>`;
-      }).join('');
-    }
-    await apiFetch('/api/notifications/read', {});
-    const badge=document.getElementById('importantNotifBadge');
-    if(badge) badge.style.display='none';
-  }catch(e){
-    console.error('notifications error', e);
-    box.textContent='Не удалось загрузить уведомления';
-  }
-};
-
-// Лёгкий фоновый опрос: только бейдж + всплывающие тосты о новых
-// уведомлениях. Список во вкладке не трогает — не мигает и не мешает,
-// если пользователь как раз читает уведомления.
-window.checkNotificationsBadge = async function(){
-  try{
-    const d = await apiFetch('/api/notifications', {});
-    const badge = document.getElementById('importantNotifBadge');
-    if(badge) badge.style.display = Number(d.unread||0) > 0 ? 'block' : 'none';
-    const list = Array.isArray(d.notifications) ? d.notifications : [];
-    list.filter(n=>!n.type || n.type==='important').forEach(n=>{
-      if(!window.notifSeenIds.has(n.id)){
-        if(window.notifSeenIds.size) (window.showToastSafe||function(){})('🔔 '+(n.title||n.text||'Новое уведомление'),'success');
-        window.notifSeenIds.add(n.id);
-      }
-    });
-  }catch(e){}
-};
 
 function switchTab(tab){
   if(document.getElementById('battleDiceModal')?.classList.contains('open')) closeBattleDiceModal();
@@ -2420,7 +2359,6 @@ function switchTab(tab){
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
   if(tab==='cases') renderCases();
-  if(tab==='notifications') window.loadImportantNotifications?.();
 }
 
 function updateBalanceUI(){
@@ -3543,14 +3481,12 @@ async function confirmUpgrade(){
       if(upgradeSource.kind==='key') payload.source_key_id=String(upgradeSource.ref?.id||'');
       else { payload.cube_id=Number(upgradeSource.ref?.id || upgradeSource.ref?.uid || 0); payload.index=Number(upgradeSource.index); }
       j=await apiFetch('/api/upgrade',payload);
-      // В интерфейсе апгрейдера шанс всегда означает шанс ПОБЕДЫ.
-      // Колесо и результат используют тот же самый шанс, что показан игроку.
+      // Сервер является единственным источником истины для шанса и результата.
+      // Не пересчитываем шанс на клиенте: иначе зелёная зона может не совпасть
+      // с тем roll/success, по которому сервер выдал награду.
       if(j){
-        const localChance=getUpgradeChance();
-        j.chance=localChance;
-        if(Number.isFinite(Number(j.roll))){
-          j.roll=Number(j.roll);
-        }
+        j.chance=Number(j.chance);
+        j.roll=Number(j.roll);
         j.success=Boolean(j.success);
       }
       data.balance=Number(j.balance);
@@ -3584,11 +3520,18 @@ async function confirmUpgrade(){
     document.getElementById('upgradeStepResult').style.display='block';
     const chanceDeg=(Number(j.chance||0)/100)*360;
     const gauge=document.getElementById('upgradeGauge'), pointer=document.getElementById('upgradePointer');
-    gauge.style.background=`conic-gradient(from 0deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
+    gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
     pointer.style.transition='none'; pointer.style.transform='rotate(0deg)'; void pointer.offsetWidth; pointer.style.transition='';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const finalAngle=360*4+(Number(j.roll||0)/100)*360-90;
+    const rawRoll=Math.max(0,Math.min(99.9999,Number(j.roll||0)));
+     // Визуальный указатель всегда попадает в ту же зону, которая соответствует
+     // серверному результату. Это особенно важно для гарантированной победы.
+     let visualRoll=rawRoll;
+     const serverChance=Math.max(0,Math.min(100,Number(j.chance||0)));
+     if(j.success && visualRoll>=serverChance) visualRoll=serverChance>0 ? serverChance*0.5 : 0;
+     if(!j.success && visualRoll<serverChance) visualRoll=serverChance+(100-serverChance)*0.5;
+     const finalAngle=360*4+(visualRoll/100)*360-90;
     requestAnimationFrame(()=>{
       pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
       pointer.style.transform=`rotate(${finalAngle}deg)`;
@@ -4768,11 +4711,6 @@ boot();
   document.getElementById('menuMusicFile')?.addEventListener('change',e=>{ addTracks(e.target.files); e.target.value=''; });
 
 
-  // Бейдж/тосты уведомлений теперь обрабатывает единая функция
-  // window.checkNotificationsBadge (см. выше), чтобы не было нескольких
-  // параллельных опросов /api/notifications.
-  window.checkNotificationsBadge?.(); setInterval(()=>window.checkNotificationsBadge?.(), 15000);
-
   let savedTrack=Number(localStorage.getItem(MENU_MUSIC_KEY));
   if(Number.isInteger(savedTrack) && savedTrack>=0) menuTrackIndex=savedTrack;
   updateMusicUI();
@@ -4830,39 +4768,10 @@ boot();
   else boot();
 })();
 
-// (Дублирующийся загрузчик уведомлений удалён — см. window.loadImportantNotifications
-// в начале файла. Несколько версий этой функции с разными интервалами
-// одновременно опрашивали /api/notifications и перетирали друг друга,
-// из-за чего в меню периодически мелькало "Не удалось загрузить уведомления".)
 </script>
 
 
 <script>
-// Important notifications badge + music state
-const importantNotifications = JSON.parse(localStorage.getItem('importantNotifications')||'[]');
-function saveMusicState(playing,track){localStorage.setItem('musicState',JSON.stringify({playing:!!playing,track:track||''}));}
-function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||'{"playing":false,"track":""}');}
-</script>
-<script>
-// Открытие вкладки "Уведомления" из бургер-меню теперь всегда идёт через
-// один и тот же window.loadImportantNotifications (объявлен выше).
-// Раньше здесь было ещё два независимых обработчика клика по
-// [data-menu-tab="notifications"], каждый со своей копией логики загрузки —
-// они конкурировали между собой и с фоновыми интервалами за один и тот же
-// #notificationsList, отсюда и периодическая ошибка загрузки.
-window.refreshMenuNotifications = window.loadImportantNotifications;
-document.addEventListener('click', e=>{
-  if(e.target.closest('[data-menu-tab="notifications"]')){
-    setTimeout(()=>window.loadImportantNotifications?.(), 100);
-  }
-});
-</script>
-</body>
-  </html>
-
-
-<style>
-/* Keys disabled globally */
 .key-item,.key-badge,[data-key],.upgrade-key,.required-key,.key-requirement{display:none!important;}
 </style>
 <script>
