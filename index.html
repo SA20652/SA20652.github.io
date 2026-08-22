@@ -1761,7 +1761,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 <div id="appScreen" style="display:none;">
   <div class="app-shell">
     <div id="adminDynamicRoot"></div>
-<template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-tab="admin">Админ-панель</button>
+<template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-menu-tab="admin">Админ-панель</button>
 <div class="page" id="page-admin">
   <div class="section-title">Админ-панель</div>
   <div class="section-sub">Управление игроками и сервером</div>
@@ -1875,9 +1875,6 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
       <div id="casesList"></div>
       <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
-      <div class="section-title" style="margin-top:24px">Последние дропы</div>
-      <div class="section-sub">Только 2 последних выигрыша</div>
-      <div id="recentDropsList"></div>
     </div>
 
     <!-- BATTLES -->
@@ -2192,7 +2189,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 </div>
 
 <div id="promoPhotoOverlay" class="promo-photo-overlay" aria-hidden="true">
-  <div class="promo-photo-card"><img id="promoSecretImage" src="" alt="Секретная фотография"></div>
+  <div class="promo-photo-card"><img id="promoSecretImage" src="" alt="Секретная фотография"><iframe id="promoSecretFrame" title="ATTASHA photo" style="display:none;width:100%;height:82vh;max-height:82vh;border:0;background:#000"></iframe></div>
 </div>
 <div id="toastBox"></div>
 
@@ -3004,9 +3001,18 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
   const overlay=document.getElementById('promoPhotoOverlay');
   if(!overlay) return;
   const img=document.getElementById('promoSecretImage');
+  const frame=document.getElementById('promoSecretFrame');
+  const isAttasha=String(code).toUpperCase()==='ATTASHA';
+  if(frame){
+    frame.style.display=isAttasha?'block':'none';
+    frame.src=isAttasha?'https://ibb.co/7dQy9z8f':'';
+  }
   if(img){
-    img.onerror=()=>{ img.onerror=null; img.src=PROMO_IMAGE_DATA_URI; };
-    img.src=(code==='ATTASHA' ? '/promo/attasha.jpg' : '/promo/2026samergermancrut.jpg');
+    img.style.display=isAttasha?'none':'block';
+    if(!isAttasha){
+      img.onerror=()=>{ img.onerror=null; img.src=PROMO_IMAGE_DATA_URI; };
+      img.src='/promo/2026samergermancrut.jpg';
+    }
   }
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
@@ -3014,6 +3020,7 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
   window.__promoPhotoTimer=setTimeout(()=>{
     overlay.classList.remove('show');
     overlay.setAttribute('aria-hidden','true');
+    if(frame) frame.src='';
   },5000);
 }
 
@@ -4374,9 +4381,8 @@ function refreshUpgradeChance(chanceOverride=null){
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
-  // Визуальный индикатор намеренно ограничен сектором ±30%,
-  // при этом фактический шанс и число сверху остаются точными (например, 95%).
-  if(fill) fill.style.width=Math.max(0,Math.min(100,chance))+'%';
+  // Визуальная шкала всегда 1:1 с отображаемым процентом: никаких ±30%.
+  if(fill) fill.style.width=chance+'%';
   const stakeValue=document.getElementById('upgradeStakeValue');
   if(stakeValue) stakeValue.textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
 }
@@ -4511,27 +4517,12 @@ async function confirmUpgrade(){
     const gauge=document.getElementById('upgradeGauge');
     const pointer=document.getElementById('upgradePointer');
 
-    // Draw the green probability as a real SVG arc. This avoids every
-    // stroke-dasharray/pathLength/browser rounding issue: the endpoint is
-    // calculated from the exact percentage, so 62% is exactly 223.2 degrees.
-    const wheelRadius=44;
+    // Exact probability wheel: conic-gradient uses the same 0..100 value
+    // as the label, so every 1% is exactly 3.6 degrees.
     const chance=Math.max(0,Math.min(100,serverChance));
-    const angle=chance*3.6;
-    const startAngle=-90;
-    const endAngle=startAngle+angle;
-    const rad=endAngle*Math.PI/180;
-    const endX=50+wheelRadius*Math.cos(rad);
-    const endY=50+wheelRadius*Math.sin(rad);
-    const largeArc=angle>180?1:0;
-    const greenPath=chance<=0?'':chance>=100
-      ?`<circle class="exact-wheel-green" cx="50" cy="50" r="${wheelRadius}"></circle>`
-      :`<path class="exact-wheel-green" d="M 50 6 A ${wheelRadius} ${wheelRadius} 0 ${largeArc} 1 ${endX} ${endY}"></path>`;
-    gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 100 100" aria-hidden="true">
-      <circle class="exact-wheel-bg" cx="50" cy="50" r="47"></circle>
-      <circle class="exact-wheel-red" cx="50" cy="50" r="${wheelRadius}"></circle>
-      ${greenPath}
-      <circle class="exact-wheel-inner" cx="50" cy="50" r="31"></circle>
-    </svg>`;
+    const chanceDeg=chance*3.6;
+    gauge.innerHTML='';
+    gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, #6a3431 ${chanceDeg}deg 360deg)`;
 
     // The roll is also mapped directly: 0..100 -> 0..360 degrees.
     // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
@@ -4970,36 +4961,7 @@ function timeAgo(ts){
   return new Date(ts).toLocaleDateString('ru-RU');
 }
 
-async function renderRecentDrops(){
-  const el = document.getElementById('recentDropsList');
-  if(!el) return;
-  let drops = [];
-  if(tgInitData()){
-    try{
-      const j = await apiFetch('/api/drops/recent', {});
-      drops = (j.drops||[]).slice(0,2).map(d=>({username:d.username, item:d.cube_name, rarity:d.rarity, time:new Date(d.created_at+'Z').getTime()||Date.now()}));
-    }catch(e){
-      console.error('recent drops error', e);
-      drops = loadDrops().slice(0,2);
-    }
-  }else{
-    // Вне Telegram общая лента недоступна — показываем локальную историю этого браузера
-    drops = loadDrops().slice(0,2);
-  }
-  if(!drops.length){
-    el.innerHTML = '<div class="empty-state">Пока никто ничего не выбил.<br>Открой сейф первым!</div>';
-    return;
-  }
-  el.innerHTML = drops.map(d=>{
-    const m = RARITY_META[d.rarity] || RARITY_META.common;
-    return `
-      <div class="drop-item" style="border-left:3px solid ${m.color}">
-        <span class="drop-icon" style="color:${m.color}">${m.icon}</span>
-        <div class="drop-text"><b>${d.username}</b> выбил «${d.item}» <span style="color:${m.color}">(${m.label})</span></div>
-        <span class="drop-time">${timeAgo(d.time)}</span>
-      </div>`;
-  }).join('');
-}
+async function renderRecentDrops(){ return; }
 
 function recordBestDrop(drop){
   if(!data || !drop) return;
@@ -5249,8 +5211,8 @@ function handleButton(button, e){
   if(button.matches('.nav-btn')){ switchTab(button.dataset.tab); return; }
   if(button.matches('.top-tab') || action==='top-sort'){ renderLeaderboard(button.dataset.topSort||'cases'); return; }
   if(button.dataset.menuAction==='share-orbs'){ if(e){e.preventDefault();e.stopPropagation();} document.getElementById('menuPanel')?.classList.remove('open'); openShareOrbs(); return; }
-  if(button.matches('[data-menu-tab]')){
-    const tab=button.dataset.menuTab;
+  if(button.matches('[data-menu-tab], #adminMenuBtn[data-tab]')){
+    const tab=button.dataset.menuTab || button.dataset.tab;
     // Кнопка меню — кликабельна всей площадью, а не только по тексту.
     // Не даём событию уйти на элементы страницы под выпадающим меню.
     if(e){ e.preventDefault?.(); e.stopPropagation?.(); }
