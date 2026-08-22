@@ -1628,11 +1628,11 @@ window.lockUpgradeResult=function(result,angle){
 #spinModal .reel-line::before{left:50%;top:-1px;border-top:0;border-bottom:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid var(--brass-2);transform:translate(-50%,0);}
 #spinModal .reel-line::after{right:auto;left:50%;top:auto;bottom:-1px;border-top:0;border-bottom:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:9px solid var(--brass-2);transform:translate(-50%,0);}
 #spinModal .wheel-dial{display:flex;width:max-content;height:100%;align-items:stretch;position:relative;top:0;will-change:transform;padding:0 0;}
-#spinModal .wheel-item{height:100%;width:104px;min-width:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid rgba(236,228,211,.07);border-bottom:0;box-sizing:border-box;position:relative;transition:transform .25s,filter .25s,opacity .25s;}
+#spinModal .wheel-item{height:100%;width:104px;min-width:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid rgba(236,228,211,.07);border-bottom:0;box-sizing:border-box;position:relative;transition:none;contain:layout paint;}
 #spinModal .wheel-item::after{content:"";position:absolute;inset:13px 8px;border-radius:13px;border:1px solid rgba(255,255,255,.035);background:linear-gradient(180deg,rgba(255,255,255,.025),transparent);pointer-events:none;}
 #spinModal .wheel-item span{font-size:30px;position:relative;z-index:1;}
 #spinModal .wheel-item small{font-size:9px;margin-top:5px;position:relative;z-index:1;}
-#spinModal .wheel-dial.is-spinning .wheel-item{filter:blur(.65px);opacity:.82;}
+#spinModal .wheel-dial.is-spinning .wheel-item{opacity:.9;}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.08);filter:none;opacity:1;}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after{border-color:rgba(201,151,77,.55);box-shadow:0 0 24px rgba(201,151,77,.18),inset 0 0 20px rgba(201,151,77,.08);}
 .reel-sheen{position:absolute;inset:0;z-index:7;pointer-events:none;background:linear-gradient(105deg,transparent 25%,rgba(255,255,255,.035) 48%,rgba(201,151,77,.07) 50%,rgba(255,255,255,.035) 52%,transparent 75%);background-size:220% 100%;animation:reelSheen 2.8s linear infinite;}
@@ -1683,11 +1683,11 @@ window.lockUpgradeResult=function(result,angle){
 /* Lightweight case opening: no extra case animation, only a smooth reel reveal. */
 #spinModal .case-open-stage{display:none!important;}
 #spinModal .spin-modal{max-width:448px;background:radial-gradient(circle at 50% 8%,rgba(227,184,114,.10),transparent 34%),linear-gradient(165deg,#241d17,#0e0b09 78%);border:1px solid rgba(227,184,114,.30);}
-#spinModal .wheel-wrap.reel-opening,#spinModal .wheel-multi-row.reel-opening{animation:reelOpenLite .28s ease-out both;}
+#spinModal .wheel-wrap.reel-opening,#spinModal .wheel-multi-row.reel-opening{animation:reelOpenLite .22s ease-out both;will-change:opacity,transform;}
 @keyframes reelOpenLite{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
 #spinModal .reel-mask{border-radius:20px;border:1px solid rgba(227,184,114,.35);box-shadow:inset 0 0 28px rgba(0,0,0,.72),0 0 18px rgba(227,184,114,.08);}
 #spinModal .wheel-item{width:112px;min-width:112px;transition:transform .18s,opacity .18s;}
-#spinModal .wheel-dial.is-spinning{filter:blur(.35px);}
+#spinModal .wheel-dial.is-spinning{filter:none;}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.10);opacity:1;box-shadow:0 0 16px rgba(227,184,114,.16);}
 #spinModal .reel-line{width:3px;box-shadow:0 0 12px rgba(227,184,114,.75);}
 #spinModal .spin-result{animation:resultPopLite .32s ease-out;}
@@ -3539,8 +3539,8 @@ try{
 
 const REEL_ITEM_HEIGHT = 86;
 const REEL_ITEM_WIDTH = 104;
-const REEL_LENGTH = 40;
-const REEL_TARGET_POS = 33;
+const REEL_LENGTH = 28;
+const REEL_TARGET_POS = 21;
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
   const target = authoritativeDrop ? {...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)} : {...(items[wonIndex]||{}),value:Math.floor(Number(wonValue ?? items[wonIndex]?.value ?? 0)||0)};
@@ -3594,7 +3594,7 @@ function runSecretReveal(){
 }
 
 function spawnConfetti(container, color){
-  for(let i=0;i<8;i++){
+  for(let i=0;i<4;i++){
     const s = document.createElement('span');
     s.className = 'confetti-piece';
     s.style.left = (42 + Math.random()*16) + '%';
@@ -5650,3 +5650,25 @@ boot();
  const oldText=(document.body.innerHTML||'');
 })();
 </script>
+
+<style id="case-performance-final">
+/* Case roulette performance pass: preserve visuals, reduce compositor/layout work. */
+#spinModal .spin-modal{contain:layout paint;}
+#spinModal .reel-mask{contain:layout paint;backdrop-filter:none;}
+#spinModal .wheel-dial{contain:layout paint;will-change:transform;backface-visibility:hidden;transform:translate3d(0,0,0);}
+#spinModal .wheel-item{backface-visibility:hidden;contain:layout paint;}
+#spinModal .wheel-item::after{box-shadow:none!important;background:none!important;}
+#spinModal .wheel-dial.is-spinning .wheel-item{filter:none!important;opacity:.94;}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{filter:none!important;}
+#spinModal .reel-mask::before,#spinModal .reel-mask::after{filter:none!important;}
+</style>
+
+<style id="case-small-spin-blur">
+/* Very light blur during case roulette: keeps motion smooth without the old heavy blur. */
+#spinModal .wheel-dial.is-spinning{
+  filter:blur(.7px);
+}
+#spinModal .wheel-dial.is-stopped{
+  filter:none;
+}
+</style>
