@@ -2350,6 +2350,15 @@ async function adminReset(uid){
 }
 
 
+// Единый источник логики уведомлений. Раньше в разных местах файла было
+// сразу несколько конкурирующих реализаций (разные интервалы + разные
+// обработчики клика по пункту меню), которые одновременно дёргали
+// /api/notifications. Из-за гонки более медленный/неудачный запрос иногда
+// перезаписывал уже успешно отрисованный список текстом об ошибке —
+// это и была причина "Не удалось загрузить уведомления" в меню.
+// Теперь есть один рендер-метод и один лёгкий фоновый опрос бейджа.
+window.notifSeenIds = window.notifSeenIds || new Set();
+
 window.loadImportantNotifications = async function(){
   const box = document.getElementById('notificationsList');
   if(!box) return;
@@ -2357,18 +2366,19 @@ window.loadImportantNotifications = async function(){
   try{
     const d = await apiFetch('/api/notifications', {});
     const list = Array.isArray(d.notifications) ? d.notifications : [];
+    list.forEach(n=>window.notifSeenIds.add(n.id));
     if(!list.length){
       box.innerHTML = '<div class="empty-state">Нет важных уведомлений</div>';
-      return;
+    } else {
+      box.innerHTML = list.map(n=>{
+        const date = n.created_at ? new Date(n.created_at).toLocaleString('ru-RU') : '';
+        return `<div class="notif-card">
+          <div class="notif-title">${escapeHtml(n.title || 'Уведомление')}</div>
+          <div class="notif-text">${escapeHtml(n.text || '')}</div>
+          <div class="notif-date">${escapeHtml(date)}</div>
+        </div>`;
+      }).join('');
     }
-    box.innerHTML = list.map(n=>{
-      const date = n.created_at ? new Date(n.created_at).toLocaleString('ru-RU') : '';
-      return `<div class="notif-card">
-        <div class="notif-title">${escapeHtml(n.title || 'Уведомление')}</div>
-        <div class="notif-text">${escapeHtml(n.text || '')}</div>
-        <div class="notif-date">${escapeHtml(date)}</div>
-      </div>`;
-    }).join('');
     await apiFetch('/api/notifications/read', {});
     const badge=document.getElementById('importantNotifBadge');
     if(badge) badge.style.display='none';
@@ -2376,6 +2386,24 @@ window.loadImportantNotifications = async function(){
     console.error('notifications error', e);
     box.textContent='Не удалось загрузить уведомления';
   }
+};
+
+// Лёгкий фоновый опрос: только бейдж + всплывающие тосты о новых
+// уведомлениях. Список во вкладке не трогает — не мигает и не мешает,
+// если пользователь как раз читает уведомления.
+window.checkNotificationsBadge = async function(){
+  try{
+    const d = await apiFetch('/api/notifications', {});
+    const badge = document.getElementById('importantNotifBadge');
+    if(badge) badge.style.display = Number(d.unread||0) > 0 ? 'block' : 'none';
+    const list = Array.isArray(d.notifications) ? d.notifications : [];
+    list.filter(n=>!n.type || n.type==='important').forEach(n=>{
+      if(!window.notifSeenIds.has(n.id)){
+        if(window.notifSeenIds.size) (window.showToastSafe||function(){})('🔔 '+(n.title||n.text||'Новое уведомление'),'success');
+        window.notifSeenIds.add(n.id);
+      }
+    });
+  }catch(e){}
 };
 
 function switchTab(tab){
@@ -4740,21 +4768,10 @@ boot();
   document.getElementById('menuMusicFile')?.addEventListener('change',e=>{ addTracks(e.target.files); e.target.value=''; });
 
 
-  let lastNotificationIds=new Set();
-  async function updateImportantNotifBadge(){
-    try{
-      const d=await apiFetch('/api/notifications', {});
-      const b=document.getElementById('importantNotifBadge');
-      if(b) b.style.display=(Number(d.unread||0)>0)?'block':'none';
-      (d.notifications||[]).filter(n=>(!n.type || String(n.type)==='important')).forEach(n=>{
-        if(!lastNotificationIds.has(n.id)){
-          if(n.read===0) showToastSafe('🔔 '+(n.text||n.title||'Новое уведомление'),'success');
-          lastNotificationIds.add(n.id);
-        }
-      });
-    }catch(e){}
-  }
-  updateImportantNotifBadge(); setInterval(updateImportantNotifBadge, 3000);
+  // Бейдж/тосты уведомлений теперь обрабатывает единая функция
+  // window.checkNotificationsBadge (см. выше), чтобы не было нескольких
+  // параллельных опросов /api/notifications.
+  window.checkNotificationsBadge?.(); setInterval(()=>window.checkNotificationsBadge?.(), 15000);
 
   let savedTrack=Number(localStorage.getItem(MENU_MUSIC_KEY));
   if(Number.isInteger(savedTrack) && savedTrack>=0) menuTrackIndex=savedTrack;
@@ -4813,21 +4830,10 @@ boot();
   else boot();
 })();
 
-async function loadImportantNotifications(){
- const el=document.getElementById('notificationsList');
- try{
-  if(el) el.innerHTML='Загрузка уведомлений...';
-  const d=await apiFetch('/api/notifications', {});
-  if(el) el.innerHTML=(d.notifications||[]).map(n=>`<div class="buff-card"><b>${n.title||'Уведомление'}</b><br>${n.text||''}</div>`).join('')||'Нет важных уведомлений';
-  const badge=document.getElementById('importantNotifBadge');
-  if(badge) badge.style.display=Number(d.unread||0)>0?'block':'none';
- }catch(e){
-  if(el) el.innerHTML='Не удалось загрузить уведомления';
-  console.log('notifications error',e);
- }
-}
-setInterval(loadImportantNotifications,5000);
-window.addEventListener('load',loadImportantNotifications);
+// (Дублирующийся загрузчик уведомлений удалён — см. window.loadImportantNotifications
+// в начале файла. Несколько версий этой функции с разными интервалами
+// одновременно опрашивали /api/notifications и перетирали друг друга,
+// из-за чего в меню периодически мелькало "Не удалось загрузить уведомления".)
 </script>
 
 
@@ -4838,92 +4844,18 @@ function saveMusicState(playing,track){localStorage.setItem('musicState',JSON.st
 function loadMusicState(){return JSON.parse(localStorage.getItem('musicState')||'{"playing":false,"track":""}');}
 </script>
 <script>
-(function(){
-  let lastNotifIds = new Set();
-
-  function escapeNotif(s){
-    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+// Открытие вкладки "Уведомления" из бургер-меню теперь всегда идёт через
+// один и тот же window.loadImportantNotifications (объявлен выше).
+// Раньше здесь было ещё два независимых обработчика клика по
+// [data-menu-tab="notifications"], каждый со своей копией логики загрузки —
+// они конкурировали между собой и с фоновыми интервалами за один и тот же
+// #notificationsList, отсюда и периодическая ошибка загрузки.
+window.refreshMenuNotifications = window.loadImportantNotifications;
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-menu-tab="notifications"]')){
+    setTimeout(()=>window.loadImportantNotifications?.(), 100);
   }
-
-  async function loadImportantNotifications(){
-    try{
-      const d = await apiFetch('/api/notifications', {});
-      const list = Array.isArray(d.notifications) ? d.notifications : [];
-      const important = list.filter(n => !n.type || n.type === 'important');
-
-      const box = document.getElementById('notificationsList');
-      if(box){
-        box.innerHTML = important.length ? important.map(n =>
-          `<div class="admin-card" style="margin-bottom:8px">
-             <b>🔔 ${escapeNotif(n.title)}</b><br>
-             <span>${escapeNotif(n.text)}</span>
-           </div>`
-        ).join('') : 'Нет важных уведомлений';
-      }
-
-      for(const n of important){
-        if(!lastNotifIds.has(n.id)){
-          if(lastNotifIds.size){
-            showImportantToast(`🔔 ${n.title}: ${n.text}`);
-          }
-          lastNotifIds.add(n.id);
-        }
-      }
-      if(lastNotifIds.size > 100) lastNotifIds = new Set([...lastNotifIds].slice(-50));
-
-      const badge=document.getElementById('importantNotifBadge');
-      if(badge) badge.style.display = Number(d.unread||0)>0 ? 'block':'none';
-    }catch(e){
-      console.warn('notifications error', e);
-    }
-  }
-
-  function showImportantToast(text){
-    let t=document.createElement('div');
-    t.style.cssText='position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:99999;background:#221d19;color:#ece4d3;border:1px solid #c9974d;border-radius:12px;padding:12px 16px;max-width:90%;font-size:14px;box-shadow:0 8px 30px #000;';
-    t.textContent=text;
-    document.body.appendChild(t);
-    setTimeout(()=>t.remove(),4500);
-  }
-
-  window.loadImportantNotifications = loadImportantNotifications;
-  document.addEventListener('DOMContentLoaded', ()=>{
-    loadImportantNotifications();
-    setInterval(loadImportantNotifications, 10000);
-  });
-
-  document.addEventListener('click', e=>{
-    const b=e.target.closest('[data-menu-tab="notifications"]');
-    if(b) setTimeout(loadImportantNotifications,100);
-  });
-})();
-</script>
-
-<script>
-// Final notifications menu fix: load only when opening the ☰ -> Уведомления page
-(function(){
-  async function refreshMenuNotifications(){
-    const box=document.getElementById('notificationsList');
-    if(!box) return;
-    try{
-      const d=await apiFetch('/api/notifications',{});
-      const list=Array.isArray(d.notifications)?d.notifications:[];
-      box.innerHTML=list.length?list.map(n=>`
-        <div class="buff-card" style="margin-bottom:8px">
-          <b>🔔 ${String(n.title||'Уведомление')}</b><br>
-          ${String(n.text||'')}
-        </div>`).join(''):'Нет уведомлений';
-    }catch(e){
-      box.innerHTML='Не удалось загрузить уведомления';
-    }
-  }
-  window.refreshMenuNotifications=refreshMenuNotifications;
-  document.addEventListener('click',e=>{
-    if(e.target.closest('[data-menu-tab="notifications"]')){
-      setTimeout(refreshMenuNotifications,100);
-    }
-  });
-})();
+});
 </script>
 </body>
   </html>
