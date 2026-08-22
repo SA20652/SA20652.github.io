@@ -1678,6 +1678,56 @@ window.lockUpgradeResult=function(result,angle){
 #upgradePointer{z-index:10!important;}
 </style>
 
+
+<style id="gdplay-case-ladder-and-opening-v4">
+/* === CASE LADDER V4: always visible, bottom of every case === */
+.bot-case-ladder{position:relative;margin:2px 0 14px;padding:10px 0 2px;overflow:hidden;}
+.bot-case-ladder-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px;font:800 8px 'IBM Plex Mono',monospace;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+.bot-case-ladder-head b{color:var(--brass-2);font-size:8px;}
+.bot-case-ladder-track{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 7px;scroll-behavior:smooth;}
+.bot-case-ladder-track::-webkit-scrollbar{display:none;}
+.bot-case-ladder-item{flex:0 0 78px;height:76px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(0,0,0,.18));border:1px solid rgba(236,228,211,.08);transition:transform .35s ease,opacity .35s ease,border-color .35s ease,box-shadow .35s ease;opacity:.52;transform:scale(.94);}
+.bot-case-ladder-item .ladder-icon{font-size:22px;line-height:1;margin-bottom:5px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4));}
+.bot-case-ladder-item .ladder-name{max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;font-weight:800;}
+.bot-case-ladder-item .ladder-value{font:800 8px 'IBM Plex Mono',monospace;margin-top:3px;color:var(--muted);}
+.bot-case-ladder-item.active{opacity:1;transform:translateY(-3px) scale(1.035);border-color:var(--ladder-color);box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 18px color-mix(in srgb,var(--ladder-color) 20%,transparent),inset 0 0 18px color-mix(in srgb,var(--ladder-color) 9%,transparent);}
+.bot-case-ladder-item.active::before{content:"";position:absolute;left:10px;right:10px;bottom:-5px;height:2px;border-radius:99px;background:var(--ladder-color);box-shadow:0 0 10px var(--ladder-color);}
+.bot-case-ladder-item.passed{opacity:.82;}
+.bot-case-ladder-arrow{position:absolute;right:0;top:38px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-2);border:1px solid var(--line);color:var(--brass-2);font-size:11px;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+@keyframes ladderPulseV4{0%,100%{box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 12px color-mix(in srgb,var(--ladder-color) 14%,transparent)}50%{box-shadow:0 8px 22px rgba(0,0,0,.35),0 0 27px color-mix(in srgb,var(--ladder-color) 32%,transparent)}}
+.bot-case-ladder-item.active{animation:ladderPulseV4 1.5s ease-in-out infinite;}
+
+/* === CASE OPENING V4 === */
+#spinModal .case-open-stage{display:none!important;}
+#spinModal .spin-modal{max-width:448px;background:radial-gradient(circle at 50% 8%,rgba(227,184,114,.12),transparent 34%),linear-gradient(165deg,#241d17,#0e0b09 78%);border:1px solid rgba(227,184,114,.35);}
+.case-open-stage{height:116px;position:relative;margin:4px auto 13px;display:flex;align-items:center;justify-content:center;perspective:700px;overflow:hidden;border-radius:20px;background:radial-gradient(circle,rgba(227,184,114,.13),transparent 60%),#0b0908;border:1px solid rgba(227,184,114,.15);}
+/* CASE OPENING: only the reel appears, no extra case animation */
+#spinModal .wheel-wrap.reel-opening{animation:reelOpenSmooth .48s cubic-bezier(.22,1,.36,1) both;}
+@keyframes reelOpenSmooth{from{opacity:0;transform:translateY(12px) scale(.965);filter:blur(5px);}55%{opacity:1;transform:translateY(-2px) scale(1.008);filter:blur(0);}to{opacity:1;transform:none;filter:none;}}
+#spinModal .wheel-multi-row.reel-opening{animation:reelOpenSmooth .48s cubic-bezier(.22,1,.36,1) both;}
+
+.case-open-stage .stage-ring{position:absolute;width:94px;height:94px;border-radius:50%;border:1px solid rgba(227,184,114,.3);box-shadow:0 0 28px rgba(227,184,114,.12),inset 0 0 24px rgba(227,184,114,.08);animation:stageRingV4 2.4s linear infinite;}
+.case-open-stage .stage-ring.r2{width:72px;height:72px;border-style:dashed;animation-direction:reverse;animation-duration:1.8s;}
+.case-open-box{position:relative;width:72px;height:62px;transform-style:preserve-3d;animation:boxFloatV4 1.7s ease-in-out infinite;z-index:2;}
+.case-open-box .box-body{position:absolute;left:7px;right:7px;bottom:4px;height:43px;border-radius:10px;background:linear-gradient(145deg,#b77b35,#4d2d12);border:1px solid rgba(255,231,178,.5);box-shadow:inset 0 7px 15px rgba(255,255,255,.08),0 12px 25px rgba(0,0,0,.5);}
+.case-open-box .box-lid{position:absolute;left:4px;right:4px;top:4px;height:19px;border-radius:8px;background:linear-gradient(145deg,#e0ae5f,#6b431b);border:1px solid rgba(255,235,190,.6);transform-origin:bottom center;animation:lidOpenV4 1.8s cubic-bezier(.2,.8,.2,1) infinite;box-shadow:0 0 15px rgba(227,184,114,.18);}
+.case-open-box .box-lock{position:absolute;left:50%;top:23px;transform:translateX(-50%);width:14px;height:18px;border-radius:4px;background:#f0c776;box-shadow:0 0 12px rgba(240,199,118,.7);z-index:4;}
+.case-open-stage .stage-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,232,168,.65),transparent 45%);opacity:0;animation:stageFlashV4 1.8s ease-in-out infinite;}
+@keyframes stageRingV4{to{transform:rotate(360deg)}}
+@keyframes boxFloatV4{0%,100%{transform:translateY(3px) rotateX(0) rotateY(-5deg)}50%{transform:translateY(-5px) rotateX(3deg) rotateY(5deg)}}
+@keyframes lidOpenV4{0%,45%{transform:rotateX(0)}70%,100%{transform:rotateX(-48deg) translateY(-4px)}}
+@keyframes stageFlashV4{0%,55%,100%{opacity:0}70%{opacity:.75}}
+#spinModal .reel-mask{border-radius:20px;border:1px solid rgba(227,184,114,.42);box-shadow:inset 0 0 45px rgba(0,0,0,.82),0 0 35px rgba(227,184,114,.12);}
+#spinModal .wheel-item{width:112px;min-width:112px;transition:transform .22s,filter .22s,opacity .22s;}
+#spinModal .wheel-dial.is-spinning .wheel-item{animation:reelItemV4 .42s linear infinite alternate;}
+@keyframes reelItemV4{from{transform:translateY(-2px) scale(.98);filter:blur(.9px);opacity:.65}to{transform:translateY(2px) scale(1.02);filter:blur(.35px);opacity:.92}}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.14);filter:none;opacity:1;box-shadow:0 0 25px rgba(227,184,114,.2);}
+#spinModal .reel-line{width:3px;box-shadow:0 0 20px rgba(227,184,114,1),0 0 45px rgba(227,184,114,.35);}
+#spinModal .spin-result{animation:resultPopV4 .55s cubic-bezier(.2,1.4,.3,1);}
+@keyframes resultPopV4{from{opacity:0;transform:translateY(16px) scale(.94)}to{opacity:1;transform:none}}
+@media(max-width:430px){.bot-case-ladder-item{flex-basis:72px;height:72px}.bot-case-ladder-item .ladder-name{max-width:62px}#spinModal .wheel-item{width:100px;min-width:100px}.case-open-stage{height:105px;}}
+</style>
+
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
@@ -2045,7 +2095,7 @@ window.lockUpgradeResult=function(result,angle){
       </div>
       <div class="spin-status-pill" id="spinStatusPill">ГОТОВ</div>
     </div>
-    <div class="spin-subline"><span id="spinCaseSub">Лента награды</span><span>•</span><span>Цель фиксируется сервером</span></div>
+    <div class="spin-subline"><span id="spinCaseSub">Подготовка открытия</span><span>•</span><span>Награда фиксируется сервером</span></div>
     <div class="wheel-wrap" id="wheelWrap">
       <div class="reel-glow reel-glow-a"></div><div class="reel-glow reel-glow-b"></div>
       <div class="reel-line"></div>
@@ -3415,35 +3465,21 @@ const casePreviewState = Object.create(null);
 let casePreviewTimer = null;
 function updateCasePreviewCard(card, c, index){
   if(!card || !c?.items?.length) return;
-  const sorted = c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0));
-  const i = ((Number(index)||0) % sorted.length + sorted.length) % sorted.length;
-  const it = sorted[i];
-  const m = RARITY_META[it.rarity] || RARITY_META.common;
-  const icon = card.querySelector('[data-preview-icon]');
-  const name = card.querySelector('[data-preview-name]');
-  const rarity = card.querySelector('[data-preview-rarity]');
-  const value = card.querySelector('[data-preview-value]');
-  const step = card.querySelector('.bot-case-featured-step');
-  const feature = card.querySelector('.bot-case-featured-card');
-  if(icon) icon.textContent=m.icon;
-  if(name) name.textContent=it.name;
-  if(rarity){ rarity.textContent=m.label; rarity.style.color=m.color; }
-  if(value){ value.textContent='💰 '+Number(it.value||0).toLocaleString('ru-RU'); value.style.color=m.color; }
-  if(step) step.textContent=`${i+1} / ${sorted.length}`;
-  if(feature){
-    feature.style.setProperty('--preview-color',m.color);
-    feature.classList.remove('preview-shift');
-    void feature.offsetWidth;
-    feature.classList.add('preview-shift');
-  }
+  const sorted=c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0));
+  const i=((Number(index)||0)%sorted.length+sorted.length)%sorted.length;
+  card.querySelectorAll('.bot-case-ladder-item').forEach((el,n)=>{
+    el.classList.toggle('active',n===i);
+    el.classList.toggle('passed',n<i);
+    if(n===i){el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}
+  });
+  const counter=card.querySelector('[data-ladder-counter]'); if(counter) counter.textContent=`${i+1} / ${sorted.length}`;
 }
 function startCasePreviewRotation(){
-  if(casePreviewTimer) return;
+  if(casePreviewTimer) clearInterval(casePreviewTimer);
   casePreviewTimer=setInterval(()=>{
-    document.querySelectorAll('[data-case-preview]').forEach(card=>{
-      const id=card.getAttribute('data-case-preview');
-      const c=CASES.find(x=>String(x.id)===String(id));
-      if(!c?.items?.length) return;
+    document.querySelectorAll('[data-case-ladder]').forEach(card=>{
+      const id=card.getAttribute('data-case-ladder');
+      const c=CASES.find(x=>String(x.id)===String(id)); if(!c?.items?.length)return;
       const next=((casePreviewState[id]??0)+1)%c.items.length;
       casePreviewState[id]=next;
       updateCasePreviewCard(card,c,next);
@@ -3483,16 +3519,12 @@ function renderCases(){
           <div class="bot-case-price">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div>
         </div>
         <div class="bot-case-drops">${dropRows}</div>
-        <div class="bot-case-featured" data-case-preview="${c.id}">
-          <div class="bot-case-featured-label"><span>ЛЕСТНИЦА ДРОПОВ</span><span class="bot-case-featured-step">1 / ${c.items.length}</span></div>
-          <div class="bot-case-featured-card">
-            <div class="bot-case-featured-icon" data-preview-icon>${RARITY_META[c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.rarity||'common']?.icon||'●'}</div>
-            <div class="bot-case-featured-info">
-              <div class="bot-case-featured-name" data-preview-name>${c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.name||''}</div>
-              <div class="bot-case-featured-rarity" data-preview-rarity>${RARITY_META[c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.rarity||'common']?.label||'Обычный'}</div>
-            </div>
-            <div class="bot-case-featured-value" data-preview-value>💰 ${Number(c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.value||0).toLocaleString('ru-RU')}</div>
+        <div class="bot-case-ladder" data-case-ladder="${c.id}">
+          <div class="bot-case-ladder-head"><span>ЛЕСТНИЦА КУБОВ</span><b data-ladder-counter>1 / ${c.items.length}</b></div>
+          <div class="bot-case-ladder-track">
+            ${c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0)).map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common; return `<div class="bot-case-ladder-item ${idx===0?'active':''}" data-ladder-index="${idx}" style="--ladder-color:${m.color}"><div class="ladder-icon">${m.icon}</div><div class="ladder-name">${it.name}</div><div class="ladder-value">${Number(it.value||0).toLocaleString('ru-RU')} 💰</div></div>`;}).join('')}
           </div>
+          <div class="bot-case-ladder-arrow">›</div>
         </div>
         <div class="bot-case-bottom">
           <div class="bot-case-qty">
@@ -3505,8 +3537,8 @@ function renderCases(){
         </div>
       </article>`;
   }).join('');
-  document.querySelectorAll('[data-case-preview]').forEach(card=>{
-    const id=card.getAttribute('data-case-preview');
+  document.querySelectorAll('[data-case-ladder]').forEach(card=>{
+    const id=card.getAttribute('data-case-ladder');
     const c=CASES.find(x=>String(x.id)===String(id));
     if(c){ if(casePreviewState[id]==null) casePreviewState[id]=0; updateCasePreviewCard(card,c,casePreviewState[id]); }
   });
@@ -3812,6 +3844,9 @@ async function openCaseBatch(c, qty, useKey=false){
 
   openModal('spinModal');
 
+  multiRow.classList.remove('reel-opening');
+  void multiRow.offsetWidth;
+  multiRow.classList.add('reel-opening');
   const spins = wins.map((won,i)=>{
     const wonIndex = c.items.findIndex(it=>it.name===won.name && Number(it.value)===Number(won.value));
     const dial = document.getElementById(`wheelDialM${i}`);
@@ -3838,6 +3873,7 @@ async function openCaseBatch(c, qty, useKey=false){
   document.getElementById('spinCloseBtn').onclick=()=>{
     closeModal('spinModal');
     multiRow.style.display='none';
+    multiRow.classList.remove('reel-opening');
     multiRow.innerHTML='';
     multiResult.classList.add('hidden');
     multiResult.innerHTML='';
@@ -3928,8 +3964,11 @@ async function openCaseOnce(c, seq, total, useKey=false){
   const spinSub=document.getElementById('spinCaseSub'); if(spinSub) spinSub.textContent=`${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinPill=document.getElementById('spinStatusPill'); if(spinPill) spinPill.textContent='КРУТИМ';
   buildWheel(c.items, wonIndex, won.value, won);
-  openModal('spinModal');
   const dial = document.getElementById('wheelDial');
+  const wheelWrap = document.getElementById('wheelWrap');
+  if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
+  if(dial) dial.style.opacity='1';
+  openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
 
   // Show exactly the same authoritative value that was stored on the server.
@@ -3957,6 +3996,7 @@ function collectSpinReward(){
   if(multiRow){ multiRow.style.display='none'; multiRow.innerHTML=''; }
   if(multiResult){ multiResult.classList.add('hidden'); multiResult.innerHTML=''; }
   document.getElementById('wheelWrap').style.display='block';
+  document.getElementById('wheelWrap').classList.remove('reel-opening');
   renderInventory();
   renderCases();
   updateBalanceUI();
