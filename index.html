@@ -1227,11 +1227,17 @@ window.lockUpgradeResult=function(result,angle){
 .upgrade-gauge-wrap::after{
   content:"";
   position:absolute;
-  inset:-7px;
-  border-radius:50%;
-  border:1px dashed rgba(236,228,211,.12);
+  left:50%;
+  bottom:-18px;
+  width:0;
+  height:0;
+  transform:translateX(-50%);
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-top:16px solid var(--brass-2);
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
   pointer-events:none;
-  animation:none;
+  z-index:20;
 }
 @keyframes gdUpgradeOrbit{to{transform:rotate(360deg)}}
 
@@ -1649,7 +1655,7 @@ window.lockUpgradeResult=function(result,angle){
   position:absolute!important; inset:0!important;
   width:100%!important; height:100%!important;
   border-radius:50%!important;
-  background:#5a302e!important;
+  background:#5a302e;
   overflow:hidden!important;
 }
 #upgradeGauge .exact-wheel-svg{
@@ -3004,15 +3010,17 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
   const frame=document.getElementById('promoSecretFrame');
   const isAttasha=String(code).toUpperCase()==='ATTASHA';
   if(frame){
-    frame.style.display=isAttasha?'block':'none';
-    frame.src=isAttasha?'https://ibb.co/7dQy9z8f':'';
+    frame.style.display='none';
+    frame.src='';
   }
   if(img){
-    img.style.display=isAttasha?'none':'block';
-    if(!isAttasha){
-      img.onerror=()=>{ img.onerror=null; img.src=PROMO_IMAGE_DATA_URI; };
-      img.src='/promo/2026samergermancrut.jpg';
-    }
+    img.style.display='block';
+    img.onerror=()=>{
+      img.onerror=null;
+      if(isAttasha) img.src=PROMO_IMAGE_DATA_URI;
+      else img.src=PROMO_IMAGE_DATA_URI;
+    };
+    img.src=isAttasha?'/promo/attasha.jpg':'/promo/2026samergermancrut.jpg';
   }
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
@@ -3046,14 +3054,15 @@ async function redeemPromo(){
     // повторно активировать после обновления страницы на этом устройстве.
     const redeemed=Array.isArray(data?.redeemedPromos)?data.redeemedPromos:[];
     if(code==='ATTASHA'){
-      if(redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
-      data.redeemedPromos=[...redeemed,'ATTASHA'];
+      const adminUnlimited=!!window.isAdmin;
+      if(!adminUnlimited && redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
+      if(!adminUnlimited) data.redeemedPromos=[...redeemed,'ATTASHA'];
       data.balance=Math.max(0,Math.floor(Number(data.balance||0)))+1488;
       persistLocal();
       updateBalanceUI();renderProfile();
       syncToServer();
       if(i)i.value='';
-      promoSetMessage('Промокод ATTASHA активирован: +1 488 монет ✨',true);
+      promoSetMessage(adminUnlimited ? 'ATTASHA активирован: +1 488 монет ✨ (для администратора без ограничений)' : 'Промокод ATTASHA активирован: +1 488 монет ✨',true);
       showPromoSecretPhoto('ATTASHA');
       return;
     }
