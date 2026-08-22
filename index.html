@@ -201,6 +201,12 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .case-qty-picker{display:flex;gap:6px;}
 .case-qty-btn{width:30px;height:30px;border-radius:8px;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);font-weight:700;font-size:13px;}
 .case-qty-btn.active{background:var(--brass-2);color:#1c1509;border-color:var(--brass-2);}
+.bot-case-bottom{display:flex;flex-direction:column;gap:8px;}
+.bot-case-qty{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:2px;}
+.bot-case-qty-picker{display:flex;gap:6px;}
+.case-qty-btn{transform:translateZ(0);transition:background-color .15s,border-color .15s,color .15s;}
+.case-qty-btn:active{transform:scale(.96);}
+@media (prefers-reduced-motion: reduce){.case-qty-btn:active{transform:none;}}
 
 /* ============ MODAL / WHEEL ============ */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,8,6,.78);display:none;align-items:flex-start;justify-content:center;z-index:2000;padding:calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;}
@@ -226,7 +232,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .wheel-multi-row .wheel-item small{font-size:9px;}
 .spin-result-multi{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
 .spin-result-multi.hidden{display:none;}
-.spin-result-multi-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;}
+.spin-result-multi-item{will-change:auto;contain:content;display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;}
 .reel-mask{width:100%;height:100%;overflow:hidden;border-radius:16px;border:4px solid var(--brass-dim);
   background:var(--bg-2);box-shadow:inset 0 0 30px rgba(0,0,0,.6), 0 0 22px rgba(201,151,77,.15);position:relative;}
 .reel-mask::before, .reel-mask::after{content:"";position:absolute;left:0;right:0;height:70px;z-index:5;pointer-events:none;}
@@ -1635,8 +1641,7 @@ window.lockUpgradeResult=function(result,angle){
 #spinModal .wheel-dial.is-spinning .wheel-item{opacity:.9;}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.08);filter:none;opacity:1;}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after{border-color:rgba(201,151,77,.55);box-shadow:0 0 24px rgba(201,151,77,.18),inset 0 0 20px rgba(201,151,77,.08);}
-.reel-sheen{position:absolute;inset:0;z-index:7;pointer-events:none;background:linear-gradient(105deg,transparent 25%,rgba(255,255,255,.035) 48%,rgba(201,151,77,.07) 50%,rgba(255,255,255,.035) 52%,transparent 75%);background-size:220% 100%;animation:reelSheen 2.8s linear infinite;}
-@keyframes reelSheen{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.reel-sheen{display:none!important;}
 .reel-glow{position:absolute;width:120px;height:120px;border-radius:50%;filter:blur(25px);pointer-events:none;z-index:0;}
 .reel-glow-a{left:12%;top:25%;background:rgba(201,151,77,.09);}.reel-glow-b{right:12%;top:25%;background:rgba(201,151,77,.05);}
 #spinModal .spin-result{margin-top:0;padding:13px 12px;border-radius:15px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.08);}
@@ -2617,7 +2622,7 @@ function showModerationNotice(notice){
     : 'Ваш аккаунт заблокирован администратором.';
   showToast(title+': '+notice.reason,'error');
   setTimeout(()=>{
-    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+'\n\nПричина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
+    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+'\nПричина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
   },120);
 }
 
@@ -3687,140 +3692,103 @@ async function openCaseBatch(c, qty, useKey=false){
   spinning = true;
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = true);
 
-  document.getElementById('spinCaseTitle').textContent = `${c.name} · ${qty} кейса`;
-  const spinIconBatch=document.getElementById('spinCaseIcon'); if(spinIconBatch) spinIconBatch.textContent=c.icon;
-  const spinPriceBatch=document.getElementById('spinCasePrice'); if(spinPriceBatch) spinPriceBatch.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
-  const spinSubBatch=document.getElementById('spinCaseSub'); if(spinSubBatch) spinSubBatch.textContent=`${qty} открытия · лента наград`;
-  const spinPillBatch=document.getElementById('spinStatusPill'); if(spinPillBatch) spinPillBatch.textContent='КРУТИМ';
-  document.getElementById('wheelWrap').style.display = 'none';
-  document.getElementById('vaultCrack').style.display = 'none';
-  document.getElementById('spinResult').classList.add('hidden');
-  document.getElementById('spinResult').innerHTML = '';
-  document.getElementById('spinCloseBtn').classList.add('hidden');
+  const title=document.getElementById('spinCaseTitle');
+  const icon=document.getElementById('spinCaseIcon');
+  const price=document.getElementById('spinCasePrice');
+  const sub=document.getElementById('spinCaseSub');
+  const pill=document.getElementById('spinStatusPill');
+  const wheelWrap=document.getElementById('wheelWrap');
+  const wheelDial=document.getElementById('wheelDial');
+  const multiRow=document.getElementById('wheelMultiRow');
+  const multiResult=document.getElementById('spinResultMulti');
+  const resultBox=document.getElementById('spinResult');
+  const closeBtn=document.getElementById('spinCloseBtn');
 
-  const multiRow = document.getElementById('wheelMultiRow');
-  const multiResult = document.getElementById('spinResultMulti');
+  // Для 2x/3x используем ОДНУ рулетку и прокручиваем её последовательно.
+  // Это намного легче для мобильного WebView, чем создавать 2–3 независимые
+  // рулетки одновременно. Серверный batch остаётся атомарным.
+  wheelWrap.style.display='block';
+  if(multiRow){ multiRow.style.display='none'; multiRow.innerHTML=''; }
   multiResult.classList.add('hidden');
-  multiResult.innerHTML = '';
-  multiRow.style.display = 'flex';
-  multiRow.innerHTML = '';
+  multiResult.innerHTML='';
+  resultBox.classList.add('hidden');
+  resultBox.innerHTML='';
+  closeBtn.classList.add('hidden');
+  document.getElementById('vaultCrack').style.display='none';
+  if(title) title.textContent=`${c.name} · ${qty} кейса`;
+  if(icon) icon.textContent=c.icon;
+  if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
+  if(sub) sub.textContent=`${qty} открытия · одна плавная лента`;
+  if(pill) pill.textContent='КРУТИМ';
 
-  // IMPORTANT: the server chooses the real drop first. The animation is
-  // built only after receiving that result, so the item shown in the wheel
-  // can never differ from the item actually credited to the account.
-  const wins = [];
+  const wins=[];
   try{
     if(tgInitData()){
-      // One atomic server call returns the three authoritative drops.
-      // No individual response can be reused for another reel.
-      const requestId = (crypto?.randomUUID ? crypto.randomUUID() : `open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-      const j = await apiFetch('/api/cube/open-batch', {case_id: c.id, qty, use_key:!!useKey, request_id:requestId});
-      if(!Array.isArray(j.drops) || j.drops.length !== qty){
-        throw new Error('Сервер вернул некорректные результаты кейсов');
-      }
-      j.drops.forEach(d=>{
-        wins.push({
-          name: String(d.name),
-          rarity: String(d.rarity),
-          value: Math.floor(Number(d.value)||0),
-          source_case_id: String(d.case_id||c.id)
-        });
-      });
-      data.balance = Number(j.balance)||0;
-      if(Array.isArray(j.cubes)) data.cubes = j.cubes.map(x=>({...x}));
-      if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
-      if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{
-        if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');
-      });
-      data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+qty;
+      const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const j=await apiFetch('/api/cube/open-batch',{case_id:c.id,qty,use_key:!!useKey,request_id:requestId});
+      if(!Array.isArray(j.drops)||j.drops.length!==qty) throw new Error('Сервер вернул некорректные результаты кейсов');
+      j.drops.forEach(d=>wins.push({name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
+      data.balance=Number(j.balance)||0;
+      if(Array.isArray(j.cubes)) data.cubes=j.cubes.map(x=>({...x}));
+      if(Array.isArray(j.keys)) data.keys=j.keys.map(x=>({...x}));
+      if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');});
+      data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+qty;
       if(j.farm_action) handleFarmAction?.(j.farm_action);
     }else{
       for(let i=0;i<qty;i++){
-        const won = rollCaseItem(c);
-        normalizeCubeValue(won);
-        won.value = Math.floor(Number(won.value || 0));
-        if(!useKey) data.balance -= c.price;
-        data.cubes.push({...won, source_case_id:c.id});
-        data.cases_opened = (data.cases_opened||0)+1;
-        wins.push({...won, source_case_id:c.id});
+        const won=rollCaseItem(c); normalizeCubeValue(won); won.value=Math.floor(Number(won.value||0));
+        if(!useKey) data.balance-=c.price;
+        data.cubes.push({...won,source_case_id:c.id});
+        data.cases_opened=(data.cases_opened||0)+1;
+        wins.push({...won,source_case_id:c.id});
       }
     }
-    persistLocal();
-    updateBalanceUI();
+    if(wins.some(w=>!w.name||!Number.isFinite(w.value)||w.value<0)) throw new Error('Сервер вернул некорректную награду');
+    persistLocal(); updateBalanceUI();
   }catch(e){
     showToast('❌ '+e.message,'error');
-    spinning = false;
+    spinning=false;
     closeModal('spinModal');
     document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
     return;
   }
 
-  // Defensive check: every displayed result must be one of the exact server drops.
-  if(wins.some(w => !w.name || !Number.isFinite(w.value) || w.value < 0)){
-    throw new Error('Сервер вернул некорректную награду');
-  }
-  for(let i=0;i<wins.length;i++){
-    multiRow.insertAdjacentHTML('beforeend', `
-      <div class="wheel-wrap" id="wheelWrapM${i}">
-        <div class="reel-line"></div>
-        <div class="reel-mask"><div class="wheel-dial" id="wheelDialM${i}"></div></div>
-      </div>`);
-  }
-
   openModal('spinModal');
+  // Держим один DOM-диал и переиспользуем его для всех 2/3 открытий.
+  // Это исключает скачки высоты, лишний layout и параллельные GPU-анимации.
+  for(let i=0;i<wins.length;i++){
+    const won=wins[i];
+    if(title) title.textContent=`${c.name} · ${i+1}/${wins.length}`;
+    if(pill) pill.textContent=`${i+1}/${wins.length}`;
+    let wonIndex=c.items.findIndex(it=>String(it.name)===String(won.name)&&String(it.rarity||'')===String(won.rarity||'')&&Number(it.value)===Number(won.value));
+    if(wonIndex<0) wonIndex=c.items.findIndex(it=>String(it.name)===String(won.name));
+    if(wonIndex<0) wonIndex=c.items.findIndex(it=>String(it.rarity||'')===String(won.rarity||''));
+    if(wonIndex<0) wonIndex=0;
+    buildWheel(c.items,wonIndex,won.value,won);
+    await spinWheelIn(wheelWrap,wheelDial,c.items,wonIndex);
+    // Небольшая пауза между 2/3 открытиями: предыдущий кадр успевает
+    // завершить layout/paint, но пользователь не ощущает зависания.
+    if(i<wins.length-1) await new Promise(r=>setTimeout(r,90));
+  }
 
-  multiRow.classList.remove('reel-opening');
-  void multiRow.offsetWidth;
-  multiRow.classList.add('reel-opening');
-  const spins = wins.map((won,i)=>{
-    let wonIndex = c.items.findIndex(it=>
-      String(it.name)===String(won.name) &&
-      String(it.rarity||'')===String(won.rarity||'') &&
-      Number(it.value)===Number(won.value)
-    );
-    if(wonIndex < 0) wonIndex = c.items.findIndex(it=>String(it.name)===String(won.name));
-    if(wonIndex < 0) wonIndex = c.items.findIndex(it=>String(it.rarity||'')===String(won.rarity||''));
-    if(wonIndex < 0) wonIndex = 0;
-    const dial = document.getElementById(`wheelDialM${i}`);
-    const wrap = document.getElementById(`wheelWrapM${i}`);
-    buildWheelIn(dial, c.items, wonIndex, won.value, won);
-    return spinWheelIn(wrap, dial, c.items, wonIndex);
-  });
-
-  await Promise.all(spins);
-  const spinPillBatchDone=document.getElementById('spinStatusPill'); if(spinPillBatchDone) spinPillBatchDone.textContent='ГОТОВО';
-
-  playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald') ? 1180 : 840);
-
+  if(pill) pill.textContent='ГОТОВО';
+  playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald')?1180:840);
   multiResult.classList.remove('hidden');
-  multiResult.innerHTML = wins.map(w=>{
-    const m=RARITY_META[w.rarity];
-    return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}">
-      <span>${m.icon} <b style="color:${m.color}">${w.name}</b></span>
-      <span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span>
-    </div>`;
+  multiResult.innerHTML=wins.map(w=>{
+    const m=RARITY_META[w.rarity]||RARITY_META.common;
+    return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${w.name}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;
   }).join('');
-
-  document.getElementById('spinCloseBtn').classList.remove('hidden');
-  document.getElementById('spinCloseBtn').onclick=()=>{
+  closeBtn.classList.remove('hidden');
+  closeBtn.onclick=()=>{
     closeModal('spinModal');
-    multiRow.style.display='none';
-    multiRow.classList.remove('reel-opening');
-    multiRow.innerHTML='';
+    wheelWrap.classList.remove('reel-opening');
     multiResult.classList.add('hidden');
     multiResult.innerHTML='';
-    document.getElementById('wheelWrap').style.display='block';
-    renderInventory();
-    renderCases();
-    document.getElementById('spinCloseBtn').onclick=null;
+    renderInventory(); renderCases(); updateBalanceUI();
+    closeBtn.onclick=null;
   };
-
-  wins.forEach(won=>{
-    pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});
-    recordBestDrop(won);
-  });
+  wins.forEach(won=>{pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});recordBestDrop(won);});
   persistLocal();
-
   spinning=false;
   renderCases();
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
@@ -5672,3 +5640,50 @@ boot();
   filter:none;
 }
 </style>
+<style id="gdplay-final-main-menu-polish">
+/* ===== MAIN MENU REDESIGN: keep all existing text, cube artwork and hamburger ===== */
+#page-cases{
+  position:relative;
+  padding:14px 12px 24px;
+  margin:0 -2px;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 92% 2%,rgba(201,151,77,.09),transparent 28%),
+    linear-gradient(180deg,rgba(255,255,255,.018),transparent 34%),
+    rgba(20,17,16,.42);
+  border:1px solid rgba(236,228,211,.055);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+#page-cases>.section-title:first-child{
+  display:flex;align-items:center;gap:9px;
+  font-size:18px;letter-spacing:-.2px;margin:2px 2px 4px!important;
+}
+#page-cases>.section-title:first-child::before{
+  content:"";width:4px;height:20px;border-radius:4px;background:linear-gradient(180deg,var(--brass-2),var(--brass-dim));
+  box-shadow:0 0 10px rgba(201,151,77,.18);
+}
+#page-cases>.section-sub{margin:0 2px 14px!important;max-width:330px;line-height:1.45;}
+#page-cases #casesList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+#page-cases #casesList .case-card{margin:0;padding:11px;border-radius:17px;box-shadow:0 8px 22px rgba(0,0,0,.18);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;}
+#page-cases #casesList .case-card:active{transform:scale(.985);}
+#page-cases #casesList .case-card-top{gap:9px;margin-bottom:9px;}
+#page-cases #casesList .case-icon{width:46px;height:46px;border-radius:12px;font-size:23px;}
+#page-cases #casesList .case-items-preview{max-height:58px;overflow:hidden;}
+#page-cases #casesList .case-card .btn{min-height:42px;border-radius:12px;}
+#page-cases .promo-card{margin-top:14px;border-radius:17px;border:1px solid rgba(201,151,77,.12);background:linear-gradient(145deg,rgba(201,151,77,.055),rgba(255,255,255,.012));box-shadow:0 8px 22px rgba(0,0,0,.16);}
+#page-cases .promo-row{gap:7px;}
+#page-cases .promo-row .btn{min-width:104px;}
+#page-cases>#recentDropsList{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+#page-cases>#recentDropsList>*{min-width:0;}
+@media(max-width:560px){#page-cases #casesList{grid-template-columns:1fr;}#page-cases{padding-left:10px;padding-right:10px;} }
+@media(max-width:380px){#page-cases{padding-left:8px;padding-right:8px;}#page-cases #casesList .case-card{padding:10px;}}
+
+/* ===== CASE OPENING: no repeating sheen / no mid-animation restart ===== */
+#spinModal .reel-sheen{display:none!important;animation:none!important;}
+#spinModal .reel-glow{animation:none!important;}
+#spinModal .wheel-dial{transition:transform 2.9s cubic-bezier(.12,.72,.12,1)!important;}
+
+/* Keep inactive screens cheap. */
+.page:not(.active) #casesList,.page:not(.active) #recentDropsList{content-visibility:auto;contain-intrinsic-size:1px 500px;}
+</style>
+
