@@ -395,15 +395,9 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .upgrade-gauge-center{
   position:absolute;top:50%;left:50%;width:22px;height:22px;border-radius:50%;
   background:radial-gradient(circle at 35% 30%, var(--brass-2), var(--brass-dim));
-  transform:translate(-50%,-50%);box-shadow:0 3px 10px rgba(0,0,0,.6);z-index:2;border:2px solid #1c1509;
+  transform:translate(-50%,-50%);box-shadow:0 3px 10px rgba(0,0,0,.6);z-index:6;border:2px solid #1c1509;
 }
-.upgrade-pointer{
-  position:absolute;top:50%;left:50%;width:92px;height:14px;margin-left:0;margin-top:-7px;
-  transform-origin:0 50%;transform:rotate(0deg);transition:transform 2.6s cubic-bezier(.15,.85,.15,1);z-index:1;
-  background:linear-gradient(90deg,var(--brass-dim),var(--paper));
-  clip-path:polygon(0% 20%, 78% 20%, 78% 0%, 100% 50%, 78% 100%, 78% 80%, 0% 80%);
-  filter:drop-shadow(0 3px 6px rgba(0,0,0,.55));
-}
+.upgrade-pointer{position:absolute;top:50%;left:50%;width:104px;height:16px;margin:0;transform-origin:0 50%;transform:translateY(-50%) rotate(0deg);transition:transform 2.6s cubic-bezier(.15,.85,.15,1);z-index:1;background:linear-gradient(90deg,var(--brass-dim),var(--paper));clip-path:polygon(0% 25%,78% 25%,78% 0%,100% 50%,78% 100%,78% 75%,0% 75%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.42));pointer-events:none;}
 
 /* ============ BATTLE DICE ============ */
 .battle-dice-list{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-top:10px;}
@@ -429,9 +423,9 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .drop-item{display:flex;align-items:center;gap:10px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px;animation:slideIn .3s ease;}
 @keyframes slideIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
 .drop-icon{font-size:18px;}
-.drop-text{flex:1;font-size:12.5px;}
+.drop-text{flex:1;min-width:0;font-size:12.5px;overflow-wrap:anywhere;word-break:break-word;line-height:1.35;}
 .drop-text b{font-weight:700;}
-.drop-time{font-size:10.5px;color:var(--muted-2);font-family:'IBM Plex Mono',monospace;}
+.drop-time{font-size:10.5px;color:var(--muted-2);font-family:'IBM Plex Mono',monospace;flex:0 0 auto;white-space:nowrap;margin-left:auto;}
 
 .empty-state{text-align:center;color:var(--muted);font-size:12.5px;padding:34px 10px;line-height:1.6;}
 
@@ -1682,6 +1676,12 @@ window.lockUpgradeResult=function(result,angle){
 #upgradeGauge::before,#upgradeGauge::after{display:none!important;}
 #upgradePointer{z-index:10!important;}
 </style>
+<style id="gdplay-upgrade-probability-final">
+#upgradeGauge .exact-wheel-css{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;display:block;}
+#upgradeGauge .exact-wheel-css::after{content:"";position:absolute;inset:31%;border-radius:50%;background:#15110e;border:3px solid #211b17;box-sizing:border-box;}
+#upgradePointer{z-index:4!important;}
+.upgrade-gauge-center{z-index:7!important;}
+</style>
 
 
 <style id="gdplay-case-optimized-v5">
@@ -1727,7 +1727,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #page-cases>.section-title:first-child{margin-top:2px;font-size:23px;letter-spacing:-.3px}#page-cases>.section-sub{margin-top:4px;margin-bottom:14px}
 #casesList{display:grid;gap:12px}.bot-case-card{border-radius:18px!important;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.025)!important;transform:translateZ(0);contain:layout paint}
 .promo-card{margin-top:14px!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.14))!important;box-shadow:0 8px 20px rgba(0,0,0,.16)!important}
-#recentDropsList{display:grid;gap:7px}.recent-drop{border-radius:13px!important}
+#recentDropsList{display:grid;gap:7px}.recent-drop{border-radius:13px!important}.drop-item{min-width:0}.drop-text{max-width:100%;}.drop-icon{flex:0 0 auto}
 @media(max-width:430px){header{top:0}.app-shell{padding-left:10px;padding-right:10px}nav{top:74px;grid-template-columns:repeat(3,1fr)}.nav-btn{font-size:10px;padding:7px 3px}}
 </style>
 </head>
@@ -1803,7 +1803,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
       <div id="casesList"></div>
       <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
       <div class="section-title" style="margin-top:24px">Последние дропы</div>
-      <div class="section-sub">Только 3 последних выигрыша</div>
+      <div class="section-sub">Только 2 последних выигрыша</div>
       <div id="recentDropsList"></div>
     </div>
 
@@ -4399,16 +4399,12 @@ async function confirmUpgrade(){
     // Build the probability wheel from the same single number shown above.
     // 1% is ALWAYS 3.6 degrees. No scaling, item-count weighting or random
     // client-side calculation is involved here.
-    const circumference=2*Math.PI*44;
-    const greenLength=circumference*(serverChance/100);
-    const redLength=circumference-greenLength;
-    const ns='http://www.w3.org/2000/svg';
-    gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 100 100" aria-hidden="true">
-      <circle class="exact-wheel-bg" cx="50" cy="50" r="47"></circle>
-      <circle class="exact-wheel-red" cx="50" cy="50" r="44" stroke-dasharray="${redLength} ${circumference}" stroke-dashoffset="-${greenLength}"></circle>
-      <circle class="exact-wheel-green" cx="50" cy="50" r="44" stroke-dasharray="${greenLength} ${circumference}" stroke-dashoffset="0"></circle>
-      <circle class="exact-wheel-inner" cx="50" cy="50" r="31"></circle>
-    </svg>`;
+    // Draw the probability directly as an angular CSS gradient.
+    // This makes the visual sector mathematically identical to the displayed chance:
+    // 62% = 62% of the circle, 30% = 30%, etc.
+    gauge.innerHTML=`<div class="exact-wheel-css" aria-hidden="true"></div>`;
+    const wheelCss=gauge.querySelector('.exact-wheel-css');
+    wheelCss.style.background=`conic-gradient(from -90deg, var(--success) 0% ${serverChance}%, #6a3431 ${serverChance}% 100%)`;
 
     // The roll is also mapped directly: 0..100 -> 0..360 degrees.
     // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
@@ -4854,14 +4850,14 @@ async function renderRecentDrops(){
   if(tgInitData()){
     try{
       const j = await apiFetch('/api/drops/recent', {});
-      drops = (j.drops||[]).map(d=>({username:d.username, item:d.cube_name, rarity:d.rarity, time:new Date(d.created_at+'Z').getTime()||Date.now()}));
+      drops = (j.drops||[]).slice(0,2).map(d=>({username:d.username, item:d.cube_name, rarity:d.rarity, time:new Date(d.created_at+'Z').getTime()||Date.now()}));
     }catch(e){
       console.error('recent drops error', e);
-      drops = loadDrops().slice(0,3);
+      drops = loadDrops().slice(0,2);
     }
   }else{
     // Вне Telegram общая лента недоступна — показываем локальную историю этого браузера
-    drops = loadDrops().slice(0,3);
+    drops = loadDrops().slice(0,2);
   }
   if(!drops.length){
     el.innerHTML = '<div class="empty-state">Пока никто ничего не выбил.<br>Открой сейф первым!</div>';
@@ -5728,65 +5724,4 @@ boot();
 #spinModal .wheel-multi-row .wheel-dial{display:flex;flex-direction:row;height:100%;width:max-content;position:relative;transform:translate3d(0,0,0);will-change:transform;backface-visibility:hidden;}
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:96px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
-</style>
-
-<style id="gdplay-case-layout-v10">
-/* Header cube: remove the extra wrapper box completely, keep the original image. */
-.brand-mark{display:contents!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;}
-.brand-mark img{width:42px!important;height:42px!important;display:block!important;object-fit:contain!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;}
-@media (max-width:400px){.brand-mark img{width:40px!important;height:40px!important;}}
-@media (max-width:350px){.brand-mark img{width:36px!important;height:36px!important;}}
-
-/* Case opening: compact modal — no giant empty area, button always fits on screen. */
-#spinModal{align-items:center!important;padding:10px!important;}
-#spinModal .spin-modal{
-  width:min(430px,100%)!important;
-  max-height:calc(100dvh - 20px)!important;
-  height:auto!important;
-  min-height:0!important;
-  overflow:hidden!important;
-  padding:12px 12px 12px!important;
-}
-#spinModal .spin-topbar{gap:8px!important;}
-#spinModal .spin-case-icon{width:44px!important;height:44px!important;border-radius:12px!important;font-size:21px!important;}
-#spinModal .spin-subline{margin:7px 2px 7px!important;font-size:8px!important;}
-#spinModal .wheel-wrap{
-  height:148px!important;
-  margin:0 auto 9px!important;
-  max-height:148px!important;
-}
-#spinModal .reel-mask{border-width:2px!important;border-radius:14px!important;}
-#spinModal .reel-mask::before,#spinModal .reel-mask::after{height:38px!important;}
-#spinModal .reel-line{height:2px!important;box-shadow:0 0 7px rgba(201,151,77,.22)!important;}
-#spinModal .wheel-multi-row{
-  height:auto!important;
-  max-height:none!important;
-  margin:0 auto 8px!important;
-  gap:6px!important;
-}
-#spinModal .wheel-multi-row .wheel-wrap{
-  height:78px!important;
-  max-height:78px!important;
-  margin:0!important;
-}
-#spinModal .wheel-multi-row .wheel-item span{font-size:14px!important;}
-#spinModal .wheel-multi-row .wheel-item small{font-size:7px!important;}
-#spinModal .spin-result{margin-top:3px!important;}
-#spinModal .spin-result-icon{font-size:28px!important;margin-bottom:2px!important;}
-#spinModal .spin-result-name{font-size:14px!important;}
-#spinModal .spin-result-rarity{font-size:10px!important;}
-#spinModal .spin-result-value{margin-top:3px!important;font-size:12px!important;}
-#spinModal .spin-result-multi{gap:5px!important;margin-top:3px!important;}
-#spinModal .spin-result-multi-item{padding:7px 9px!important;}
-#spinModal #spinCloseBtn{margin-top:8px!important;min-height:42px!important;height:42px!important;}
-#spinModal .vault-crack{width:150px!important;height:150px!important;margin:0 auto 8px!important;}
-
-/* Keep the single-opening layout especially compact on short phones. */
-@media (max-height:700px){
-  #spinModal{padding:6px!important;}
-  #spinModal .spin-modal{padding:9px 10px!important;max-height:calc(100dvh - 12px)!important;}
-  #spinModal .wheel-wrap{height:126px!important;max-height:126px!important;}
-  #spinModal .spin-subline{margin:5px 2px!important;}
-  #spinModal #spinCloseBtn{height:40px!important;min-height:40px!important;margin-top:6px!important;}
-}
 </style>
