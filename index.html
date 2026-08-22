@@ -1592,6 +1592,92 @@ window.lockUpgradeResult=function(result,angle){
 .upgrade-gauge::before,.upgrade-gauge::after{pointer-events:none;}
 </style>
 </style>
+
+<style id="gdplay-cases-carousel-and-spin-v3">
+/* ===== CASE DROP LADDER ===== */
+.bot-case-featured{position:relative;z-index:1;margin:0 0 12px;padding:8px 0 0;}
+.bot-case-featured-label{display:flex;justify-content:space-between;align-items:center;margin:0 2px 6px;color:var(--muted);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+.bot-case-featured-step{color:var(--brass-dim);}
+.bot-case-featured-card{--preview-color:var(--brass-2);display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 10px;border-radius:13px;background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(0,0,0,.12));border:1px solid color-mix(in srgb,var(--preview-color) 22%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 7px 16px rgba(0,0,0,.16);overflow:hidden;}
+.bot-case-featured-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;background:radial-gradient(circle at 35% 25%,color-mix(in srgb,var(--preview-color) 28%,transparent),transparent 65%),#171311;border:1px solid color-mix(in srgb,var(--preview-color) 30%,transparent);}
+.bot-case-featured-info{min-width:0;}
+.bot-case-featured-name{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bot-case-featured-rarity{font-size:9px;color:var(--preview-color);margin-top:3px;font-weight:700;}
+.bot-case-featured-value{font:800 10px 'IBM Plex Mono',monospace;color:var(--preview-color);white-space:nowrap;}
+.bot-case-featured-card.preview-shift{animation:casePreviewShift .34s cubic-bezier(.2,.9,.2,1);}
+@keyframes casePreviewShift{0%{opacity:.35;transform:translateY(6px) scale(.985);filter:blur(2px)}100%{opacity:1;transform:none;filter:none}}
+
+/* ===== NEW CASE OPENING MODAL ===== */
+#spinModal{background:rgba(7,6,5,.84);backdrop-filter:blur(14px);}
+#spinModal .spin-modal{max-width:430px;padding:15px 14px 16px;border-radius:26px;background:linear-gradient(165deg,#211b17,#120f0d 72%);border:1px solid rgba(201,151,77,.28);box-shadow:0 30px 90px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.04);}
+.spin-topbar{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;}
+.spin-case-icon{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px;background:linear-gradient(145deg,rgba(201,151,77,.22),rgba(201,151,77,.04));border:1px solid rgba(201,151,77,.28);box-shadow:inset 0 0 18px rgba(0,0,0,.25);}
+.spin-case-heading{min-width:0;}
+.spin-case-kicker{font:700 7px/1.2 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#spinModal .spin-modal h3{margin:3px 0 2px;font-family:'Fraunces',serif;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spin-case-price{font:700 9px 'IBM Plex Mono',monospace;color:var(--brass-2);}
+.spin-status-pill{padding:6px 8px;border-radius:9px;border:1px solid rgba(201,151,77,.2);background:rgba(201,151,77,.07);color:var(--brass-2);font:800 8px 'IBM Plex Mono',monospace;letter-spacing:.7px;}
+.spin-subline{display:flex;gap:7px;margin:11px 2px 9px;color:var(--muted);font-size:9px;justify-content:center;}
+.spin-subline span:first-child{color:var(--paper);font-weight:700;}
+#spinModal .wheel-wrap{width:100%;max-width:none;height:176px;margin:0 auto 15px;}
+#spinModal .reel-mask{height:100%;border:1px solid rgba(201,151,77,.3);border-radius:18px;background:radial-gradient(circle at 50% 50%,rgba(201,151,77,.08),transparent 55%),#0d0b09;box-shadow:inset 0 0 35px rgba(0,0,0,.75),0 0 28px rgba(201,151,77,.09);}
+#spinModal .reel-mask::before,#spinModal .reel-mask::after{top:0;bottom:0;left:auto;right:auto;width:72px;height:auto;background:none;z-index:4;}
+#spinModal .reel-mask::before{left:0;background:linear-gradient(90deg,#0d0b09,transparent);}
+#spinModal .reel-mask::after{right:0;background:linear-gradient(270deg,#0d0b09,transparent);}
+#spinModal .reel-line{left:50%;right:auto;top:0;bottom:0;width:2px;height:auto;background:var(--brass-2);transform:translateX(-50%);box-shadow:0 0 16px rgba(201,151,77,.8);z-index:8;}
+#spinModal .reel-line::before{left:50%;top:-1px;border-top:0;border-bottom:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid var(--brass-2);transform:translate(-50%,0);}
+#spinModal .reel-line::after{right:auto;left:50%;top:auto;bottom:-1px;border-top:0;border-bottom:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:9px solid var(--brass-2);transform:translate(-50%,0);}
+#spinModal .wheel-dial{display:flex;width:max-content;height:100%;align-items:stretch;position:relative;top:0;will-change:transform;padding:0 0;}
+#spinModal .wheel-item{height:100%;width:104px;min-width:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid rgba(236,228,211,.07);border-bottom:0;box-sizing:border-box;position:relative;transition:transform .25s,filter .25s,opacity .25s;}
+#spinModal .wheel-item::after{content:"";position:absolute;inset:13px 8px;border-radius:13px;border:1px solid rgba(255,255,255,.035);background:linear-gradient(180deg,rgba(255,255,255,.025),transparent);pointer-events:none;}
+#spinModal .wheel-item span{font-size:30px;position:relative;z-index:1;}
+#spinModal .wheel-item small{font-size:9px;margin-top:5px;position:relative;z-index:1;}
+#spinModal .wheel-dial.is-spinning .wheel-item{filter:blur(.65px);opacity:.82;}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.08);filter:none;opacity:1;}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after{border-color:rgba(201,151,77,.55);box-shadow:0 0 24px rgba(201,151,77,.18),inset 0 0 20px rgba(201,151,77,.08);}
+.reel-sheen{position:absolute;inset:0;z-index:7;pointer-events:none;background:linear-gradient(105deg,transparent 25%,rgba(255,255,255,.035) 48%,rgba(201,151,77,.07) 50%,rgba(255,255,255,.035) 52%,transparent 75%);background-size:220% 100%;animation:reelSheen 2.8s linear infinite;}
+@keyframes reelSheen{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.reel-glow{position:absolute;width:120px;height:120px;border-radius:50%;filter:blur(25px);pointer-events:none;z-index:0;}
+.reel-glow-a{left:12%;top:25%;background:rgba(201,151,77,.09);}.reel-glow-b{right:12%;top:25%;background:rgba(201,151,77,.05);}
+#spinModal .spin-result{margin-top:0;padding:13px 12px;border-radius:15px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.08);}
+#spinModal #spinCloseBtn{height:45px;border-radius:13px;margin-top:12px;}
+@media(max-width:430px){#spinModal .spin-modal{width:calc(100% - 12px);max-height:calc(100dvh - 24px);padding:13px 11px 14px;}#spinModal .wheel-item{width:96px;min-width:96px;}#spinModal .wheel-wrap{height:166px;}}
+</style>
+<style id="gdplay-upgrade-exact-wheel-fix">
+/* FINAL FIX: the upgrade wheel uses a real SVG probability ring.
+   One percentage point = exactly 3.6 degrees. */
+#upgradeGauge{
+  position:absolute!important; inset:0!important;
+  width:100%!important; height:100%!important;
+  border-radius:50%!important;
+  background:#5a302e!important;
+  overflow:hidden!important;
+}
+#upgradeGauge .exact-wheel-svg{
+  position:absolute; inset:0; width:100%; height:100%;
+  display:block; overflow:visible;
+}
+#upgradeGauge .exact-wheel-bg{fill:#5a302e;}
+#upgradeGauge .exact-wheel-green{
+  fill:none; stroke:var(--success); stroke-width:44;
+  stroke-linecap:butt;
+  transform:rotate(-90deg); transform-origin:50% 50%;
+}
+#upgradeGauge .exact-wheel-red{
+  fill:none; stroke:#6a3431; stroke-width:44;
+  stroke-linecap:butt;
+  transform:rotate(-90deg); transform-origin:50% 50%;
+}
+#upgradeGauge .exact-wheel-inner{
+  fill:#15110e; stroke:#211b17; stroke-width:3;
+}
+#upgradeGauge .exact-wheel-tick{
+  stroke:rgba(255,255,255,.15); stroke-width:1.2;
+}
+#upgradeGauge::before,#upgradeGauge::after{display:none!important;}
+#upgradePointer{z-index:10!important;}
+</style>
+
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
@@ -1950,10 +2036,21 @@ window.lockUpgradeResult=function(result,angle){
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
-    <h3 id="spinCaseTitle">Сейф</h3>
+    <div class="spin-topbar">
+      <div class="spin-case-icon" id="spinCaseIcon">🗝️</div>
+      <div class="spin-case-heading">
+        <div class="spin-case-kicker">GDPLAY VAULT · ОТКРЫТИЕ</div>
+        <h3 id="spinCaseTitle">Сейф</h3>
+        <div class="spin-case-price" id="spinCasePrice">— 💰</div>
+      </div>
+      <div class="spin-status-pill" id="spinStatusPill">ГОТОВ</div>
+    </div>
+    <div class="spin-subline"><span id="spinCaseSub">Лента награды</span><span>•</span><span>Цель фиксируется сервером</span></div>
     <div class="wheel-wrap" id="wheelWrap">
+      <div class="reel-glow reel-glow-a"></div><div class="reel-glow reel-glow-b"></div>
       <div class="reel-line"></div>
       <div class="reel-mask">
+        <div class="reel-sheen"></div>
         <div class="wheel-dial" id="wheelDial"></div>
       </div>
     </div>
@@ -3314,6 +3411,45 @@ function countCaseKeys(caseId){
   if(!typeIds.length) return 0;
   return (data.keys||[]).filter(k=>typeIds.includes(keyCatalogId(k))).reduce((n,k)=>n+Number(k.stack_count||1),0);
 }
+const casePreviewState = Object.create(null);
+let casePreviewTimer = null;
+function updateCasePreviewCard(card, c, index){
+  if(!card || !c?.items?.length) return;
+  const sorted = c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0));
+  const i = ((Number(index)||0) % sorted.length + sorted.length) % sorted.length;
+  const it = sorted[i];
+  const m = RARITY_META[it.rarity] || RARITY_META.common;
+  const icon = card.querySelector('[data-preview-icon]');
+  const name = card.querySelector('[data-preview-name]');
+  const rarity = card.querySelector('[data-preview-rarity]');
+  const value = card.querySelector('[data-preview-value]');
+  const step = card.querySelector('.bot-case-featured-step');
+  const feature = card.querySelector('.bot-case-featured-card');
+  if(icon) icon.textContent=m.icon;
+  if(name) name.textContent=it.name;
+  if(rarity){ rarity.textContent=m.label; rarity.style.color=m.color; }
+  if(value){ value.textContent='💰 '+Number(it.value||0).toLocaleString('ru-RU'); value.style.color=m.color; }
+  if(step) step.textContent=`${i+1} / ${sorted.length}`;
+  if(feature){
+    feature.style.setProperty('--preview-color',m.color);
+    feature.classList.remove('preview-shift');
+    void feature.offsetWidth;
+    feature.classList.add('preview-shift');
+  }
+}
+function startCasePreviewRotation(){
+  if(casePreviewTimer) return;
+  casePreviewTimer=setInterval(()=>{
+    document.querySelectorAll('[data-case-preview]').forEach(card=>{
+      const id=card.getAttribute('data-case-preview');
+      const c=CASES.find(x=>String(x.id)===String(id));
+      if(!c?.items?.length) return;
+      const next=((casePreviewState[id]??0)+1)%c.items.length;
+      casePreviewState[id]=next;
+      updateCasePreviewCard(card,c,next);
+    });
+  },3000);
+}
 function renderCases(){
   const el = document.getElementById('casesList');
   if(!el) return;
@@ -3347,6 +3483,17 @@ function renderCases(){
           <div class="bot-case-price">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div>
         </div>
         <div class="bot-case-drops">${dropRows}</div>
+        <div class="bot-case-featured" data-case-preview="${c.id}">
+          <div class="bot-case-featured-label"><span>ЛЕСТНИЦА ДРОПОВ</span><span class="bot-case-featured-step">1 / ${c.items.length}</span></div>
+          <div class="bot-case-featured-card">
+            <div class="bot-case-featured-icon" data-preview-icon>${RARITY_META[c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.rarity||'common']?.icon||'●'}</div>
+            <div class="bot-case-featured-info">
+              <div class="bot-case-featured-name" data-preview-name>${c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.name||''}</div>
+              <div class="bot-case-featured-rarity" data-preview-rarity>${RARITY_META[c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.rarity||'common']?.label||'Обычный'}</div>
+            </div>
+            <div class="bot-case-featured-value" data-preview-value>💰 ${Number(c.items.slice().sort((a,b)=>(Number(a.value)||0)-(Number(b.value)||0))[0]?.value||0).toLocaleString('ru-RU')}</div>
+          </div>
+        </div>
         <div class="bot-case-bottom">
           <div class="bot-case-qty">
             <span>Открыть</span>
@@ -3358,6 +3505,12 @@ function renderCases(){
         </div>
       </article>`;
   }).join('');
+  document.querySelectorAll('[data-case-preview]').forEach(card=>{
+    const id=card.getAttribute('data-case-preview');
+    const c=CASES.find(x=>String(x.id)===String(id));
+    if(c){ if(casePreviewState[id]==null) casePreviewState[id]=0; updateCasePreviewCard(card,c,casePreviewState[id]); }
+  });
+  startCasePreviewRotation();
   renderRecentDrops();
   renderBattles();
 }
@@ -3424,85 +3577,54 @@ try{
 }catch(e){}
 
 const REEL_ITEM_HEIGHT = 86;
-const REEL_LENGTH = 40;   // сколько плашек всего в ленте
-const REEL_TARGET_POS = 33; // на какой позиции гарантированно окажется выигрыш
+const REEL_ITEM_WIDTH = 104;
+const REEL_LENGTH = 56;
+const REEL_TARGET_POS = 47;
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
-  // ВАЖНО: для каждой рулетки существует ровно один authoritativeDrop.
-  // Он же используется в карточке результата и был выбран сервером.
-  // Не пытаемся заново вычислять предмет/цену на клиенте.
-  const target = authoritativeDrop ? {
-    ...authoritativeDrop,
-    value: Math.floor(Number(authoritativeDrop.value)||0)
-  } : {
-    ...(items[wonIndex] || {}),
-    value: Math.floor(Number(
-      wonValue!==null && wonValue!==undefined ? wonValue : (items[wonIndex]?.value || 0)
-    )||0)
-  };
-
-  const strip = [];
-  for(let i=0;i<REEL_LENGTH;i++){
-    if(i===REEL_TARGET_POS){
-      strip.push(target);
-    }else{
-      strip.push(items[Math.floor(Math.random()*items.length)]);
-    }
-  }
-
-  let markup = '';
-  strip.forEach((it, idx)=>{
-    const realValue = Math.floor(Number(it.value || 0));
-    const m = RARITY_META[it.rarity] || RARITY_META.common;
-    const isTarget = idx === REEL_TARGET_POS;
-    markup += `<div class="wheel-item" ${isTarget ? 'data-reel-target="1"' : ''} style="background:linear-gradient(180deg, ${m.color}22, transparent)">
-      <span>${m.icon}</span><small style="color:${m.color}">${realValue.toLocaleString('ru-RU')}</small>
-    </div>`;
-  });
-  dial.innerHTML = markup;
-  dial.style.transition = 'none';
-  dial.style.transform = 'translateY(0px)';
+  const target = authoritativeDrop ? {...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)} : {...(items[wonIndex]||{}),value:Math.floor(Number(wonValue ?? items[wonIndex]?.value ?? 0)||0)};
+  const strip=[];
+  for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS ? target : items[Math.floor(Math.random()*items.length)]);
+  dial.classList.remove('is-spinning','is-stopped');
+  dial.classList.toggle('wheel-dial--vertical', !!dial.closest('.wheel-multi-row'));
+  dial.innerHTML=strip.map((it,idx)=>{
+    const realValue=Math.floor(Number(it.value||0));
+    const m=RARITY_META[it.rarity]||RARITY_META.common;
+    const isTarget=idx===REEL_TARGET_POS;
+    return `<div class="wheel-item" ${isTarget?'data-reel-target="1"':''} style="background:linear-gradient(180deg,${m.color}18,transparent 72%)"><span>${m.icon}</span><small style="color:${m.color}">${realValue.toLocaleString('ru-RU')}</small></div>`;
+  }).join('');
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
 }
-function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){
-  buildWheelIn(document.getElementById('wheelDial'), items, wonIndex, wonValue, authoritativeDrop);
-}
+function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){buildWheelIn(document.getElementById('wheelDial'),items,wonIndex,wonValue,authoritativeDrop);}
 
-function spinWheelIn(container, dial, items, wonIndex){
-  // Никогда не рассчитываем положение цели через константу высоты.
-  // На мобильных устройствах высота/масштаб multi-wheel может отличаться,
-  // из-за чего раньше в центре оказывался соседний элемент.
-  const targetEl = dial.querySelector('.wheel-item[data-reel-target="1"]');
+function spinWheelIn(container,dial,items,wonIndex){
+  const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
-
-  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = reduced ? 500 : 4200;
-
-  // offsetTop/offsetHeight — фактическая геометрия DOM, а не предполагаемые
-  // 86px. Поэтому центр выбранного сервером дропа точно совпадает с линией.
-  const targetCenter = targetEl.offsetTop + targetEl.offsetHeight / 2;
-  const containerCenter = container.clientHeight / 2;
-  const offset = Math.max(0, targetCenter - containerCenter);
-
-  dial.getBoundingClientRect();
-
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const vertical=dial.classList.contains('wheel-dial--vertical');
+  const duration=reduced?550:4700;
+  const targetCenter=vertical ? targetEl.offsetTop+targetEl.offsetHeight/2 : targetEl.offsetLeft+targetEl.offsetWidth/2;
+  const containerCenter=vertical ? container.clientHeight/2 : container.clientWidth/2;
+  const offset=Math.max(0,targetCenter-containerCenter);
+  dial.classList.add('is-spinning');
+  dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        dial.style.transition = `transform ${duration}ms cubic-bezier(0.1,0.7,0.15,1)`;
-        dial.style.transform = `translate3d(0, -${offset}px, 0)`;
-      });
-    });
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
+      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+    }));
     setTimeout(()=>{
-      // Финально фиксируем математически точную позицию без jitter.
-      dial.style.transition = 'none';
-      dial.style.transform = `translate3d(0, -${offset}px, 0)`;
+      dial.style.transition='none';
+      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+      dial.classList.remove('is-spinning');
+      dial.classList.add('is-stopped');
+      playBeep(920);
       resolve();
-    }, duration + 80);
+    },duration+90);
   });
 }
-function spinWheel(dial, items, wonIndex){
-  return spinWheelIn(document.getElementById('wheelWrap'), dial, items, wonIndex);
-}
+function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
 
 function runSecretReveal(){
   document.getElementById('wheelWrap').style.display = 'none';
@@ -3609,6 +3731,10 @@ async function openCaseBatch(c, qty, useKey=false){
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = true);
 
   document.getElementById('spinCaseTitle').textContent = `${c.name} · ${qty} кейса`;
+  const spinIconBatch=document.getElementById('spinCaseIcon'); if(spinIconBatch) spinIconBatch.textContent=c.icon;
+  const spinPriceBatch=document.getElementById('spinCasePrice'); if(spinPriceBatch) spinPriceBatch.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
+  const spinSubBatch=document.getElementById('spinCaseSub'); if(spinSubBatch) spinSubBatch.textContent=`${qty} открытия · лента наград`;
+  const spinPillBatch=document.getElementById('spinStatusPill'); if(spinPillBatch) spinPillBatch.textContent='КРУТИМ';
   document.getElementById('wheelWrap').style.display = 'none';
   document.getElementById('vaultCrack').style.display = 'none';
   document.getElementById('spinResult').classList.add('hidden');
@@ -3695,6 +3821,7 @@ async function openCaseBatch(c, qty, useKey=false){
   });
 
   await Promise.all(spins);
+  const spinPillBatchDone=document.getElementById('spinStatusPill'); if(spinPillBatchDone) spinPillBatchDone.textContent='ГОТОВО';
 
   playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald') ? 1180 : 840);
 
@@ -3796,6 +3923,10 @@ async function openCaseOnce(c, seq, total, useKey=false){
   }
 
   document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
+  const spinIcon=document.getElementById('spinCaseIcon'); if(spinIcon) spinIcon.textContent=c.icon;
+  const spinPrice=document.getElementById('spinCasePrice'); if(spinPrice) spinPrice.textContent=`${Number(c.price).toLocaleString('ru-RU')} 💰`;
+  const spinSub=document.getElementById('spinCaseSub'); if(spinSub) spinSub.textContent=`${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
+  const spinPill=document.getElementById('spinStatusPill'); if(spinPill) spinPill.textContent='КРУТИМ';
   buildWheel(c.items, wonIndex, won.value, won);
   openModal('spinModal');
   const dial = document.getElementById('wheelDial');
@@ -3803,6 +3934,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
 
   // Show exactly the same authoritative value that was stored on the server.
   showSpinResult(won, isSecret);
+  const spinPillDone=document.getElementById('spinStatusPill'); if(spinPillDone) spinPillDone.textContent='ГОТОВО';
   pushDrop({ username:data.username, item:won.name, rarity:won.rarity, value:won.value, time:Date.now() });
   recordBestDrop(won);
   persistLocal();
@@ -4279,39 +4411,44 @@ async function confirmUpgrade(){
     document.getElementById('upgradeCancelBtn').style.display='none';
     document.getElementById('upgradeResultText').textContent='';
     document.getElementById('upgradeStepResult').style.display='block';
-    const serverChance=Math.max(0,Math.min(100,Number(j.chance||0)));
-    // The server is authoritative. Mirror its exact chance in the label before
-    // drawing the wheel, so the text and the colored sector are always identical.
+    const serverChanceRaw=Number(j.chance);
+    const serverRollRaw=Number(j.roll);
+    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(100,serverChanceRaw)):0;
+    const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
     refreshUpgradeChance(serverChance);
-    const chanceDeg=(serverChance/100)*360;
-    const gauge=document.getElementById('upgradeGauge'), pointer=document.getElementById('upgradePointer');
-    // Green starts exactly at 12 o'clock and occupies exactly `serverChance` percent
-    // of the circle. No extra offsets, so 95% really means 342 degrees of green.
-    gauge.style.background=`conic-gradient(from 0deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
 
-    // Map the server roll itself onto the same 0..360 scale. This makes the final
-    // pointer position represent the real roll, not a fake center point.
-    const roll=Math.max(0,Math.min(100,Number(j.roll||0)));
-    let stopDeg;
-    if(serverChance>=100){
-      stopDeg=(roll/100)*360;
-    }else if(roll < serverChance){
-      stopDeg=(roll/Math.max(serverChance,0.0001))*chanceDeg;
-    }else{
-      stopDeg=chanceDeg + ((roll-serverChance)/Math.max(100-serverChance,0.0001))*(360-chanceDeg);
-    }
-    // Keep the pointer a fraction away from the border so antialiasing never makes
-    // a successful roll visually look like it landed in the red sector.
-    const epsilon=Math.min(1.25,Math.max(.08,chanceDeg/80));
-    if(j.success) stopDeg=Math.min(chanceDeg-epsilon,Math.max(epsilon,stopDeg));
-    else stopDeg=Math.min(360-epsilon,Math.max(chanceDeg+epsilon,stopDeg));
+    const gauge=document.getElementById('upgradeGauge');
+    const pointer=document.getElementById('upgradePointer');
+
+    // Build the probability wheel from the same single number shown above.
+    // 1% is ALWAYS 3.6 degrees. No scaling, item-count weighting or random
+    // client-side calculation is involved here.
+    const circumference=2*Math.PI*44;
+    const greenLength=circumference*(serverChance/100);
+    const redLength=circumference-greenLength;
+    const ns='http://www.w3.org/2000/svg';
+    gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="exact-wheel-bg" cx="50" cy="50" r="47"></circle>
+      <circle class="exact-wheel-red" cx="50" cy="50" r="44" stroke-dasharray="${redLength} ${circumference}" stroke-dashoffset="0"></circle>
+      <circle class="exact-wheel-green" cx="50" cy="50" r="44" stroke-dasharray="${greenLength} ${circumference}" stroke-dashoffset="0"></circle>
+      <circle class="exact-wheel-inner" cx="50" cy="50" r="31"></circle>
+    </svg>`;
+
+    // The roll is also mapped directly: 0..100 -> 0..360 degrees.
+    // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
+    // exactly halfway through that green 95% sector.
+    const stopDeg=(roll/100)*360;
+    const epsilon=Math.min(1.25,Math.max(.08,serverChance*3.6/80));
+    let visualDeg=stopDeg;
+    if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
+    if(!j.success) visualDeg=Math.max(serverChance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
 
     pointer.style.transition='none';
     pointer.style.transform='rotate(-90deg)';
     void pointer.offsetWidth;
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const finalAngle=-90 + (360*5) + stopDeg;
+    const finalAngle=-90 + (360*5) + visualDeg;
     pointer.dataset.resultAngle=String(finalAngle);
     requestAnimationFrame(()=>{
       pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
