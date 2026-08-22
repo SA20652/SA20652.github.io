@@ -1302,6 +1302,113 @@ window.lockUpgradeResult=function(result,angle){
 }
 </style>
 
+
+<style id="gdplay-upgrade-fix-v29">
+/* ===== UPGRADE MOBILE FIX // v29 ===== */
+#upgradeModal{
+  align-items:center !important;
+  justify-content:center !important;
+  padding:12px !important;
+  box-sizing:border-box;
+}
+#upgradeModal .upgrade-modal{
+  width:min(480px,100%) !important;
+  max-width:480px !important;
+  max-height:calc(100dvh - 24px) !important;
+  margin:0 !important;
+  padding:0 14px calc(14px + env(safe-area-inset-bottom)) !important;
+  border:1px solid rgba(201,151,77,.24) !important;
+  border-radius:26px !important;
+  overflow-y:auto !important;
+  box-sizing:border-box !important;
+}
+#upgradeModal .upgrade-modal::before{
+  margin:10px auto 15px !important;
+}
+#upgradeModal .upgrade-modal h3{
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
+/* Catalog rows: no artificial empty space between icon, text and price. */
+#upgradeModal .upgrade-cat-item{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  box-sizing:border-box !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+#upgradeModal .upgrade-cat-item::before{
+  flex:0 0 34px !important;
+  width:34px !important;
+  min-width:34px !important;
+}
+#upgradeModal .upgrade-cat-item > div:first-of-type{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  width:auto !important;
+  overflow:hidden !important;
+}
+#upgradeModal .upgrade-cat-item > div:last-of-type{
+  flex:0 0 auto !important;
+  margin-left:auto !important;
+  max-width:42% !important;
+}
+#upgradeModal .upgrade-cat-name{
+  display:block !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  line-height:1.25 !important;
+}
+
+/* Rarity labels are always identical, clean pills instead of uneven rectangles. */
+#upgradeModal .upgrade-cat-item > div:first-of-type .upgrade-cat-value{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:max-content !important;
+  max-width:100% !important;
+  min-height:28px !important;
+  height:28px !important;
+  box-sizing:border-box !important;
+  padding:0 10px !important;
+  margin-top:5px !important;
+  border-radius:10px !important;
+  line-height:28px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+#upgradeModal .upgrade-cat-item > div:last-of-type.upgrade-cat-value{
+  min-height:34px !important;
+  height:34px !important;
+  display:flex !important;
+  align-items:center !important;
+  padding:0 10px !important;
+  border-radius:10px !important;
+  box-sizing:border-box !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+@media (max-width:390px){
+  #upgradeModal{padding:8px !important;}
+  #upgradeModal .upgrade-modal{
+    max-height:calc(100dvh - 16px) !important;
+    padding-left:11px !important;
+    padding-right:11px !important;
+  }
+  #upgradeModal .upgrade-cat-item{gap:8px !important;padding-left:10px !important;padding-right:10px !important;}
+  #upgradeModal .upgrade-cat-item::before{flex-basis:32px !important;width:32px !important;min-width:32px !important;height:32px !important;}
+  #upgradeModal .upgrade-cat-item > div:last-of-type{max-width:40% !important;}
+  #upgradeModal .upgrade-cat-item > div:first-of-type .upgrade-cat-value{padding:0 8px !important;}
+  #upgradeModal .upgrade-cat-item > div:last-of-type.upgrade-cat-value{padding:0 8px !important;font-size:10.5px !important;}
+}
+</style>
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
