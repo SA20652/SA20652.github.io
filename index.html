@@ -1678,7 +1678,11 @@ window.lockUpgradeResult=function(result,angle){
 </style>
 <style id="gdplay-upgrade-probability-final">
 #upgradeGauge .exact-wheel-css{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;display:block;}
-#upgradeGauge .exact-wheel-css::after{content:"";position:absolute;inset:31%;border-radius:50%;background:#15110e;border:3px solid #211b17;box-sizing:border-box;}
+#upgradeGauge .exact-wheel-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;}
+#upgradeGauge .exact-wheel-red{fill:none;stroke:#6a3431;stroke-width:44;stroke-linecap:butt;}
+#upgradeGauge .exact-wheel-green{fill:none;stroke:var(--success);stroke-width:44;stroke-linecap:butt;}
+#upgradeGauge .exact-wheel-green{transform:rotate(-90deg);transform-origin:50% 50%;}
+#upgradeGauge .exact-wheel-css::after{content:"";position:absolute;inset:31%;border-radius:50%;background:#15110e;border:3px solid #211b17;box-sizing:border-box;z-index:2;}
 #upgradePointer{z-index:4!important;}
 .upgrade-gauge-center{z-index:7!important;}
 </style>
@@ -4402,14 +4406,28 @@ async function confirmUpgrade(){
     // Draw the probability directly as an angular CSS gradient.
     // This makes the visual sector mathematically identical to the displayed chance:
     // 62% = 62% of the circle, 30% = 30%, etc.
-    gauge.innerHTML=`<div class="exact-wheel-css" aria-hidden="true"></div>`;
-    const wheelCss=gauge.querySelector('.exact-wheel-css');
-    wheelCss.style.background=`conic-gradient(from -90deg, var(--success) 0% ${serverChance}%, #6a3431 ${serverChance}% 100%)`;
+    // Draw the probability wheel with SVG. This avoids browser-specific
+    // conic-gradient rendering issues: the green arc length is mathematically
+    // tied to the same chance value shown above (1% = 3.6 degrees).
+    gauge.innerHTML=`<div class="exact-wheel-css" aria-hidden="true"><svg class="exact-wheel-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"><circle class="exact-wheel-red" cx="50" cy="50" r="28" pathLength="100"></circle><circle class="exact-wheel-green" cx="50" cy="50" r="28" pathLength="100"></circle></svg></div>`;
+    const greenArc=gauge.querySelector('.exact-wheel-green');
+    greenArc.style.strokeDasharray=`${serverChance} ${100-serverChance}`;
+    greenArc.style.strokeDashoffset='0';
 
-    // The roll is also mapped directly: 0..100 -> 0..360 degrees.
-    // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
-    // exactly halfway through that green 95% sector.
-    const stopDeg=(roll/100)*360;
+    // The server result is authoritative. If a legacy/backend response ever
+    // contains a roll that disagrees with success, never animate the pointer
+    // into the opposite colour. Keep the displayed probability exact, while
+    // placing the pointer in the region matching the actual result.
+    const rollIsGreen=roll < serverChance;
+    let visualRoll=roll;
+    if(rollIsGreen !== Boolean(j.success)){
+      if(j.success){
+        visualRoll=Math.max(0.05,Math.min(serverChance-0.05,serverChance*0.5));
+      }else{
+        visualRoll=Math.min(99.95,Math.max(serverChance+0.05,serverChance+(100-serverChance)*0.5));
+      }
+    }
+    const stopDeg=(visualRoll/100)*360;
     const epsilon=Math.min(1.25,Math.max(.08,serverChance*3.6/80));
     let visualDeg=stopDeg;
     if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
