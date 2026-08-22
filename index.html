@@ -836,7 +836,7 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
     0%,100%{opacity:.55; transform:scale(.94)}
     50%{opacity:1; transform:scale(1.08)}
   }
-  .gd-ambient-orb{
+  .gd-ambient-orb{animation:none!important;
     position:fixed;
     width:110px;height:110px;border-radius:50%;
     pointer-events:none; z-index:0;
@@ -854,17 +854,17 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
 
 /* === FINAL POLISH: stronger smooth motion + ambient UI === */
 .gd-motion-glow{position:fixed;inset:-20%;pointer-events:none;z-index:0;opacity:.22;background:radial-gradient(circle at 20% 20%,rgba(227,184,114,.12),transparent 28%),radial-gradient(circle at 80% 75%,rgba(75,210,170,.08),transparent 26%);animation:gdAmbientDrift 16s ease-in-out infinite alternate;}
-.page,.card,.daily-card,.tip-card,.settings-row,.settings-music-card,.nav-btn{will-change:transform,opacity,filter;}
-.page.active{animation:gdPageInStrong .52s cubic-bezier(.22,1,.36,1) both;}
-.nav-btn{transition:transform .3s cubic-bezier(.22,1,.36,1),filter .3s ease,box-shadow .3s ease,background-color .3s ease;}
-.nav-btn:hover{transform:translateY(-3px) scale(1.015);filter:brightness(1.1);}
-.nav-btn:active{transform:translateY(0) scale(.95);}
+.page{will-change:auto;}
+.page.active{animation:gdPageInSmooth .28s cubic-bezier(.22,1,.36,1) both;}
+.nav-btn{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,color .18s ease;}
+.nav-btn:hover{transform:none;filter:none;}
+.nav-btn:active{transform:scale(.97);}
 .card,.daily-card,.tip-card,.settings-row{transition:transform .38s cubic-bezier(.22,1,.36,1),box-shadow .38s ease,filter .38s ease;}
 .card:hover,.daily-card:hover,.tip-card:hover,.settings-row:hover{transform:translateY(-2px);filter:brightness(1.025);}
 .settings-music-card{isolation:isolate;}
 .settings-music-card::before{content:"";position:absolute;inset:-80%;z-index:-1;pointer-events:none;background:conic-gradient(from 0deg,transparent,rgba(227,184,114,.16),transparent 28%);animation:gdSweep 7s linear infinite;}
 .settings-music-card.music-playing{box-shadow:0 18px 55px rgba(227,184,114,.16),0 0 0 1px rgba(227,184,114,.08);}
-@keyframes gdPageInStrong{from{opacity:0;transform:translateY(14px) scale(.985);filter:blur(3px)}55%{opacity:1;transform:translateY(-1px) scale(1.002);filter:blur(0)}to{opacity:1;transform:none}}
+@keyframes gdPageInSmooth{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes gdAmbientDrift{from{transform:translate3d(-2%, -1%,0) scale(.96)}to{transform:translate3d(2%,2%,0) scale(1.05)}}
 @keyframes gdSweep{to{transform:rotate(360deg)}}
 
@@ -1605,10 +1605,10 @@ window.lockUpgradeResult=function(result,angle){
 .bot-case-featured-rarity{font-size:9px;color:var(--preview-color);margin-top:3px;font-weight:700;}
 .bot-case-featured-value{font:800 10px 'IBM Plex Mono',monospace;color:var(--preview-color);white-space:nowrap;}
 .bot-case-featured-card.preview-shift{animation:casePreviewShift .34s cubic-bezier(.2,.9,.2,1);}
-@keyframes casePreviewShift{0%{opacity:.35;transform:translateY(6px) scale(.985);filter:blur(2px)}100%{opacity:1;transform:none;filter:none}}
+@keyframes casePreviewShift{0%{opacity:.35;transform:translateY(6px) scale(.985);filter:none}100%{opacity:1;transform:none;filter:none}}
 
 /* ===== NEW CASE OPENING MODAL ===== */
-#spinModal{background:rgba(7,6,5,.84);backdrop-filter:blur(14px);}
+#spinModal{background:rgba(7,6,5,.84);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
 #spinModal .spin-modal{max-width:430px;padding:15px 14px 16px;border-radius:26px;background:linear-gradient(165deg,#211b17,#120f0d 72%);border:1px solid rgba(201,151,77,.28);box-shadow:0 30px 90px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.04);}
 .spin-topbar{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;}
 .spin-case-icon{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px;background:linear-gradient(145deg,rgba(201,151,77,.22),rgba(201,151,77,.04));border:1px solid rgba(201,151,77,.28);box-shadow:inset 0 0 18px rgba(0,0,0,.25);}
@@ -1695,7 +1695,7 @@ window.lockUpgradeResult=function(result,angle){
 @media(max-width:430px){#spinModal .wheel-item{width:100px;min-width:100px;}}
 </style>
 
-</head>
+\n<style id="gdplay-performance-optimized">\n/* Performance pass: preserve the redesigned UI while reducing expensive compositor effects. */\n.bot-case-card{box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.02);}\n.bot-case-icon{box-shadow:inset 0 0 12px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.18);}\n.bot-case-glow{opacity:.65;}\n.bot-case-featured-card.preview-shift{animation:casePreviewShiftLite .22s ease-out;}\n@keyframes casePreviewShiftLite{from{opacity:.75;transform:translateY(3px) scale(.995)}to{opacity:1;transform:none}}\n#spinModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}\n#spinModal .spin-modal{box-shadow:0 18px 48px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.03);}\n#spinModal .reel-mask{box-shadow:inset 0 0 22px rgba(0,0,0,.62),0 0 16px rgba(201,151,77,.06);}\n#spinModal .reel-line{box-shadow:0 0 7px rgba(201,151,77,.55);}\n#spinModal .reel-glow{filter:blur(12px)!important;opacity:.55;}\n#spinModal .wheel-item{box-shadow:none!important;}\n#spinModal .wheel-dial{will-change:transform;contain:layout paint;backface-visibility:hidden;}\n#upgradeModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}\n.upgrade-gauge-wrap{filter:drop-shadow(0 8px 16px rgba(0,0,0,.24));}\n.upgrade-gauge::before{filter:blur(1px);opacity:.7;}\n/* Only animate the active page; hidden pages should not consume compositor time. */\n.page:not(.active),.modal:not(.show),#spinModal:not(.show){animation:none!important;}\n.page:not(.active) *{animation-play-state:paused!important;}\n@media (prefers-reduced-motion:no-preference){\n  .page.active{animation-duration:.18s!important;}\n}\n</style>\n</head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
@@ -4411,7 +4411,7 @@ async function confirmUpgrade(){
     const ns='http://www.w3.org/2000/svg';
     gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 100 100" aria-hidden="true">
       <circle class="exact-wheel-bg" cx="50" cy="50" r="47"></circle>
-      <circle class="exact-wheel-red" cx="50" cy="50" r="44" stroke-dasharray="${redLength} ${circumference}" stroke-dashoffset="0"></circle>
+      <circle class="exact-wheel-red" cx="50" cy="50" r="44" stroke-dasharray="${redLength} ${circumference}" stroke-dashoffset="-${greenLength}"></circle>
       <circle class="exact-wheel-green" cx="50" cy="50" r="44" stroke-dasharray="${greenLength} ${circumference}" stroke-dashoffset="0"></circle>
       <circle class="exact-wheel-inner" cx="50" cy="50" r="31"></circle>
     </svg>`;
