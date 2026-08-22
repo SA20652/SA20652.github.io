@@ -3533,14 +3533,16 @@ async function confirmUpgrade(){
     // она гарантированно останавливается глубоко внутри нужного сектора.
     const greenCenterDeg=chanceDeg/2;
     const redCenterDeg=chanceDeg + (360-chanceDeg)/2;
+    // Финальный угол считается от той же точки, от которой рисуется conic-gradient.
+    // Никаких дополнительных смещений после старта анимации.
     const stopDeg=j.success ? greenCenterDeg : redCenterDeg;
-    const finalAngle=360*6 + (-90 + stopDeg);
+    const finalAngle=-90 + (360*5) + stopDeg;
+    pointer.dataset.resultAngle=String(finalAngle);
     requestAnimationFrame(()=>{
       pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
       pointer.style.transform=`rotate(${finalAngle}deg)`;
     });
     setTimeout(()=>{
-      // v24: результат показывается после завершения вращения, а не во время анимации
       document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»' + (j.protected ? ' 🛡️ Защита от серии' : '')) : 'Не повезло — предмет потерян';
       playBeep(j.success?1200:300);
     },duration);
