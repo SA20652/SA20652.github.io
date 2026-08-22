@@ -1548,6 +1548,49 @@ window.lockUpgradeResult=function(result,angle){
     padding:0 7px !important;
   }
 }
+<style id="gdplay-cases-bot-v2">
+/* ===== BOT / CASES V2 ===== */
+#casesList{display:flex;flex-direction:column;gap:12px;}
+.bot-case-card{
+  position:relative;overflow:hidden;padding:14px;border-radius:20px;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.035),transparent 42%),
+    linear-gradient(180deg,#211b17,#191512);
+  border:1px solid rgba(201,151,77,.18);
+  box-shadow:0 14px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.bot-case-card::after{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(201,151,77,.025),transparent);}
+.bot-case-glow{position:absolute;width:150px;height:150px;right:-70px;top:-80px;border-radius:50%;background:radial-gradient(circle,rgba(201,151,77,.18),transparent 70%);pointer-events:none;}
+.bot-case-head{position:relative;z-index:1;display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:11px;}
+.bot-case-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:27px;background:linear-gradient(145deg,rgba(201,151,77,.22),rgba(201,151,77,.05));border:1px solid rgba(201,151,77,.24);box-shadow:inset 0 0 20px rgba(0,0,0,.22),0 7px 18px rgba(0,0,0,.22);}
+.bot-case-title-wrap{min-width:0;}
+.bot-case-kicker{font:600 8px/1.2 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bot-case-name{margin-top:3px;font-family:'Fraunces',serif;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bot-case-meta{display:flex;align-items:center;gap:5px;margin-top:4px;color:var(--muted);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bot-case-price{align-self:start;min-width:72px;padding:7px 8px;border-radius:10px;text-align:right;background:rgba(201,151,77,.08);border:1px solid rgba(201,151,77,.12);color:var(--brass-2);font:700 10px 'IBM Plex Mono',monospace;}
+.bot-case-price small{font-size:9px;margin-left:3px;}
+.bot-case-drops{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:13px 0 12px;padding:8px;border-radius:13px;background:rgba(0,0,0,.14);border:1px solid rgba(236,228,211,.055);}
+.bot-case-drop{min-width:0;display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:5px;padding:7px 7px;border-radius:9px;background:rgba(255,255,255,.018);border-left:2px solid var(--drop-color);}
+.bot-case-drop-icon{font-size:12px;color:var(--drop-color);text-align:center;}
+.bot-case-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:700;color:var(--paper);}
+.bot-case-drop-chance{font:600 9px 'IBM Plex Mono',monospace;color:var(--drop-color);white-space:nowrap;}
+.bot-case-bottom{position:relative;z-index:1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;}
+.bot-case-qty{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:9px;font-weight:700;}
+.bot-case-qty-picker{display:flex;gap:4px;}
+.bot-case-qty .case-qty-btn{width:31px;height:30px;border-radius:9px;background:#171311;border-color:rgba(236,228,211,.08);font-size:10px;}
+.bot-case-qty .case-qty-btn.active{background:linear-gradient(145deg,var(--brass-2),var(--brass));border-color:var(--brass-2);color:#1b140b;box-shadow:0 4px 12px rgba(201,151,77,.16);}
+.bot-case-open{width:100%;min-width:0;height:46px;border-radius:13px;font-size:12px;box-shadow:0 8px 20px rgba(201,151,77,.10);}
+.bot-case-open:disabled{filter:none;opacity:.45;}
+@media(max-width:370px){.bot-case-head{grid-template-columns:50px minmax(0,1fr);}.bot-case-price{grid-column:2;justify-self:start;margin-top:-4px;}.bot-case-icon{width:50px;height:50px}.bot-case-name{font-size:16px}.bot-case-drops{grid-template-columns:1fr}.bot-case-bottom{grid-template-columns:1fr}.bot-case-qty{flex-direction:row;align-items:center;justify-content:space-between;}}
+
+/* ===== UPGRADE WHEEL V2 — exact probability geometry ===== */
+#upgradeStepResult{position:relative;}
+.upgrade-gauge-wrap{position:relative!important;width:min(292px,78vw)!important;height:min(292px,78vw)!important;margin:12px auto 15px!important;display:block!important;}
+.upgrade-gauge{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border-radius:50%!important;}
+.upgrade-gauge-center{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;}
+.upgrade-pointer{position:absolute!important;left:50%!important;top:50%!important;width:43%!important;height:18px!important;margin:0!important;transform-origin:0% 50%!important;transform:rotate(-90deg);pointer-events:none;}
+.upgrade-gauge::before,.upgrade-gauge::after{pointer-events:none;}
+</style>
 </style>
 </head>
 <body>
@@ -3273,31 +3316,47 @@ function countCaseKeys(caseId){
 }
 function renderCases(){
   const el = document.getElementById('casesList');
+  if(!el) return;
   el.innerHTML = CASES.map(c=>{
-    const chips = c.items.map(it=>{
-      const m = RARITY_META[it.rarity];
-      return `<span class="chip" style="background:${hexA(m.color,.16)};color:${m.color}">${m.icon} ${it.chance}%</span>`;
-    }).join('');
     const qty = caseOpenQty[c.id] || 1;
-    const balanceNow = Number(data?.balance); const totalPrice = Number(c.price)*qty; const affordable = Number.isFinite(balanceNow) && balanceNow >= totalPrice;
-    return `
-      <div class="case-card">
-        <div class="case-card-top">
-          <div class="case-icon">${c.icon}</div>
-          <div>
-            <div class="case-name">${c.name}</div>
-            <div class="case-price mono">💰 ${c.price.toLocaleString('ru-RU')}</div>
-          </div>
-        </div>
-        <div class="case-items-preview">${chips}</div>
-        <div class="case-qty-row">
-          <span class="section-sub" style="margin:0">Открыть за раз:</span>
-          <div class="case-qty-picker">
-            ${[1,2,3].map(n=>`<button type="button" class="case-qty-btn ${qty===n?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="${n}">${n}</button>`).join('')}
-          </div>
-        </div>
-        <button type="button" class="btn open-case-btn" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?`Открыть ${qty>1?'×'+qty+' — '+totalPrice.toLocaleString('ru-RU')+' 💰':'сейф'}`:`Не хватает ${Math.max(0,totalPrice-(Number.isFinite(balanceNow)?balanceNow:0)).toLocaleString('ru-RU')} монет`}</button>
+    const balanceNow = Number(data?.balance);
+    const totalPrice = Number(c.price)*qty;
+    const affordable = Number.isFinite(balanceNow) && balanceNow >= totalPrice;
+    const totalChance = c.items.reduce((sum,it)=>sum + Math.max(0, Number(it.chance)||0), 0);
+    const topDrops = [...c.items].sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)).slice(0,4);
+    const dropRows = topDrops.map(it=>{
+      const m = RARITY_META[it.rarity] || RARITY_META.common;
+      const chance = totalChance > 0 ? (Number(it.chance)||0) / totalChance * 100 : 0;
+      return `<div class="bot-case-drop" style="--drop-color:${m.color}">
+        <span class="bot-case-drop-icon">${m.icon}</span>
+        <span class="bot-case-drop-name">${it.name}</span>
+        <span class="bot-case-drop-chance">${chance.toFixed(chance % 1 ? 2 : 0)}%</span>
       </div>`;
+    }).join('');
+    const rarityCount = c.items.reduce((n,it)=>n + (['epic','legendary','mythic','divine','emerald'].includes(it.rarity)?1:0),0);
+    return `
+      <article class="bot-case-card" data-case-id="${c.id}">
+        <div class="bot-case-glow"></div>
+        <div class="bot-case-head">
+          <div class="bot-case-icon">${c.icon}</div>
+          <div class="bot-case-title-wrap">
+            <div class="bot-case-kicker">GDPLAY VAULT · ${c.id.toUpperCase()}</div>
+            <div class="bot-case-name">${c.name}</div>
+            <div class="bot-case-meta"><span>💰 ${Number(c.price).toLocaleString('ru-RU')}</span><span>•</span><span>${c.items.length} предметов</span><span>•</span><span>${rarityCount} топ-дропа</span></div>
+          </div>
+          <div class="bot-case-price">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div>
+        </div>
+        <div class="bot-case-drops">${dropRows}</div>
+        <div class="bot-case-bottom">
+          <div class="bot-case-qty">
+            <span>Открыть</span>
+            <div class="bot-case-qty-picker">
+              ${[1,2,3].map(n=>`<button type="button" class="case-qty-btn ${qty===n?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="${n}">${n}×</button>`).join('')}
+            </div>
+          </div>
+          <button type="button" class="btn bot-case-open" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?(qty>1?`Открыть · ${totalPrice.toLocaleString('ru-RU')} 💰`:'Открыть сейф'):`Нужно ещё ${Math.max(0,totalPrice-(Number.isFinite(balanceNow)?balanceNow:0)).toLocaleString('ru-RU')} 💰`}</button>
+        </div>
+      </article>`;
   }).join('');
   renderRecentDrops();
   renderBattles();
@@ -4068,10 +4127,12 @@ function getUpgradeSource(){
 function getUpgradeChance(){
   const source=getUpgradeSource();
   if(!source || !upgradeTarget) return 0;
-  const sourceValue=Number(source.value||0);
-  const targetValue=Number(upgradeTarget.value||1);
-  const effectiveCoverage=sourceValue+Number(upgradeStake||0);
-  return Math.max(0.3, Math.min(95, effectiveCoverage/targetValue*100-5));
+  const sourceValue=Math.max(0,Number(source.value||0));
+  const targetValue=Math.max(1,Number(upgradeTarget.value||1));
+  const effectiveCoverage=sourceValue+Math.max(0,Number(upgradeStake||0));
+  // The number shown in the UI is the exact sector size used by the wheel.
+  // Keep one formula and one cap so the label, bar and wheel cannot drift apart.
+  return Math.max(0.3, Math.min(95, (effectiveCoverage/targetValue)*100));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -4087,11 +4148,14 @@ function refreshUpgradeStake(){
   upgradeStake=Number(range.value||0);
   label.textContent=upgradeStake.toLocaleString('ru-RU')+' 💰';
 }
-function refreshUpgradeChance(){
-  const chance=getUpgradeChance();
-  document.getElementById('upgradeChanceValue').textContent=chance.toFixed(1)+'%';
-  document.getElementById('upgradeChanceFill').style.width=chance+'%';
-  document.getElementById('upgradeStakeValue').textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
+function refreshUpgradeChance(chanceOverride=null){
+  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(100,Number(chanceOverride)||0));
+  const value=document.getElementById('upgradeChanceValue');
+  const fill=document.getElementById('upgradeChanceFill');
+  if(value) value.textContent=chance.toFixed(1)+'%';
+  if(fill) fill.style.width=chance+'%';
+  const stakeValue=document.getElementById('upgradeStakeValue');
+  if(stakeValue) stakeValue.textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
 }
 function openUpgradeModal(index,kind='cube'){
   if(kind==='key'){ showToast('❌ Ключи нельзя улучшать','error'); return; }
@@ -4216,29 +4280,38 @@ async function confirmUpgrade(){
     document.getElementById('upgradeResultText').textContent='';
     document.getElementById('upgradeStepResult').style.display='block';
     const serverChance=Math.max(0,Math.min(100,Number(j.chance||0)));
+    // The server is authoritative. Mirror its exact chance in the label before
+    // drawing the wheel, so the text and the colored sector are always identical.
+    refreshUpgradeChance(serverChance);
     const chanceDeg=(serverChance/100)*360;
     const gauge=document.getElementById('upgradeGauge'), pointer=document.getElementById('upgradePointer');
-    // Одна и та же геометрия используется и для сектора, и для стрелки:
-    // зелёный сектор начинается сверху (-90°) и идёт по часовой стрелке.
-    gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
+    // Green starts exactly at 12 o'clock and occupies exactly `serverChance` percent
+    // of the circle. No extra offsets, so 95% really means 342 degrees of green.
+    gauge.style.background=`conic-gradient(from 0deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
+
+    // Map the server roll itself onto the same 0..360 scale. This makes the final
+    // pointer position represent the real roll, not a fake center point.
+    const roll=Math.max(0,Math.min(100,Number(j.roll||0)));
+    let stopDeg;
+    if(serverChance>=100){
+      stopDeg=(roll/100)*360;
+    }else if(roll < serverChance){
+      stopDeg=(roll/Math.max(serverChance,0.0001))*chanceDeg;
+    }else{
+      stopDeg=chanceDeg + ((roll-serverChance)/Math.max(100-serverChance,0.0001))*(360-chanceDeg);
+    }
+    // Keep the pointer a fraction away from the border so antialiasing never makes
+    // a successful roll visually look like it landed in the red sector.
+    const epsilon=Math.min(1.25,Math.max(.08,chanceDeg/80));
+    if(j.success) stopDeg=Math.min(chanceDeg-epsilon,Math.max(epsilon,stopDeg));
+    else stopDeg=Math.min(360-epsilon,Math.max(chanceDeg+epsilon,stopDeg));
+
     pointer.style.transition='none';
     pointer.style.transform='rotate(-90deg)';
     void pointer.offsetWidth;
-    pointer.style.transition='';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    // Не направляем стрелку на саму границу цветов. После ответа сервера
-    // она гарантированно останавливается глубоко внутри нужного сектора.
-    const greenCenterDeg=chanceDeg/2;
-    const redCenterDeg=chanceDeg + (360-chanceDeg)/2;
-    // Финальный угол считается от той же точки, от которой рисуется conic-gradient.
-    // Важно: `conic-gradient(from -90deg, ...)` физически стартует не сверху (12 часов),
-    // а слева (9 часов) — CSS отсчитывает угол "from" по часовой стрелке от вершины,
-    // поэтому -90° сдвигает точку старта на 90° против часовой стрелки от верха.
-    // Стрелка при rotate(-90deg) указывает строго вверх, поэтому её систему координат
-    // нужно сместить ещё на -90°, иначе она гарантированно попадает не в тот сектор.
-    const stopDeg=j.success ? greenCenterDeg : redCenterDeg;
-    const finalAngle=-180 + (360*5) + stopDeg;
+    const finalAngle=-90 + (360*5) + stopDeg;
     pointer.dataset.resultAngle=String(finalAngle);
     requestAnimationFrame(()=>{
       pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
