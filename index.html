@@ -697,7 +697,6 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
 }
 
 .notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
-.menu-has-notifications{position:relative;}
 </style>
 
 <!-- GDPLAY embedded promo image -->
@@ -3518,20 +3517,24 @@ async function confirmUpgrade(){
     document.getElementById('upgradeCancelBtn').style.display='none';
     document.getElementById('upgradeResultText').textContent='';
     document.getElementById('upgradeStepResult').style.display='block';
-    const chanceDeg=(Number(j.chance||0)/100)*360;
+    const serverChance=Math.max(0,Math.min(100,Number(j.chance||0)));
+    const chanceDeg=(serverChance/100)*360;
     const gauge=document.getElementById('upgradeGauge'), pointer=document.getElementById('upgradePointer');
+    // Одна и та же геометрия используется и для сектора, и для стрелки:
+    // зелёный сектор начинается сверху (-90°) и идёт по часовой стрелке.
     gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
-    pointer.style.transition='none'; pointer.style.transform='rotate(0deg)'; void pointer.offsetWidth; pointer.style.transition='';
+    pointer.style.transition='none';
+    pointer.style.transform='rotate(-90deg)';
+    void pointer.offsetWidth;
+    pointer.style.transition='';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const rawRoll=Math.max(0,Math.min(99.9999,Number(j.roll||0)));
-     // Визуальный указатель всегда попадает в ту же зону, которая соответствует
-     // серверному результату. Это особенно важно для гарантированной победы.
-     let visualRoll=rawRoll;
-     const serverChance=Math.max(0,Math.min(100,Number(j.chance||0)));
-     if(j.success && visualRoll>=serverChance) visualRoll=serverChance>0 ? serverChance*0.5 : 0;
-     if(!j.success && visualRoll<serverChance) visualRoll=serverChance+(100-serverChance)*0.5;
-     const finalAngle=360*4+(visualRoll/100)*360-90;
+    // Не направляем стрелку на саму границу цветов. После ответа сервера
+    // она гарантированно останавливается глубоко внутри нужного сектора.
+    const greenCenterDeg=chanceDeg/2;
+    const redCenterDeg=chanceDeg + (360-chanceDeg)/2;
+    const stopDeg=j.success ? greenCenterDeg : redCenterDeg;
+    const finalAngle=360*4 - 90 + stopDeg;
     requestAnimationFrame(()=>{
       pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
       pointer.style.transform=`rotate(${finalAngle}deg)`;
@@ -4430,40 +4433,12 @@ document.getElementById('rushBet')?.addEventListener('blur',function(){ setRushB
 function persistDevice(){ if(currentUser && data){ try{ persistLocal(); }catch(e){ console.error(e); } } }
 setInterval(persistDevice,10000);
 let currentTab = 'cases';
-let purchaseNotificationPolling = true;
-const seenPurchaseNotifications = new Set();
-
-function showPurchaseNotification(n){
-  const buyer = String(n.buyer_name || n.buyer || n.username || 'Игрок').trim();
-  const kind = String(n.kind || n.item_kind || '').toLowerCase()==='key' ? 'ключ' : 'куб';
-  const item = String(n.item_name || n.key_name || n.cube_name || n.name || 'предмет').trim();
-  showToast(`${buyer} купил у вас ${kind}: ${item}`, 'purchase');
+// Уведомления полностью отключены в интерфейсе.
+// Старые/динамически добавленные кнопки уведомлений удаляются из меню.
+function removeNotificationMenuItems(){
+  document.querySelectorAll('#menuPanel [data-menu-tab="notifications"], #menuPanel [data-menu-action="notifications"], #menuPanel .menu-notifications, #menuPanel .menu-has-notifications').forEach(el=>el.remove());
 }
-
-async function pollPurchaseNotifications(){
-  if(!currentUser || !tgInitData() || !purchaseNotificationPolling) return;
-  try{
-    const j = await apiFetch('/api/mp/market/notifications', {});
-    const list = Array.isArray(j.notifications) ? j.notifications : [];
-    for(const n of list){
-      const id = String(n.id || n.notification_id || `${n.buyer_id||n.buyer_name}|${n.item_id||n.item_name||n.cube_name}|${n.created_at||''}`);
-      if(seenPurchaseNotifications.has(id)) continue;
-      seenPurchaseNotifications.add(id);
-      showPurchaseNotification(n);
-    }
-    // Keep the in-memory dedupe set small on long sessions.
-    if(seenPurchaseNotifications.size > 200){
-      const keep = Array.from(seenPurchaseNotifications).slice(-100);
-      seenPurchaseNotifications.clear();
-      keep.forEach(x=>seenPurchaseNotifications.add(x));
-    }
-  }catch(e){
-    // Older servers may not have the notification endpoint yet; do not disturb the game UI.
-    if(String(e?.message||'').includes('404') || String(e?.message||'').toLowerCase().includes('not found')){
-      purchaseNotificationPolling = false;
-    }
-  }
-}
+removeNotificationMenuItems();
 
 setInterval(()=>{
   if(!currentUser) return;
@@ -4472,7 +4447,6 @@ setInterval(()=>{
   if(currentTab==='plinko') renderPlinko();
   if(currentTab==='market') renderMarket();
   if(currentTab==='cases') renderRecentDrops();
-  pollPurchaseNotifications();
   refreshFromServer();
 },5000);
 window.addEventListener('pagehide',persistDevice);
