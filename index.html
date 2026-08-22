@@ -5729,3 +5729,64 @@ boot();
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:96px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
 </style>
+
+<style id="gdplay-case-layout-v10">
+/* Header cube: remove the extra wrapper box completely, keep the original image. */
+.brand-mark{display:contents!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;}
+.brand-mark img{width:42px!important;height:42px!important;display:block!important;object-fit:contain!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;}
+@media (max-width:400px){.brand-mark img{width:40px!important;height:40px!important;}}
+@media (max-width:350px){.brand-mark img{width:36px!important;height:36px!important;}}
+
+/* Case opening: compact modal — no giant empty area, button always fits on screen. */
+#spinModal{align-items:center!important;padding:10px!important;}
+#spinModal .spin-modal{
+  width:min(430px,100%)!important;
+  max-height:calc(100dvh - 20px)!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding:12px 12px 12px!important;
+}
+#spinModal .spin-topbar{gap:8px!important;}
+#spinModal .spin-case-icon{width:44px!important;height:44px!important;border-radius:12px!important;font-size:21px!important;}
+#spinModal .spin-subline{margin:7px 2px 7px!important;font-size:8px!important;}
+#spinModal .wheel-wrap{
+  height:148px!important;
+  margin:0 auto 9px!important;
+  max-height:148px!important;
+}
+#spinModal .reel-mask{border-width:2px!important;border-radius:14px!important;}
+#spinModal .reel-mask::before,#spinModal .reel-mask::after{height:38px!important;}
+#spinModal .reel-line{height:2px!important;box-shadow:0 0 7px rgba(201,151,77,.22)!important;}
+#spinModal .wheel-multi-row{
+  height:auto!important;
+  max-height:none!important;
+  margin:0 auto 8px!important;
+  gap:6px!important;
+}
+#spinModal .wheel-multi-row .wheel-wrap{
+  height:78px!important;
+  max-height:78px!important;
+  margin:0!important;
+}
+#spinModal .wheel-multi-row .wheel-item span{font-size:14px!important;}
+#spinModal .wheel-multi-row .wheel-item small{font-size:7px!important;}
+#spinModal .spin-result{margin-top:3px!important;}
+#spinModal .spin-result-icon{font-size:28px!important;margin-bottom:2px!important;}
+#spinModal .spin-result-name{font-size:14px!important;}
+#spinModal .spin-result-rarity{font-size:10px!important;}
+#spinModal .spin-result-value{margin-top:3px!important;font-size:12px!important;}
+#spinModal .spin-result-multi{gap:5px!important;margin-top:3px!important;}
+#spinModal .spin-result-multi-item{padding:7px 9px!important;}
+#spinModal #spinCloseBtn{margin-top:8px!important;min-height:42px!important;height:42px!important;}
+#spinModal .vault-crack{width:150px!important;height:150px!important;margin:0 auto 8px!important;}
+
+/* Keep the single-opening layout especially compact on short phones. */
+@media (max-height:700px){
+  #spinModal{padding:6px!important;}
+  #spinModal .spin-modal{padding:9px 10px!important;max-height:calc(100dvh - 12px)!important;}
+  #spinModal .wheel-wrap{height:126px!important;max-height:126px!important;}
+  #spinModal .spin-subline{margin:5px 2px!important;}
+  #spinModal #spinCloseBtn{height:40px!important;min-height:40px!important;margin-top:6px!important;}
+}
+</style>
