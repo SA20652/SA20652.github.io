@@ -851,6 +851,30 @@ const PROMO_IMAGE_DATA_URI = "data:image/jpeg;base64,/9j/4SpDRXhpZgAATU0AKgAAAAg
 <style>
 .online-users-list{max-height:55vh;overflow:auto;margin-top:12px;padding:4px 0}.online-user-row{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:14px;margin-bottom:8px;border:1px solid var(--line)}.online-user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:0 0 40px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1c1509}.online-user-avatar img{width:100%;height:100%;object-fit:cover}.online-user-name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis}.share-modal .input-modal{max-height:80vh;overflow:auto}.share-search{margin-top:10px}.share-amount-row{display:flex;gap:8px;margin-top:10px}.share-amount-row input{flex:1}.share-selected{font-weight:700;margin-top:8px}
 </style>
+
+<style id="gdplay-v27-redesign">
+/* GDPLAY v27 upgrade redesign */
+#upgradeWheel, .upgrade-wheel, .wheel-container {
+  filter: drop-shadow(0 0 18px rgba(201,151,77,.25));
+}
+.v27-upgrade-panel {
+  border:1px solid rgba(201,151,77,.35);
+  border-radius:24px;
+  background:linear-gradient(145deg,#221d19,#141110);
+  padding:18px;
+}
+.v27-spin-state {
+  animation: v27Pulse 1.2s infinite;
+}
+@keyframes v27Pulse {50%{opacity:.65}}
+</style>
+<script>
+// v27: upgrade result is locked before animation; no second random roll
+window.GDPLAY_V27_UPGRADE_LOCK=true;
+window.lockUpgradeResult=function(result,angle){
+  return {result:result, targetAngle:angle, locked:true};
+};
+</script>
 </head>
 <body>
 <div id="releaseScreen" aria-hidden="true">
