@@ -1224,7 +1224,15 @@ window.lockUpgradeResult=function(result,angle){
     0 0 35px rgba(201,151,77,.10);
   pointer-events:none;
 }
-.upgrade-gauge-wrap::after{display:none!important;}
+.upgrade-gauge-wrap::after{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  border-radius:50%;
+  border:1px dashed rgba(236,228,211,.12);
+  pointer-events:none;
+  animation:none;
+}
 @keyframes gdUpgradeOrbit{to{transform:rotate(360deg)}}
 
 .upgrade-gauge{
@@ -1266,22 +1274,13 @@ window.lockUpgradeResult=function(result,angle){
   z-index:5;
 }
 .upgrade-pointer{
-  position:absolute!important;
-  left:50%!important;
-  top:auto!important;
-  bottom:-23px!important;
-  width:0!important;
-  height:0!important;
-  margin:0!important;
-  transform:translateX(-50%)!important;
-  border-left:12px solid transparent!important;
-  border-right:12px solid transparent!important;
-  border-top:20px solid var(--brass-2)!important;
-  background:none!important;
-  clip-path:none!important;
-  filter:drop-shadow(0 4px 5px rgba(0,0,0,.7));
-  z-index:30!important;
-  pointer-events:none;
+  width:116px;
+  height:18px;
+  margin-top:-9px;
+  background:linear-gradient(90deg,#6f5128 0%,#d6a85d 72%,#f1d09a 100%);
+  clip-path:polygon(0 28%,78% 28%,78% 0,100% 50%,78% 100%,78% 72%,0 72%);
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.7));
+  z-index:4;
 }
 #upgradeResultText{
   min-height:48px;
@@ -1589,7 +1588,7 @@ window.lockUpgradeResult=function(result,angle){
 .upgrade-gauge-wrap{position:relative!important;width:min(292px,78vw)!important;height:min(292px,78vw)!important;margin:12px auto 15px!important;display:block!important;}
 .upgrade-gauge{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border-radius:50%!important;}
 .upgrade-gauge-center{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;}
-.upgrade-pointer{position:absolute!important;left:50%!important;top:50%!important;width:43%!important;height:18px!important;margin:0!important;transform-origin:100% 50%!important;transform:rotate(-90deg)!important;pointer-events:none!important;z-index:10!important;background:linear-gradient(90deg,var(--brass-dim),var(--paper))!important;clip-path:polygon(0 50%,22% 0,100% 0,100% 100%,22% 100%)!important;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))!important;}
+.upgrade-pointer{position:absolute!important;left:50%!important;top:50%!important;width:43%!important;height:18px!important;margin:0!important;transform-origin:0% 50%!important;transform:rotate(-90deg);pointer-events:none;}
 .upgrade-gauge::before,.upgrade-gauge::after{pointer-events:none;}
 </style>
 </style>
@@ -1650,7 +1649,7 @@ window.lockUpgradeResult=function(result,angle){
   position:absolute!important; inset:0!important;
   width:100%!important; height:100%!important;
   border-radius:50%!important;
-  background:#5a302e;
+  background:#5a302e!important;
   overflow:hidden!important;
 }
 #upgradeGauge .exact-wheel-svg{
@@ -1674,6 +1673,14 @@ window.lockUpgradeResult=function(result,angle){
 }
 #upgradeGauge::before,#upgradeGauge::after{display:none!important;}
 #upgradePointer{z-index:10!important;}
+</style>
+
+<style id="gdplay-upgrade-percent-final-fix">
+/* The probability visualization is exact for every value from 0% to 100%. */
+#upgradeGauge .exact-wheel-green { stroke:var(--success)!important; }
+#upgradeGauge .exact-wheel-red { stroke:#6a3431!important; }
+#upgradeGauge::before, #upgradeGauge::after { display:none!important; }
+#upgradeChanceFill { width:0%; }
 </style>
 
 
@@ -1762,7 +1769,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 <div id="appScreen" style="display:none;">
   <div class="app-shell">
     <div id="adminDynamicRoot"></div>
-<template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-menu-tab="admin">Админ-панель</button>
+<template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-tab="admin">Админ-панель</button>
 <div class="page" id="page-admin">
   <div class="section-title">Админ-панель</div>
   <div class="section-sub">Управление игроками и сервером</div>
@@ -1876,6 +1883,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
       <div id="casesList"></div>
       <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
+      <div class="section-title" style="margin-top:24px">Последние дропы</div>
+      <div class="section-sub">Только 2 последних выигрыша</div>
+      <div id="recentDropsList"></div>
     </div>
 
     <!-- BATTLES -->
@@ -2190,7 +2200,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 </div>
 
 <div id="promoPhotoOverlay" class="promo-photo-overlay" aria-hidden="true">
-  <div class="promo-photo-card"><img id="promoSecretImage" src="" alt="Секретная фотография"><iframe id="promoSecretFrame" title="ATTASHA photo" style="display:none;width:100%;height:82vh;max-height:82vh;border:0;background:#000"></iframe></div>
+  <div class="promo-photo-card"><img id="promoSecretImage" src="" alt="Секретная фотография"></div>
 </div>
 <div id="toastBox"></div>
 
@@ -2224,7 +2234,7 @@ function bindCriticalAuth(){
 }
 bindCriticalAuth();
 
-const API_BASE = "https://spammf-production.up.railway.app";
+const API_BASE = "https://gdplay.up.railway.app";
 
 try{
   if(window.Telegram && window.Telegram.WebApp){
@@ -2696,20 +2706,13 @@ async function loadAdminUI(){
   const menu = document.getElementById('menuPanel');
   if(!root || !menu) return false;
   try{
-    // Сначала очищаем только динамическую админскую часть, чтобы повторная
-    // загрузка после истечения сессии не создавала дубликаты.
-    root.querySelectorAll('.admin-dynamic-page, .admin-dynamic-modal').forEach(el=>el.remove());
-    menu.querySelector('#adminMenuBtn')?.remove();
-
     let html = '';
     try{
       const j = await apiFetch('/api/admin/ui', {});
-      html = j && typeof j.html === 'string' ? j.html : '';
+      html = j && j.html ? j.html : '';
     }catch(e){
       console.warn('admin UI API unavailable, using built-in admin UI:', e);
     }
-    // Встроенный fallback гарантирует, что панель добавится даже если
-    // admin_fragment.html временно недоступен на сервере.
     if(!html){
       const tpl = document.getElementById('adminUiFallback');
       html = tpl ? tpl.innerHTML : '';
@@ -2718,12 +2721,12 @@ async function loadAdminUI(){
     const wrap = document.createElement('div');
     wrap.innerHTML = html;
     const menuItem = wrap.querySelector('#adminMenuBtn');
-    if(menuItem){ menuItem.classList.add('admin-dynamic-menu'); menu.insertBefore(menuItem, document.getElementById('menuLogout') || null); }
+    if(menuItem) menu.insertBefore(menuItem, document.getElementById('menuLogout') || null);
     const page = wrap.querySelector('#page-admin');
-    if(page){ page.classList.add('admin-dynamic-page'); root.appendChild(page); }
-    wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>{ el.classList.add('admin-dynamic-modal'); root.appendChild(el); });
-    window.adminUIReady = !!(menu.querySelector('#adminMenuBtn') && root.querySelector('#page-admin'));
-    return window.adminUIReady;
+    if(page) root.appendChild(page);
+    wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>root.appendChild(el));
+    window.adminUIReady = true;
+    return true;
   }catch(e){
     console.error('admin UI load error', e);
     return false;
@@ -2998,61 +3001,20 @@ async function toggleCubeLock(index){
     showToast(!locked ? '🔒 Куб заморожен' : '🔓 Куб разморожен','success');
   }catch(e){showToast('❌ '+e.message,'error');}
 }
-function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
+function showPromoSecretPhoto(){
   const overlay=document.getElementById('promoPhotoOverlay');
   if(!overlay) return;
   const img=document.getElementById('promoSecretImage');
-  const frame=document.getElementById('promoSecretFrame');
-  const isAttasha=String(code).toUpperCase()==='ATTASHA';
-  clearTimeout(window.__promoPhotoTimer);
-
-  if(isAttasha){
-    // ImgBB share URLs are HTML pages, not image files, so putting the
-    // ibb.co URL directly into <img> or an iframe is unreliable. Resolve
-    // its OpenGraph image through a lightweight public fetch proxy, then
-    // display the actual image URL.
-    const pageUrl='https://ibb.co/7dQy9z8f';
-    if(frame){ frame.style.display='none'; frame.src=''; }
-    if(img){
-      img.style.display='block';
-      img.removeAttribute('src');
-      img.alt='ATTASHA';
-      img.onerror=()=>{
-        img.onerror=null;
-        // Last-resort fallback: open the exact ImgBB page inside the modal.
-        if(frame){
-          frame.style.display='block';
-          frame.src=pageUrl;
-        }
-      };
-      fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(pageUrl),{cache:'no-store'})
-        .then(r=>{if(!r.ok) throw new Error('proxy'); return r.text();})
-        .then(html=>{
-          const m=html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-            || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-          if(!m||!m[1]) throw new Error('image');
-          img.src=m[1].replace(/&amp;/g,'&');
-        })
-        .catch(()=>{
-          if(frame){ frame.style.display='block'; frame.src=pageUrl; }
-        });
-    }
-  }else{
-    if(frame){ frame.style.display='none'; frame.src=''; }
-    if(img){
-      img.style.display='block';
-      img.onerror=()=>{ img.onerror=null; img.src=PROMO_IMAGE_DATA_URI; };
-      img.src='/promo/2026samergermancrut.jpg';
-    }
+  if(img){
+    img.onerror=()=>{ img.onerror=null; img.src=PROMO_IMAGE_DATA_URI; };
+    img.src='https://ibb.co/7dQy9z8f';
   }
-
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
+  clearTimeout(window.__promoPhotoTimer);
   window.__promoPhotoTimer=setTimeout(()=>{
     overlay.classList.remove('show');
     overlay.setAttribute('aria-hidden','true');
-    if(frame) frame.src='';
-    if(img) img.removeAttribute('src');
   },5000);
 }
 
@@ -3073,21 +3035,21 @@ async function redeemPromo(){
   if(!code){promoSetMessage('Введите промокод');return}
   const b=document.getElementById('promoRedeemBtn');if(b)b.disabled=true;
   try{
-    // Секретный промокод Attasha — полностью в index.html.
-    // Использование запоминается в сохранении игрока, чтобы код нельзя было
-    // повторно активировать после обновления страницы на этом устройстве.
+    // ATTASHA: один раз на аккаунт. Состояние хранится внутри game-данных
+    // конкретного currentUser, поэтому обновление страницы не сбрасывает код.
+    const accountKey=String(currentUser||'').trim().toLowerCase();
     const redeemed=Array.isArray(data?.redeemedPromos)?data.redeemedPromos:[];
+    const accountPromoKey=accountKey ? `ATTASHA:${accountKey}` : 'ATTASHA';
     if(code==='ATTASHA'){
-      const adminUnlimited=!!window.isAdmin;
-      if(!adminUnlimited && redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
-      if(!adminUnlimited) data.redeemedPromos=[...redeemed,'ATTASHA'];
+      if(redeemed.includes(accountPromoKey) || redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
+      data.redeemedPromos=[...redeemed,accountPromoKey];
       data.balance=Math.max(0,Math.floor(Number(data.balance||0)))+1488;
       persistLocal();
       updateBalanceUI();renderProfile();
       syncToServer();
       if(i)i.value='';
-      promoSetMessage('Промокод ATTASHA активирован: +1 488 монет ✨',true);
-      showPromoSecretPhoto('ATTASHA');
+      promoSetMessage('Промокод активирован: +1 488 монет ✨',true);
+      showPromoSecretPhoto();
       return;
     }
     if(code==='2026SAMERGERMANCRUT'){
@@ -3096,7 +3058,7 @@ async function redeemPromo(){
       persistLocal();
       if(i)i.value='';
       promoSetMessage('Промокод активирован ✨',true);
-      showPromoSecretPhoto('2026SAMERGERMANCRUT');
+      showPromoSecretPhoto();
       return;
     }
     const j=await apiFetch('/api/promo/redeem',{code});
@@ -4393,7 +4355,7 @@ function getUpgradeChance(){
   const effectiveCoverage=sourceValue+Math.max(0,Number(upgradeStake||0));
   // The number shown in the UI is the exact sector size used by the wheel.
   // Keep one formula and one cap so the label, bar and wheel cannot drift apart.
-  return Math.max(0, Math.min(100, (effectiveCoverage/targetValue)*100));
+  return Math.max(0.3, Math.min(95, (effectiveCoverage/targetValue)*100));
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -4414,7 +4376,8 @@ function refreshUpgradeChance(chanceOverride=null){
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
-  // Визуальная шкала всегда 1:1 с отображаемым процентом: никаких ±30%.
+  // Полоса всегда имеет ровно ту же длину, что и показанный процент.
+  // Никаких фиксированных ±30%: 10% = 10%, 50% = 50%, 95% = 95% и т.д.
   if(fill) fill.style.width=chance+'%';
   const stakeValue=document.getElementById('upgradeStakeValue');
   if(stakeValue) stakeValue.textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
@@ -4442,7 +4405,7 @@ function renderUpgradeCatalog(filter){
   if(!list.length){box.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
   box.innerHTML=list.map(it=>{
     const m=RARITY_META[it.rarity]||RARITY_META.common;
-    const chance=Math.max(0, Math.min(100, (Number(source.value||0)/Number(it.value||1))*100));
+    const chance=Math.max(0.3, Math.min(95, ((Number(source.value||0)+Math.max(0,Number(upgradeStake||0)))/Math.max(1,Number(it.value||1)))*100));
     return `<button type="button" class="upgrade-cat-item" data-action="pick-upgrade-target" data-kind="${it.kind}" data-name="${it.name}" data-rarity="${it.rarity}" data-value="${it.value}" data-key-id="${it.id||''}">
       <div><div class="upgrade-cat-name" style="color:${m.color}">${it.icon||m.icon||'◆'} ${it.name}</div><div class="upgrade-cat-value">${it.kind==='key'?'Ключ · ':''}${m.label}</div></div>
       <div class="upgrade-cat-value">💰${Number(it.value).toLocaleString('ru-RU')} · ${chance.toFixed(0)}%</div>
@@ -4486,6 +4449,29 @@ function performLocalUpgrade(){
   persistLocal(); updateBalanceUI(); renderInventory(); renderProfile(); syncToServer();
   return {success,roll,chance,cubes:data.cubes};
 }
+function renderExactUpgradeGauge(chance){
+  const gauge=document.getElementById('upgradeGauge');
+  if(!gauge) return;
+  const pct=Math.max(0,Math.min(100,Number(chance)||0));
+  const wheelRadius=44;
+  const angle=pct*3.6;
+  const startAngle=-90;
+  const endAngle=startAngle+angle;
+  const rad=endAngle*Math.PI/180;
+  const endX=50+wheelRadius*Math.cos(rad);
+  const endY=50+wheelRadius*Math.sin(rad);
+  const largeArc=angle>180?1:0;
+  const greenPath=pct<=0?'':pct>=100
+    ?`<circle class="exact-wheel-green" cx="50" cy="50" r="${wheelRadius}"></circle>`
+    :`<path class="exact-wheel-green" d="M 50 6 A ${wheelRadius} ${wheelRadius} 0 ${largeArc} 1 ${endX} ${endY}"></path>`;
+  gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 100 100" aria-hidden="true">
+    <circle class="exact-wheel-bg" cx="50" cy="50" r="47"></circle>
+    <circle class="exact-wheel-red" cx="50" cy="50" r="${wheelRadius}"></circle>
+    ${greenPath}
+    <circle class="exact-wheel-inner" cx="50" cy="50" r="31"></circle>
+  </svg>`;
+}
+
 async function confirmUpgrade(){
   if(!upgradeSource||!upgradeTarget) return;
   const btn=document.getElementById('upgradeConfirmBtn'); btn.disabled=true;
@@ -4547,15 +4533,7 @@ async function confirmUpgrade(){
     const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
     refreshUpgradeChance(serverChance);
 
-    const gauge=document.getElementById('upgradeGauge');
-    const pointer=document.getElementById('upgradePointer');
-
-    // Exact probability wheel: conic-gradient uses the same 0..100 value
-    // as the label, so every 1% is exactly 3.6 degrees.
-    const chance=Math.max(0,Math.min(100,serverChance));
-    const chanceDeg=chance*3.6;
-    gauge.innerHTML='';
-    gauge.style.background=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, #6a3431 ${chanceDeg}deg 360deg)`; gauge.style.setProperty('--upgrade-chance', chance+'%');
+    renderExactUpgradeGauge(serverChance);
 
     // The roll is also mapped directly: 0..100 -> 0..360 degrees.
     // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
@@ -4566,19 +4544,16 @@ async function confirmUpgrade(){
     if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
     if(!j.success) visualDeg=Math.max(serverChance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
 
-    // Fixed indicator under the spindle: the wheel rotates beneath it.
-    // This keeps the arrow straight and makes the stopped segment line up
-    // with the exact server roll.
-    pointer.style.transform='translateX(-50%)';
+    pointer.style.transition='none';
+    pointer.style.transform='rotate(-90deg)';
+    void pointer.offsetWidth;
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const finalAngle=90 - visualDeg + (360*5);
-    gauge.style.transition='none';
-    gauge.style.transform='rotate(0deg)';
-    void gauge.offsetWidth;
+    const finalAngle=-90 + (360*5) + visualDeg;
+    pointer.dataset.resultAngle=String(finalAngle);
     requestAnimationFrame(()=>{
-      gauge.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
-      gauge.style.transform=`rotate(${finalAngle}deg)`;
+      pointer.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
+      pointer.style.transform=`rotate(${finalAngle}deg)`;
     });
     setTimeout(()=>{
       document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»' + (j.protected ? ' 🛡️ Защита от серии' : '')) : 'Не повезло — предмет потерян';
@@ -4997,7 +4972,36 @@ function timeAgo(ts){
   return new Date(ts).toLocaleDateString('ru-RU');
 }
 
-async function renderRecentDrops(){ return; }
+async function renderRecentDrops(){
+  const el = document.getElementById('recentDropsList');
+  if(!el) return;
+  let drops = [];
+  if(tgInitData()){
+    try{
+      const j = await apiFetch('/api/drops/recent', {});
+      drops = (j.drops||[]).slice(0,2).map(d=>({username:d.username, item:d.cube_name, rarity:d.rarity, time:new Date(d.created_at+'Z').getTime()||Date.now()}));
+    }catch(e){
+      console.error('recent drops error', e);
+      drops = loadDrops().slice(0,2);
+    }
+  }else{
+    // Вне Telegram общая лента недоступна — показываем локальную историю этого браузера
+    drops = loadDrops().slice(0,2);
+  }
+  if(!drops.length){
+    el.innerHTML = '<div class="empty-state">Пока никто ничего не выбил.<br>Открой сейф первым!</div>';
+    return;
+  }
+  el.innerHTML = drops.map(d=>{
+    const m = RARITY_META[d.rarity] || RARITY_META.common;
+    return `
+      <div class="drop-item" style="border-left:3px solid ${m.color}">
+        <span class="drop-icon" style="color:${m.color}">${m.icon}</span>
+        <div class="drop-text"><b>${d.username}</b> выбил «${d.item}» <span style="color:${m.color}">(${m.label})</span></div>
+        <span class="drop-time">${timeAgo(d.time)}</span>
+      </div>`;
+  }).join('');
+}
 
 function recordBestDrop(drop){
   if(!data || !drop) return;
@@ -5247,8 +5251,8 @@ function handleButton(button, e){
   if(button.matches('.nav-btn')){ switchTab(button.dataset.tab); return; }
   if(button.matches('.top-tab') || action==='top-sort'){ renderLeaderboard(button.dataset.topSort||'cases'); return; }
   if(button.dataset.menuAction==='share-orbs'){ if(e){e.preventDefault();e.stopPropagation();} document.getElementById('menuPanel')?.classList.remove('open'); openShareOrbs(); return; }
-  if(button.matches('[data-menu-tab], #adminMenuBtn[data-tab]')){
-    const tab=button.dataset.menuTab || button.dataset.tab;
+  if(button.matches('[data-menu-tab]')){
+    const tab=button.dataset.menuTab;
     // Кнопка меню — кликабельна всей площадью, а не только по тексту.
     // Не даём событию уйти на элементы страницы под выпадающим меню.
     if(e){ e.preventDefault?.(); e.stopPropagation?.(); }
