@@ -1748,9 +1748,6 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   pointer-events:none!important;
   z-index:30!important;
 }
-</style><style id="telegram-only-auth">
-/* Авторизация теперь полностью через Telegram WebApp. */
-#authScreen{display:none!important;}
 </style><style>@keyframes gdplayStatusGradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}</style></head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
@@ -3000,53 +2997,51 @@ async function bootSafe(){
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
 
-  // Авторизация только через Telegram WebApp.
-  const initData = tgInitData();
-  if(!initData){
-    // Не показываем пустой экран: auth-экран больше не используется.
-    throw new Error('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
+  // Авторизация возвращена: сначала показываем экран входа/регистрации,
+  // а приложение открываем только после успешной серверной авторизации.
+  // Telegram initData по-прежнему используется как безопасный контекст,
+  // но больше не заменяет логин и пароль.
+  if(!tgInitData()){
+    currentUser = null;
+    data = null;
+    showAuth();
+    showAuthError('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
+    return;
   }
 
-  const tgUser = (()=>{
-    try{return window.Telegram?.WebApp?.initDataUnsafe?.user || null;}catch(e){return null;}
-  })();
-  const telegramName = String(
-    [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(' ') || 'Игрок'
-  );
-  const telegramAvatar = String(tgUser?.photo_url || '');
-  const telegramId = tgUser?.id || null;
+  const token = storageGet(AUTH_TOKEN_KEY);
+  const savedSession = storageGet(SESSION_KEY);
 
-  // Сразу создаём локальное состояние, чтобы интерфейс и все кнопки
-  // отображались даже если /api/me временно недоступен.
-  currentUser = String(telegramId || 'telegram-user').toLowerCase();
-  data = serverUserToGame({display_name:telegramName, avatar:telegramAvatar, user_id:telegramId}, telegramName);
-  data.username = telegramName;
-  if(telegramAvatar) data.avatar = telegramAvatar;
-
-  try{
-    const j = await apiFetch('/api/me', {});
-    if(j && j.user){
-      data = serverUserToGame(j.user, telegramName);
-      data.username = telegramName;
-      if(telegramAvatar) data.avatar = telegramAvatar;
-      currentUser = String(j.user.user_id || telegramId || 'telegram-user').toLowerCase();
-      window.isAdmin = !!j.is_admin;
-      if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+  // Если есть сохранённая серверная сессия — пытаемся восстановить её.
+  // При любой ошибке просто возвращаем обычный экран входа, не оставляя
+  // пользователя на пустом/зависшем экране.
+  if(token && savedSession){
+    try{
+      const j = await apiFetch('/api/me', {});
+      if(j && j.user){
+        const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
+        const tgName = String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ') || j.user.display_name || j.user.username || 'Игрок');
+        const tgAvatar = String(tgUser?.photo_url || j.user.avatar || '');
+        currentUser = String(j.user.user_id || savedSession).toLowerCase();
+        data = serverUserToGame(j.user, tgName);
+        data.username = tgName;
+        if(tgAvatar) data.avatar = tgAvatar;
+        window.isAdmin = !!j.is_admin;
+        if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+        showApp();
+        return;
+      }
+    }catch(e){
+      console.warn('Сохранённая сессия недействительна:', e);
     }
-  }catch(e){
-    console.warn('GDPLAY /api/me недоступен, запускаем интерфейс с Telegram-профилем:', e);
-    window.isAdmin = false;
+    storageRemove(AUTH_TOKEN_KEY);
+    storageRemove(SESSION_KEY);
   }
 
-  let users = loadUsers();
-  users[currentUser] = users[currentUser] || {username:telegramName, passHash:'', game:data};
-  users[currentUser].username = telegramName;
-  users[currentUser].game = data;
-  saveUsers(users);
-  storageSet(SESSION_KEY,currentUser);
-
-  // Важно: показываем приложение независимо от временного сбоя API.
-  showApp();
+  // Нет рабочей сессии — нормальный экран авторизации.
+  currentUser = null;
+  data = null;
+  showAuth();
 }
 
 
@@ -3358,11 +3353,10 @@ async function adminCustomStatus(uid){
   const current=u?.custom_status || {};
   document.getElementById('adminCustomStatusUid').textContent=uid;
   document.getElementById('adminCustomStatusEmoji').value=String(current.emoji||'');
-    const text=document.getElementById('adminCustomStatusText').value.trim().slice(0,32);
-    const gradient=!!document.getElementById('adminCustomStatusGradient').checked;
-    const color1=document.getElementById('adminCustomStatusColor1').value;
-    const color2=document.getElementById('adminCustomStatusColor2').value;
-    if(!text && !emoji)
+  document.getElementById('adminCustomStatusText').value=String(current.text||'');
+  document.getElementById('adminCustomStatusGradient').checked=!!current.gradient;
+  document.getElementById('adminCustomStatusColor1').value=String(current.color1||'#ff4d6d');
+  document.getElementById('adminCustomStatusColor2').value=String(current.color2||'#7c4dff');
   const accept=document.getElementById('adminCustomStatusAccept');
   const clear=document.getElementById('adminCustomStatusClear');
   const cancel=document.getElementById('adminCustomStatusCancel');
