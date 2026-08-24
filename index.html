@@ -5038,6 +5038,7 @@ async function renderLeaderboard(sortBy='cases'){
       premium_until: r.premium_until || null,
       creator_badge: !!r.creator_badge,
       tester_badge: !!r.tester_badge,
+      custom_status: r.custom_status || {},
       best_drops: r.best_drops || r.bestDrops || [],
       buffs: Array.isArray(r.buffs) ? r.buffs : [],
       cube_count: Number(r.cube_count ?? (Array.isArray(r.cubes) ? r.cubes.length : 0)),
@@ -5050,7 +5051,7 @@ async function renderLeaderboard(sortBy='cases'){
       user_id:r.key, username:r.username, avatar:r.avatar, balance:r.balance,
       cases_opened:r.cases, cube_count:r.cube_count, battles:Number(r.battles||0),
       wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge,
-      tester_badge:r.tester_badge, best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
+      tester_badge:r.tester_badge, custom_status:r.custom_status || {}, best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
       buffs:Array.isArray(r.buffs)?r.buffs:[]
     }; });
     const myId = String(tgUserId()||'');
@@ -5063,6 +5064,7 @@ async function renderLeaderboard(sortBy='cases'){
         <div style="min-width:0;flex:1">
           <div class="lb-user">${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
+          ${customStatusBadgeHtml(r.custom_status)}
           <div class="lb-sub">${sortBy==='balance' ? r.balance.toLocaleString('ru-RU')+' монет' : sortBy==='winnings' ? r.winnings.toLocaleString('ru-RU')+' орбов выиграно' : r.cases+' кейсов открыто'}</div>
           ${r.key!==myId?`<button type="button" class="btn-ghost public-profile-btn" data-action="view-profile" data-profile-uid="${r.key}">Профиль</button>`:''}
         </div>
@@ -5117,6 +5119,12 @@ function renderBuffs(){
     const hours=Math.floor(left/3600000), mins=Math.floor((left%3600000)/60000);
     return `<div class="buff-card"><div><div class="buff-name">${names[b.type]||('⚡ '+(b.name||b.type||'Бафф'))}</div><div class="buff-desc">${b.description||'Выдан администратором'}</div></div><div class="buff-time">${exp?(hours+'ч '+mins+'м'):'∞'}</div></div>`;
   }).join('');
+}
+function customStatusBadgeHtml(cs){
+  if(!cs || (!cs.text && !cs.emoji)) return '';
+  const emoji=String(cs.emoji||'');
+  const text=String(cs.text||'');
+  return `<div class="lb-badges"><span class="lb-badge" style="color:#f0c674;border-color:rgba(240,198,116,.45)">${emoji}${emoji&&text?' ':''}${text}</span></div>`;
 }
 function buffBadgeHtml(r){
   const a=[];
