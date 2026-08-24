@@ -3145,15 +3145,15 @@ async function redeemPromo(){
     // повторно активировать после обновления страницы на этом устройстве.
     const redeemed=Array.isArray(data?.redeemedPromos)?data.redeemedPromos:[];
     if(code==='ATTASHA'){
-      const adminUnlimited=!!window.isAdmin;
-      if(!adminUnlimited && redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
-      if(!adminUnlimited) data.redeemedPromos=[...redeemed,'ATTASHA'];
-      data.balance=Math.max(0,Math.floor(Number(data.balance||0)))+1488;
+      const redeemed=Array.isArray(data?.redeemedPromos)?data.redeemedPromos:[];
+      if(!window.isAdmin && redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
+      const j=await apiFetch('/api/promo/redeem',{code:'ATTASHA'});
+      if(j.user) applyServerState(j.user);
+      if(!window.isAdmin) data.redeemedPromos=[...redeemed,'ATTASHA'];
       persistLocal();
-      updateBalanceUI();renderProfile();
-      syncToServer();
       if(i)i.value='';
       promoSetMessage('Промокод ATTASHA активирован: +1 488 монет ✨',true);
+      updateBalanceUI(); renderProfile();
       showPromoSecretPhoto('ATTASHA');
       return;
     }
@@ -3238,7 +3238,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
           <button type="button" class="btn-ghost" data-action="admin-premium" data-uid="${u.user_id}">Выдать Premium</button>
-          <button type="button" class="btn-ghost" data-action="admin-custom-status" data-uid="${u.user_id}" >🏷️ Свой статус</button>
+          <button type="button" class="btn-ghost" data-action="admin-custom-status" data-uid="${u.user_id}" onclick="window.adminCustomStatus && window.adminCustomStatus(this.dataset.uid); return false;">🏷️ Свой статус</button>
           <button type="button" class="btn-ghost" data-action="admin-buff" data-uid="${u.user_id}">⚡ Выдать бафф</button>
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-creator" data-uid="${u.user_id}" data-enabled="${creatorActive?0:1}">${creatorActive?'Снять 🛠️':'Выдать 🛠️'}</button>` : ''}
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-tester" data-uid="${u.user_id}" data-enabled="${testerActive?0:1}">${testerActive?'Снять 🛡️':'Выдать 🛡️'}</button>` : ''}
@@ -3399,6 +3399,8 @@ async function adminCustomStatus(uid){
     }catch(e){ showToast('❌ '+e.message,'error'); }
   };
 }
+
+window.adminCustomStatus = adminCustomStatus;
 
 async function adminBuff(uid){
   if(!window.isAdmin){showToast('❌ Баффы может выдавать только администратор','error');return;}
@@ -5409,7 +5411,7 @@ function handleButton(button, e){
   if(action==='admin-reset'){ tgConfirm('Точно сбросить весь прогресс этого игрока?').then(ok=>{ if(ok) adminReset(button.dataset.uid); }); return; }
   if(action==='admin-grant-cube'){ adminGrantCube(button.dataset.uid); return; }
   if(action==='admin-premium'){ adminPremium(button.dataset.uid); return; }
-  if(action==='admin-custom-status'){ adminCustomStatus(button.dataset.uid); return; }
+  if(action==='admin-custom-status'){ if(typeof window.adminCustomStatus==='function') window.adminCustomStatus(button.dataset.uid); else showToast('❌ Окно статуса ещё загружается','error'); return; }
   if(action==='admin-buff'){ adminBuff(button.dataset.uid); return; }
   if(action==='view-profile'){ openPublicProfile(button.dataset.profileUid, leaderboardProfileSeeds[String(button.dataset.profileUid)]||{}); return; }
   if(action==='admin-creator'){ adminCreator(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
