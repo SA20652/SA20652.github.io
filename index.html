@@ -1877,11 +1877,17 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
     </div>
     <p class="section-sub" style="margin:0 0 10px">Игрок ID: <span id="adminCustomStatusUid" class="mono"></span></p>
     <div style="display:grid;gap:8px">
-    const text=document.getElementById('adminCustomStatusText').value.trim().slice(0,32);
-    const gradient=!!document.getElementById('adminCustomStatusGradient').checked;
-    const color1=document.getElementById('adminCustomStatusColor1').value;
-    const color2=document.getElementById('adminCustomStatusColor2').value;
-    if(!text && !emoji)
+      <input id="adminCustomStatusEmoji" maxlength="8" placeholder="Эмодзи, например 👑">
+      <input id="adminCustomStatusText" maxlength="32" placeholder="Текст статуса, например VIP+">
+      <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px">
+        <span><b>Переливание цвета</b><small style="display:block;opacity:.65">Плавно переливать статус между 2 цветами</small></span>
+        <input id="adminCustomStatusGradient" type="checkbox" class="toggle-slider" style="width:44px;height:24px;accent-color:#f0c674">
+      </label>
+      <div id="adminCustomStatusColors" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <label class="section-sub">Цвет 1<input id="adminCustomStatusColor1" type="color" value="#f0c674" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
+        <label class="section-sub">Цвет 2<input id="adminCustomStatusColor2" type="color" value="#ffffff" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
+      </div>
+      <div class="section-sub">Если переливание выключено, используется обычный цвет статуса. Пустое поле текста удаляет текущий статус.</div>
       <div class="input-modal-actions">
         <button class="btn" id="adminCustomStatusAccept">Выдать статус</button>
         <button class="btn-ghost" id="adminCustomStatusClear">Снять статус</button>
@@ -2973,9 +2979,19 @@ async function boot(){
   }catch(e){
     console.error('GDPLAY boot error:', e);
     if(releaseScreen) releaseScreen.classList.remove('show');
-    currentUser=null; data=null;
-    showAuth();
-    showAuthError('Не удалось восстановить сессию. Войди в аккаунт ещё раз.');
+    const hasTelegram = !!tgInitData();
+    if(hasTelegram){
+      const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
+      const name = String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ')||'Игрок');
+      currentUser=String(tgUser?.id||'telegram-user').toLowerCase();
+      data=serverUserToGame({display_name:name,avatar:tgUser?.photo_url||'',user_id:tgUser?.id},name);
+      data.username=name;
+      if(tgUser?.photo_url) data.avatar=tgUser.photo_url;
+      showApp();
+    }else{
+      currentUser=null; data=null;
+      showAuth();
+    }
   }
 }
 
@@ -2984,31 +3000,43 @@ async function bootSafe(){
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
 
-  // Единственная авторизация — Telegram WebApp. Никаких логина, регистрации
-  // или локального пароля: Telegram ID является идентификатором игрока.
+  // Авторизация только через Telegram WebApp.
   const initData = tgInitData();
   if(!initData){
+    // Не показываем пустой экран: auth-экран больше не используется.
     throw new Error('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
   }
-
-  const j = await apiFetch('/api/me', {});
-  if(!j || !j.user) throw new Error('Не удалось получить профиль Telegram.');
 
   const tgUser = (()=>{
     try{return window.Telegram?.WebApp?.initDataUnsafe?.user || null;}catch(e){return null;}
   })();
   const telegramName = String(
-    [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(' ') ||
-    j.user.display_name || 'Игрок'
+    [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(' ') || 'Игрок'
   );
-  const telegramAvatar = String(tgUser?.photo_url || j.user.avatar || '');
+  const telegramAvatar = String(tgUser?.photo_url || '');
+  const telegramId = tgUser?.id || null;
 
-  currentUser = String(j.user.user_id || tgUser?.id || 'telegram-user').toLowerCase();
-  data = serverUserToGame(j.user, telegramName);
-  // Для интерфейса используем имя и фото из Telegram. Серверные игровые
-  // данные при этом остаются привязаны к Telegram ID.
+  // Сразу создаём локальное состояние, чтобы интерфейс и все кнопки
+  // отображались даже если /api/me временно недоступен.
+  currentUser = String(telegramId || 'telegram-user').toLowerCase();
+  data = serverUserToGame({display_name:telegramName, avatar:telegramAvatar, user_id:telegramId}, telegramName);
   data.username = telegramName;
   if(telegramAvatar) data.avatar = telegramAvatar;
+
+  try{
+    const j = await apiFetch('/api/me', {});
+    if(j && j.user){
+      data = serverUserToGame(j.user, telegramName);
+      data.username = telegramName;
+      if(telegramAvatar) data.avatar = telegramAvatar;
+      currentUser = String(j.user.user_id || telegramId || 'telegram-user').toLowerCase();
+      window.isAdmin = !!j.is_admin;
+      if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+    }
+  }catch(e){
+    console.warn('GDPLAY /api/me недоступен, запускаем интерфейс с Telegram-профилем:', e);
+    window.isAdmin = false;
+  }
 
   let users = loadUsers();
   users[currentUser] = users[currentUser] || {username:telegramName, passHash:'', game:data};
@@ -3017,10 +3045,10 @@ async function bootSafe(){
   saveUsers(users);
   storageSet(SESSION_KEY,currentUser);
 
-  window.isAdmin = !!j.is_admin;
-  if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+  // Важно: показываем приложение независимо от временного сбоя API.
   showApp();
 }
+
 
 
 function isUpgradeFast(){
