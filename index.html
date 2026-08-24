@@ -3238,7 +3238,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
           <button type="button" class="btn-ghost" data-action="admin-premium" data-uid="${u.user_id}">Выдать Premium</button>
-          <button type="button" class="btn-ghost" data-action="admin-custom-status" data-uid="${u.user_id}" onclick="window.adminCustomStatus && window.adminCustomStatus(this.dataset.uid); return false;">🏷️ Свой статус</button>
+          <button type="button" class="btn-ghost" data-action="admin-custom-status" data-uid="${u.user_id}">🏷️ Свой статус</button>
           <button type="button" class="btn-ghost" data-action="admin-buff" data-uid="${u.user_id}">⚡ Выдать бафф</button>
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-creator" data-uid="${u.user_id}" data-enabled="${creatorActive?0:1}">${creatorActive?'Снять 🛠️':'Выдать 🛠️'}</button>` : ''}
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-tester" data-uid="${u.user_id}" data-enabled="${testerActive?0:1}">${testerActive?'Снять 🛡️':'Выдать 🛡️'}</button>` : ''}
@@ -3399,6 +3399,8 @@ async function adminCustomStatus(uid){
     }catch(e){ showToast('❌ '+e.message,'error'); }
   };
 }
+
+window.adminCustomStatus = adminCustomStatus;
 
 window.adminCustomStatus = adminCustomStatus;
 
@@ -5473,6 +5475,21 @@ document.addEventListener('pointerup', e=>{
   // в Telegram WebView, где обычный click иногда приходит с задержкой.
   runButtonAction(button,e);
 }, false);
+
+// Кастомный статус: отдельный capture-обработчик. Он не зависит от
+// динамической админки и срабатывает даже если другие обработчики клика
+// перехватили событие.
+document.addEventListener('click', e=>{
+  const btn=e.target?.closest?.('button[data-action="admin-custom-status"]');
+  if(!btn || btn.disabled) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  if(typeof window.adminCustomStatus==='function'){
+    window.adminCustomStatus(String(btn.dataset.uid||''));
+  }else{
+    showToast('❌ Функция статуса ещё не загружена','error');
+  }
+}, true);
 
 document.addEventListener('click', e=>{
   const button=e.target?.closest?.('button');
