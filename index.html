@@ -1748,6 +1748,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   pointer-events:none!important;
   z-index:30!important;
 }
+</style><style id="telegram-only-auth">
+/* Авторизация теперь полностью через Telegram WebApp. */
+#authScreen{display:none!important;}
 </style><style>@keyframes gdplayStatusGradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}</style></head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
@@ -2981,56 +2984,42 @@ async function bootSafe(){
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
 
-  let session = storageGet(SESSION_KEY);
+  // Единственная авторизация — Telegram WebApp. Никаких логина, регистрации
+  // или локального пароля: Telegram ID является идентификатором игрока.
+  const initData = tgInitData();
+  if(!initData){
+    throw new Error('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
+  }
+
+  const j = await apiFetch('/api/me', {});
+  if(!j || !j.user) throw new Error('Не удалось получить профиль Telegram.');
+
+  const tgUser = (()=>{
+    try{return window.Telegram?.WebApp?.initDataUnsafe?.user || null;}catch(e){return null;}
+  })();
+  const telegramName = String(
+    [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(' ') ||
+    j.user.display_name || 'Игрок'
+  );
+  const telegramAvatar = String(tgUser?.photo_url || j.user.avatar || '');
+
+  currentUser = String(j.user.user_id || tgUser?.id || 'telegram-user').toLowerCase();
+  data = serverUserToGame(j.user, telegramName);
+  // Для интерфейса используем имя и фото из Telegram. Серверные игровые
+  // данные при этом остаются привязаны к Telegram ID.
+  data.username = telegramName;
+  if(telegramAvatar) data.avatar = telegramAvatar;
+
   let users = loadUsers();
+  users[currentUser] = users[currentUser] || {username:telegramName, passHash:'', game:data};
+  users[currentUser].username = telegramName;
+  users[currentUser].game = data;
+  saveUsers(users);
+  storageSet(SESSION_KEY,currentUser);
 
-  // Восстанавливаем локальную сессию, если она есть.
-  if(!session){
-    try{
-      const backup=JSON.parse(storageGet(DEVICE_BACKUP_KEY)||'null');
-      if(backup && backup.user && backup.game){
-        session=backup.user;
-        if(!users[session]) users[session]={username:backup.game.username||session,passHash:'',game:backup.game};
-        else users[session].game=backup.game;
-        saveUsers(users);
-        storageSet(SESSION_KEY,session);
-      }
-    }catch(e){}
-  }
-
-  if(session && users[session]){
-    currentUser = session;
-    data = users[session].game;
-    showApp();
-    return;
-  }
-
-  // Если WebView потерял локальные данные, но auth-токен сохранился,
-  // восстанавливаем аккаунт с сервера без повторного ввода логина и пароля.
-  const savedToken = storageGet(AUTH_TOKEN_KEY);
-  if(savedToken && tgInitData()){
-    try{
-      const j = await apiFetch('/api/me', {});
-      if(j && j.user){
-        const serverName = String(j.user.display_name || j.user.username || 'Игрок');
-        currentUser = String(j.user.username || serverName).toLowerCase();
-        data = serverUserToGame(j.user, serverName);
-        users = loadUsers();
-        users[currentUser] = users[currentUser] || {username:serverName, passHash:'', game:data};
-        users[currentUser].username = serverName;
-        users[currentUser].game = data;
-        saveUsers(users);
-        storageSet(SESSION_KEY,currentUser);
-        showApp();
-        return;
-      }
-    }catch(e){
-      // Недействительный/истёкший токен — только тогда показываем вход.
-      storageRemove(AUTH_TOKEN_KEY);
-    }
-  }
-
-  showAuth();
+  window.isAdmin = !!j.is_admin;
+  if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+  showApp();
 }
 
 
