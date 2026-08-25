@@ -2052,13 +2052,13 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #casesList .bot-case-drops{grid-template-columns:repeat(2,minmax(0,1fr))!important;border-radius:16px!important;padding:10px!important;gap:7px!important;}
 #casesList .bot-case-drop{border-radius:11px!important;padding:9px!important;}
 #casesList .bot-case-open{height:50px!important;border-radius:16px!important;background:linear-gradient(135deg,#e0b45d,#b87927)!important;color:#1a1209!important;border:1px solid rgba(255,226,155,.6)!important;font-weight:900!important;box-shadow:0 9px 24px rgba(201,151,77,.20)!important;}
-#openPremiumCaseBtn{display:block!important;width:100%!important;min-width:0!important;height:48px!important;padding:0 18px!important;border-radius:16px!important;background:linear-gradient(135deg,#e2b75f,#b87825)!important;color:#1b1309!important;border:1px solid rgba(255,228,163,.72)!important;box-shadow:0 8px 24px rgba(201,151,77,.24),inset 0 1px 0 rgba(255,255,255,.2)!important;font-size:12px!important;font-weight:900!important;line-height:48px!important;appearance:none!important;-webkit-appearance:none!important;}
-#openPremiumCaseBtn:hover{filter:brightness(1.08);transform:translateY(-1px);}
-#openPremiumCaseBtn:disabled{opacity:.55!important;filter:none!important;transform:none!important;}
-.premium-case-card{position:relative!important;margin-top:14px!important;padding:16px!important;border-radius:22px!important;background:linear-gradient(145deg,rgba(216,170,83,.16),rgba(255,255,255,.025))!important;border:1px solid rgba(216,170,83,.35)!important;box-shadow:0 14px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,235,190,.05)!important;}
+
+#:hover{filter:brightness(1.08);transform:translateY(-1px);}
+#:disabled{opacity:.55!important;filter:none!important;transform:none!important;}
+
 .premium-case-card .title{font-size:15px!important;font-weight:900!important;color:#e5bc6d!important;}
 .premium-case-card .desc{line-height:1.4!important;}
-#premiumCaseTimer{min-height:16px!important;margin-top:8px!important;color:#e5bc6d!important;font-family:'IBM Plex Mono',monospace!important;font-size:9px!important;}
+
 .profile-avatar-wrap{position:relative!important;}
 .profile-avatar-frame{pointer-events:none!important;}
 .lb-avatar{position:relative!important;overflow:visible!important;z-index:0;}
@@ -2084,9 +2084,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #page-cases #casesList .bot-case-drops{grid-template-columns:repeat(2,minmax(0,1fr))!important;background:rgba(0,0,0,.16)!important;margin-top:10px!important;}
 #page-cases #casesList .bot-case-drop{min-height:44px!important;background:rgba(255,255,255,.025)!important;}
 #page-cases #casesList .bot-case-open{height:46px!important;border-radius:13px!important;}
-#page-cases .premium-case-card{margin-top:12px!important;padding:13px!important;border-radius:18px!important;}
-#openPremiumCaseBtn{width:100%!important;height:42px!important;min-height:42px!important;line-height:normal!important;padding:0 14px!important;border-radius:12px!important;font-size:11px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;}
-#premiumCaseCard{margin-bottom:4px!important;}
+#page-cases 
+
+
 .lb-avatar{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;border-radius:50%!important;overflow:visible!important;position:relative!important;isolation:isolate!important;}
 .lb-avatar img{border-radius:50%!important;clip-path:circle(50% at 50% 50%)!important;}
 .lb-avatar-frame{inset:-4px!important;border-radius:50%!important;}
@@ -2432,13 +2432,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
           <button type="button" class="profile-style-btn" data-profile-name="neon"><span style="color:#d9ff5b">Aa</span>Неон</button>
         </div>
       </div>
-      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · Premium-кейс · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div>
-      <div class="premium-case-card" id="premiumCaseCard">
-<div class="title">💎 Premium-кейс</div>
-<div class="desc">Бесплатный кейс каждые 3 дня. Награды: 5000–20000 орбов, эксклюзивные рамки, цвета ника и Premium-бонусы.</div>
-<button class="btn-main" id="openPremiumCaseBtn">Открыть Premium-кейс</button>
-<div class="desc" id="premiumCaseTimer"></div>
-</div><div class="daily-card" style="margin-top:12px">
+      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
@@ -2610,7 +2604,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> Орб-рывков в день</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎁 <span><b>1</b> бесплатный Premium-кейс раз в 3 дня</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
+<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> Орб-рывков в день</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <div class="spin-topbar">
@@ -4212,48 +4206,31 @@ function countCaseKeys(caseId){
   return (data.keys||[]).filter(k=>typeIds.includes(keyCatalogId(k))).reduce((n,k)=>n+Number(k.stack_count||1),0);
 }
 function renderCases(){
-  const el = document.getElementById('casesList');
+  const el=document.getElementById('casesList');
   if(!el) return;
-  el.innerHTML = CASES.map(c=>{
-    const qty = caseOpenQty[c.id] || 1;
-    const balanceNow = Number(data?.balance);
-    const totalPrice = Number(c.price)*qty;
-    const affordable = Number.isFinite(balanceNow) && balanceNow >= totalPrice;
-    const totalChance = c.items.reduce((sum,it)=>sum + Math.max(0, Number(it.chance)||0), 0);
-    const topDrops = [...c.items].sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)).slice(0,4);
-    const dropRows = topDrops.map(it=>{
-      const m = RARITY_META[it.rarity] || RARITY_META.common;
-      const chance = totalChance > 0 ? (Number(it.chance)||0) / totalChance * 100 : 0;
-      return `<div class="bot-case-drop" style="--drop-color:${m.color}">
-        <span class="bot-case-drop-icon">${m.icon}</span>
-        <span class="bot-case-drop-name">${it.name}</span>
-        <span class="bot-case-drop-chance">${chance.toFixed(chance % 1 ? 2 : 0)}%</span>
-      </div>`;
+  el.innerHTML=CASES.map((c,index)=>{
+    const qty=caseOpenQty[c.id]||1;
+    const balanceNow=Number(data?.balance||0);
+    const totalPrice=Number(c.price)*qty;
+    const affordable=Number.isFinite(balanceNow)&&balanceNow>=totalPrice;
+    const totalChance=c.items.reduce((sum,it)=>sum+Math.max(0,Number(it.chance)||0),0);
+    const topDrops=[...c.items].sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)).slice(0,5);
+    const rarityCount=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).length;
+    const drops=topDrops.map(it=>{
+      const m=RARITY_META[it.rarity]||RARITY_META.common;
+      const chance=totalChance?(Number(it.chance)||0)/totalChance*100:0;
+      return `<div class="rad-drop" style="--drop:${m.color}"><span class="rad-drop-icon">${m.icon}</span><span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
     }).join('');
-    const rarityCount = c.items.reduce((n,it)=>n + (['epic','legendary','mythic','divine','emerald'].includes(it.rarity)?1:0),0);
-    return `
-      <article class="bot-case-card" data-case-id="${c.id}">
-        <div class="bot-case-glow"></div>
-        <div class="bot-case-head">
-          <div class="bot-case-icon">${c.icon}</div>
-          <div class="bot-case-title-wrap">
-            <div class="bot-case-kicker">GDPLAY VAULT · ${c.id.toUpperCase()}</div>
-            <div class="bot-case-name">${c.name}</div>
-            <div class="bot-case-meta"><span>💰 ${Number(c.price).toLocaleString('ru-RU')}</span><span>•</span><span>${c.items.length} предметов</span><span>•</span><span>${rarityCount} топ-дропа</span></div>
-          </div>
-          <div class="bot-case-price">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div>
-        </div>
-        <div class="bot-case-drops">${dropRows}</div>
-        <div class="bot-case-bottom">
-          <div class="bot-case-qty">
-            <span>Открыть</span>
-            <div class="bot-case-qty-picker">
-              ${[1,2,3].map(n=>`<button type="button" class="case-qty-btn ${qty===n?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="${n}">${n}×</button>`).join('')}
-            </div>
-          </div>
-          <button type="button" class="btn bot-case-open" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?(qty>1?`Открыть · ${totalPrice.toLocaleString('ru-RU')} 💰`:'Открыть сейф'):`Нужно ещё ${Math.max(0,totalPrice-(Number.isFinite(balanceNow)?balanceNow:0)).toLocaleString('ru-RU')} 💰`}</button>
-        </div>
-      </article>`;
+    return `<article class="rad-case-card" data-case-id="${c.id}">
+      <div class="rad-case-number">${String(index+1).padStart(2,'0')}</div>
+      <div class="rad-case-art"><div class="rad-case-art-glow"></div><span>${c.icon}</span></div>
+      <div class="rad-case-main">
+        <div class="rad-case-top"><div><div class="rad-case-label">CASE / ${c.id.toUpperCase()}</div><h3>${c.name}</h3></div><div class="rad-price">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div></div>
+        <div class="rad-case-stats"><span>${c.items.length} наград</span><span>${rarityCount} редких</span><span>шанс зависит от дропа</span></div>
+        <div class="rad-drops">${drops}</div>
+        <div class="rad-actions"><div class="rad-qty"><button type="button" class="case-qty-btn ${qty===1?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="1">1×</button><button type="button" class="case-qty-btn ${qty===2?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="2">2×</button><button type="button" class="case-qty-btn ${qty===3?'active':''}" data-action="set-case-qty" data-case="${c.id}" data-qty="3">3×</button></div><button type="button" class="rad-open" data-action="open-case" data-case="${c.id}" ${affordable?'':'disabled'}>${affordable?(qty>1?'Открыть · '+totalPrice.toLocaleString('ru-RU')+' 💰':'Открыть кейс'):'Не хватает '+Math.max(0,totalPrice-balanceNow).toLocaleString('ru-RU')+' 💰'}</button></div>
+      </div>
+    </article>`;
   }).join('');
   renderRecentDrops();
   renderBattles();
@@ -5572,7 +5549,7 @@ async function renderLeaderboard(sortBy='cases'){
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item ${r.key===myId?'me':''}">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
-        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.key==='7491528121'?'ghost':(r.profile_frame||((r.key===myId)?data.profileFrame:'default'))); const ok=f==='default' ? false : (f==='ghost'?r.key==='7491528121':true); return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
+        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.key==='74915228121'?'ghost':(r.profile_frame||((r.key===myId)?data.profileFrame:'default'))); const ok=f==='default' ? false : (f==='ghost'?r.key==='74915228121':true); return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
           <div class="lb-user">${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
@@ -5715,7 +5692,7 @@ async function openPublicProfile(userId, seed={}){
     </div>`;
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
-  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}${String(p.user_id||'')==='7491528121'?'<span class="lb-avatar-frame frame-ghost"></span>':''}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
+  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}${String(p.user_id||'')==='74915228121'?'<span class="lb-avatar-frame frame-ghost"></span>':''}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
   renderBestDrops(document.getElementById('publicBestDrops'),best);
   const now=Date.now();
   const list=buffs.filter(b=>!b.expires_at||new Date(b.expires_at).getTime()>now);
@@ -5736,18 +5713,18 @@ function profileFrameUnlock(key){
   const vipActive=!!(data && ((data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now()) || data.vip===true || data.isVip===true || data.vip_until || data.vipUntil));
   const userId=String(tgUserId()||data?.user_id||data?.id||'');
   const cases=Number(data?.cases_opened||0);
+  if(userId==='74915228121') return {ok:true, label:'Доступна владельцу ID 74915228121'};
   const balance=Number(data?.balance||0);
   const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
   if(key==='gold') return {ok:vipActive, label:'Premium'};
-  if(key==='premium') return {ok:vipActive, label:'Premium-кейс'};
   if(key==='emerald') return {ok:cases>=100, label:'100 открытых кейсов'};
   if(key==='ruby') return {ok:cases>=2000, label:'2 000 открытых кейсов'};
   if(key==='amethyst') return {ok:balance>=2500000, label:'2 500 000 орбов'};
   if(key==='ice') return {ok:streak>=28, label:'28 дней подряд'};
   if(key==='obsidian') return {ok:cases>=1000, label:'1 000 открытых кейсов'};
   if(key==='neon') return {ok:balance>=100000000, label:'100 000 000 орбов'};
-  if(key==='ghost') return {ok:userId==='7491528121', label:'Только для ID 7491528121'};
+  if(key==='ghost') return {ok:userId==='74915228121', label:'Только для ID 74915228121'};
   return {ok:false,label:'Недоступно'};
 }
 
@@ -5755,9 +5732,7 @@ function renderProfileCustomization(){
   const frame=document.getElementById('profileAvatarFrame');
   const name=document.getElementById('profileName');
   const vipActive=!!(data && ((data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now()) || data.vip===true || data.isVip===true || data.vip_until || data.vipUntil) && (!((data.vip_until||data.vipUntil)) || new Date(data.vip_until||data.vipUntil).getTime()>Date.now()));
-  const forcedGhost=String(tgUserId()||data?.user_id||data?.id||'')==='7491528121';
-  const selected=forcedGhost?'ghost':String(data?.profileFrame||'default');
-  if(forcedGhost) data.profileFrame='ghost';
+  const selected=String(data?.profileFrame||'default');
   const nameStyle=String(data?.profileNameStyle||'default');
   if(frame){
     frame.className='profile-avatar-frame';
@@ -5781,7 +5756,6 @@ function renderProfileCustomization(){
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'VIP оформление':'Базовое оформление';
 }
 function setProfileFrame(key){
-  if(String(tgUserId()||data?.user_id||data?.id||'')==='7491528121') key='ghost';
   const info=profileFrameUnlock(key);
   if(!info.ok){ showToast('🔒 '+info.label,'error'); return; }
   data.profileFrame=key; persistLocal(); renderProfileCustomization();
@@ -6582,36 +6556,32 @@ boot();
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:96px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
 </style>
-\n<script id="gdplay-final-all-fixes">
+\n
+
+<style id="gdplay-radical-cases-final">
+#casesList{display:grid!important;grid-template-columns:1fr!important;gap:16px!important;padding:2px 0 24px!important;}
+.rad-case-card{position:relative!important;display:grid!important;grid-template-columns:96px minmax(0,1fr)!important;gap:15px!important;min-height:230px!important;padding:15px!important;border-radius:28px!important;overflow:hidden!important;background:radial-gradient(circle at 12% 8%,rgba(220,178,92,.14),transparent 34%),linear-gradient(145deg,#26201b 0%,#171310 62%,#11100e 100%)!important;border:1px solid rgba(226,184,99,.22)!important;box-shadow:0 18px 40px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.035)!important;}
+.rad-case-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.035) 50%,transparent 80%);transform:translateX(-100%);animation:radCaseShine 7s ease-in-out infinite;}
+@keyframes radCaseShine{0%,55%{transform:translateX(-100%)}75%,100%{transform:translateX(100%)}}
+.rad-case-number{position:absolute;right:13px;top:10px;color:rgba(229,188,109,.16);font:900 32px/1 'IBM Plex Mono',monospace;z-index:1}
+.rad-case-art{position:relative;z-index:2;width:96px;height:96px;margin-top:2px;border-radius:25px;display:flex;align-items:center;justify-content:center;font-size:43px;background:linear-gradient(145deg,rgba(226,184,99,.24),rgba(75,54,29,.12));border:1px solid rgba(231,194,118,.35);box-shadow:inset 0 0 25px rgba(0,0,0,.25),0 14px 28px rgba(0,0,0,.25)}
+.rad-case-art-glow{position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(225,181,91,.22),transparent 65%);filter:blur(8px);z-index:-1}
+.rad-case-main{position:relative;z-index:2;min-width:0}.rad-case-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding-right:38px}.rad-case-label{font:800 8px 'IBM Plex Mono',monospace;letter-spacing:1.5px;color:#b79865;text-transform:uppercase}.rad-case-top h3{margin:4px 0 0;font:800 22px/1.05 'Fraunces',serif;color:#f3eadb}.rad-price{white-space:nowrap;padding:8px 10px;border-radius:13px;background:rgba(224,181,91,.09);border:1px solid rgba(224,181,91,.2);color:#e7bd70;font:900 11px 'IBM Plex Mono',monospace}.rad-price small{margin-left:3px}.rad-case-stats{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0;color:#928779;font-size:9px}.rad-case-stats span{padding:5px 7px;border-radius:8px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.045)}
+.rad-drops{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 0 12px}.rad-drop{min-width:0;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:5px;align-items:center;padding:7px 8px;border-radius:10px;background:rgba(0,0,0,.18);border-left:2px solid var(--drop)}.rad-drop-icon{color:var(--drop);font-size:13px}.rad-drop-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:#eee5d8}.rad-drop b{font:700 8px 'IBM Plex Mono',monospace;color:var(--drop)}
+.rad-actions{display:flex;gap:8px;align-items:center}.rad-qty{display:flex;gap:4px}.rad-qty .case-qty-btn{width:34px;height:38px;border-radius:11px;background:#12100e;border:1px solid rgba(255,255,255,.07);color:#bdb2a4;font-weight:800}.rad-qty .case-qty-btn.active{background:linear-gradient(145deg,#e1b45f,#b97828);border-color:#e4bb6c;color:#1a1209;box-shadow:0 5px 14px rgba(211,167,83,.18)}.rad-open{flex:1;height:40px!important;border-radius:12px!important;background:linear-gradient(135deg,#e1b45f,#b97828)!important;color:#1a1209!important;border:1px solid rgba(255,226,151,.6)!important;font-weight:900!important;font-size:10px!important;box-shadow:0 7px 18px rgba(199,151,77,.18)!important}.rad-open:disabled{opacity:.42!important;filter:none!important}
+@media(max-width:430px){.rad-case-card{grid-template-columns:76px minmax(0,1fr)!important;padding:12px!important;gap:11px!important}.rad-case-art{width:76px;height:76px;font-size:34px;border-radius:20px}.rad-case-top h3{font-size:18px}.rad-drops{grid-template-columns:1fr}.rad-price{font-size:9px;padding:7px}.rad-case-stats{gap:4px}.rad-actions{align-items:stretch}.rad-qty .case-qty-btn{width:31px}}
+</style>
+<script id="gdplay-frame-owner-fix">
 (function(){
-  const PC_KEY='gdplay_premium_case_next_v2', THREE_DAYS=259200000;
-  const REW=[
-    {name:'5000 орбов',rarity:'common',value:5000,type:'orbs',chance:34},{name:'7500 орбов',rarity:'common',value:7500,type:'orbs',chance:22},
-    {name:'10000 орбов',rarity:'rare',value:10000,type:'orbs',chance:16},{name:'12500 орбов',rarity:'epic',value:12500,type:'orbs',chance:11},
-    {name:'15000 орбов',rarity:'legendary',value:15000,type:'orbs',chance:8},{name:'20000 орбов',rarity:'mythic',value:20000,type:'orbs',chance:4},
-    {name:'Premium-рамка',rarity:'divine',value:0,type:'frame',chance:2.5},{name:'+3 дня Premium',rarity:'divine',value:3,type:'premium',chance:1.5},
-    {name:'100000 орбов',rarity:'divine',value:100000,type:'jackpot',chance:1}
-  ];
-  const active=()=>!!(data&&((data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now())||data.vip===true||data.isVip===true||data.vip_until||data.vipUntil));
-  const next=()=>Number(storageGet(PC_KEY)||0);
-  const leftFmt=ms=>{let d=Math.floor(ms/86400000);ms%=86400000;let h=Math.floor(ms/3600000);ms%=3600000;let m=Math.floor(ms/60000);let s=Math.floor(ms/1000)%60;return `${d}д ${String(h).padStart(2,'0')}ч ${String(m).padStart(2,'0')}м ${String(s).padStart(2,'0')}с`;};
-  function update(){const b=document.getElementById('openPremiumCaseBtn'),t=document.getElementById('premiumCaseTimer');if(!b||!t)return;if(!active()){b.disabled=true;b.textContent='🔒 Нужен Premium';t.textContent='Доступно только при активном Premium';return;}const n=next(),l=n-Date.now();if(n&&l>0){b.disabled=true;b.textContent='⏳ Premium-кейс';t.textContent='Следующее открытие через '+leftFmt(l);}else{b.disabled=false;b.textContent='💎 Открыть Premium-кейс';t.textContent='Бесплатно · 1 кейс каждые 3 дня';}}
-  function pick(){let r=Math.random()*REW.reduce((a,x)=>a+x.chance,0);for(const x of REW){if(r<x.chance)return x;r-=x.chance;}return REW[0];}
-  async function openPremiumCase(){
-    if(!active()){showToast('🔒 Premium-кейс доступен только с Premium','error');return;} if(next()>Date.now())return;
-    const reward=pick(), c={name:'Premium-кейс',icon:'💎',price:0,items:REW.map(x=>({name:x.name,rarity:x.rarity,value:x.value,chance:x.chance}))};
-    const wi=c.items.findIndex(x=>x.name===reward.name); spinning=true;
-    const title=document.getElementById('spinCaseTitle'),icon=document.getElementById('spinCaseIcon'),price=document.getElementById('spinCasePrice'),sub=document.getElementById('spinCaseSub'),pill=document.getElementById('spinStatusPill'),result=document.getElementById('spinResult'),close=document.getElementById('spinCloseBtn');
-    if(title)title.textContent='💎 Premium-кейс';if(icon)icon.textContent='💎';if(price)price.textContent='БЕСПЛАТНО';if(sub)sub.textContent='Эксклюзивные Premium-награды';if(pill)pill.textContent='PREMIUM';
-    result?.classList.add('hidden');close?.classList.add('hidden');openModal('spinModal');buildWheel(c.items,wi,reward.value,reward);
-    try{await spinWheel(document.getElementById('wheelDial'),c.items,wi);}catch(e){spinning=false;closeModal('spinModal');showToast('❌ Не удалось открыть Premium-кейс','error');return;}
-    storageSet(PC_KEY,String(Date.now()+THREE_DAYS));
-    if(reward.type==='orbs'||reward.type==='jackpot'){data.balance=Number(data.balance||0)+reward.value;showSpinResult(reward,false);}
-    else if(reward.type==='frame'){data.premiumCaseFrames=true;data.profileFrame='premium';showSpinResult({...reward,value:0},false);renderProfileCustomization();}
-    else {const old=new Date(data.premiumUntil||Date.now()).getTime();data.premiumUntil=new Date(Math.max(old,Date.now())+259200000).toISOString();showSpinResult({...reward,value:3},false);renderProfile();}
-    persistLocal();updateBalanceUI();update();renderProfile();spinning=false;
-  }
-  document.getElementById('openPremiumCaseBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPremiumCase();});
-  window.gdplayOpenPremiumCase=openPremiumCase; setInterval(update,1000); setTimeout(update,0);
+  const OWNER='74915228121';
+  const id=()=>String(tgUserId()||data?.user_id||data?.id||'');
+  const originalUnlock=window.profileFrameUnlock;
+  // Keep the existing unlock rules, but let the requested owner freely switch among every unlocked frame.
+  window.setOwnerFrame=function(key){
+    if(id()!==OWNER) return;
+    const info=typeof profileFrameUnlock==='function'?profileFrameUnlock(key):{ok:false};
+    if(!info.ok){showToast('🔒 '+(info.label||'Рамка недоступна'),'error');return;}
+    data.profileFrame=key;persistLocal();renderProfileCustomization();
+  };
 })();
 </script>
