@@ -21,6 +21,8 @@
   --r-legendary:#e6a72e; --r-mythic:#d3323f; --r-divine:#ec5fc4; --r-emerald:#2ecc71;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
   --radius: 16px;
+  --glow-1: rgba(201,151,77,.10);
+  --glow-2: rgba(63,138,112,.08);
 }
 body.light{
   --bg:#efe9dc; --bg-2:#ffffff; --bg-3:#f7f2e6;
@@ -28,14 +30,41 @@ body.light{
   --paper:#211c15; --muted:#6b6255; --muted-2:#8a8172;
   --shadow: 0 8px 22px rgba(60,45,20,.12);
 }
+
+/* ============ SEASONAL THEMES (server-controlled, applies to everyone) ============ */
+/* summer = default look above, no overrides needed */
+body.theme-newyear{
+  --brass:#4f9fe0; --brass-2:#8cc7ff; --brass-dim:#2b6aa3;
+  --emerald:#4f9fe0; --crimson:#5c7fe0;
+  --glow-1: rgba(79,159,224,.18); --glow-2: rgba(140,199,255,.10);
+}
+body.theme-autumn{
+  --brass:#d9812f; --brass-2:#f2a95c; --brass-dim:#9a541a;
+  --emerald:#d9812f;
+  --glow-1: rgba(217,129,47,.16); --glow-2: rgba(242,169,92,.10);
+}
+body.theme-spring{
+  --brass:#4caf6e; --brass-2:#86dba0; --brass-dim:#2e7a48;
+  --emerald:#4caf6e;
+  --glow-1: rgba(76,175,110,.16); --glow-2: rgba(134,219,160,.10);
+}
+body.theme-transition, body.theme-transition *{transition:background-color .55s ease,color .55s ease,border-color .55s ease !important;}
+
+/* ---- bottom decoration strip: snowflakes / leaves / grass ---- */
+.season-decor{position:fixed;left:0;right:0;bottom:0;height:44px;pointer-events:none;z-index:40;display:none;align-items:flex-end;justify-content:space-around;overflow:hidden;
+  -webkit-mask-image:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.95) 50%,transparent);
+  mask-image:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.95) 50%,transparent);}
+.season-decor.active{display:flex;}
+.season-decor span{display:inline-block;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));animation:seasonBob ease-in-out infinite;}
+@keyframes seasonBob{0%,100%{transform:translateY(0) rotate(-6deg);}50%{transform:translateY(-9px) rotate(6deg);}}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body.modal-open{overflow:hidden;touch-action:none;}
 body{height:100%;min-height:100%;}
 html{overscroll-behavior-y:none;}
 body{
   background:
-    radial-gradient(circle at 15% -10%, rgba(201,151,77,.10), transparent 45%),
-    radial-gradient(circle at 100% 0%, rgba(63,138,112,.08), transparent 40%),
+    radial-gradient(circle at 15% -10%, var(--glow-1), transparent 45%),
+    radial-gradient(circle at 100% 0%, var(--glow-2), transparent 40%),
     var(--bg);
   color:var(--paper);
   font-family:'Inter',sans-serif;
@@ -2503,6 +2532,7 @@ const USERS_KEY = 'gdplay_users_v1';
 const SESSION_KEY = 'gdplay_session_v1';
 const DROPS_KEY = 'gdplay_drops_v1';
 const THEME_KEY = 'gdplay_theme_v1';
+const SEASON_THEME_KEY = 'gdplay_season_theme_v1';
 const MARKET_KEY = 'gdplay_market_v1';
 const DEVICE_BACKUP_KEY = 'gdplay_device_backup_v1';
 const AUTH_TOKEN_KEY = 'gdplay_auth_token_v1';
@@ -2896,6 +2926,7 @@ async function refreshFromServer(){
   try{
     const j = await apiFetch('/api/me', {});
     applyServerState(j && j.user);
+    if(j && j.season_theme && j.season_theme !== currentSeasonTheme) applySeasonTheme(j.season_theme);
   }catch(e){ /* тихо игнорируем — например, initData ещё не готова */ }
 }
 
@@ -3015,6 +3046,7 @@ async function registerWithServer(){
   try{
     const j = await apiFetch('/api/me', {});
     if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+    if(j.season_theme) applySeasonTheme(j.season_theme);
     window.isAdmin = !!j.is_admin;
     if(window.isAdmin) await loadAdminUI();
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
@@ -3196,6 +3228,9 @@ async function bootSafe(){
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
+  // Мгновенно показываем последнюю известную сезонную тему из кэша, чтобы не
+  // было "вспышки" обычной темы до ответа сервера; сервер ниже подтвердит/обновит её.
+  applySeasonTheme(storageGet(SEASON_THEME_KEY) || 'summer', {skipPersist:true});
 
   // Telegram-режим гостя: если приложение открыто из Telegram, вход/регистрация
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
@@ -3230,6 +3265,7 @@ async function bootSafe(){
         if(tgAvatar) data.avatar = tgAvatar;
         window.isAdmin = !!j.is_admin;
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+        if(j.season_theme) applySeasonTheme(j.season_theme);
         showApp();
         return;
       }
@@ -3255,6 +3291,7 @@ async function bootSafe(){
       if(tgAvatar) data.avatar = tgAvatar;
       window.isAdmin = !!j.is_admin;
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+      if(j.season_theme) applySeasonTheme(j.season_theme);
       showApp();
       return;
     }
@@ -5567,6 +5604,60 @@ function toggleTheme(){
   clearTimeout(window.__themeTransitionTimer);
   window.__themeTransitionTimer=setTimeout(()=>body.classList.remove('theme-transition'),650);
 }
+
+// ===== SEASONAL THEME (управляется админом, применяется у всех игроков) =====
+// 'summer' — обычная тема (без переопределений), остальные три задают
+// цветовую схему через CSS-переменные и декор внизу экрана.
+const SEASON_THEMES = ['newyear','autumn','spring','summer'];
+const SEASON_ICONS = {
+  newyear: ['❄️','❅','❆'],
+  autumn: ['🍁','🍂','🍃'],
+  spring: ['🌿','🌱','🍀'],
+  summer: []
+};
+let currentSeasonTheme = 'summer';
+
+function renderSeasonDecor(theme){
+  let el = document.getElementById('seasonDecor');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'seasonDecor';
+    el.className = 'season-decor';
+    el.setAttribute('aria-hidden','true');
+    document.body.appendChild(el);
+  }
+  const icons = SEASON_ICONS[theme] || [];
+  if(!icons.length){ el.classList.remove('active'); el.innerHTML=''; return; }
+  const count = 14;
+  let html = '';
+  for(let i=0;i<count;i++){
+    const icon = icons[i % icons.length];
+    const dur = (2.6 + Math.random()*2.2).toFixed(2);
+    const delay = (Math.random()*3).toFixed(2);
+    const size = (13 + Math.random()*10).toFixed(0);
+    const opac = (0.5 + Math.random()*0.4).toFixed(2);
+    html += `<span style="animation-duration:${dur}s;animation-delay:-${delay}s;font-size:${size}px;opacity:${opac}">${icon}</span>`;
+  }
+  el.innerHTML = html;
+  el.classList.add('active');
+}
+
+function applySeasonTheme(theme, opts){
+  opts = opts || {};
+  theme = SEASON_THEMES.includes(theme) ? theme : 'summer';
+  currentSeasonTheme = theme;
+  const body = document.body;
+  body.classList.add('theme-transition');
+  body.classList.remove('theme-newyear','theme-autumn','theme-spring');
+  if(theme==='newyear') body.classList.add('theme-newyear');
+  else if(theme==='autumn') body.classList.add('theme-autumn');
+  else if(theme==='spring') body.classList.add('theme-spring');
+  renderSeasonDecor(theme);
+  clearTimeout(window.__seasonThemeTransitionTimer);
+  window.__seasonThemeTransitionTimer=setTimeout(()=>body.classList.remove('theme-transition'),650);
+  if(!opts.skipPersist){ try{ storageSet(SEASON_THEME_KEY, theme); }catch(e){} }
+}
+window.applySeasonTheme = applySeasonTheme;
 
 function renderAll(){
   normalizeGameState();
