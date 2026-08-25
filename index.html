@@ -1979,6 +1979,35 @@ body{overflow-x:hidden}
 .premium-card{border-radius:24px;padding:20px;text-align:center}
 .premium-badge{font-weight:800}
 </style>
+
+<style id="gdplay-case-fix-v2">
+/* Cases: always one card per row */
+#page-cases #casesList, #casesList, .cases-grid, .case-grid {
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  width:100% !important;
+}
+#page-cases #casesList > *, #casesList > * {
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+/* Case opening animation */
+#spinModal .wheel-dial {
+  animation:gdplayWheelIdle 1.2s ease-in-out infinite;
+}
+#spinModal .spin-modal {
+  animation:gdplaySpinAppear .22s ease-out;
+}
+@keyframes gdplaySpinAppear {
+  from {transform:scale(.92);opacity:0}
+  to {transform:scale(1);opacity:1}
+}
+@keyframes gdplayWheelIdle {
+  0%,100% {filter:brightness(1)}
+  50% {filter:brightness(1.12)}
+}
+</style>
 </head>
 <body><svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
   <filter id="brandLogoTint" color-interpolation-filters="sRGB">
