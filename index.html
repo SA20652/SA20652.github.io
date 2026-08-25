@@ -1678,6 +1678,26 @@ window.lockUpgradeResult=function(result,angle){
 #spinModal .spin-result{margin-top:0;padding:13px 12px;border-radius:15px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.08);}
 #spinModal #spinCloseBtn{height:45px;border-radius:13px;margin-top:12px;}
 @media(max-width:430px){#spinModal .spin-modal{width:calc(100% - 12px);max-height:calc(100dvh - 24px);padding:13px 11px 14px;}#spinModal .wheel-item{width:96px;min-width:96px;}#spinModal .wheel-wrap{height:166px;}}
+/* CASE REEL ANIMATION FIX: horizontal strip must visibly travel to the center. */
+#spinModal .reel-mask{overflow:hidden!important;position:relative;}
+#spinModal .wheel-dial{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  width:max-content!important;
+  height:100%!important;
+  transform:translate3d(0,0,0);
+  will-change:transform;
+}
+#spinModal .wheel-item{
+  flex:0 0 112px!important;
+  width:112px!important;
+  min-width:112px!important;
+  height:100%!important;
+}
+@media(max-width:430px){
+  #spinModal .wheel-item{flex-basis:100px!important;width:100px!important;min-width:100px!important;}
+}
 </style>
 <style id="gdplay-upgrade-exact-wheel-fix">
 /* FINAL FIX: the upgrade wheel uses a real SVG probability ring.
@@ -4195,27 +4215,41 @@ function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){buil
 function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
+
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const vertical=false;
-  const duration=reduced?450:3000;
-  const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
+  const duration=reduced ? 450 : 3200;
+
+  // Кейс — горизонтальная лента. Раньше здесь использовался вертикальный
+  // расчёт, из-за чего transform не совпадал с реальной геометрией ленты.
+  const targetCenter=targetEl.offsetLeft + targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
+
   dial.classList.add('is-spinning');
   dial.classList.remove('is-stopped');
+
+  // Гарантируем старт с нулевой позиции, чтобы повторное открытие тоже
+  // всегда имело полноценную прокрутку.
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
+  void dial.offsetWidth;
+
   return new Promise(resolve=>{
     requestAnimationFrame(()=>{
-      dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
-      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+      requestAnimationFrame(()=>{
+        dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
+        dial.style.transform=`translate3d(-${offset}px,0,0)`;
+      });
     });
+
     setTimeout(()=>{
       dial.style.transition='none';
-      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+      dial.style.transform=`translate3d(-${offset}px,0,0)`;
       dial.classList.remove('is-spinning');
       dial.classList.add('is-stopped');
       playBeep(920);
       resolve();
-    },duration+90);
+    },duration+120);
   });
 }
 
@@ -6418,5 +6452,36 @@ boot();
 #spinModal .wheel-multi-row .wheel-dial{display:flex;flex-direction:row;height:100%;width:max-content;position:relative;transform:translate3d(0,0,0);will-change:transform;backface-visibility:hidden;}
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:96px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
+
+/* Premium CTAs — bot/app style, not a bright yellow button */
+#buyPremiumBtn,
+#viewPremiumBtn,
+button[data-action="buy-premium"],
+button[data-action="view-premium"] {
+  background: linear-gradient(180deg, #2b2f38 0%, #20232a 100%) !important;
+  color: #f4f5f7 !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 14px !important;
+  min-height: 46px;
+  padding: 0 18px !important;
+  font-weight: 800 !important;
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+  text-shadow: none !important;
+}
+#buyPremiumBtn:hover,
+#viewPremiumBtn:hover,
+button[data-action="buy-premium"]:hover,
+button[data-action="view-premium"]:hover {
+  background: linear-gradient(180deg, #343944 0%, #252932 100%) !important;
+}
+#buyPremiumBtn:active,
+#viewPremiumBtn:active,
+button[data-action="buy-premium"]:active,
+button[data-action="view-premium"]:active {
+  transform: translateY(1px) scale(.99);
+}
+
 </style>
 
