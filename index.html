@@ -2019,6 +2019,21 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .profile-frame,.avatar-frame,.user-frame{z-index:2;pointer-events:none;}
 .top-user-row .profile-frame,.top-user-row .avatar-frame,.leader-row .profile-frame,.leader-row .avatar-frame{display:block!important;visibility:visible!important;}
 </style>
+
+<style id="cases-final-ui-update">
+/* final premium cases visual refresh */
+#casesList .bot-case-card,.case-card{border-radius:22px!important;overflow:hidden!important;box-shadow:0 8px 30px rgba(0,0,0,.35)!important;}
+#casesList .bot-case-card .btn,.open-case-btn{border-radius:14px!important;font-weight:800!important;}
+.case-open-modal,.case-result,.case-reward{border-radius:24px!important;}
+</style>
+
+<style id="final-premium-upgrades">
+.case-card,.case-item,.premium-box,.premium-card{border-radius:22px!important;overflow:hidden}
+.transparent-ghost-frame{border:3px solid rgba(255,255,255,.55)!important;box-shadow:0 0 18px rgba(255,255,255,.35)!important}
+.premium-gold{border:2px solid #d8aa35!important;box-shadow:0 0 20px rgba(216,170,53,.35)}
+.case-open-modal,.case-opening{border-radius:26px!important}
+.notification-item.orb-transfer{border-left:4px solid #d8aa35}
+</style>
 </head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
@@ -2360,7 +2375,12 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
         </div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · Premium-кейс · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div>
-      <div class="daily-card" style="margin-top:12px">
+      <div class="premium-case-card" id="premiumCaseCard">
+<div class="title">💎 Premium-кейс</div>
+<div class="desc">Бесплатный кейс каждые 3 дня. Награды: 5000–20000 орбов, эксклюзивные рамки и предметы.</div>
+<button class="btn-main" id="openPremiumCaseBtn">Открыть Premium-кейс</button>
+<div class="desc" id="premiumCaseTimer"></div>
+</div><div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
