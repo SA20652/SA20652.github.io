@@ -1968,6 +1968,17 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   box-shadow:0 6px 14px rgba(0,0,0,.14);
 }
 </style>
+
+<style>
+/* Premium + universal layout fixes */
+*{box-sizing:border-box}
+body{overflow-x:hidden}
+.case-grid,.cases-grid,.shop-grid{grid-template-columns:1fr!important}
+.case-card,.case,.shop-card{width:100%!important;max-width:100%!important;min-height:360px;overflow:hidden}
+.case-card *,.case *,.shop-card *{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.premium-card{border-radius:24px;padding:20px;text-align:center}
+.premium-badge{font-weight:800}
+</style>
 </head>
 <body><svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
   <filter id="brandLogoTint" color-interpolation-filters="sRGB">
@@ -6392,3 +6403,66 @@ boot();
   100%{transform:scale(1.10);}
 }
 </style>
+
+<style id="gdplay-subscribe-style">
+.gd-subscribe-card{
+  width:calc(100% - 24px);
+  margin:12px auto;
+  padding:18px;
+  border-radius:18px;
+  position:relative;
+  box-sizing:border-box;
+  background:linear-gradient(135deg,#1e293b,#334155);
+  color:white;
+  overflow:hidden;
+}
+.gd-subscribe-card h3{margin:0 0 8px;font-size:20px}
+.gd-subscribe-card p{margin:0 0 14px;overflow-wrap:anywhere}
+.gd-subscribe-btn{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+.gd-subscribe-close{
+  position:absolute;
+  right:10px;
+  top:8px;
+  border:0;
+  background:none;
+  color:white;
+  font-size:22px;
+}
+</style>
+
+<script id="gdplay-subscribe-script">
+(function(){
+ const KEY="gdplay_subscribe_hidden";
+ function createSubscribe(){
+   if(localStorage.getItem(KEY)) return;
+   if(document.getElementById("gdSubscribeBox")) return;
+   let target=document.querySelector(".cases, #cases, .case-container, .cases-grid");
+   const box=document.createElement("div");
+   box.id="gdSubscribeBox";
+   box.className="gd-subscribe-card";
+   box.innerHTML=`
+     <button class="gd-subscribe-close">×</button>
+     <h3>📢 Подпишись на GDplay</h3>
+     <p>🎁 Получи <b>1000 💰</b> за подписку на наш Telegram-канал</p>
+     <button class="gd-subscribe-btn">Подписаться</button>`;
+   box.querySelector(".gd-subscribe-btn").onclick=()=>{
+      window.open("https://t.me/GDplay_off","_blank");
+   };
+   box.querySelector(".gd-subscribe-close").onclick=()=>{
+      localStorage.setItem(KEY,"1");
+      box.remove();
+      if(window.showNotification) showNotification("Блок подписки скрыт");
+   };
+   if(target) target.parentNode.insertBefore(box,target);
+   else document.body.prepend(box);
+ }
+ window.addEventListener("load",()=>setTimeout(createSubscribe,500));
+})();
+</script>
