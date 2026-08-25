@@ -2319,7 +2319,7 @@ body{overflow-x:hidden}
         <div class="pstat"><b id="statBattles">0</b><span>батлов</span></div>
         <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
       </div>
-      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · Premium-кейс · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div>
+      <div class="profile-premium-open"><div class="title">⭐ Premium</div><button class="btn-main" id="buyPremiumBtn">Купить Premium · 20 ⭐</button></div>
       <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
@@ -4175,7 +4175,7 @@ function spinWheelIn(container,dial,items,wonIndex){
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const vertical=false;
-  const duration=reduced?450:3000;
+  const duration=reduced?600:4200;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
@@ -6469,4 +6469,10 @@ boot();
   55%{transform:scale(1.16);}
   100%{transform:scale(1.10);}
 }
+</style>
+
+<style id="gdplay-final-premium-spin-fix">
+.profile-premium-open{background:var(--bg-2)!important;border:1px solid var(--line)!important;border-radius:16px;padding:12px!important;}
+.profile-premium-open .btn-main,.premium-buy-action{background:linear-gradient(145deg,var(--brass-2),var(--brass))!important;color:#1b140b!important;border-color:var(--brass-2)!important;}
+.premium-modal-card{background:var(--bg-2)!important;}
 </style>
