@@ -1980,33 +1980,22 @@ body{overflow-x:hidden}
 .premium-badge{font-weight:800}
 </style>
 
-<style id="gdplay-case-fix-v2">
-/* Cases: always one card per row */
-#page-cases #casesList, #casesList, .cases-grid, .case-grid {
-  display:grid !important;
-  grid-template-columns:1fr !important;
-  width:100% !important;
-}
-#page-cases #casesList > *, #casesList > * {
-  width:100% !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-}
-/* Case opening animation */
-#spinModal .wheel-dial {
-  animation:gdplayWheelIdle 1.2s ease-in-out infinite;
-}
-#spinModal .spin-modal {
-  animation:gdplaySpinAppear .22s ease-out;
-}
-@keyframes gdplaySpinAppear {
-  from {transform:scale(.92);opacity:0}
-  to {transform:scale(1);opacity:1}
-}
-@keyframes gdplayWheelIdle {
-  0%,100% {filter:brightness(1)}
-  50% {filter:brightness(1.12)}
-}
+<style id="gdplay-stable-cases-premium-subscribe">
+/* Stable rollback: one case per row on every viewport. */
+#page-cases #casesList{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;}
+#page-cases #casesList .bot-case-card{width:100%;box-sizing:border-box;min-width:0;}
+/* Compact channel bonus card in the bot's visual language. */
+.channel-bonus-card{position:relative;display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 38px 10px 11px;border:1px solid rgba(201,151,77,.18);border-radius:14px;background:linear-gradient(135deg,rgba(201,151,77,.08),rgba(255,255,255,.018));box-shadow:0 7px 18px rgba(0,0,0,.16);overflow:hidden;}
+.channel-bonus-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.18);font-size:17px;}
+.channel-bonus-copy{min-width:0;flex:1;}.channel-bonus-title{font-size:11px;font-weight:800;line-height:1.2;}.channel-bonus-sub{margin-top:3px;color:var(--muted);font-size:9.5px;line-height:1.25;}
+.channel-bonus-actions{display:flex;gap:5px;flex:0 0 auto;}.channel-bonus-actions .btn{height:32px;min-width:76px;padding:0 9px;border-radius:9px;font-size:9.5px;}.channel-bonus-close{position:absolute;right:7px;top:7px;width:22px;height:22px;border:0;background:transparent;color:var(--muted);font-size:15px;line-height:22px;padding:0;cursor:pointer;}.channel-bonus-close:hover{color:var(--paper);}
+.channel-bonus-hidden{display:none!important;}
+.settings-channel-row{display:none;}.settings-channel-row.visible{display:flex;}
+/* Premium purchase modal — same cards, borders and typography as GDPLAY. */
+#premiumModal{z-index:10050;}.premium-modal-card{width:min(390px,calc(100vw - 28px));padding:20px;border-radius:22px;background:linear-gradient(180deg,var(--bg-3),var(--bg-2));border:1px solid rgba(201,151,77,.28);box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.035);text-align:left;overflow:hidden;position:relative;}
+.premium-modal-card::before{content:"";position:absolute;inset:-45% 35% auto -20%;height:170px;background:radial-gradient(circle,rgba(201,151,77,.16),transparent 68%);pointer-events:none;}
+.premium-modal-top{position:relative;display:flex;align-items:center;gap:12px;}.premium-modal-star{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.24);font-size:27px;box-shadow:inset 0 0 18px rgba(201,151,77,.08);}.premium-modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:800;}.premium-modal-sub{font-size:10px;color:var(--muted);margin-top:3px;}.premium-perks{position:relative;display:grid;gap:7px;margin:16px 0;}.premium-perk{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.055);font-size:11px;line-height:1.25;}.premium-perk b{color:var(--brass-2);}.premium-price{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:11px 12px;border-radius:12px;background:rgba(201,151,77,.07);border:1px solid rgba(201,151,77,.14);}.premium-price-label{font-size:10px;color:var(--muted);}.premium-price-value{font:800 15px 'IBM Plex Mono',monospace;color:var(--brass-2);}.premium-buy-action{width:100%;height:44px;border-radius:12px;font-weight:800;}.premium-close-action{width:100%;margin-top:7px;height:38px;}
+.profile-premium-open{position:relative;margin:12px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,rgba(201,151,77,.12),rgba(255,255,255,.02));border:1px solid rgba(201,151,77,.22);box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden;}.profile-premium-open .title{font-weight:800;font-size:14px;}.profile-premium-open .desc{margin-top:5px;color:var(--muted);font-size:10.5px;line-height:1.35;}.profile-premium-open .btn-main{margin-top:11px;width:100%;}
 </style>
 </head>
 <body><svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
@@ -2215,6 +2204,7 @@ body{overflow-x:hidden}
     <div class="page active" id="page-cases">
       <div class="section-title">Сейфы хранилища</div>
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
+      <div class="channel-bonus-card" id="channelBonusCard"><div class="channel-bonus-icon">📢</div><div class="channel-bonus-copy"><div class="channel-bonus-title">GDplay · +1000 💰 за подписку</div><div class="channel-bonus-sub">Подпишись на канал и забери бонус.</div></div><div class="channel-bonus-actions"><button type="button" class="btn" id="channelSubscribeBtn">Подписаться</button></div><button type="button" class="channel-bonus-close" id="channelBonusClose" aria-label="Скрыть">×</button></div>
       <div id="casesList"></div>
       <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
     </div>
@@ -2329,7 +2319,7 @@ body{overflow-x:hidden}
         <div class="pstat"><b id="statBattles">0</b><span>батлов</span></div>
         <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
       </div>
-      <div class="premium-buy-card"><div class="title">⭐ Premium на 30 дней</div><div class="desc">Premium даёт x2 ежедневный бонус, специальный статус ⭐ Premium и особый значок в профиле.</div><button class="btn-main" id="buyPremiumBtn">Купить за 20 ⭐</button></div>
+      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · Premium-кейс · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div>
       <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
@@ -2373,6 +2363,7 @@ body{overflow-x:hidden}
       <div class="settings-row"><span class="label">Анимации</span><button class="btn-ghost" id="motionToggle">Включены</button></div>
       <div class="settings-row"><span class="label">Пароль аккаунта</span><button class="btn-ghost" id="passwordBtn">Изменить</button></div>
       <div class="settings-row"><span class="label">Двухэтапная аутентификация</span><button class="btn-ghost" id="twoFactorToggle">Проверка…</button></div>
+      <div class="settings-row settings-channel-row" id="settingsChannelBonusRow"><span class="label">📢 Бонус за подписку</span><button class="btn-ghost" id="settingsChannelBonusBtn">Показать</button></div>
       <div class="settings-row"><span class="label">Выйти из аккаунта</span><button class="btn-ghost btn-danger" id="logoutBtn">Выйти</button></div>
     </div>
   </div>
@@ -2501,6 +2492,7 @@ body{overflow-x:hidden}
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
+<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> Орб-рывков в день</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎁 <span><b>1</b> бесплатный Premium-кейс в день</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <div class="spin-topbar">
@@ -4181,28 +4173,29 @@ function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){buil
 function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
-  const duration=3000;
-  const itemWidth=targetEl.offsetWidth || 100;
-  const target=targetEl.offsetLeft - (container.clientWidth/2 - itemWidth/2);
-  const extra=(items.length*itemWidth)*3;
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const vertical=false;
+  const duration=reduced?450:3000;
+  const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
+  const containerCenter=container.clientWidth/2;
+  const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');
   dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
     requestAnimationFrame(()=>{
-      dial.style.transition=`transform ${duration}ms cubic-bezier(.12,.75,.18,1)`;
-      dial.style.transform=`translate3d(-${extra+target}px,0,0)`;
+      dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
+      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
     });
     setTimeout(()=>{
       dial.style.transition='none';
-      dial.style.transform=`translate3d(-${extra+target}px,0,0)`;
+      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
       dial.classList.remove('is-spinning');
       dial.classList.add('is-stopped');
       playBeep(920);
       resolve();
-    },duration+100);
+    },duration+90);
   });
 }
-
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
 
 function runSecretReveal(){
@@ -5649,11 +5642,22 @@ function updateThemeIcon(){
 }
 
 async function buyPremium(){
+  openModal('premiumModal');
+}
+async function startPremiumPayment(){
  try{
   const j=await apiFetch('/api/premium/create',{});
-  if(j.invoice) Telegram.WebApp.openInvoice(j.invoice,(s)=>{if(s==='paid'){showToast('⭐ Premium активирован на 30 дней','success');loadMe();}});
+  if(!j.invoice) throw new Error('Не удалось создать счёт');
+  Telegram.WebApp.openInvoice(j.invoice,(status)=>{
+    if(status==='paid'){
+      closeModal('premiumModal');
+      showToast('⭐ Premium активирован на 30 дней','success');
+      setTimeout(()=>loadMe(),350);
+    }else if(status==='failed'){ showToast('❌ Оплата не прошла','error'); }
+  });
  }catch(e){showToast('❌ '+e.message,'error');}
 }
+
 function toggleTheme(){
   const body=document.body;
   body.classList.add('theme-transition');
@@ -5740,6 +5744,41 @@ async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.ge
 document.getElementById('shareSearch')?.addEventListener('input',()=>loadOnlineUsers());
 document.getElementById('onlineUsersList')?.addEventListener('click',e=>{const b=e.target.closest('[data-share-user]');if(b)selectShareUser(b.dataset.shareUser,b.parentElement.querySelector('.online-user-name')?.textContent||'Игрок');});
 document.getElementById('shareSendBtn')?.addEventListener('click',sendOrbs);document.getElementById('shareCloseBtn')?.addEventListener('click',()=>closeModal('shareOrbsModal'));
+
+const CHANNEL_BONUS_KEY='gdplay_channel_bonus_hidden_v1';
+function updateChannelBonusUI(){
+  const card=document.getElementById('channelBonusCard'); const row=document.getElementById('settingsChannelBonusRow');
+  const hidden=storageGet(CHANNEL_BONUS_KEY)==='1';
+  if(card) card.classList.toggle('channel-bonus-hidden',hidden);
+  if(row) row.classList.toggle('visible',hidden);
+}
+function hideChannelBonus(){storageSet(CHANNEL_BONUS_KEY,'1');updateChannelBonusUI();showToast('📢 Бонус перенесён в настройки','success');}
+function restoreChannelBonus(){storageSet(CHANNEL_BONUS_KEY,'0');updateChannelBonusUI();switchTab('cases');}
+async function claimChannelBonus(){
+  const b=document.getElementById('channelSubscribeBtn');
+  if(b){b.disabled=true;b.textContent='Проверка…';}
+  try{
+    const j=await apiFetch('/api/channel/claim',{});
+    if(j.claimed){data.balance=Number(j.balance||data.balance);persistLocal();updateBalanceUI();showToast('🎁 +1000 💰 за подписку на GDplay','success');}
+    else if(j.already){showToast('ℹ️ Бонус за подписку уже получен','info');}
+    updateChannelBonusUI();
+  }catch(e){showToast('❌ '+(e.message||'Подпишись на канал и попробуй ещё раз'),'error');}
+  finally{if(b){b.disabled=false;b.textContent=channelBonusVerifyMode?'Проверить':'Подписаться';}}
+}
+let channelBonusVerifyMode=false;
+function openChannel(){
+  try{Telegram.WebApp.openTelegramLink('https://t.me/GDplay_off');}
+  catch(e){window.open('https://t.me/GDplay_off','_blank');}
+  channelBonusVerifyMode=true;
+  const b=document.getElementById('channelSubscribeBtn'); if(b) b.textContent='Проверить';
+}
+function channelBonusButtonClick(){ if(channelBonusVerifyMode) claimChannelBonus(); else openChannel(); }
+document.getElementById('channelSubscribeBtn')?.addEventListener('click',channelBonusButtonClick);
+document.getElementById('channelBonusClose')?.addEventListener('click',hideChannelBonus);
+document.getElementById('settingsChannelBonusBtn')?.addEventListener('click',restoreChannelBonus);
+document.getElementById('premiumModalBuyBtn')?.addEventListener('click',startPremiumPayment);
+document.getElementById('premiumModalCloseBtn')?.addEventListener('click',()=>closeModal('premiumModal'));
+setTimeout(updateChannelBonusUI,0);
 
 function handleButton(button, e){
   const action=button.dataset.action || '';
@@ -6430,83 +6469,4 @@ boot();
   55%{transform:scale(1.16);}
   100%{transform:scale(1.10);}
 }
-</style>
-
-<style id="gdplay-subscribe-style">
-.gd-subscribe-card{
-  width:calc(100% - 24px);
-  margin:12px auto;
-  padding:18px;
-  border-radius:18px;
-  position:relative;
-  box-sizing:border-box;
-  background:linear-gradient(135deg,#1e293b,#334155);
-  color:white;
-  overflow:hidden;
-}
-.gd-subscribe-card h3{margin:0 0 8px;font-size:20px}
-.gd-subscribe-card p{margin:0 0 14px;overflow-wrap:anywhere}
-.gd-subscribe-btn{
-  width:100%;
-  border:0;
-  border-radius:12px;
-  padding:12px;
-  font-size:16px;
-  cursor:pointer;
-}
-.gd-subscribe-close{
-  position:absolute;
-  right:10px;
-  top:8px;
-  border:0;
-  background:none;
-  color:white;
-  font-size:22px;
-}
-</style>
-
-<script id="gdplay-subscribe-script">
-(function(){
- const KEY="gdplay_subscribe_hidden";
- function createSubscribe(){
-   if(localStorage.getItem(KEY)) return;
-   if(document.getElementById("gdSubscribeBox")) return;
-   let target=document.querySelector(".cases, #cases, .case-container, .cases-grid");
-   const box=document.createElement("div");
-   box.id="gdSubscribeBox";
-   box.className="gd-subscribe-card";
-   box.innerHTML=`
-     <button class="gd-subscribe-close">×</button>
-     <h3>📢 Подпишись на GDplay</h3>
-     <p>🎁 Получи <b>1000 💰</b> за подписку на наш Telegram-канал</p>
-     <button class="gd-subscribe-btn">Подписаться</button>`;
-   box.querySelector(".gd-subscribe-btn").onclick=()=>{
-      window.open("https://t.me/GDplay_off","_blank");
-   };
-   box.querySelector(".gd-subscribe-close").onclick=()=>{
-      localStorage.setItem(KEY,"1");
-      box.remove();
-      if(window.showNotification) showNotification("Блок подписки скрыт");
-   };
-   if(target) target.parentNode.insertBefore(box,target);
-   else document.body.prepend(box);
- }
- window.addEventListener("load",()=>setTimeout(createSubscribe,500));
-})();
-</script>
-
-<style id="final-fixes-aug25">
-/* final case layout */
-#page-cases #casesList,
-#casesList{grid-template-columns:1fr!important;display:grid!important;gap:12px!important;}
-#page-cases #casesList .case-card,
-#page-cases #casesList .bot-case-card{width:100%!important;box-sizing:border-box!important;}
-/* small telegram style subscribe card */
-.gd-subscribe-card{position:relative;margin:10px 0 14px;padding:12px 14px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);box-shadow:var(--shadow);}
-.gd-subscribe-card h3{font-size:14px;margin:0 24px 5px 0;}
-.gd-subscribe-card p{font-size:12px;color:var(--muted);margin:0 0 10px;}
-.gd-subscribe-close{position:absolute;right:8px;top:8px;width:26px;height:26px;border-radius:50%;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);}
-.gd-subscribe-btn{width:100%;height:38px;border-radius:12px;background:var(--brass);color:#17110a;border:0;font-weight:800;}
-.premium-buy-card{overflow:hidden!important;position:relative;}
-.premium-buy-card:before{content:'⭐';position:absolute;right:15px;top:12px;font-size:32px;opacity:.35;}
 </style>
