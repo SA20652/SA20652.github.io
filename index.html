@@ -1851,6 +1851,181 @@ nav{background:rgba(27,23,20,.94)!important;border:1px solid var(--ui-line)!impo
 input,select,textarea{outline:none;}
 input:focus,select:focus,textarea:focus{border-color:rgba(227,184,114,.5)!important;box-shadow:0 0 0 2px rgba(201,151,77,.08)!important;}
 </style>
+
+<style id="gdplay-final-polish">
+/* ===== FINAL VISUAL REWORK: TOP / STACKS / BATTLES ===== */
+:root{
+  --ux-cream:#fff3dc;
+  --ux-gold:#e3b872;
+  --ux-gold-hi:#f2cf8b;
+  --ux-bronze:#b87936;
+  --ux-deep:#100b07;
+  --ux-panel:#19120d;
+  --ux-panel-hi:#24180f;
+  --ux-stroke:rgba(227,184,114,.20);
+  --ux-stroke-hi:rgba(242,207,139,.42);
+}
+
+/* ---------- TOP: clean podium + compact ranking ---------- */
+#page-top .section-title{margin-bottom:3px!important}
+#page-top .section-sub{max-width:520px!important}
+#page-top .top-tabs{
+  margin:18px 0 14px!important;padding:4px!important;gap:4px!important;
+  background:linear-gradient(180deg,#21160e,#140d09)!important;
+  border:1px solid var(--ux-stroke)!important;border-radius:15px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 10px 28px rgba(0,0,0,.20)!important;
+}
+#page-top .top-tab{
+  min-height:38px!important;border:0!important;border-radius:11px!important;
+  color:#8e7d69!important;background:transparent!important;font-size:10.5px!important;
+  transition:all .22s cubic-bezier(.22,1,.36,1)!important;
+}
+#page-top .top-tab.active{
+  color:var(--ux-cream)!important;
+  background:linear-gradient(180deg,rgba(227,184,114,.20),rgba(184,121,54,.08))!important;
+  box-shadow:inset 0 1px 0 rgba(255,244,223,.08),0 4px 14px rgba(0,0,0,.18)!important;
+}
+#leaderboardList{
+  display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px!important;
+  align-items:stretch!important;
+}
+#leaderboardList .lb-item{
+  min-height:70px!important;margin:0!important;padding:11px 12px!important;
+  display:grid!important;grid-template-columns:34px minmax(0,1fr) auto!important;
+  gap:9px!important;align-items:center!important;
+  background:linear-gradient(145deg,#24180f 0%,#17100b 78%)!important;
+  border:1px solid rgba(227,184,114,.14)!important;border-radius:15px!important;
+  box-shadow:0 10px 25px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  overflow:hidden!important;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important;
+}
+#leaderboardList .lb-item:hover{transform:translateY(-2px);border-color:rgba(227,184,114,.28)!important;box-shadow:0 15px 30px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.03)!important}
+#leaderboardList .lb-item:nth-child(-n+3){
+  grid-column:span 2;min-height:108px!important;padding:15px!important;
+  grid-template-columns:42px minmax(0,1fr) auto!important;
+  background:linear-gradient(145deg,#2a1b0f,#18100a 78%)!important;
+  border-color:rgba(227,184,114,.25)!important;
+}
+#leaderboardList .lb-item:nth-child(1){grid-column:2 / span 2;grid-row:1}
+#leaderboardList .lb-item:nth-child(2){grid-column:1 / span 2;grid-row:1}
+#leaderboardList .lb-item:nth-child(3){grid-column:4 / span 2;grid-row:1}
+#leaderboardList .lb-item:nth-child(1)::before{background:linear-gradient(180deg,#f4d58d,#b87936)!important;width:4px!important;opacity:1!important}
+#leaderboardList .lb-item:nth-child(2)::before{background:#cfc7bb!important;width:4px!important;opacity:.9!important}
+#leaderboardList .lb-item:nth-child(3)::before{background:#b97b50!important;width:4px!important;opacity:.9!important}
+#leaderboardList .lb-rank{font-size:17px!important;color:var(--ux-gold-hi)!important;display:flex;align-items:center;justify-content:center}
+#leaderboardList .lb-item:nth-child(-n+3) .lb-rank{font-size:25px!important}
+#leaderboardList .lb-avatar{
+  width:34px!important;height:34px!important;border-radius:11px!important;overflow:hidden!important;
+  background:linear-gradient(145deg,#d9ad64,#7e4d1d)!important;color:#1a1008!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 13px rgba(0,0,0,.22)!important;
+}
+#leaderboardList .lb-item:nth-child(-n+3) .lb-avatar{width:42px!important;height:42px!important;border-radius:13px!important}
+#leaderboardList .lb-user{font-size:12px!important;font-weight:850!important;color:#fff1d8!important;letter-spacing:.05px!important}
+#leaderboardList .lb-sub{margin-top:3px!important;font-size:9.5px!important;color:#94806a!important}
+#leaderboardList .lb-score{font-size:12px!important;font-weight:900!important;color:var(--ux-gold-hi)!important;white-space:nowrap}
+#leaderboardList .public-profile-btn{margin-top:6px!important;padding:5px 8px!important;font-size:9px!important;background:rgba(227,184,114,.06)!important}
+#leaderboardList .lb-item.me{border-color:rgba(242,207,139,.55)!important;background:linear-gradient(145deg,rgba(227,184,114,.14),#1b110a 76%)!important;box-shadow:0 0 0 1px rgba(227,184,114,.08),0 13px 30px rgba(0,0,0,.25)!important}
+#leaderboardList .lb-item.me::after{content:'ТЫ';position:absolute;right:9px;top:8px;padding:3px 5px;border-radius:6px;background:rgba(227,184,114,.12);color:var(--ux-gold-hi);font-size:7px;font-weight:900;letter-spacing:.6px}
+
+/* ---------- INVENTORY STACKS: actual drawer, not a plain list ---------- */
+#page-inventory #inventoryList{grid-template-columns:1fr 1fr!important;gap:11px!important;align-items:start!important}
+#page-inventory .inv-item{
+  position:relative!important;border-radius:16px!important;padding:13px!important;
+  background:linear-gradient(145deg,#25190f,#17100b 78%)!important;
+  border:1px solid rgba(227,184,114,.14)!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+#page-inventory .inv-item:not(.inv-subitem){min-height:105px!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important}
+#page-inventory .inv-item:not(.inv-subitem)::after{content:'';position:absolute;inset:auto 12px 0;height:1px;background:linear-gradient(90deg,transparent,rgba(227,184,114,.16),transparent);pointer-events:none}
+#page-inventory .inv-item-info{min-width:0!important;display:flex!important;align-items:center!important;gap:9px!important}
+#page-inventory .cube-visual{width:43px!important;height:43px!important;flex:0 0 43px!important;display:grid!important;place-items:center!important;border-radius:13px!important;background:radial-gradient(circle,rgba(227,184,114,.12),transparent 70%)!important}
+#page-inventory .cube-visual .mini-cube{transform:scale(1.12) rotateX(-20deg) rotateY(35deg)!important}
+#page-inventory .inv-name{font-size:12px!important;font-weight:850!important;color:#fff0d7!important;line-height:1.2!important}
+#page-inventory .inv-rarity{font-size:9px!important;letter-spacing:.45px!important;margin-top:4px!important;opacity:.92}
+#page-inventory .inv-value{font-size:10.5px!important;color:var(--ux-gold-hi)!important;font-weight:800!important}
+#page-inventory .inv-actions{display:flex!important;gap:5px!important;flex-wrap:wrap!important;margin-top:9px!important}
+#page-inventory .inv-actions .btn-sell{flex:1 1 30%!important;min-width:0!important;border-radius:9px!important;padding:7px 5px!important;font-size:8.5px!important}
+#page-inventory .stack-toggle-btn{
+  width:100%!important;min-width:0!important;padding:0!important;gap:4px!important;
+  align-items:flex-start!important;transition:transform .18s ease!important;
+}
+#page-inventory .stack-toggle-btn:active{transform:scale(.985)!important}
+#page-inventory .stack-toggle-btn .inv-name{display:flex!important;align-items:center!important;gap:6px!important}
+#page-inventory .stack-arrow{display:inline-grid!important;place-items:center!important;width:18px;height:18px;border-radius:6px;background:rgba(227,184,114,.08);color:var(--ux-gold)!important;transition:transform .28s cubic-bezier(.22,1,.36,1),background .28s ease!important}
+#page-inventory .stack-toggle-btn.expanded .stack-arrow{transform:rotate(180deg)!important;background:rgba(227,184,114,.16)!important}
+#page-inventory .inv-stack-list{
+  grid-column:1/-1!important;margin:7px 0 0!important;padding:7px!important;
+  border:1px solid rgba(227,184,114,.14)!important;border-left:1px solid rgba(227,184,114,.24)!important;
+  border-radius:12px!important;background:linear-gradient(180deg,rgba(12,8,5,.58),rgba(25,16,10,.72))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important;
+  animation:stackReveal .24s cubic-bezier(.22,1,.36,1) both!important;
+}
+#page-inventory .inv-subitem{
+  min-height:52px!important;margin:5px 0!important;padding:9px 9px 9px 10px!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;
+  border-radius:11px!important;background:linear-gradient(90deg,#21150d,#17100b)!important;
+  border:1px solid rgba(227,184,114,.10)!important;box-shadow:none!important;
+}
+#page-inventory .inv-subitem .inv-item-info{grid-column:1!important}
+#page-inventory .inv-subitem .inv-actions{grid-column:1/-1!important;margin-top:2px!important}
+#page-inventory .inv-subitem .cube-lock-btn{top:8px!important;right:8px!important;width:30px!important;height:30px!important;min-width:30px!important;border-radius:8px!important}
+#page-inventory .inv-subid{font-size:8px!important;color:#6f5f4e!important;font-family:'IBM Plex Mono',monospace!important}
+@keyframes stackReveal{from{opacity:0;transform:translateY(-5px);max-height:0}to{opacity:1;transform:none;max-height:900px}}
+
+/* ---------- BATTLES: lobby cards + clear player slots ---------- */
+#page-battles .battle-form{
+  position:relative!important;padding:16px!important;margin-top:15px!important;
+  background:linear-gradient(145deg,#281b10,#17100b 76%)!important;
+  border:1px solid rgba(227,184,114,.22)!important;border-radius:18px!important;
+  box-shadow:0 14px 32px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.03)!important;
+}
+#page-battles .battle-form::before{content:'⚔';position:absolute;right:16px;top:11px;font-size:38px;opacity:.045;transform:rotate(-10deg);pointer-events:none}
+#page-battles .battle-row>div{background:#160f0a!important;border:1px solid rgba(227,184,114,.14)!important;border-radius:12px!important;padding:10px!important}
+#page-battles .battle-form input,#page-battles .battle-form select{color:#fff0d7!important;font-weight:800!important}
+#page-battles #battlesList{display:grid!important;gap:10px!important;margin-top:15px!important}
+#page-battles .battle-card{
+  position:relative!important;padding:15px!important;margin:0!important;overflow:hidden!important;
+  border-radius:17px!important;background:linear-gradient(145deg,#24180f,#17100b 80%)!important;
+  border:1px solid rgba(227,184,114,.15)!important;
+  box-shadow:0 11px 27px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important;
+}
+#page-battles .battle-card:hover{transform:translateY(-2px);border-color:rgba(227,184,114,.28)!important;box-shadow:0 16px 32px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.03)!important}
+#page-battles .battle-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--ux-gold-hi),rgba(184,121,54,.18));opacity:.75}
+#page-battles .battle-top{padding-bottom:10px!important;border-bottom:1px solid rgba(227,184,114,.10)!important}
+#page-battles .battle-title{font-size:13px!important;color:#fff0d7!important;letter-spacing:.15px}
+#page-battles .battle-meta{font-size:9.5px!important;color:#8e7c67!important}
+#page-battles .battle-prize{font-size:12px!important;color:var(--ux-gold-hi)!important;background:rgba(227,184,114,.07);border:1px solid rgba(227,184,114,.12);padding:6px 8px;border-radius:9px}
+#page-battles .battle-player{
+  display:grid!important;grid-template-columns:10px minmax(0,1fr) auto!important;gap:8px!important;
+  min-height:39px!important;padding:8px 9px!important;margin-top:6px!important;
+  background:linear-gradient(90deg,#19110b,#140d08)!important;
+  border:1px solid rgba(227,184,114,.09)!important;border-radius:10px!important;
+  color:#e6d3b6!important;font-size:10.5px!important;
+}
+#page-battles .battle-player::before{content:'';width:6px;height:6px;border-radius:50%;background:#7c644a;box-shadow:0 0 0 3px rgba(124,100,74,.10)}
+#page-battles .battle-player span:last-child{font-family:'IBM Plex Mono',monospace;font-weight:900;color:var(--ux-gold-hi)!important;min-width:42px;text-align:right}
+#page-battles .battle-cancel,#page-battles .battle-card>[data-action="join-battle"]{margin-top:9px!important;border-radius:11px!important;min-height:40px!important}
+
+/* ---------- small motion, intentionally restrained ---------- */
+@media (prefers-reduced-motion:no-preference){
+  #leaderboardList .lb-item,#page-battles .battle-card,#page-inventory .inv-item{animation:gdCardIn .34s cubic-bezier(.22,1,.36,1) both}
+  #leaderboardList .lb-item:nth-child(2){animation-delay:.03s}#leaderboardList .lb-item:nth-child(3){animation-delay:.06s}
+  #page-battles .battle-card:nth-child(2){animation-delay:.04s}.battle-card:nth-child(3){animation-delay:.08s}
+  #page-inventory .inv-item:nth-child(2n){animation-delay:.035s}
+}
+@keyframes gdCardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+@media(max-width:650px){
+  #leaderboardList{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #leaderboardList .lb-item:nth-child(-n+3){grid-column:span 2!important;grid-row:auto!important}
+  #leaderboardList .lb-item:nth-child(2),#leaderboardList .lb-item:nth-child(3){grid-column:span 1!important}
+}
+@media(max-width:430px){
+  #page-inventory #inventoryList{grid-template-columns:1fr!important}
+  #leaderboardList{grid-template-columns:1fr!important}
+  #leaderboardList .lb-item:nth-child(-n+3),#leaderboardList .lb-item:nth-child(2),#leaderboardList .lb-item:nth-child(3){grid-column:1!important}
+}
+</style>
 </head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
