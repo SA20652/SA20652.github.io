@@ -1595,6 +1595,7 @@ window.lockUpgradeResult=function(result,angle){
   }
 }
 <style id="gdplay-cases-bot-v2">
+/* обновлённый интерфейс кейсов */
 /* ===== BOT / CASES V2 ===== */
 #casesList{display:flex;flex-direction:column;gap:12px;}
 .bot-case-card{
@@ -2010,6 +2011,13 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #premiumModalBuyBtn:active {
   transform: translateY(0);
 }
+</style>
+
+<style id="top-frame-fix">
+/* Рамки игроков в топе */
+.leader-user-avatar,.top-user-avatar,.ranking-avatar,.leader-avatar{position:relative;overflow:visible!important;}
+.profile-frame,.avatar-frame,.user-frame{z-index:2;pointer-events:none;}
+.top-user-row .profile-frame,.top-user-row .avatar-frame,.leader-row .profile-frame,.leader-row .avatar-frame{display:block!important;visibility:visible!important;}
 </style>
 </head>
 <body><div id="releaseScreen" aria-hidden="true">
@@ -3458,6 +3466,8 @@ function loadNotifications(){try{return JSON.parse(storageGet(NOTIFICATIONS_KEY)
 function saveNotifications(list){storageSet(NOTIFICATIONS_KEY,JSON.stringify(list.slice(0,40)));}
 function addNotification(message){
   if(!message) return;
+  const m=String(message).toLowerCase();
+  if(m.includes('кейс') || m.includes('куб') || m.includes('дроп')) return;
   const list=loadNotifications();
   list.unshift({message:String(message),time:Date.now(),read:false});
   saveNotifications(list);
