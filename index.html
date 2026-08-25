@@ -1992,6 +1992,18 @@ body{overflow-x:hidden}
 .channel-bonus-hidden{display:none!important;}
 .settings-channel-row{display:none;}.settings-channel-row.visible{display:flex;}
 /* Premium purchase modal — same cards, borders and typography as GDPLAY. */
+/* Profile Premium CTA: match the app's thicker, rounded buttons. */
+#buyPremiumBtn{
+  min-height:46px!important;
+  height:46px!important;
+  padding:0 18px!important;
+  border-radius:14px!important;
+  border-width:2px!important;
+  font-weight:800!important;
+  line-height:1.1!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+#buyPremiumBtn:active{transform:scale(.98);}
 #premiumModal{z-index:10050;}.premium-modal-card{width:min(390px,calc(100vw - 28px));padding:20px;border-radius:22px;background:linear-gradient(180deg,var(--bg-3),var(--bg-2));border:1px solid rgba(201,151,77,.28);box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.035);text-align:left;overflow:hidden;position:relative;}
 .premium-modal-card::before{content:"";position:absolute;inset:-45% 35% auto -20%;height:170px;background:radial-gradient(circle,rgba(201,151,77,.16),transparent 68%);pointer-events:none;}
 .premium-modal-top{position:relative;display:flex;align-items:center;gap:12px;}.premium-modal-star{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.24);font-size:27px;box-shadow:inset 0 0 18px rgba(201,151,77,.08);}.premium-modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:800;}.premium-modal-sub{font-size:10px;color:var(--muted);margin-top:3px;}.premium-perks{position:relative;display:grid;gap:7px;margin:16px 0;}.premium-perk{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.055);font-size:11px;line-height:1.25;}.premium-perk b{color:var(--brass-2);}.premium-price{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:11px 12px;border-radius:12px;background:rgba(201,151,77,.07);border:1px solid rgba(201,151,77,.14);}.premium-price-label{font-size:10px;color:var(--muted);}.premium-price-value{font:800 15px 'IBM Plex Mono',monospace;color:var(--brass-2);}.premium-buy-action{width:100%;height:44px;border-radius:12px;font-weight:800;}.premium-close-action{width:100%;margin-top:7px;height:38px;}
@@ -4174,21 +4186,24 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const vertical=false;
+  // The reel is a vertical stack of slots. The previous rollback used
+  // offsetLeft/translateX, which left every slot at the same horizontal
+  // position and made the "spin" effectively invisible.
+  const vertical=true;
   const duration=reduced?450:3000;
-  const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
-  const containerCenter=container.clientWidth/2;
+  const targetCenter=targetEl.offsetTop+targetEl.offsetHeight/2;
+  const containerCenter=container.clientHeight/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');
   dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
     requestAnimationFrame(()=>{
       dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
-      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+      dial.style.transform=`translate3d(0,-${offset}px,0)`;
     });
     setTimeout(()=>{
       dial.style.transition='none';
-      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+      dial.style.transform=`translate3d(0,-${offset}px,0)`;
       dial.classList.remove('is-spinning');
       dial.classList.add('is-stopped');
       playBeep(920);
@@ -4412,6 +4427,27 @@ async function openCaseOnce(c, seq, total, useKey=false){
   document.getElementById('wheelWrap').style.display = 'block';
   document.getElementById('vaultCrack').style.display = 'none';
 
+  // Show a populated reel immediately. The server result remains authoritative;
+  // this first pass is only a visual loading spin while the request is in flight.
+  const previewItems = Array.isArray(c.items) && c.items.length ? c.items : [];
+  if(previewItems.length){
+    const previewIndex = Math.floor(Math.random()*previewItems.length);
+    buildWheel(previewItems, previewIndex, previewItems[previewIndex]?.value, null);
+  }
+  openModal('spinModal');
+  if(spinPill) spinPill.textContent='ПОДГОТОВКА';
+  if(spinSub) spinSub.textContent=`${c.items.length} предметов · получаем результат…`;
+
+  let previewSpinPromise = Promise.resolve();
+  if(previewItems.length){
+    const previewDial = document.getElementById('wheelDial');
+    const previewWrap = document.getElementById('wheelWrap');
+    const previewTarget = previewDial?.querySelector('.wheel-item[data-reel-target="1"]');
+    if(previewTarget && previewWrap){
+      previewSpinPromise = spinWheelIn(previewWrap, previewDial, previewItems, 0);
+    }
+  }
+
   let won;
   try{
     if(tgInitData()){
@@ -4476,6 +4512,14 @@ async function openCaseOnce(c, seq, total, useKey=false){
   const spinPrice=document.getElementById('spinCasePrice'); if(spinPrice) spinPrice.textContent=`${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinSub=document.getElementById('spinCaseSub'); if(spinSub) spinSub.textContent=`${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinPill=document.getElementById('spinStatusPill'); if(spinPill) spinPill.textContent='КРУТИМ';
+  // Replace the visual preview with the authoritative server-selected item.
+  // The preview may have completed already; resetting the transform guarantees
+  // the real reel always starts from the beginning.
+  const previewDialReset = document.getElementById('wheelDial');
+  if(previewDialReset){
+    previewDialReset.style.transition='none';
+    previewDialReset.style.transform='translate3d(0,0,0)';
+  }
   buildWheel(c.items, wonIndex, won.value, won);
   const dial = document.getElementById('wheelDial');
   const wheelWrap = document.getElementById('wheelWrap');
