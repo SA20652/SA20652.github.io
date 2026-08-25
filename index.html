@@ -3265,8 +3265,7 @@ function showModerationNotice(notice){
     : 'Ваш аккаунт заблокирован администратором.';
   showToast(title+': '+notice.reason,'error');
   setTimeout(()=>{
-    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+'
-Причина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
+    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+'\nПричина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
   },120);
 }
 
@@ -6465,10 +6464,8 @@ boot();
     const nodes=[];
     while(walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(node=>{
-      if(typeof node.nodeValue==='string' && /\
-/.test(node.nodeValue)){
-        node.nodeValue=node.nodeValue.replace(/\
-+/g,' ');
+      if(typeof node.nodeValue==='string' && /\\n/.test(node.nodeValue)){
+        node.nodeValue=node.nodeValue.replace(/\\n+/g,' ');
       }
     });
   }
@@ -6511,7 +6508,7 @@ boot();
 </script>
 
 
-<script>
+<style>
 .key-item,.key-badge,[data-key],.upgrade-key,.required-key,.key-requirement{display:none!important;}
 </style>
 <script>
