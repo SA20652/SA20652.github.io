@@ -2009,6 +2009,92 @@ body{overflow-x:hidden}
 .premium-modal-top{position:relative;display:flex;align-items:center;gap:12px;}.premium-modal-star{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.24);font-size:27px;box-shadow:inset 0 0 18px rgba(201,151,77,.08);}.premium-modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:800;}.premium-modal-sub{font-size:10px;color:var(--muted);margin-top:3px;}.premium-perks{position:relative;display:grid;gap:7px;margin:16px 0;}.premium-perk{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.055);font-size:11px;line-height:1.25;}.premium-perk b{color:var(--brass-2);}.premium-price{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:11px 12px;border-radius:12px;background:rgba(201,151,77,.07);border:1px solid rgba(201,151,77,.14);}.premium-price-label{font-size:10px;color:var(--muted);}.premium-price-value{font:800 15px 'IBM Plex Mono',monospace;color:var(--brass-2);}.premium-buy-action{width:100%;height:44px;border-radius:12px;font-weight:800;}.premium-close-action{width:100%;margin-top:7px;height:38px;}
 .profile-premium-open{position:relative;margin:12px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,rgba(201,151,77,.12),rgba(255,255,255,.02));border:1px solid rgba(201,151,77,.22);box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden;}.profile-premium-open .title{font-weight:800;font-size:14px;}.profile-premium-open .desc{margin-top:5px;color:var(--muted);font-size:10.5px;line-height:1.35;}.profile-premium-open .btn-main{margin-top:11px;width:100%;}
 </style>
+
+<style id="gdplay-case-reward-compact-v8">
+/* После прокрутки пустое пространство кейса больше не сохраняется:
+   лента убирается, а на её месте появляется компактная карточка награды. */
+#spinModal .spin-modal{height:auto;min-height:0;}
+#spinModal .wheel-wrap.result-collapsed,
+#spinModal .wheel-multi-row.result-collapsed{display:none!important;}
+#spinModal .spin-result{
+  margin:2px 0 0!important;
+  padding:18px 14px 15px!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(201,151,77,.10),rgba(255,255,255,.025))!important;
+  border:1px solid rgba(227,184,114,.25)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 10px 28px rgba(0,0,0,.18);
+  animation:caseRewardIn .28s cubic-bezier(.2,.9,.2,1) both;
+}
+#spinModal .spin-result-icon{font-size:38px;line-height:1;margin-bottom:7px;}
+#spinModal .spin-result-name{font-size:17px;font-weight:900;line-height:1.2;}
+#spinModal .spin-result-rarity{margin-top:4px;font-size:10px;font-weight:800;letter-spacing:.4px;}
+#spinModal .spin-result-value{margin-top:8px;font:900 13px 'IBM Plex Mono',monospace;color:var(--paper);}
+#spinModal #spinCloseBtn{
+  width:100%!important;
+  height:47px!important;
+  margin-top:10px!important;
+  border-radius:14px!important;
+  font-weight:900!important;
+}
+#spinModal .spin-result-multi{
+  width:100%;
+  margin:2px 0 0!important;
+  padding:12px!important;
+  box-sizing:border-box;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(201,151,77,.09),rgba(255,255,255,.025));
+  border:1px solid rgba(227,184,114,.25);
+  animation:caseRewardIn .28s cubic-bezier(.2,.9,.2,1) both;
+}
+#spinModal .spin-result-multi-item{
+  min-height:48px;
+  padding:9px 10px;
+  border-radius:11px;
+  background:rgba(0,0,0,.18);
+  border-top:1px solid rgba(255,255,255,.025);
+  box-sizing:border-box;
+}
+@keyframes caseRewardIn{
+  from{opacity:0;transform:translateY(8px) scale(.975)}
+  to{opacity:1;transform:none}
+}
+</style>
+<style id="gdplay-case-result-state-v9">
+/* Case opening has two real layout states: compact while spinning, expanded only after stop. */
+#spinModal .spin-modal{
+  height:auto!important;
+  min-height:0!important;
+  max-height:calc(100dvh - 24px)!important;
+  overflow:hidden!important;
+  transition:height .22s ease, padding .22s ease, transform .22s ease;
+}
+#spinModal .spin-modal:not(.has-result){
+  padding-bottom:13px!important;
+}
+#spinModal .spin-modal:not(.has-result) #spinResult,
+#spinModal .spin-modal:not(.has-result) #spinResultMulti,
+#spinModal .spin-modal:not(.has-result) #spinCloseBtn{
+  display:none!important;
+  margin:0!important;
+  padding:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+}
+#spinModal .spin-modal.has-result{padding-bottom:15px!important;}
+#spinModal .spin-modal.has-result .wheel-wrap.result-collapsed,
+#spinModal .spin-modal.has-result .wheel-multi-row.result-collapsed{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+#spinModal .spin-result.hidden,
+#spinModal .spin-result-multi.hidden{display:none!important;}
+</style>
 </head>
 <body><svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
   <filter id="brandLogoTint" color-interpolation-filters="sRGB">
@@ -4148,6 +4234,10 @@ document.addEventListener('keydown',e=>{
 });
 document.querySelectorAll('.modal-overlay').forEach(overlay=>{
   overlay.addEventListener('click',e=>{
+    if(overlay.id==='spinModal' && !spinning){
+      const card=overlay.querySelector('.spin-modal');
+      if(card) card.classList.remove('has-result');
+    }
     if(e.target!==overlay) return;
     if(overlay.id==='spinModal' && spinning) return;
     closeModal(overlay.id);
@@ -4169,7 +4259,7 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   const target = authoritativeDrop ? {...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)} : {...(items[wonIndex]||{}),value:Math.floor(Number(wonValue ?? items[wonIndex]?.value ?? 0)||0)};
   const strip=[];
   for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS ? target : items[Math.floor(Math.random()*items.length)]);
-  dial.classList.remove('is-spinning','is-stopped');
+  dial.classList.remove('is-spinning','is-stopped','is-preview-spinning');
   dial.classList.remove('wheel-dial--vertical');
   dial.innerHTML=strip.map((it,idx)=>{
     const realValue=Math.floor(Number(it.value||0));
@@ -4186,24 +4276,28 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  // The reel is a vertical stack of slots. The previous rollback used
-  // offsetLeft/translateX, which left every slot at the same horizontal
-  // position and made the "spin" effectively invisible.
-  const vertical=true;
-  const duration=reduced?450:3000;
-  const targetCenter=targetEl.offsetTop+targetEl.offsetHeight/2;
-  const containerCenter=container.clientHeight/2;
+  // The reel in the modal is HORIZONTAL: each slot is a fixed-width card and
+  // the gold marker is a vertical line in the center. The previous fix used
+  // offsetTop/translateY, so the calculated offset was effectively zero.
+  const duration=reduced?700:3000;
+  const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
+  const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
+  dial.classList.remove('is-preview-spinning');
   dial.classList.add('is-spinning');
   dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
     requestAnimationFrame(()=>{
+      // Force the browser to commit the starting transform before animating.
+      dial.style.transition='none';
+      dial.style.transform='translate3d(0,0,0)';
+      void dial.offsetWidth;
       dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
-      dial.style.transform=`translate3d(0,-${offset}px,0)`;
+      dial.style.transform=`translate3d(-${offset}px,0,0)`;
     });
     setTimeout(()=>{
       dial.style.transition='none';
-      dial.style.transform=`translate3d(0,-${offset}px,0)`;
+      dial.style.transform=`translate3d(-${offset}px,0,0)`;
       dial.classList.remove('is-spinning');
       dial.classList.add('is-stopped');
       playBeep(920);
@@ -4211,6 +4305,7 @@ function spinWheelIn(container,dial,items,wonIndex){
     },duration+90);
   });
 }
+
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
 
 function runSecretReveal(){
@@ -4323,6 +4418,8 @@ async function openCaseBatch(c, qty, useKey=false){
   const multiResult=document.getElementById('spinResultMulti');
   const resultBox=document.getElementById('spinResult');
   const closeBtn=document.getElementById('spinCloseBtn');
+  const spinModalCard=document.querySelector('#spinModal .spin-modal');
+  if(spinModalCard) spinModalCard.classList.remove('has-result');
 
   wheelWrap.style.display = qty===1 ? 'block' : 'none';
   if(qty>1) wheelWrap.style.display='none';
@@ -4401,12 +4498,29 @@ async function openCaseBatch(c, qty, useKey=false){
   }
 
   playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald')?1180:840);
+  // После 2x/3x прокрутки убираем сами рулетки, чтобы не оставлять пустую
+  // вертикальную область. На их месте появляется список всех наград.
+  if(wheelWrap){
+    wheelWrap.classList.remove('reel-opening');
+    wheelWrap.classList.add('result-collapsed');
+    wheelWrap.style.display='none';
+  }
+  if(multiRow){
+    multiRow.classList.remove('reel-opening');
+    multiRow.classList.add('result-collapsed');
+    multiRow.style.display='none';
+  }
+  if(spinModalCard) spinModalCard.classList.add('has-result');
   multiResult.classList.remove('hidden');
   multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${w.name}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
   closeBtn.classList.remove('hidden');
   closeBtn.onclick=()=>{
-    closeModal('spinModal'); wheelWrap.classList.remove('reel-opening'); if(multiRow){multiRow.classList.remove('reel-opening');multiRow.style.display='none';multiRow.innerHTML='';}
-    multiResult.classList.add('hidden'); multiResult.innerHTML=''; renderInventory(); renderCases(); updateBalanceUI(); closeBtn.onclick=null;
+    closeModal('spinModal');
+    if(spinModalCard) spinModalCard.classList.remove('has-result');
+    wheelWrap.classList.remove('reel-opening','result-collapsed');
+    if(multiRow){multiRow.classList.remove('reel-opening','result-collapsed');multiRow.style.display='none';multiRow.innerHTML='';}
+    multiResult.classList.add('hidden'); multiResult.innerHTML='';
+    renderInventory(); renderCases(); updateBalanceUI(); closeBtn.onclick=null;
   };
   wins.forEach(won=>{pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});recordBestDrop(won);});
   persistLocal(); spinning=false; renderCases(); document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
@@ -4421,6 +4535,8 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(staleMultiResult){ staleMultiResult.classList.add('hidden'); staleMultiResult.innerHTML=''; }
 
   const resultBox = document.getElementById('spinResult');
+  const spinModalCard = document.querySelector('#spinModal .spin-modal');
+  if(spinModalCard) spinModalCard.classList.remove('has-result');
   resultBox.classList.add('hidden');
   resultBox.innerHTML = '';
   document.getElementById('spinCloseBtn').classList.add('hidden');
@@ -4438,13 +4554,18 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(spinPill) spinPill.textContent='ПОДГОТОВКА';
   if(spinSub) spinSub.textContent=`${c.items.length} предметов · получаем результат…`;
 
-  let previewSpinPromise = Promise.resolve();
+  // Keep the populated preview visibly moving while the authoritative server
+  // result is in flight. This prevents a blank/frozen reel during network lag.
   if(previewItems.length){
     const previewDial = document.getElementById('wheelDial');
-    const previewWrap = document.getElementById('wheelWrap');
-    const previewTarget = previewDial?.querySelector('.wheel-item[data-reel-target="1"]');
-    if(previewTarget && previewWrap){
-      previewSpinPromise = spinWheelIn(previewWrap, previewDial, previewItems, 0);
+    if(previewDial){
+      // Duplicate the preview strip so a continuous leftward loop has no
+      // visible jump when it reaches the end. The authoritative result will
+      // rebuild the strip back to its normal 28 slots before the real spin.
+      const previewMarkup = previewDial.innerHTML;
+      previewDial.innerHTML = previewMarkup + previewMarkup;
+      previewDial.classList.add('is-preview-spinning');
+      previewDial.classList.remove('is-spinning','is-stopped');
     }
   }
 
@@ -4528,9 +4649,20 @@ async function openCaseOnce(c, seq, total, useKey=false){
   openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
 
+  // Прячем ленту после остановки: вместо огромной пустой зоны появляется
+  // компактная карточка результата с одной кнопкой «Забрать».
+  if(wheelWrap){
+    wheelWrap.classList.remove('reel-opening');
+    wheelWrap.classList.add('result-collapsed');
+    wheelWrap.style.display='none';
+  }
+  // Only now, after the reel has physically stopped, expand the modal and
+  // reveal the reward zone + the single Claim button.
+  if(spinModalCard) spinModalCard.classList.add('has-result');
   // Show exactly the same authoritative value that was stored on the server.
   showSpinResult(won, isSecret);
   const spinPillDone=document.getElementById('spinStatusPill'); if(spinPillDone) spinPillDone.textContent='ГОТОВО';
+
   pushDrop({ username:data.username, item:won.name, rarity:won.rarity, value:won.value, time:Date.now() });
   recordBestDrop(won);
   persistLocal();
@@ -4546,14 +4678,39 @@ function collectSpinReward(){
   if(spinning) return;
   const modal=document.getElementById('spinModal');
   const result=document.getElementById('spinResult');
-  if(!modal || !result || result.classList.contains('hidden')) return;
-  closeModal('spinModal');
-  const multiRow=document.getElementById('wheelMultiRow');
   const multiResult=document.getElementById('spinResultMulti');
-  if(multiRow){ multiRow.style.display='none'; multiRow.innerHTML=''; }
-  if(multiResult){ multiResult.classList.add('hidden'); multiResult.innerHTML=''; }
-  document.getElementById('wheelWrap').style.display='block';
-  document.getElementById('wheelWrap').classList.remove('reel-opening');
+  const hasSingle=result && !result.classList.contains('hidden');
+  const hasMulti=multiResult && !multiResult.classList.contains('hidden');
+  if(!modal || (!hasSingle && !hasMulti)) return;
+
+  closeModal('spinModal');
+
+  const wheelWrap=document.getElementById('wheelWrap');
+  const multiRow=document.getElementById('wheelMultiRow');
+  if(wheelWrap){
+    wheelWrap.classList.remove('reel-opening','result-collapsed');
+    wheelWrap.style.display='block';
+  }
+  if(multiRow){
+    multiRow.classList.remove('reel-opening','result-collapsed');
+    multiRow.style.display='none';
+    multiRow.innerHTML='';
+  }
+  if(result){
+    result.classList.add('hidden');
+    result.innerHTML='';
+  }
+  if(multiResult){
+    multiResult.classList.add('hidden');
+    multiResult.innerHTML='';
+  }
+
+  const closeBtn=document.getElementById('spinCloseBtn');
+  if(closeBtn){
+    closeBtn.classList.add('hidden');
+    closeBtn.onclick=null;
+  }
+
   renderInventory();
   renderCases();
   updateBalanceUI();
@@ -6364,6 +6521,8 @@ boot();
 #spinModal .wheel-item{backface-visibility:hidden;contain:layout paint;}
 #spinModal .wheel-item::after{box-shadow:none!important;background:none!important;}
 #spinModal .wheel-dial.is-spinning .wheel-item{filter:none!important;opacity:.94;}
+#spinModal .wheel-dial.is-preview-spinning{animation:gdplayPreviewReel 1.05s linear infinite!important;transition:none!important;}
+@keyframes gdplayPreviewReel{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{filter:none!important;}
 #spinModal .reel-mask::before,#spinModal .reel-mask::after{filter:none!important;}
 </style>
