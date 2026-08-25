@@ -1945,6 +1945,28 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .premium-modal-top{position:relative;display:flex;align-items:center;gap:12px;}.premium-modal-star{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.24);font-size:27px;box-shadow:inset 0 0 18px rgba(201,151,77,.08);}.premium-modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:800;}.premium-modal-sub{font-size:10px;color:var(--muted);margin-top:3px;}.premium-perks{position:relative;display:grid;gap:7px;margin:16px 0;}.premium-perk{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.055);font-size:11px;line-height:1.25;}.premium-perk b{color:var(--brass-2);}.premium-price{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:11px 12px;border-radius:12px;background:rgba(201,151,77,.07);border:1px solid rgba(201,151,77,.14);}.premium-price-label{font-size:10px;color:var(--muted);}.premium-price-value{font:800 15px 'IBM Plex Mono',monospace;color:var(--brass-2);}.premium-buy-action{width:100%;height:44px;border-radius:12px;font-weight:800;}.premium-close-action{width:100%;margin-top:7px;height:38px;}
 .profile-premium-open{position:relative;margin:12px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,rgba(201,151,77,.12),rgba(255,255,255,.02));border:1px solid rgba(201,151,77,.22);box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden;}.profile-premium-open .title{font-weight:800;font-size:14px;}.profile-premium-open .desc{margin-top:5px;color:var(--muted);font-size:10.5px;line-height:1.35;}.profile-premium-open .btn-main{margin-top:11px;width:100%;}
 </style>
+
+<style id="gdplay-premium-buttons-style">
+/* Premium buttons — bot gold style */
+#buyPremiumBtn,
+#premiumModalBuyBtn {
+  background: linear-gradient(135deg, #d6a04f, #b97927) !important;
+  color: #17120b !important;
+  border: 1px solid rgba(255, 220, 150, .55) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 18px rgba(201,151,77,.24), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  font-weight: 800 !important;
+}
+#buyPremiumBtn:hover,
+#premiumModalBuyBtn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+#buyPremiumBtn:active,
+#premiumModalBuyBtn:active {
+  transform: translateY(0);
+}
+</style>
 </head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
