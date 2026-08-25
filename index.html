@@ -783,6 +783,12 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
 }
 
 .notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
+
+*{box-sizing:border-box;max-width:100%;}
+.case-card,.daily-card,.profile-card,.modal-card,.settings-row{overflow:hidden;word-break:break-word;}
+.cases-grid{grid-template-columns:1fr !important;}
+.premium-buy-card{margin:12px 0;padding:14px;border-radius:18px;background:var(--bg-3);border:1px solid var(--line);}
+.premium-buy-card button{width:100%;}
 </style>
 
 <!-- GDPLAY embedded promo image -->
@@ -2283,6 +2289,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
         <div class="pstat"><b id="statBattles">0</b><span>батлов</span></div>
         <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
       </div>
+      <div class="premium-buy-card"><div class="title">⭐ Premium на 30 дней</div><div class="desc">Premium даёт x2 ежедневный бонус, специальный статус ⭐ Premium и особый значок в профиле.</div><button class="btn-main" id="buyPremiumBtn">Купить за 20 ⭐</button></div>
       <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Ежедневный бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
@@ -5601,6 +5608,13 @@ function updateThemeIcon(){
   const btn1 = document.getElementById('themeToggle');
   if(btn1) btn1.textContent = icon;
 }
+
+async function buyPremium(){
+ try{
+  const j=await apiFetch('/api/premium/create',{});
+  if(j.invoice) Telegram.WebApp.openInvoice(j.invoice,(s)=>{if(s==='paid'){showToast('⭐ Premium активирован на 30 дней','success');loadMe();}});
+ }catch(e){showToast('❌ '+e.message,'error');}
+}
 function toggleTheme(){
   const body=document.body;
   body.classList.add('theme-transition');
@@ -5747,6 +5761,7 @@ function handleButton(button, e){
 
   switch(button.id){
     case 'themeToggle': case 'themeToggle2': toggleTheme(); break;
+    case 'buyPremiumBtn': buyPremium(); break;
     case 'menuBtn': document.getElementById('menuPanel')?.classList.toggle('open'); break;
     case 'menuLogout': case 'logoutBtn': logout(); break;
     case 'createBattleBtn': createBattle(); break;
