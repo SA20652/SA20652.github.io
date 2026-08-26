@@ -3449,6 +3449,13 @@ async function bootSafe(){
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
   if(!initData){
+    // Если это Telegram WebApp, не показываем ручной вход из-за временного отсутствия initData.
+    // Ждём и показываем ошибку только в обычном браузере.
+    if(window.Telegram && window.Telegram.WebApp){
+      currentUser=null; data=null;
+      showAuthError('Telegram не передал данные запуска. Закрой и снова открой Mini App.');
+      return;
+    }
     currentUser = null;
     data = null;
     showAuth();
