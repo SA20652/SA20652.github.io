@@ -3440,7 +3440,12 @@ async function bootSafe(){
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
   // а имя и фото берутся непосредственно из Telegram. Формы входа/регистрации
   // остаются в DOM и доступны для ручного входа в другой аккаунт.
-  const initData = tgInitData();
+  // Ждём Telegram WebApp: в некоторых Telegram WebView initData появляется не сразу.
+  let initData = tgInitData();
+  for(let i=0; !initData && i<20; i++){
+    await new Promise(r=>setTimeout(r,100));
+    initData = tgInitData();
+  }
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
   if(!initData){
@@ -3494,6 +3499,16 @@ async function bootSafe(){
       if(tgAvatar) data.avatar = tgAvatar;
       window.isAdmin = !!j.is_admin;
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+      showApp();
+      return;
+    }
+    // Повторная попытка после прогрева Telegram WebApp
+    await new Promise(r=>setTimeout(r,500));
+    const retry = await apiFetch('/api/me', {});
+    if(retry && retry.user){
+      const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
+      currentUser = String(retry.user.user_id || tgUser?.id || 'telegram-user').toLowerCase();
+      data = serverUserToGame(retry.user, tgUser?.first_name || 'Игрок');
       showApp();
       return;
     }
