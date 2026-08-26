@@ -1753,7 +1753,7 @@ window.lockUpgradeResult=function(result,angle){
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:100px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
 </style>
-<style id="gdplay-performance-optimized">/* Performance pass: preserve the redesigned UI while reducing expensive compositor effects. */.bot-case-card{box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.02);}\n.bot-case-icon{box-shadow:inset 0 0 12px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.18);}\n.bot-case-glow{opacity:.65;}\n.bot-case-featured-card.preview-shift{animation:casePreviewShiftLite .22s ease-out;}@keyframes casePreviewShiftLite{from{opacity:.75;transform:translateY(3px) scale(.995)}to{opacity:1;transform:none}}#spinModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}#spinModal .spin-modal{box-shadow:0 18px 48px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.03);}#spinModal .reel-mask{box-shadow:inset 0 0 22px rgba(0,0,0,.62),0 0 16px rgba(201,151,77,.06);}#spinModal .reel-line{box-shadow:0 0 7px rgba(201,151,77,.55);}#spinModal .reel-glow{filter:blur(12px)!important;opacity:.55;}#spinModal .wheel-item{box-shadow:none!important;}#spinModal .wheel-dial{will-change:transform;contain:layout paint;backface-visibility:hidden;}#upgradeModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}.upgrade-gauge-wrap{filter:drop-shadow(0 8px 16px rgba(0,0,0,.24));}.upgrade-gauge::before{filter:blur(1px);opacity:.7;}/* Only animate the active page; hidden pages should not consume compositor time. */.page:not(.active),.modal:not(.show),#spinModal:not(.show){animation:none!important;}.page:not(.active) *{animation-play-state:paused!important;}@media (prefers-reduced-motion:no-preference){\n  .page.active{animation-duration:.18s!important;}\n}</style>
+<style id="gdplay-performance-optimized">/* Performance pass: preserve the redesigned UI while reducing expensive compositor effects. */.bot-case-card{box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.02);} .bot-case-icon{box-shadow:inset 0 0 12px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.18);} .bot-case-glow{opacity:.65;} .bot-case-featured-card.preview-shift{animation:casePreviewShiftLite .22s ease-out;}@keyframes casePreviewShiftLite{from{opacity:.75;transform:translateY(3px) scale(.995)}to{opacity:1;transform:none}}#spinModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}#spinModal .spin-modal{box-shadow:0 18px 48px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.03);}#spinModal .reel-mask{box-shadow:inset 0 0 22px rgba(0,0,0,.62),0 0 16px rgba(201,151,77,.06);}#spinModal .reel-line{box-shadow:0 0 7px rgba(201,151,77,.55);}#spinModal .reel-glow{filter:blur(12px)!important;opacity:.55;}#spinModal .wheel-item{box-shadow:none!important;}#spinModal .wheel-dial{will-change:transform;contain:layout paint;backface-visibility:hidden;}#upgradeModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}.upgrade-gauge-wrap{filter:drop-shadow(0 8px 16px rgba(0,0,0,.24));}.upgrade-gauge::before{filter:blur(1px);opacity:.7;}/* Only animate the active page; hidden pages should not consume compositor time. */.page:not(.active),.modal:not(.show),#spinModal:not(.show){animation:none!important;}.page:not(.active) *{animation-play-state:paused!important;}@media (prefers-reduced-motion:no-preference){   .page.active{animation-duration:.18s!important;} }</style>
 
 <style id="gdplay-main-menu-redesign-v2">
 /* Main menu redesign: keep text, cube image and hamburger unchanged. */
@@ -2425,16 +2425,6 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
           <button type="button" class="profile-style-btn" data-profile-frame="neon"><span class="style-dot" style="color:#d9ff5b"></span>Неон</button>
           <button type="button" class="profile-style-btn" data-profile-frame="ghost"><span class="style-dot" style="color:#b8b8ff"></span>Призрачная</button>
           <button type="button" class="profile-style-btn" data-profile-frame="premium"><span class="style-dot" style="color:#e2b75f"></span>Premium</button>
-        </div>
-        <button type="button" class="profile-style-btn profile-style-reset" id="profileStyleReset">↺ Снять оформление</button>
-        <div class="profile-customize-grid" id="profileNameGrid">
-          <button type="button" class="profile-style-btn" data-profile-name="default"><span>Aa</span>Обычный</button>
-          <button type="button" class="profile-style-btn" data-profile-name="gold"><span style="color:#e3b872">Aa</span>Золотой</button>
-          <button type="button" class="profile-style-btn" data-profile-name="emerald"><span style="color:#7dd2a5">Aa</span>Изумруд</button>
-          <button type="button" class="profile-style-btn" data-profile-name="ruby"><span style="color:#e17b86">Aa</span>Рубиновый</button>
-          <button type="button" class="profile-style-btn" data-profile-name="amethyst"><span style="color:#b89bea">Aa</span>Аметист</button>
-          <button type="button" class="profile-style-btn" data-profile-name="ice"><span style="color:#9bd8f2">Aa</span>Лёд</button>
-          <button type="button" class="profile-style-btn" data-profile-name="neon"><span style="color:#d9ff5b">Aa</span>Неон</button>
         </div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
@@ -3214,7 +3204,7 @@ function showModerationNotice(notice){
     : 'Ваш аккаунт заблокирован администратором.';
   showToast(title+': '+notice.reason,'error');
   setTimeout(()=>{
-    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+'\nПричина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
+    try{ if(window.Telegram?.WebApp?.showPopup){ Telegram.WebApp.showPopup({title, message:text+' Причина: '+notice.reason, buttons:[{id:'ok',type:'ok',text:'Понятно'}]}); } }catch(e){}
   },120);
 }
 
@@ -3548,11 +3538,17 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
 }
 
 const NOTIFICATIONS_KEY='gdplay_notifications_v1';
-function loadNotifications(){try{const a=JSON.parse(storageGet(NOTIFICATIONS_KEY))||[]; const bad=['кейс','дроп','выпал','открыт сейф','открытие сейфа','открытие кейса','получен куб','получена награда из кейса','ежедневный бонус','ежедневку','ежедневная награда','доступно с vip-статусом','доступно с vip статусом']; const clean=a.filter(x=>!bad.some(k=>String(x?.message||'').toLowerCase().includes(k))); if(clean.length!==a.length) storageSet(NOTIFICATIONS_KEY,JSON.stringify(clean.slice(0,40))); return clean;}catch(e){return[];}}
+function loadNotifications(){try{const a=JSON.parse(storageGet(NOTIFICATIONS_KEY))||[]; const allowed=['админ','administrator','admin','передал орб','передача орб','получил орб','получены орбы','орбы от']; const clean=a.filter(x=>allowed.some(k=>String(x?.message||'').toLowerCase().includes(k))); if(clean.length!==a.length) storageSet(NOTIFICATIONS_KEY,JSON.stringify(clean.slice(0,40))); return clean;}catch(e){return[];}}
 function saveNotifications(list){storageSet(NOTIFICATIONS_KEY,JSON.stringify(list.slice(0,40)));}
 function addNotification(message){
   if(!message) return;
   const m=String(message).toLowerCase();
+  // В центре уведомлений остаются только сообщения администратора и передачи орбов.
+  const allowed=[
+    'админ','administrator','admin',
+    'передал орб','передача орб','получил орб','получены орбы','орбы от'
+  ];
+  if(!allowed.some(x=>m.includes(x))) return;
   // Кейсовые действия никогда не попадают в центр уведомлений.
   const noise=[
     'кейс','куб','дроп','открыт сейф','открытие сейфа','открытие кейса',
@@ -5803,6 +5799,7 @@ function renderProfile(){
 async function claimDaily(){
   const today=new Date().toDateString();
   const localLast=Number(data?.lastDaily||0);
+  const btn=document.getElementById('dailyBtn'); if(btn) btn.disabled=true;
   if(localLast && new Date(localLast).toDateString()===today){ renderProfile(); return; }
   serverActionInFlight++; serverBusyUntil=Date.now()+150;
   try{
@@ -6435,8 +6432,8 @@ boot();
     const nodes=[];
     while(walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(node=>{
-      if(typeof node.nodeValue==='string' && /\\n/.test(node.nodeValue)){
-        node.nodeValue=node.nodeValue.replace(/\\n+/g,' ');
+      if(typeof node.nodeValue==='string' && /\ /.test(node.nodeValue)){
+        node.nodeValue=node.nodeValue.replace(/\ +/g,' ');
       }
     });
   }
@@ -6572,7 +6569,7 @@ boot();
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:96px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
 </style>
-\n
+ 
 
 <style id="gdplay-radical-cases-final">
 #casesList{display:grid!important;grid-template-columns:1fr!important;gap:16px!important;padding:2px 0 24px!important;}
