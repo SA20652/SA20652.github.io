@@ -3432,7 +3432,6 @@ async function waitTelegramInit(timeout=3000){
 }
 
 async function bootSafe(){
-  await waitTelegramInit(3000);
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
@@ -3444,7 +3443,6 @@ async function bootSafe(){
   const initData = tgInitData();
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
-  if(initData && !token && !savedSession){ await autoTelegramLoginRetry(); if(data) return; }
   if(!initData){
     currentUser = null;
     data = null;
@@ -3502,12 +3500,6 @@ async function bootSafe(){
     throw new Error('Не удалось получить Telegram-профиль');
   }catch(e){
     console.warn('Telegram guest mode failed:', e);
-    // Telegram WebApp иногда отдаёт initData с задержкой в Android WebView.
-    // Делаем последнюю попытку после полной инициализации.
-    await waitTelegramInit(3000);
-    if(tgInitData()){
-      try{ if(await autoTelegramLoginRetry()) return; }catch(err){ console.warn('Delayed Telegram login failed', err); }
-    }
     currentUser = null;
     data = null;
     showAuth();
