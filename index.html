@@ -193,7 +193,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
   background:radial-gradient(circle at 35% 30%, rgba(201,151,77,.35), var(--bg-3));border:1px solid var(--line);
 }
 .case-name{font-weight:700;font-size:15px;}
-.case-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:12.5px;margin-top:2px;}
+.case-price{transform:translateX(-6px);font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:12.5px;margin-top:2px;}
 .case-items-preview{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
 .chip{font-size:10.5px;font-weight:600;padding:4px 8px;border-radius:8px;font-family:'IBM Plex Mono',monospace;}
 .open-case-btn{width:100%;}
@@ -1615,7 +1615,7 @@ window.lockUpgradeResult=function(result,angle){
 .bot-case-kicker{font:600 8px/1.2 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bot-case-name{margin-top:3px;font-family:'Fraunces',serif;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bot-case-meta{display:flex;align-items:center;gap:5px;margin-top:4px;color:var(--muted);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bot-case-price{align-self:start;min-width:72px;padding:7px 8px;border-radius:10px;text-align:right;background:rgba(201,151,77,.08);border:1px solid rgba(201,151,77,.12);color:var(--brass-2);font:700 10px 'IBM Plex Mono',monospace;}
+.bot-case-price{transform:translateX(-6px);align-self:start;min-width:72px;padding:7px 8px;border-radius:10px;text-align:right;background:rgba(201,151,77,.08);border:1px solid rgba(201,151,77,.12);color:var(--brass-2);font:700 10px 'IBM Plex Mono',monospace;}
 .bot-case-price small{font-size:9px;margin-left:3px;}
 .bot-case-drops{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:13px 0 12px;padding:8px;border-radius:13px;background:rgba(0,0,0,.14);border:1px solid rgba(236,228,211,.055);}
 .bot-case-drop{min-width:0;display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:5px;padding:7px 7px;border-radius:9px;background:rgba(255,255,255,.018);border-left:2px solid var(--drop-color);}
@@ -1663,7 +1663,7 @@ window.lockUpgradeResult=function(result,angle){
 .spin-case-heading{min-width:0;}
 .spin-case-kicker{font:700 7px/1.2 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #spinModal .spin-modal h3{margin:3px 0 2px;font-family:'Fraunces',serif;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.spin-case-price{font:700 9px 'IBM Plex Mono',monospace;color:var(--brass-2);}
+.spin-case-price{transform:translateX(-6px);font:700 9px 'IBM Plex Mono',monospace;color:var(--brass-2);}
 .spin-status-pill{padding:6px 8px;border-radius:9px;border:1px solid rgba(201,151,77,.2);background:rgba(201,151,77,.07);color:var(--brass-2);font:800 8px 'IBM Plex Mono',monospace;letter-spacing:.7px;}
 .spin-subline{display:flex;gap:7px;margin:11px 2px 9px;color:var(--muted);font-size:9px;justify-content:center;}
 .spin-subline span:first-child{color:var(--paper);font-weight:700;}
@@ -3393,6 +3393,26 @@ async function boot(){
   }
 }
 
+async function autoTelegramLoginRetry(){
+  const initData=tgInitData();
+  if(!initData) return false;
+  try{
+    const j=await apiFetch('/api/me',{});
+    if(j&&j.user){
+      const tgUser=(()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
+      const name=String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ')||j.user.display_name||'Игрок');
+      currentUser=String(j.user.user_id||tgUser?.id||'telegram-user').toLowerCase();
+      data=serverUserToGame(j.user,name);
+      data.username=name;
+      if(tgUser?.photo_url) data.avatar=tgUser.photo_url;
+      if(j.token) storageSet(AUTH_TOKEN_KEY,j.token);
+      showApp();
+      return true;
+    }
+  }catch(e){console.warn('Auto Telegram login retry failed',e);}
+  return false;
+}
+
 async function bootSafe(){
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
@@ -3405,6 +3425,7 @@ async function bootSafe(){
   const initData = tgInitData();
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
+  if(initData && !token && !savedSession){ await autoTelegramLoginRetry(); if(data) return; }
   if(!initData){
     currentUser = null;
     data = null;
