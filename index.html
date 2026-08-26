@@ -3514,11 +3514,28 @@ async function bootSafe(){
     }
     throw new Error('Не удалось получить Telegram-профиль');
   }catch(e){
-    console.warn('Telegram guest mode failed:', e);
+    console.warn('Telegram auto login retry:', e);
+    // Не показываем ручной вход сразу. Telegram WebApp иногда отдаёт initData
+    // с задержкой или сервер может быть занят. Повторяем попытку.
+    for(let attempt=0; attempt<5; attempt++) {
+      await new Promise(r=>setTimeout(r,1000));
+      try {
+        const again = await apiFetch('/api/me', {});
+        if(again && again.user){
+          const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
+          currentUser = String(again.user.user_id || tgUser?.id || 'telegram-user').toLowerCase();
+          data = serverUserToGame(again.user, tgUser?.first_name || 'Игрок');
+          window.isAdmin = !!again.is_admin;
+          if(again.moderation_notice) showModerationNotice(again.moderation_notice);
+          showApp();
+          return;
+        }
+      } catch(err) { console.warn('auto login attempt', attempt+1, err); }
+    }
     currentUser = null;
     data = null;
     showAuth();
-    showAuthError('Не удалось автоматически войти через Telegram. Можно использовать обычный вход или регистрацию.');
+    showAuthError('Telegram не передал данные для входа. Закрой и заново открой Mini App через бота.');
   }
 }
 
