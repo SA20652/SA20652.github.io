@@ -1753,12 +1753,7 @@ window.lockUpgradeResult=function(result,angle){
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:100px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
 </style>
-<style id="gdplay-performance-optimized">/* Performance pass: preserve the redesigned UI while reducing expensive compositor effects. */.bot-case-card{box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.02);}
-.bot-case-icon{box-shadow:inset 0 0 12px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.18);}
-.bot-case-glow{opacity:.65;}
-.bot-case-featured-card.preview-shift{animation:casePreviewShiftLite .22s ease-out;}@keyframes casePreviewShiftLite{from{opacity:.75;transform:translateY(3px) scale(.995)}to{opacity:1;transform:none}}#spinModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}#spinModal .spin-modal{box-shadow:0 18px 48px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.03);}#spinModal .reel-mask{box-shadow:inset 0 0 22px rgba(0,0,0,.62),0 0 16px rgba(201,151,77,.06);}#spinModal .reel-line{box-shadow:0 0 7px rgba(201,151,77,.55);}#spinModal .reel-glow{filter:blur(12px)!important;opacity:.55;}#spinModal .wheel-item{box-shadow:none!important;}#spinModal .wheel-dial{will-change:transform;contain:layout paint;backface-visibility:hidden;}#upgradeModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}.upgrade-gauge-wrap{filter:drop-shadow(0 8px 16px rgba(0,0,0,.24));}.upgrade-gauge::before{filter:blur(1px);opacity:.7;}/* Only animate the active page; hidden pages should not consume compositor time. */.page:not(.active),.modal:not(.show),#spinModal:not(.show){animation:none!important;}.page:not(.active) *{animation-play-state:paused!important;}@media (prefers-reduced-motion:no-preference){
-  .page.active{animation-duration:.18s!important;}
-}</style>
+<style id="gdplay-performance-optimized">/* Performance pass: preserve the redesigned UI while reducing expensive compositor effects. */.bot-case-card{box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.02);}\n.bot-case-icon{box-shadow:inset 0 0 12px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.18);}\n.bot-case-glow{opacity:.65;}\n.bot-case-featured-card.preview-shift{animation:casePreviewShiftLite .22s ease-out;}@keyframes casePreviewShiftLite{from{opacity:.75;transform:translateY(3px) scale(.995)}to{opacity:1;transform:none}}#spinModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}#spinModal .spin-modal{box-shadow:0 18px 48px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.03);}#spinModal .reel-mask{box-shadow:inset 0 0 22px rgba(0,0,0,.62),0 0 16px rgba(201,151,77,.06);}#spinModal .reel-line{box-shadow:0 0 7px rgba(201,151,77,.55);}#spinModal .reel-glow{filter:blur(12px)!important;opacity:.55;}#spinModal .wheel-item{box-shadow:none!important;}#spinModal .wheel-dial{will-change:transform;contain:layout paint;backface-visibility:hidden;}#upgradeModal{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}.upgrade-gauge-wrap{filter:drop-shadow(0 8px 16px rgba(0,0,0,.24));}.upgrade-gauge::before{filter:blur(1px);opacity:.7;}/* Only animate the active page; hidden pages should not consume compositor time. */.page:not(.active),.modal:not(.show),#spinModal:not(.show){animation:none!important;}.page:not(.active) *{animation-play-state:paused!important;}@media (prefers-reduced-motion:no-preference){\n  .page.active{animation-duration:.18s!important;}\n}</style>
 
 <style id="gdplay-main-menu-redesign-v2">
 /* Main menu redesign: keep text, cube image and hamburger unchanged. */
@@ -2100,53 +2095,6 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #profileAvatarFrame:not(.frame-gold):not(.frame-emerald):not(.frame-ruby):not(.frame-amethyst):not(.frame-ice):not(.frame-obsidian):not(.frame-neon):not(.frame-ghost):not(.frame-premium){display:none!important;box-shadow:none!important;filter:none!important;}
 .profile-style-reset{grid-column:1/-1!important;border-style:dashed!important;opacity:.9;}
 </style>
-
-<style id="cases-total-redesign">
-/* TOTAL CASES REDESIGN */
-#page-cases{padding-bottom:24px!important}
-#casesList{display:grid!important;grid-template-columns:1fr!important;gap:16px!important}
-#casesList .rad-case-card{position:relative;display:grid;grid-template-columns:112px 1fr;gap:16px;min-height:190px;padding:14px!important;border-radius:26px!important;background:linear-gradient(135deg,#24201b 0%,#151311 58%,#0e0d0c 100%)!important;border:1px solid rgba(201,151,77,.28)!important;box-shadow:0 18px 45px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.05)!important;overflow:hidden}
-#casesList .rad-case-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 20%,rgba(201,151,77,.18),transparent 32%),linear-gradient(115deg,transparent 35%,rgba(255,255,255,.025),transparent 70%);pointer-events:none}
-#casesList .rad-case-number{position:absolute!important;right:14px;top:10px;font:800 9px 'IBM Plex Mono';color:rgba(201,151,77,.35);z-index:2}
-#casesList .rad-case-art{position:relative!important;width:112px!important;height:160px!important;margin:0!important;border-radius:22px!important;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#3a2b1b,#18130e)!important;border:1px solid rgba(201,151,77,.35)!important;box-shadow:inset 0 0 35px rgba(201,151,77,.12),0 12px 25px rgba(0,0,0,.35)!important;overflow:hidden}
-#casesList .rad-case-art span{font-size:54px!important;filter:drop-shadow(0 12px 16px rgba(0,0,0,.5));transform:translateY(-3px);transition:transform .25s}
-#casesList .rad-case-card:hover .rad-case-art span{transform:translateY(-8px) scale(1.06)}
-#casesList .rad-case-main{position:relative;z-index:2;display:flex;flex-direction:column;min-width:0}
-#casesList .rad-case-top{padding-right:18px!important}
-#casesList .rad-case-top h3{font-size:23px!important;margin:4px 0!important}
-#casesList .rad-case-label{font:700 9px 'IBM Plex Mono'!important;letter-spacing:1.6px!important;color:var(--brass-2)!important}
-#casesList .rad-price{font-size:13px!important;border-radius:12px!important;padding:8px 10px!important}
-#casesList .rad-case-stats{margin:8px 0 10px!important;font-size:10px!important;gap:8px!important;flex-wrap:wrap}
-#casesList .rad-drops{display:flex!important;gap:6px!important;overflow:hidden!important;padding:0!important;background:none!important;border:0!important}
-#casesList .rad-drop{min-width:76px!important;padding:8px!important;border-radius:12px!important;background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.06)!important;display:grid!important;grid-template-columns:20px 1fr!important;grid-template-rows:auto auto!important}
-#casesList .rad-drop b{grid-column:2!important;font-size:8px!important}
-#casesList .rad-actions{margin-top:auto!important;padding-top:12px!important;display:grid!important;grid-template-columns:auto 1fr!important;gap:9px!important}
-#casesList .rad-open{height:42px!important;border-radius:14px!important;background:linear-gradient(135deg,#d6a85b,#a87532)!important;color:#17110a!important;border:1px solid rgba(255,231,180,.25)!important;font-weight:900!important;box-shadow:0 8px 20px rgba(201,151,77,.18)!important}
-#casesList .rad-open:disabled{opacity:.38!important;filter:none!important}
-#spinModal{background:rgba(7,6,5,.94)!important;backdrop-filter:blur(10px)!important}
-#spinModal .spin-modal{width:min(460px,calc(100vw - 24px))!important;max-height:calc(100dvh - 30px)!important;padding:16px!important;border-radius:30px!important;background:linear-gradient(160deg,#25201a,#12100e 65%)!important;border:1px solid rgba(201,151,77,.3)!important;box-shadow:0 30px 80px rgba(0,0,0,.65)!important;overflow:auto!important}
-#spinModal .spin-topbar{padding:2px 2px 12px!important;border-bottom:1px solid rgba(255,255,255,.06)!important}
-#spinModal .spin-case-icon{width:54px!important;height:54px!important;border-radius:17px!important;background:linear-gradient(145deg,#49361f,#17120d)!important;border:1px solid rgba(201,151,77,.4)!important;font-size:28px!important;box-shadow:0 8px 22px rgba(0,0,0,.3)!important}
-#spinModal .wheel-wrap{height:220px!important;margin:18px 0!important;border-radius:24px!important;background:linear-gradient(180deg,#0c0b0a,#18130e)!important;border:1px solid rgba(201,151,77,.2)!important;box-shadow:inset 0 0 35px rgba(0,0,0,.55)!important;overflow:hidden!important}
-#spinModal .reel-mask{height:100%!important;background:linear-gradient(90deg,#090807 0%,transparent 18%,transparent 82%,#090807 100%)!important;box-shadow:none!important}
-#spinModal .reel-line{width:2px!important;height:82%!important;top:9%!important;background:linear-gradient(180deg,transparent,#e2b86d 20%,#fff0c8 50%,#e2b86d 80%,transparent)!important;box-shadow:0 0 18px rgba(226,184,109,.55)!important}
-#spinModal .wheel-dial{gap:10px!important;padding:0 20px!important;align-items:center!important}
-#spinModal .wheel-item{width:122px!important;height:158px!important;flex:0 0 122px!important;border-radius:20px!important;border:1px solid rgba(255,255,255,.08)!important;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.015))!important;box-shadow:0 8px 20px rgba(0,0,0,.3)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:12px!important}
-#spinModal .wheel-item span{font-size:42px!important;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))}
-#spinModal .wheel-item small{font-size:11px!important;font-weight:900!important}
-#spinModal .wheel-dial.is-spinning .wheel-item{animation:case-card-pulse .5s infinite alternate}
-@keyframes case-card-pulse{from{transform:scale(.98);opacity:.82}to{transform:scale(1);opacity:1}}
-#spinModal .vault-crack{height:210px!important;border-radius:25px!important;background:radial-gradient(circle,#4a3821,#110f0c 68%)!important;border:1px solid rgba(201,151,77,.3)!important;overflow:hidden!important;box-shadow:inset 0 0 50px rgba(201,151,77,.08)!important}
-#spinModal .vault-door{background:linear-gradient(145deg,#5c4527,#20180f)!important;border-color:rgba(255,216,143,.25)!important}
-#spinModal .vault-key{font-size:42px!important;filter:drop-shadow(0 0 18px rgba(226,184,109,.5))}
-#spinModal #spinCloseBtn{width:100%!important;height:46px!important;border-radius:15px!important;background:linear-gradient(135deg,#d6a85b,#9d6c2f)!important;color:#17110a!important;font-weight:900!important}
-@media(max-width:430px){#casesList .rad-case-card{grid-template-columns:88px 1fr;min-height:170px;gap:11px}#casesList .rad-case-art{width:88px!important;height:140px!important}#casesList .rad-case-art span{font-size:43px!important}#casesList .rad-case-top h3{font-size:19px!important}#spinModal .wheel-item{width:105px!important;flex-basis:105px!important;height:145px!important}}
-</style>
-
-<style id="final-case-fixes">
-/* final case UI fixes */
-.case-price,.case-card .price,.price { transform: translateX(-8px); }
-</style>
 </head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
@@ -2478,6 +2426,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
           <button type="button" class="profile-style-btn" data-profile-frame="ghost"><span class="style-dot" style="color:#b8b8ff"></span>Призрачная</button>
           <button type="button" class="profile-style-btn" data-profile-frame="premium"><span class="style-dot" style="color:#e2b75f"></span>Premium</button>
         </div>
+        <button type="button" class="profile-style-btn profile-style-reset" id="profileStyleReset">↺ Снять оформление</button>
         <div class="profile-customize-grid" id="profileNameGrid">
           <button type="button" class="profile-style-btn" data-profile-name="default"><span>Aa</span>Обычный</button>
           <button type="button" class="profile-style-btn" data-profile-name="gold"><span style="color:#e3b872">Aa</span>Золотой</button>
@@ -4357,26 +4306,48 @@ const REEL_LENGTH = 28;
 const REEL_TARGET_POS = 21;
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
-  const target=authoritativeDrop?{...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)}:{...(items[wonIndex]||{}),value:Math.floor(Number(wonValue??items[wonIndex]?.value??0)||0)};
+  const target = authoritativeDrop ? {...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)} : {...(items[wonIndex]||{}),value:Math.floor(Number(wonValue ?? items[wonIndex]?.value ?? 0)||0)};
   const strip=[];
-  for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS?target:items[Math.floor(Math.random()*items.length)]);
+  for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS ? target : items[Math.floor(Math.random()*items.length)]);
   dial.classList.remove('is-spinning','is-stopped');
-  dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}><span>${m.icon}</span><b>${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
-  dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
+  dial.classList.remove('wheel-dial--vertical');
+  dial.innerHTML=strip.map((it,idx)=>{
+    const realValue=Math.floor(Number(it.value||0));
+    const m=RARITY_META[it.rarity]||RARITY_META.common;
+    const isTarget=idx===REEL_TARGET_POS;
+    return `<div class="wheel-item" ${isTarget?'data-reel-target="1"':''} style="background:linear-gradient(180deg,${m.color}18,transparent 72%)"><span>${m.icon}</span><small style="color:${m.color}">${realValue.toLocaleString('ru-RU')}</small></div>`;
+  }).join('');
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
 }
+function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){buildWheelIn(document.getElementById('wheelDial'),items,wonIndex,wonValue,authoritativeDrop);}
 
 function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?650:4200;
+  const vertical=false;
+  const duration=reduced?450:3000;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
-  dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');playBeep(920);resolve();},260);},duration+40);});
+  dial.classList.add('is-spinning');
+  dial.classList.remove('is-stopped');
+  return new Promise(resolve=>{
+    requestAnimationFrame(()=>{
+      dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.72,.08,1)`;
+      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+    });
+    setTimeout(()=>{
+      dial.style.transition='none';
+      dial.style.transform=vertical ? `translate3d(0,-${offset}px,0)` : `translate3d(-${offset}px,0,0)`;
+      dial.classList.remove('is-spinning');
+      dial.classList.add('is-stopped');
+      playBeep(920);
+      resolve();
+    },duration+90);
+  });
 }
-
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
 
 function runSecretReveal(){
@@ -4501,10 +4472,7 @@ async function openCaseBatch(c, qty, useKey=false){
   if(icon) icon.textContent=c.icon;
   if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
   if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие сейфа';
-  if(pill) pill.textContent='ЗАГРУЗКА';
-  // Show the opening window before the network request so the button never
-  // appears unresponsive while Telegram waits for the server.
-  openModal('spinModal');
+  if(pill) pill.textContent='КРУТИМ';
 
   const wins=[];
   try{
@@ -4583,14 +4551,6 @@ async function openCaseBatch(c, qty, useKey=false){
 async function openCaseOnce(c, seq, total, useKey=false){
   spinning = true;
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled = true);
-
-  // Open the case window immediately. The previous version waited for the
-  // server response before showing it, which could look like a dead button
-  // inside Telegram WebView when the request took a moment.
-  const earlyModal=document.getElementById('spinModal');
-  if(earlyModal) openModal('spinModal');
-  const earlyPill=document.getElementById('spinStatusPill');
-  if(earlyPill) earlyPill.textContent='ЗАГРУЗКА';
 
   const staleMultiRow = document.getElementById('wheelMultiRow');
   const staleMultiResult = document.getElementById('spinResultMulti');
@@ -6519,7 +6479,7 @@ boot();
 </script>
 
 
-<style>
+<script>
 .key-item,.key-badge,[data-key],.upgrade-key,.required-key,.key-requirement{display:none!important;}
 </style>
 <script>
@@ -6612,8 +6572,7 @@ boot();
 #spinModal .wheel-multi-row .wheel-item{height:100%;width:92px;min-width:92px;}
 @media(max-width:430px){#spinModal .wheel-multi-row .multi-reel{height:96px;}#spinModal .wheel-multi-row .wheel-item{width:84px;min-width:84px;}}
 </style>
-
-
+\n
 
 <style id="gdplay-radical-cases-final">
 #casesList{display:grid!important;grid-template-columns:1fr!important;gap:16px!important;padding:2px 0 24px!important;}
@@ -6642,52 +6601,8 @@ boot();
   };
 })();
 
-</script>
-
-<style id="case-final-fixes">
-#casesList .rad-price{transform:translateX(-8px)!important;}
-#casesList .rad-open{cursor:pointer!important;}
-</style>
-<script>
 (function(){
-  // Make the redesigned safe buttons robust even if delegated handlers are interrupted.
-  document.addEventListener('click', function(e){
-    const b=e.target.closest?.('button[data-action="open-case"]');
-    if(!b || b.disabled || b.dataset.boundDirect) return;
-    e.preventDefault(); e.stopImmediatePropagation();
-    b.dataset.boundDirect='1';
-    try{ if(typeof openCase==='function') openCase(b.dataset.case,false); }catch(err){ console.error(err); }
-    setTimeout(()=>{ try{ delete b.dataset.boundDirect; }catch(_){} },500);
-  }, true);
-})();
-</script>
-
-<style id="final-case-fixes">
-/* final case UI fixes */
-.case-price,.case-card .price,.price { transform: translateX(-8px); }
-</style>
-
-<script id="final-case-fixes-js">
-(function(){
-  function clean(){
-    document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
-      if ((el.textContent||'').replace(/\s+/g,' ').trim().includes('Снять оформление')) el.remove();
-    });
-    document.body.innerHTML=document.body.innerHTML.replace(/\\n\\n/g,'').replace(/\\n/g,'');
-  }
-  document.addEventListener('click',function(e){
-    var el=e.target.closest('button,a,[role="button"]');
-    if(!el)return;
-    var t=(el.textContent||'').toLowerCase();
-    if(t.includes('открыть сейф')){
-      var target=el.closest('[data-case-id],.case-card,.safe-card,.case-modal,.modal')||document;
-      var candidates=target.querySelectorAll('[data-action="open"],.open-case,.case-open,[id*="open"],button');
-      for(var i=0;i<candidates.length;i++){
-        if(candidates[i]!==el && /открыть|open/i.test(candidates[i].textContent||'')){ candidates[i].click(); break; }
-      }
-    }
-  },true);
-  clean();
-  new MutationObserver(clean).observe(document.documentElement,{subtree:true,childList:true});
+  const reset=()=>{ if(!data)return; data.profileFrame='default'; data.profileNameStyle='default'; persistLocal(); renderProfileCustomization(); };
+  document.addEventListener('click',e=>{ if(e.target.closest?.('#profileStyleReset')) reset(); },true);
 })();
 </script>
