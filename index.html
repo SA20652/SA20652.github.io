@@ -3387,9 +3387,9 @@ async function boot(){
       if(releaseProgressFill) releaseProgressFill.style.width=progress+'%';
     },100);
 
-    // Загрузчик не зависит от сервера. Просто даём интерфейсу 4 секунды
-    // на подготовку и параллельно запускаем приложение без ожидания сети.
-    bootSafe(true).catch(e=>console.error('GDPLAY init:',e));
+    // Загрузчик полностью независим: это только визуальная заставка.
+    // Приложение запускается отдельно и не может задерживать её.
+    Promise.resolve().then(()=>bootSafe()).catch(e=>console.error('GDPLAY init:',e));
     await new Promise(resolve=>setTimeout(resolve,4000));
     clearInterval(progressTimer);
     if(releaseProgressFill){
