@@ -3524,6 +3524,11 @@ async function bootSafe(){
     }
     throw new Error('Не удалось получить Telegram-профиль');
   }catch(e){
+    console.error('[AUTH] FINAL AUTO LOGIN FAILED', e, {
+      telegram: !!(window.Telegram && window.Telegram.WebApp),
+      initDataLength: tgInitData().length,
+      api: API_BASE
+    });
     console.warn('Telegram auto login retry:', e);
     // Не показываем ручной вход сразу. Telegram WebApp иногда отдаёт initData
     // с задержкой или сервер может быть занят. Повторяем попытку.
@@ -3545,7 +3550,10 @@ async function bootSafe(){
     currentUser = null;
     data = null;
     if(window.Telegram && window.Telegram.WebApp){
-      showAuthError('Ошибка авто-входа Telegram. Проверь сервер/API.');
+      // В Telegram никогда не показываем ручную авторизацию.
+      // Оставляем пользователя на экране загрузки и даём понятную ошибку в консоли.
+      showAuthError('Авто-вход Telegram не завершён. Открой консоль или проверь API.');
+      return;
     }else{
       showAuth();
       showAuthError('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
