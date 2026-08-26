@@ -3416,7 +3416,23 @@ async function autoTelegramLoginRetry(){
   return false;
 }
 
+async function waitTelegramInit(timeout=3000){
+  const start=Date.now();
+  while(Date.now()-start<timeout){
+    try{
+      if(window.Telegram && window.Telegram.WebApp){
+        const tw=window.Telegram.WebApp;
+        try{tw.ready();}catch(e){}
+        if(tw.initData) return true;
+      }
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,100));
+  }
+  return false;
+}
+
 async function bootSafe(){
+  await waitTelegramInit(3000);
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
@@ -3486,6 +3502,12 @@ async function bootSafe(){
     throw new Error('Не удалось получить Telegram-профиль');
   }catch(e){
     console.warn('Telegram guest mode failed:', e);
+    // Telegram WebApp иногда отдаёт initData с задержкой в Android WebView.
+    // Делаем последнюю попытку после полной инициализации.
+    await waitTelegramInit(3000);
+    if(tgInitData()){
+      try{ if(await autoTelegramLoginRetry()) return; }catch(err){ console.warn('Delayed Telegram login failed', err); }
+    }
     currentUser = null;
     data = null;
     showAuth();
