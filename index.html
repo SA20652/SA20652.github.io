@@ -736,7 +736,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 }
 
 /* ===== ONE-TIME RELEASE SCREEN ===== */
-#releaseScreen{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;transform:scale(1);transition:opacity .7s ease,transform .85s cubic-bezier(.22,1,.36,1),filter .85s ease;filter:blur(0);}
+#releaseScreen{position:fixed;inset:0;z-index:999999;display:none;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;transform:scale(1);transition:opacity .7s ease,transform .85s cubic-bezier(.22,1,.36,1),filter .85s ease;filter:blur(0);}
 #releaseScreen.show{display:flex;opacity:1;}
 #releaseScreen.leaving{opacity:0;transform:scale(1.045);filter:blur(7px);pointer-events:none;}
 .release-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:14px;animation:releaseIn .65s cubic-bezier(.22,1,.36,1);}
@@ -747,7 +747,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .release-sub{color:var(--muted);font-size:13px;}
 .release-progress{width:min(300px,82vw);height:6px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
 .release-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);transform-origin:left center;}
-.release-progress-fill.run{animation:releaseProgress 5s linear forwards;}
+.release-progress-fill.run{animation:releaseProgress 4s linear forwards;}
 @keyframes releaseProgress{from{width:0%;}to{width:100%;}}
 @keyframes releaseIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 
@@ -788,9 +788,10 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
 .notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
 .rad-case-top{position:relative}.rad-price{margin-left:0!important;margin-right:auto!important;order:-1}.rad-case-top>div:first-child{margin-left:0}.rad-case-top{display:flex;gap:12px;align-items:center}.rad-case-top>div:first-child{order:2;flex:1}.rad-price{order:1}
 /* ===== FULLSCREEN STARTUP LOADER ===== */
-.release-logo{animation:gdplayCubeSpin 1.25s linear infinite;will-change:transform;}
-@keyframes gdplayCubeSpin{from{transform:rotateY(0deg) rotateX(0deg);}to{transform:rotateY(360deg) rotateX(360deg);}}
+.release-logo{animation:gdplayCubeSpin 1.2s linear infinite;will-change:transform;transform-origin:center center;}
+@keyframes gdplayCubeSpin{from{transform:rotateY(0deg);}to{transform:rotateY(360deg);}}
 #releaseScreen .release-title{font-size:28px;}
+#releaseScreen.show{display:flex;}
 #releaseScreen .release-sub{font-size:13px;}
 </style>
 
@@ -3369,20 +3370,45 @@ async function boot(){
   const releaseScreen=document.getElementById('releaseScreen');
   const releaseProgressFill=document.getElementById('releaseProgressFill');
   try{
-    // Полноэкранная загрузка при каждом запуске Mini App.
-    if(releaseScreen) releaseScreen.classList.add('show');
+    // Полноэкранная загрузка ровно 4 секунды. Прогресс обновляется
+    // непосредственно по времени, поэтому не зависает из-за CSS-анимации.
+    const LOAD_MS=4000;
+    if(releaseScreen){
+      releaseScreen.classList.remove('leaving');
+      releaseScreen.classList.add('show');
+      releaseScreen.style.display='flex';
+      releaseScreen.setAttribute('aria-hidden','false');
+    }
     if(releaseProgressFill){
       releaseProgressFill.classList.remove('run');
-      void releaseProgressFill.offsetWidth;
-      releaseProgressFill.classList.add('run');
+      releaseProgressFill.style.width='0%';
     }
-    await new Promise(resolve=>setTimeout(resolve,4000));
-    if(releaseScreen) releaseScreen.classList.add('leaving');
-    setTimeout(()=>releaseScreen && releaseScreen.classList.remove('show','leaving'),700);
+    const started=performance.now();
+    await new Promise(resolve=>{
+      const tick=(now)=>{
+        const progress=Math.min(100,((now-started)/LOAD_MS)*100);
+        if(releaseProgressFill) releaseProgressFill.style.width=progress+'%';
+        if(progress>=100){ resolve(); return; }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    if(releaseProgressFill) releaseProgressFill.style.width='100%';
+    if(releaseScreen){
+      releaseScreen.classList.add('leaving');
+      await new Promise(resolve=>setTimeout(resolve,250));
+      releaseScreen.classList.remove('show','leaving');
+      releaseScreen.style.display='none';
+      releaseScreen.setAttribute('aria-hidden','true');
+    }
     await bootSafe();
   }catch(e){
     console.error('GDPLAY boot error:', e);
-    if(releaseScreen) releaseScreen.classList.remove('show');
+    if(releaseScreen){
+      releaseScreen.classList.remove('show','leaving');
+      releaseScreen.style.display='none';
+      releaseScreen.setAttribute('aria-hidden','true');
+    }
     const hasTelegram = !!tgInitData();
     if(hasTelegram){
       const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
