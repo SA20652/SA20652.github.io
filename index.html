@@ -742,7 +742,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .release-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:14px;animation:releaseIn .65s cubic-bezier(.22,1,.36,1);}
 #releaseScreen.leaving .release-card{animation:releaseOut .7s cubic-bezier(.22,1,.36,1) forwards;}
 @keyframes releaseOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-10px) scale(.97)}}
-.release-logo{width:120px;height:120px;object-fit:contain;border-radius:26px;}
+.release-logo{width:120px;height:120px;object-fit:contain;border-radius:26px;transform:rotate(0deg)!important;animation:none!important;image-rendering:auto;}
 .release-title{font-family:'Fraunces',serif;font-size:30px;font-weight:800;color:var(--paper);}
 .release-sub{color:var(--muted);font-size:13px;}
 .release-progress{width:min(300px,82vw);height:6px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
@@ -3364,6 +3364,8 @@ async function showApp(skipServer=false){
 }
 
 async function boot(){
+  if(window.__gdBootStarted) return;
+  window.__gdBootStarted=true;
   const releaseScreen=document.getElementById('releaseScreen');
   const releaseProgressFill=document.getElementById('releaseProgressFill');
   const startedAt=Date.now();
@@ -3381,15 +3383,18 @@ async function boot(){
     // Плавно доводим полоску только до 90%, пока идёт реальная загрузка.
     let progress=0;
     const progressTimer=setInterval(()=>{
-      progress=Math.min(90, progress + (progress < 60 ? 2 : 0.7));
+      progress=Math.min(95, progress + (progress < 70 ? 2.5 : 1));
       if(releaseProgressFill) releaseProgressFill.style.width=progress+'%';
     },100);
 
-    await bootSafe();
+    await Promise.race([
+      bootSafe(),
+      new Promise((_, reject)=>setTimeout(()=>reject(new Error('boot timeout')), 12000))
+    ]);
 
     clearInterval(progressTimer);
     // Небольшой минимум, чтобы стартовый экран не мелькал.
-    const remaining=Math.max(0, 700-(Date.now()-startedAt));
+    const remaining=Math.max(0, 350-(Date.now()-startedAt));
     if(remaining) await new Promise(resolve=>setTimeout(resolve,remaining));
 
     if(releaseProgressFill){
@@ -6247,7 +6252,7 @@ window.addEventListener('unhandledrejection', e=>{
   }
 });
 
-boot();
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot,{once:true});}else{boot();}
 
 })();
 </script>
