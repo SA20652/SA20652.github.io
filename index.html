@@ -747,7 +747,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .release-sub{color:var(--muted);font-size:13px;}
 .release-progress{width:min(300px,82vw);height:6px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
 .release-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);transform-origin:left center;}
-.release-progress-fill.run{animation:releaseProgress 5s linear forwards;}
+.release-progress-fill.run{animation:releaseProgress 4s linear forwards;}
 @keyframes releaseProgress{from{width:0%;}to{width:100%;}}
 @keyframes releaseIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 
@@ -3387,21 +3387,16 @@ async function boot(){
       if(releaseProgressFill) releaseProgressFill.style.width=progress+'%';
     },100);
 
-    await Promise.race([
-      bootSafe(),
-      new Promise((_, reject)=>setTimeout(()=>reject(new Error('boot timeout')), 12000))
-    ]);
-
+    // Загрузчик не зависит от сервера. Просто даём интерфейсу 4 секунды
+    // на подготовку и параллельно запускаем приложение без ожидания сети.
+    bootSafe(true).catch(e=>console.error('GDPLAY init:',e));
+    await new Promise(resolve=>setTimeout(resolve,4000));
     clearInterval(progressTimer);
-    // Небольшой минимум, чтобы стартовый экран не мелькал.
-    const remaining=Math.max(0, 350-(Date.now()-startedAt));
-    if(remaining) await new Promise(resolve=>setTimeout(resolve,remaining));
-
     if(releaseProgressFill){
       releaseProgressFill.style.transition='width .25s ease';
       releaseProgressFill.style.width='100%';
     }
-    await new Promise(resolve=>setTimeout(resolve,250));
+    await new Promise(resolve=>setTimeout(resolve,200));
 
     if(releaseScreen) releaseScreen.classList.add('leaving');
     setTimeout(()=>releaseScreen && releaseScreen.classList.remove('show','leaving'),700);
