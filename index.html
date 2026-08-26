@@ -786,7 +786,7 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
 }
 
 .notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
-</style>
+.rad-case-top{position:relative}.rad-price{margin-left:0!important;margin-right:auto!important;order:-1}.rad-case-top>div:first-child{margin-left:0}.rad-case-top{display:flex;gap:12px;align-items:center}.rad-case-top>div:first-child{order:2;flex:1}.rad-price{order:1}</style>
 
 <!-- GDPLAY embedded promo image -->
 <script>
@@ -2413,7 +2413,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
         <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
       </div>
       <div class="profile-customize" id="profileCustomize">
-        <div class="profile-customize-head"><div><div class="profile-customize-title">🎨 Оформление профиля</div><div class="profile-customize-sub">Выбирай рамку и стиль имени</div></div><span class="profile-badge premium" id="profileStyleStatus">Стиль</span></div>
+        <div class="profile-customize-head"><div><div class="profile-customize-title">🎨 Оформление профиля</div><div class="profile-customize-sub">Выбирай рамку</div></div><span class="profile-badge premium" id="profileStyleStatus">Стиль</span></div>
         <div class="profile-customize-grid" id="profileFrameGrid">
           <button type="button" class="profile-style-btn" data-profile-frame="default"><span class="style-dot" style="color:#777"></span>Обычная</button>
           <button type="button" class="profile-style-btn" data-profile-frame="gold"><span class="style-dot" style="color:#e3b872"></span>Золото</button>
@@ -3538,31 +3538,16 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
 }
 
 const NOTIFICATIONS_KEY='gdplay_notifications_v1';
-function loadNotifications(){try{const a=JSON.parse(storageGet(NOTIFICATIONS_KEY))||[]; const allowed=['админ','administrator','admin','передал орб','передача орб','получил орб','получены орбы','орбы от']; const clean=a.filter(x=>allowed.some(k=>String(x?.message||'').toLowerCase().includes(k))); if(clean.length!==a.length) storageSet(NOTIFICATIONS_KEY,JSON.stringify(clean.slice(0,40))); return clean;}catch(e){return[];}}
+function loadNotifications(){try{return JSON.parse(storageGet(NOTIFICATIONS_KEY))||[];}catch(e){return[];}}
 function saveNotifications(list){storageSet(NOTIFICATIONS_KEY,JSON.stringify(list.slice(0,40)));}
 function addNotification(message){
   if(!message) return;
-  const m=String(message).toLowerCase();
-  // В центре уведомлений остаются только сообщения администратора и передачи орбов.
-  const allowed=[
-    'админ','administrator','admin',
-    'передал орб','передача орб','получил орб','получены орбы','орбы от'
-  ];
-  if(!allowed.some(x=>m.includes(x))) return;
-  // Кейсовые действия никогда не попадают в центр уведомлений.
-  const noise=[
-    'кейс','куб','дроп','открыт сейф','открытие сейфа','открытие кейса',
-    'награда забрана','крут','крутим','готово ·','дополнительно найден ключ',
-    'нужно ещё','не хватает монет','открыть сейф','выпал','получен куб','получена награда из кейса','премиум-кейс открыт','premium-кейс открыт','открыли кейс','открыл кейс',
-    'ежедневный бонус','ежедневку','ежедневная награда','доступно с vip-статусом','доступно с vip статусом'
-  ];
-  if(noise.some(x=>m.includes(x))) return;
   const list=loadNotifications();
   list.unshift({message:String(message),time:Date.now(),read:false});
   saveNotifications(list);
   updateNotificationBadge();
 }
-function updateNotificationBadge(){
+function updateNotificationBadge(){{
   const b=document.getElementById('notificationBadge'); if(!b)return;
   const n=loadNotifications().filter(x=>!x.read).length;
   b.textContent=n>99?'99+':String(n); b.style.display=n?'inline-flex':'none';
@@ -4234,6 +4219,13 @@ function renderCases(){
   renderRecentDrops();
   renderBattles();
 }
+let casesRefreshTimer;
+window.addEventListener('scroll',()=>{
+  clearTimeout(casesRefreshTimer);
+  casesRefreshTimer=setTimeout(()=>{
+    if(currentTab==='cases') renderCases();
+  },120);
+});
 const caseOpenQty = {};
 
 function pickItem(items){
@@ -5548,7 +5540,7 @@ async function renderLeaderboard(sortBy='cases'){
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item ${r.key===myId?'me':''}">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
-        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.key==='74915228121'?'ghost':(r.profile_frame||((r.key===myId)?data.profileFrame:'default'))); const ok=f==='default' ? false : (f==='ghost'?r.key==='74915228121':true); return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
+        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(String(r.username||'').toLowerCase()==='kuro'?'ghost':(r.profile_frame||((r.key===myId)?data.profileFrame:'default'))); const ok=f==='default' ? false : (f==='ghost'?String(r.username||'').toLowerCase()==='kuro':true); return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
           <div class="lb-user">${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
