@@ -2996,6 +2996,7 @@ function tgConfirm(message){
 
 async function apiFetch(path, payload={}){
   const initData = tgInitData();
+  console.log('[AUTH] apiFetch', path, 'initData length=', initData.length);
   if(!initData){
     throw new Error('Открой игру через кнопку «Играть» в Telegram-боте — магазин, батлы и топ игроков работают только внутри Telegram');
   }
@@ -3021,6 +3022,7 @@ async function apiFetch(path, payload={}){
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = controller ? setTimeout(()=>controller.abort(), 15000) : null;
   try{
+    console.log('[AUTH] sending request', API_BASE + path);
     const r = await fetch(API_BASE + path, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
@@ -3028,6 +3030,7 @@ async function apiFetch(path, payload={}){
       signal: controller?.signal
     });
     const j = await r.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
+    console.log('[AUTH] response', r.status, j);
     // Если короткая админ-сессия истекла, молча получаем новую.
     // Это особенно важно в Telegram WebView после долгого простоя.
     if(r.status===403 && path.startsWith('/api/admin/') && path!=='/api/admin/session' && !payload.__adminRetry){
@@ -3541,8 +3544,12 @@ async function bootSafe(){
     }
     currentUser = null;
     data = null;
-    showAuth();
-    showAuthError('Telegram не передал данные для входа. Закрой и заново открой Mini App через бота.');
+    if(window.Telegram && window.Telegram.WebApp){
+      showAuthError('Ошибка авто-входа Telegram. Проверь сервер/API.');
+    }else{
+      showAuth();
+      showAuthError('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
+    }
   }
 }
 
