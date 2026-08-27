@@ -572,12 +572,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-style-btn .style-dot{width:19px;height:19px;border-radius:50%;border:2px solid currentColor;box-sizing:border-box;}
 .profile-style-btn.active{border-color:var(--brass-2);box-shadow:0 0 0 1px rgba(227,184,114,.18) inset;}
 .profile-style-btn:disabled{opacity:.4;cursor:not-allowed;}
-.profile-name.gold-name{color:var(--brass-2);text-shadow:0 0 10px rgba(227,184,114,.18);}
-.profile-name.emerald-name{color:#7dd2a5;}
-.profile-name.ruby-name{color:#e17b86;}
-.profile-name.amethyst-name{color:#b89bea;}
-.profile-name.ice-name{color:#9bd8f2;}
-.profile-name.neon-name{color:#d9ff5b;}
+.profile-name.gold-name,.lb-user.name-gold{background:linear-gradient(90deg,#ffe08a,#d99a35,#fff0ad,#d99a35);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.8s linear infinite;text-shadow:none!important;}
+.profile-name.emerald-name,.lb-user.name-emerald{background:linear-gradient(90deg,#b7ff7a,#39d98a,#e2ff9d,#39d98a);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.6s linear infinite;text-shadow:none!important;}
+.profile-name.ruby-name,.lb-user.name-ruby{background:linear-gradient(90deg,#ff9ba6,#d83b58,#ffd0d5,#d83b58);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.5s linear infinite;text-shadow:none!important;}
+.profile-name.amethyst-name,.lb-user.name-amethyst{background:linear-gradient(90deg,#e0b7ff,#9159d8,#f2d8ff,#9159d8);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.7s linear infinite;text-shadow:none!important;}
+.profile-name.ice-name,.lb-user.name-ice{background:linear-gradient(90deg,#d5f7ff,#6bcff6,#ffffff,#6bcff6);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.9s linear infinite;text-shadow:none!important;}
+.profile-name.neon-name,.lb-user.name-neon{background:linear-gradient(90deg,#d9ff5b,#7dff00,#efffb0,#7dff00);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 1.9s linear infinite;text-shadow:0 0 9px rgba(125,255,0,.28)!important;}
+@keyframes nameShimmer{0%{background-position:200% 50%}100%{background-position:-20% 50%}}
 @media(max-width:380px){.profile-customize-grid{grid-template-columns:repeat(3,1fr);}}
 
 .profile-head{display:flex;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:var(--radius);padding:17px;margin-bottom:12px;box-shadow:var(--shadow);}
@@ -5671,6 +5672,7 @@ async function renderLeaderboard(sortBy='cases'){
       tester_badge: !!r.tester_badge,
       custom_status: r.custom_status || {},
       profile_frame: r.profile_frame || r.profileFrame || '',
+      profile_name_style: r.profile_name_style || r.profileNameStyle || 'default',
       best_drops: r.best_drops || r.bestDrops || [],
       text_color: r.text_color || r.name_color || '',
       buffs: Array.isArray(r.buffs) ? r.buffs : [],
@@ -5683,8 +5685,9 @@ async function renderLeaderboard(sortBy='cases'){
     rows.forEach(r=>{ leaderboardProfileSeeds[r.key] = {
       user_id:r.key, username:r.username, avatar:r.avatar, balance:r.balance,
       cases_opened:r.cases, cube_count:r.cube_count, battles:Number(r.battles||0),
-      wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge,
+      wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge, profile_name_style:r.profile_name_style || 'default',
       tester_badge:r.tester_badge, custom_status:r.custom_status || {}, profile_frame:r.profile_frame || '', best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
+      profile_name_style:r.profile_name_style || 'default',
       buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
     }; });
     const myId = String(tgUserId()||'');
@@ -5695,7 +5698,7 @@ async function renderLeaderboard(sortBy='cases'){
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
-          <div class="lb-user" style="${r.text_color?`color:${r.text_color}`:''}">${r.username}${r.key===myId?' (ты)':''}</div>
+          <div class="lb-user name-${r.profile_name_style||'default'}" ${r.text_color?`data-text-color="${r.text_color}"`:''}>${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
           ${customStatusBadgeHtml(r.custom_status)}
           <div class="lb-sub">${sortBy==='balance' ? r.balance.toLocaleString('ru-RU')+' монет' : sortBy==='winnings' ? r.winnings.toLocaleString('ru-RU')+' орбов выиграно' : r.cases+' кейсов открыто'}</div>
@@ -5836,7 +5839,7 @@ async function openPublicProfile(userId, seed={}){
     </div>`;
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
-  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}${((String(p.username||'').toLowerCase()==='kuro')?'<span class="lb-avatar-frame frame-ghost"></span>':'')}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
+  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}${((String(p.username||'').toLowerCase()==='kuro')?'<span class="lb-avatar-frame frame-ghost"></span>':'')}</div><div style="min-width:0"><div class="profile-name ${p.profile_name_style&&p.profile_name_style!=='default'?p.profile_name_style+'-name':''}">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
   renderBestDrops(document.getElementById('publicBestDrops'),best);
   const now=Date.now();
   const list=buffs.filter(b=>!b.expires_at||new Date(b.expires_at).getTime()>now);
@@ -5877,7 +5880,7 @@ function renderProfileCustomization(){
   const name=document.getElementById('profileName');
   const vipActive=isPremiumActive();
   const selected=String(data?.profileFrame||'default');
-  const nameStyle=String(data?.profileNameStyle||'default');
+  const nameStyle=String(data?.profileNameStyle||data?.profile_name_style||'default');
   if(frame){
     frame.className='profile-avatar-frame';
     if(vipActive && selected==='default') frame.classList.add('frame-vip');
@@ -5907,10 +5910,20 @@ function setProfileFrame(key){
 function isPremiumActive(){
   return !!(data && data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now());
 }
-function setProfileNameStyle(key){
+async function setProfileNameStyle(key){
   const premiumActive=isPremiumActive();
   if(key!=='default' && !premiumActive){ showToast('⭐ Доступно с Premium-статусом','error'); return; }
-  data.profileNameStyle=key; persistLocal(); renderProfileCustomization();
+  const prev=String(data.profileNameStyle||'default');
+  data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
+  try{
+    const j=await apiFetch('/api/profile/name-style',{style:key});
+    data.profileNameStyle=String(j.profile_name_style||key); persistLocal(); renderProfileCustomization();
+    renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
+    showToast('🎨 Цвет имени сохранён');
+  }catch(e){
+    data.profileNameStyle=prev; persistLocal(); renderProfileCustomization();
+    showToast(e.message||'Не удалось сохранить цвет имени','error');
+  }
 }
 
 function renderProfile(){
