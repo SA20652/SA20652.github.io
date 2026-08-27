@@ -4285,7 +4285,7 @@ function renderCases(){
     const totalPrice=Number(c.price)*qty;
     const affordable=Number.isFinite(balanceNow)&&balanceNow>=totalPrice;
     const totalChance=c.items.reduce((sum,it)=>sum+Math.max(0,Number(it.chance)||0),0);
-    const topDrops=[...c.items].sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)).slice(0,5);
+    const topDrops=[...c.items].sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)).slice(0,1);
     const rarityCount=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).length;
     const drops=topDrops.map(it=>{
       const m=RARITY_META[it.rarity]||RARITY_META.common;
@@ -4293,7 +4293,7 @@ function renderCases(){
       return `<div class="rad-drop" style="--drop:${m.color}"><span class="rad-drop-icon">${m.icon}</span><span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
     }).join('');
     return `<article class="rad-case-card" data-case-id="${c.id}">
-      <div class="rad-case-number">${String(index+1).padStart(2,'0')}</div>
+      
       <div class="rad-case-art"><div class="rad-case-art-glow"></div><span>${c.icon}</span></div>
       <div class="rad-case-main">
         <div class="rad-case-top"><div><div class="rad-case-label">CASE / ${c.id.toUpperCase()}</div><h3>${c.name}</h3></div><div class="rad-price case-price-shift">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div></div>
@@ -4437,17 +4437,22 @@ function showSpinResult(item, isSecret){
   spawnConfetti(document.querySelector('.spin-modal'), m.color);
 }
 
+let vaultSoundAt = 0;
 function playBeep(freq){
   if(!getSetting('sound')) return;
+  const now=Date.now();
+  if(now-vaultSoundAt<500) return;
+  vaultSoundAt=now;
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
     const ctx = new Ctx();
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type='sine'; o.frequency.value = freq || 880;
     o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.14, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-    o.start(); o.stop(ctx.currentTime + 0.35);
+    g.gain.setValueAtTime(0.10, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    o.start(); o.stop(ctx.currentTime + 0.25);
+    setTimeout(()=>ctx.close?.(),350);
   }catch(e){}
 }
 
