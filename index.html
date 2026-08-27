@@ -3485,6 +3485,7 @@ async function bootSafe(){
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
+  syncGlobalSeasonTheme();
 
   // Telegram-режим гостя: если приложение открыто из Telegram, вход/регистрация
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
@@ -3628,20 +3629,27 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
 const NOTIFICATIONS_KEY='gdplay_notifications_v1';
 function loadNotifications(){try{const a=JSON.parse(storageGet(NOTIFICATIONS_KEY))||[]; const bad=['кейс','дроп','выпал','открыт сейф','открытие сейфа','открытие кейса','получен куб','получена награда из кейса','ежедневный бонус','ежедневку','ежедневная награда','доступно с vip-статусом','доступно с vip статусом']; const clean=a.filter(x=>!bad.some(k=>String(x?.message||'').toLowerCase().includes(k))); if(clean.length!==a.length) storageSet(NOTIFICATIONS_KEY,JSON.stringify(clean.slice(0,40))); return clean;}catch(e){return[];}}
 function saveNotifications(list){storageSet(NOTIFICATIONS_KEY,JSON.stringify(list.slice(0,40)));}
+const NOTIFICATIONS_TOMBSTONES_KEY='gdplay_notifications_deleted_v2';
+function loadNotificationTombstones(){try{return new Set(JSON.parse(storageGet(NOTIFICATIONS_TOMBSTONES_KEY)||'[]').map(String));}catch(e){return new Set();}}
+function saveNotificationTombstones(set){storageSet(NOTIFICATIONS_TOMBSTONES_KEY,JSON.stringify(Array.from(set).slice(-200)));}
 async function syncServerNotifications(){
   if(!tgInitData()) return;
   try{
     const j=await apiFetch('/api/notifications',{});
     const incoming=Array.isArray(j?.notifications)?j.notifications:[];
-    if(!incoming.length) return;
+    const tomb=loadNotificationTombstones();
+    const serverItems=incoming.map(n=>({id:n.id||'',message:String(n.message||n.text||''),time:Number(n.created_at||n.time||Date.now()),read:!!n.read}))
+      .filter(n=>n.message && (!n.id || !tomb.has(String(n.id))));
     const local=loadNotifications();
-    const seen=new Set(local.map(x=>String(x.id||'')+'|'+String(x.time||'')+'|'+String(x.message||'')));
-    for(const n of incoming){
-      const item={id:n.id||'',message:String(n.message||n.text||''),time:Number(n.created_at||n.time||Date.now()),read:!!n.read};
-      const key=String(item.id)+'|'+String(item.time)+'|'+item.message;
-      if(item.message && !seen.has(key)){ local.unshift(item); seen.add(key); }
+    const byKey=new Map();
+    for(const x of local) byKey.set(String(x.id||'')+'|'+String(x.time||'')+'|'+String(x.message||''),x);
+    for(const x of serverItems){
+      const key=String(x.id||'')+'|'+String(x.time||'')+'|'+x.message;
+      const old=byKey.get(key);
+      if(old) old.read=old.read||x.read; else byKey.set(key,x);
     }
-    saveNotifications(local);
+    // Server is authoritative for server notifications, while local-only toasts are kept.
+    saveNotifications(Array.from(byKey.values()).filter(x=>!x.id || !tomb.has(String(x.id))));
     updateNotificationBadge();
   }catch(e){ console.debug('notification sync',e); }
 }
@@ -3672,14 +3680,24 @@ function renderNotifications(){
   const list=loadNotifications();
   if(!list.length){listEl.innerHTML='<div class="notification-empty">Здесь пока ничего нет.</div>';return;}
   listEl.innerHTML=list.map((x,i)=>`<div class="notification-item ${x.read?'':'new'}"><div class="notification-message">${String(x.message).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</div><div class="notification-time">${new Date(Number(x.time)||Date.now()).toLocaleString('ru-RU')}</div></div>`).join('');
+  const hadUnread=list.some(x=>!x.read);
   const read=list.map(x=>({...x,read:true})); saveNotifications(read); updateNotificationBadge();
+  if(hadUnread) apiFetch('/api/notifications/read',{}).catch(()=>{});
 }
 function openNotifications(){
   document.getElementById('menuPanel')?.classList.remove('open');
   renderNotifications(); openModal('notificationsModal');
 }
 document.getElementById('notificationsCloseBtn')?.addEventListener('click',()=>closeModal('notificationsModal'));
-document.getElementById('notificationsClearBtn')?.addEventListener('click',()=>{saveNotifications([]);renderNotifications();});
+document.getElementById('notificationsClearBtn')?.addEventListener('click',async()=>{
+  const current=loadNotifications();
+  const tomb=loadNotificationTombstones();
+  current.forEach(n=>{if(n.id)tomb.add(String(n.id));});
+  saveNotificationTombstones(tomb);
+  saveNotifications([]);
+  try{await apiFetch('/api/notifications/clear',{});}catch(e){}
+  renderNotifications();
+});
 updateNotificationBadge();
 
 function showToast(msg, type){
@@ -6054,6 +6072,11 @@ function applySeasonTheme(theme){
 }
 window.applySeasonTheme=applySeasonTheme;
 function applySeasonThemeFromUser(u){ if(u?.season_theme) applySeasonTheme(u.season_theme); }
+async function syncGlobalSeasonTheme(){
+  if(!tgInitData()) return;
+  try{ const j=await apiFetch('/api/theme',{}); if(j?.theme) applySeasonTheme(j.theme); }catch(e){}
+}
+
 
 function toggleTheme(){
   const body=document.body;
@@ -6319,6 +6342,7 @@ setInterval(()=>{
   if(currentTab==='market') renderMarket();
   if(currentTab==='cases') renderRecentDrops();
   refreshFromServer();
+  syncGlobalSeasonTheme();
   syncServerNotifications();
 },10000);
 window.addEventListener('pagehide',persistDevice);
