@@ -2163,6 +2163,14 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #casesList .rad-open{height:48px!important;border-radius:16px!important;font-size:15px!important;}
 @media(max-width:430px){#casesList .rad-case-top h3{font-size:21px!important;}#casesList .rad-case-art{height:112px!important}#casesList .rad-case-art span{font-size:52px!important;}#casesList .rad-drops{grid-template-columns:1fr!important;max-height:80px!important;overflow:hidden!important;}}
 </style>
+<style id="cases-source-interface-final-overrides">
+/* Preserve requested case UI details while importing only the source card interface. */
+#casesList .rad-case-number{display:none!important;}
+#casesList .rad-drops{grid-template-columns:1fr!important;}
+#casesList .rad-drop{min-width:0!important;}
+#casesList .rad-drop-name{min-width:0!important;max-width:180px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:9px!important;}
+@media(max-width:430px){#casesList .rad-drops{grid-template-columns:1fr!important;}#casesList .rad-drop-name{max-width:160px!important;font-size:9px!important;}}
+</style>
 </head>
 <body><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
@@ -6779,57 +6787,4 @@ boot();
 (()=>{const b=document.getElementById('adminNotificationSend');if(!b)return;b.onclick=async()=>{try{const r=await fetch('/api/admin/notifications/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:document.getElementById('adminNotificationText').value,player:document.getElementById('adminNotificationPlayer').value||null})});const j=await r.json();alert(j.ok?'Отправлено':'Ошибка: '+j.error)}catch(e){alert(e.message)}}})();
 </script>
 
-<style id="case-final-polish-v2">
-/* Case cards final polish: remove decorative indexes and improve premium layout */
-#casesList .rad-case-number{display:none!important;}
-#casesList .rad-case-card{
-  grid-template-columns:96px 1fr!important;
-  min-height:178px!important;
-  padding:14px!important;
-  gap:14px!important;
-  border-radius:24px!important;
-  background:linear-gradient(145deg,#261d14,#100e0c)!important;
-}
-#casesList .rad-case-art{
-  width:96px!important;height:148px!important;border-radius:20px!important;
-}
-#casesList .rad-case-top h3{
-  font-size:21px!important;
-  line-height:1.15!important;
-  max-width:180px!important;
-}
-#casesList .rad-case-label{opacity:.8!important;}
-#casesList .rad-drops{
-  margin-top:4px!important;
-}
-#casesList .rad-drop-name{
-  display:block!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  white-space:nowrap!important;
-  max-width:75px!important;
-  font-size:9px!important;
-}
-#casesList .rad-actions{
-  background:rgba(255,255,255,.025)!important;
-  padding:8px!important;
-  border-radius:16px!important;
-}
-#casesList .case-qty-btn{
-  width:34px!important;height:34px!important;
-  border-radius:10px!important;
-}
-#casesList .rad-open{
-  height:44px!important;
-  border-radius:14px!important;
-}
-@media(max-width:430px){
- #casesList .rad-case-card{grid-template-columns:78px 1fr!important;}
- #casesList .rad-case-art{width:78px!important;height:132px!important;}
- #casesList .rad-case-top h3{font-size:18px!important;}
-}
 
-/* Final case fixes */
-.rad-drop-name{min-width:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;}
-.rad-drop{min-height:34px;}
-</style>
