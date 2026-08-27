@@ -3194,7 +3194,6 @@ function applyServerCubes(serverCubes, authoritativeItems=[]){
 
 function applyServerState(u){
   if(!u) return;
-  applySeasonThemeFromUser(u);
   if(!data) return;
   let changed = false;
   if(typeof u.balance === 'number' && u.balance !== data.balance){ data.balance = u.balance; changed = true; }
@@ -3485,7 +3484,6 @@ async function bootSafe(){
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
   updateThemeIcon();
-  syncGlobalSeasonTheme();
 
   // Telegram-режим гостя: если приложение открыто из Telegram, вход/регистрация
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
@@ -6061,23 +6059,6 @@ document.getElementById('premiumModalBuyBtn')?.addEventListener('click',startPre
 document.getElementById('premiumModalCloseBtn')?.addEventListener('click',()=>closeModal('premiumModal'));
 setTimeout(updateChannelBonusUI,0);
 
-const SEASON_THEME_CLASSES=['theme-summer','theme-winter','theme-autumn','theme-spring'];
-function applySeasonTheme(theme){
-  let raw=String(theme||'').toLowerCase();
-  if(raw==='newyear' || raw==='snow') raw='winter';
-  const value=SEASON_THEME_CLASSES.includes('theme-'+raw) ? raw : 'summer';
-  document.body.classList.remove(...SEASON_THEME_CLASSES);
-  document.body.classList.add('theme-'+value);
-  updateThemeIcon();
-}
-window.applySeasonTheme=applySeasonTheme;
-function applySeasonThemeFromUser(u){ if(u?.season_theme) applySeasonTheme(u.season_theme); }
-async function syncGlobalSeasonTheme(){
-  if(!tgInitData()) return;
-  try{ const j=await apiFetch('/api/theme',{}); if(j?.theme) applySeasonTheme(j.theme); }catch(e){}
-}
-
-
 function toggleTheme(){
   const body=document.body;
   body.classList.add('theme-transition');
@@ -6342,7 +6323,6 @@ setInterval(()=>{
   if(currentTab==='market') renderMarket();
   if(currentTab==='cases') renderRecentDrops();
   refreshFromServer();
-  syncGlobalSeasonTheme();
   syncServerNotifications();
 },10000);
 window.addEventListener('pagehide',persistDevice);
@@ -6886,45 +6866,7 @@ boot();
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{animation:rewardWinner .72s cubic-bezier(.16,1,.3,1);}
 @keyframes rewardWinner{0%{transform:scale(.82);filter:brightness(1.8) drop-shadow(0 0 0 transparent);opacity:.5}55%{transform:scale(1.14);filter:brightness(1.35) drop-shadow(0 0 24px rgba(255,220,150,.7));opacity:1}100%{transform:scale(1.08);filter:brightness(1) drop-shadow(0 0 12px rgba(255,220,150,.28))}}
 </style>
-<style id="gdplay-seasonal-themes">
-/* Глобальные темы, выбираемые администратором. Лето = текущая тема.
-   Белые элементы намеренно не переопределяются. */
-body.theme-summer{--bg:#17130d;--bg-2:#211b12;--bg-3:#2c2417;--line:rgba(255,229,174,.11);--paper:#f4ead7;--muted:#b7a78d;--muted-2:#81725d;--brass:#d89b42;--brass-2:#f3c15e;--brass-dim:#966727;--emerald:#4e9b73;--crimson:#b95145;}
-body.theme-winter{--bg:#061326;--bg-2:#0b1d35;--bg-3:#102a47;--line:rgba(173,218,255,.13);--paper:#dceeff;--muted:#91b0ce;--muted-2:#647f9d;--brass:#4d91cc;--brass-2:#83c8ff;--brass-dim:#2f6596;--emerald:#4ba98f;--crimson:#c06178;}
-body.theme-autumn{--bg:#1a0e08;--bg-2:#28150c;--bg-3:#382016;--line:rgba(255,191,135,.12);--paper:#f1dcc5;--muted:#bd9677;--muted-2:#88684f;--brass:#c9692d;--brass-2:#ef9951;--brass-dim:#91451f;--emerald:#718f52;--crimson:#b94e3f;}
-body.theme-spring{--bg:#09170e;--bg-2:#10261a;--bg-3:#173722;--line:rgba(166,235,182,.12);--paper:#dff3e4;--muted:#8fb79b;--muted-2:#638b70;--brass:#55ad70;--brass-2:#8bdd9d;--brass-dim:#36784d;--emerald:#48c477;--crimson:#ba625b;}
-body.theme-winter .rad-case-card{background:linear-gradient(135deg,#122a45,#091626 58%,#07111f)!important;border-color:rgba(127,192,245,.30)!important;}
-body.theme-autumn .rad-case-card{background:linear-gradient(135deg,#392115,#1f130d 58%,#140b08)!important;border-color:rgba(237,154,82,.30)!important;}
-body.theme-spring .rad-case-card{background:linear-gradient(135deg,#183b28,#10251a 58%,#09150e)!important;border-color:rgba(139,214,155,.28)!important;}
-body.theme-winter .rad-case-art{background:linear-gradient(145deg,#183b5c,#0b1b2e)!important;border-color:rgba(127,192,245,.32)!important;}
-body.theme-autumn .rad-case-art{background:linear-gradient(145deg,#5a321d,#21140d)!important;border-color:rgba(237,154,82,.32)!important;}
-body.theme-spring .rad-case-art{background:linear-gradient(145deg,#275b3a,#11281a)!important;border-color:rgba(139,214,155,.30)!important;}
-body.theme-winter header,body.theme-winter nav,body.theme-winter .case-card,body.theme-winter .promo-card,body.theme-winter .settings-card,body.theme-winter .admin-card,body.theme-winter .input-modal,body.theme-winter .twofa-modal,
-body.theme-autumn header,body.theme-autumn nav,body.theme-autumn .case-card,body.theme-autumn .promo-card,body.theme-autumn .settings-card,body.theme-autumn .admin-card,body.theme-autumn .input-modal,body.theme-autumn .twofa-modal,
-body.theme-spring header,body.theme-spring nav,body.theme-spring .case-card,body.theme-spring .promo-card,body.theme-spring .settings-card,body.theme-spring .admin-card,body.theme-spring .input-modal,body.theme-spring .twofa-modal{background:var(--bg-2)!important;border-color:var(--line)!important;}
-body.theme-winter .menu-btn,body.theme-winter .balance-chip,body.theme-winter .nav-btn,body.theme-autumn .menu-btn,body.theme-autumn .balance-chip,body.theme-autumn .nav-btn,body.theme-spring .menu-btn,body.theme-spring .balance-chip,body.theme-spring .nav-btn{background:var(--bg-3)!important;border-color:var(--line)!important;color:var(--paper);}
-body.theme-winter .nav-btn.active,body.theme-autumn .nav-btn.active,body.theme-spring .nav-btn.active{background:color-mix(in srgb,var(--brass) 18%,transparent)!important;border-color:var(--brass-dim)!important;color:var(--brass-2)!important;}
-body.theme-winter .btn,body.theme-autumn .btn,body.theme-spring .btn,body.theme-winter .rad-open,body.theme-autumn .rad-open,body.theme-spring .rad-open{background:linear-gradient(135deg,var(--brass-2),var(--brass))!important;}
-body.theme-winter .section-sub,body.theme-autumn .section-sub,body.theme-spring .section-sub{color:var(--muted)!important;}
-body.theme-winter .rad-case-label,body.theme-autumn .rad-case-label,body.theme-spring .rad-case-label,body.theme-winter .rad-price,body.theme-autumn .rad-price,body.theme-spring .rad-price{color:var(--brass-2)!important;}
-body.theme-winter #spinModal .spin-modal{background:linear-gradient(160deg,#16324f,#081525 65%)!important;border-color:rgba(127,192,245,.3)!important;}
-body.theme-autumn #spinModal .spin-modal{background:linear-gradient(160deg,#432616,#1a0e09 65%)!important;border-color:rgba(237,154,82,.3)!important;}
-body.theme-spring #spinModal .spin-modal{background:linear-gradient(160deg,#1d432c,#0b1a11 65%)!important;border-color:rgba(139,214,155,.3)!important;}
-/* Делаем все четыре сезона визуально самостоятельными: меняются фон, карточки, акценты, кнопки, границы и основные подписи. Белые элементы не трогаем. */
-body.theme-summer .app,body.theme-summer main,body.theme-summer .content,body.theme-summer .page{background:var(--bg)!important;color:var(--paper);}
-body.theme-winter .app,body.theme-winter main,body.theme-winter .content,body.theme-winter .page,body.theme-autumn .app,body.theme-autumn main,body.theme-autumn .content,body.theme-autumn .page,body.theme-spring .app,body.theme-spring main,body.theme-spring .content,body.theme-spring .page{background:var(--bg)!important;color:var(--paper);}
-body.theme-summer header,body.theme-summer nav,body.theme-summer .case-card,body.theme-summer .promo-card,body.theme-summer .settings-card,body.theme-summer .admin-card,body.theme-summer .input-modal,body.theme-summer .twofa-modal{background:var(--bg-2)!important;border-color:var(--line)!important;}
-body.theme-summer .menu-btn,body.theme-summer .balance-chip,body.theme-summer .nav-btn{background:var(--bg-3)!important;border-color:var(--line)!important;color:var(--paper);}
-body.theme-summer .nav-btn.active{background:color-mix(in srgb,var(--brass) 18%,transparent)!important;border-color:var(--brass-dim)!important;color:var(--brass-2)!important;}
-body.theme-summer .btn,body.theme-summer .rad-open{background:linear-gradient(135deg,var(--brass-2),var(--brass))!important;}
-body.theme-summer .section-sub,body.theme-summer .rad-case-label,body.theme-summer .rad-price{color:var(--muted)!important;}
-body.theme-winter .input,body.theme-winter input,body.theme-winter select,body.theme-winter textarea,body.theme-autumn .input,body.theme-autumn input,body.theme-autumn select,body.theme-autumn textarea,body.theme-spring .input,body.theme-spring input,body.theme-spring select,body.theme-spring textarea{background:var(--bg-3)!important;border-color:var(--line)!important;color:var(--paper)!important;}
-body.theme-winter .icon,body.theme-winter .accent,body.theme-winter .price,body.theme-winter .value,body.theme-autumn .icon,body.theme-autumn .accent,body.theme-autumn .price,body.theme-autumn .value,body.theme-spring .icon,body.theme-spring .accent,body.theme-spring .price,body.theme-spring .value{color:var(--brass-2)!important;}
-body.theme-autumn .case-card,body.theme-autumn .promo-card{box-shadow:inset 0 1px 0 rgba(239,153,81,.08),0 12px 32px rgba(70,28,8,.18);}
-body.theme-spring .case-card,body.theme-spring .promo-card{box-shadow:inset 0 1px 0 rgba(139,221,157,.08),0 12px 32px rgba(12,70,31,.18);}
-body.theme-winter .case-card,body.theme-winter .promo-card{box-shadow:inset 0 1px 0 rgba(131,200,255,.08),0 12px 32px rgba(5,35,70,.24);}
 
-</style>
 <style id="gdplay-case-price-right">
 #casesList .rad-case-top{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:10px!important;}
 #casesList .rad-case-top>div:last-child{margin-left:auto!important;flex:0 0 auto!important;text-align:right!important;position:relative!important;left:24px!important;}
