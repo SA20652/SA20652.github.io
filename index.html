@@ -4276,7 +4276,9 @@ function countCaseKeys(caseId){
   if(!typeIds.length) return 0;
   return (data.keys||[]).filter(k=>typeIds.includes(keyCatalogId(k))).reduce((n,k)=>n+Number(k.stack_count||1),0);
 }
+let casesRenderVersion = 0;
 function renderCases(){
+  const renderVersion = ++casesRenderVersion;
   const el=document.getElementById('casesList');
   if(!el) return;
   el.innerHTML=CASES.map((c,index)=>{
@@ -4285,7 +4287,8 @@ function renderCases(){
     const totalPrice=Number(c.price)*qty;
     const affordable=Number.isFinite(balanceNow)&&balanceNow>=totalPrice;
     const totalChance=c.items.reduce((sum,it)=>sum+Math.max(0,Number(it.chance)||0),0);
-    const topDrops=[...c.items].sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)).slice(0,1);
+    const rarityPower={common:1,rare:2,epic:3,legendary:4,mythic:5,divine:6,emerald:7};
+    const topDrops=[...c.items].sort((a,b)=>((rarityPower[b.rarity]||0)-(rarityPower[a.rarity]||0)) || ((Number(b.value)||0)-(Number(a.value)||0))).slice(0,1);
     const rarityCount=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).length;
     const drops=topDrops.map(it=>{
       const m=RARITY_META[it.rarity]||RARITY_META.common;
@@ -4303,6 +4306,7 @@ function renderCases(){
       </div>
     </article>`;
   }).join('');
+  if(renderVersion !== casesRenderVersion) return;
   renderRecentDrops();
   renderBattles();
   requestAnimationFrame(()=>{ el.querySelectorAll(".rad-case-card").forEach(card=>{card.style.transform="translateZ(0)"; card.offsetHeight;}); });
@@ -6824,4 +6828,8 @@ boot();
  #casesList .rad-case-art{width:78px!important;height:132px!important;}
  #casesList .rad-case-top h3{font-size:18px!important;}
 }
+
+/* Final case fixes */
+.rad-drop-name{min-width:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;}
+.rad-drop{min-height:34px;}
 </style>
