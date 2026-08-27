@@ -4329,6 +4329,13 @@ function spinWheelIn(container,dial,items,wonIndex){
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
 
+function buildWheel(items, wonIndex, wonValue=null, authoritativeDrop=null){
+  const dial=document.getElementById('wheelDial');
+  if(!dial) return;
+  const index = Number.isFinite(Number(wonIndex)) ? Number(wonIndex) : 0;
+  buildWheelIn(dial, items || [], index, wonValue, authoritativeDrop);
+}
+
 function runSecretReveal(){
   document.getElementById('wheelWrap').style.display = 'none';
   const crack=document.getElementById('vaultCrack'); if(crack) crack.style.display='none';
@@ -5524,7 +5531,7 @@ async function renderLeaderboard(sortBy='cases'){
       cases_opened:r.cases, cube_count:r.cube_count, battles:Number(r.battles||0),
       wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge,
       tester_badge:r.tester_badge, custom_status:r.custom_status || {}, profile_frame:r.profile_frame || '', best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
-      buffs:Array.isArray(r.buffs)?r.buffs:[]
+      buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
     }; });
     const myId = String(tgUserId()||'');
     if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
@@ -5675,7 +5682,7 @@ async function openPublicProfile(userId, seed={}){
     </div>`;
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
-  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}${((String(p.user_id||'')==='74915228121'||String(p.username||'').toLowerCase()==='kuro')?'<span class="lb-avatar-frame frame-ghost"></span>':'')}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
+  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="">`:(p.username||'?')[0].toUpperCase()}${((String(p.username||'').toLowerCase()==='kuro')?'<span class="lb-avatar-frame frame-ghost"></span>':'')}</div><div style="min-width:0"><div class="profile-name">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
   renderBestDrops(document.getElementById('publicBestDrops'),best);
   const now=Date.now();
   const list=buffs.filter(b=>!b.expires_at||new Date(b.expires_at).getTime()>now);
@@ -6584,5 +6591,34 @@ boot();
 (function(){
   const reset=()=>{ if(!data)return; data.profileFrame='default'; data.profileNameStyle='default'; persistLocal(); renderProfileCustomization(); };
   document.addEventListener('click',e=>{ if(e.target.closest?.('#profileStyleReset')) reset(); },true);
+})();
+</script>
+
+<style id="top-v7-final-fix">
+/* TOP final: VIP colors and frames */
+.lb-user {
+  font-weight:900!important;
+}
+.lb-user[style*="color"] {
+  color: inherit;
+}
+.lb-avatar-frame {
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+</style>
+<script id="top-v7-color-fix">
+(function(){
+  function fixTopColors(){
+    document.querySelectorAll('.lb-user').forEach(function(el){
+      var s=el.getAttribute('style')||'';
+      if(s.includes('color:')){
+        el.style.setProperty('color', s.match(/color:([^;]+)/)?.[1]?.trim() || '', 'important');
+      }
+    });
+  }
+  new MutationObserver(fixTopColors).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('DOMContentLoaded',fixTopColors);
 })();
 </script>
