@@ -4354,7 +4354,7 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   const strip=[];
   for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS?target:items[Math.floor(Math.random()*items.length)]);
   dial.classList.remove('is-spinning','is-stopped');
-  dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}><span>${m.icon}</span><b>${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
+  dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}><span>${m.icon}</span><b style="color:${m.color}">${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
 
@@ -6678,6 +6678,58 @@ boot();
 #spinModal .spin-result{margin-bottom:8px!important;}
 #spinModal #spinCloseBtn{position:static!important;}
 .top-user-name,[data-top-name]{color:var(--paper)}
+
+/* Final responsive vault fixes */
+#spinModal .spin-modal{
+  width:min(94vw,380px);
+  max-height:calc(100dvh - 24px);
+  overflow:hidden;
+  padding:14px;
+}
+#spinModal .wheel-wrap{
+  height:190px;
+  max-width:100%;
+}
+#spinModal .wheel-multi-row{
+  height:150px;
+  gap:6px;
+}
+#spinModal .wheel-multi-row .wheel-wrap{
+  height:150px;
+}
+#spinModal .wheel-multi-row .wheel-item b,
+#spinModal .wheel-item b{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:16px;
+}
+#spinModal .wheel-item small{
+  font-size:10px;
+}
+#spinModal .spin-result-multi{
+  max-height:170px;
+  overflow:auto;
+  width:100%;
+}
+#spinModal .spin-result-multi-item b{
+  max-width:150px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#spinModal .btn{
+  flex-shrink:0;
+}
+/* vault cards: refresh layout without changing actions */
+.vault-card{
+  gap:12px;
+}
+.vault-card .open-case-btn,
+.vault-card .case-open-btn{
+  min-height:42px;
+}
 </style>
 <script>
 (()=>{
