@@ -5741,7 +5741,7 @@ async function renderLeaderboard(sortBy='cases'){
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="lazy" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
-          <div class="lb-user name-${r.profile_name_style||'default'}" ${r.text_color?`data-text-color="${r.text_color}"`:''}>${r.username}${r.key===myId?' (ты)':''}</div>
+          <div class="lb-user name-${String(r.profile_name_style||'default').toLowerCase()}" ${r.text_color?`data-text-color="${r.text_color}"`:''}>${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
           ${customStatusBadgeHtml(r.custom_status)}
           <div class="lb-sub">${sortBy==='balance' ? r.balance.toLocaleString('ru-RU')+' монет' : sortBy==='winnings' ? r.winnings.toLocaleString('ru-RU')+' орбов выиграно' : r.cases+' кейсов открыто'}</div>
