@@ -6028,16 +6028,26 @@ async function buyPremium(){
 }
 async function startPremiumPayment(){
  try{
+  if(!window.Telegram?.WebApp?.openInvoice) throw new Error('Оплата доступна только внутри Telegram');
+  const btn=document.getElementById('premiumModalBuyBtn');
+  if(btn){btn.disabled=true;btn.textContent='Создаём счёт…';}
   const j=await apiFetch('/api/premium/create',{});
-  if(!j.invoice) throw new Error('Не удалось создать счёт');
+  if(!j.invoice || typeof j.invoice!=='string') throw new Error('Не удалось создать счёт');
   Telegram.WebApp.openInvoice(j.invoice,(status)=>{
     if(status==='paid'){
       closeModal('premiumModal');
       showToast('⭐ Premium активирован на 30 дней','success');
       setTimeout(()=>loadMe(),350);
     }else if(status==='failed'){ showToast('❌ Оплата не прошла','error'); }
+    else if(status==='cancelled'){ showToast('Оплата отменена','error'); }
+    else if(status==='pending'){ showToast('⏳ Платёж ещё обрабатывается','success'); }
+    if(btn){btn.disabled=false;btn.textContent='Купить Premium · 20 ⭐';}
   });
- }catch(e){showToast('❌ '+e.message,'error');}
+ }catch(e){
+  showToast('❌ '+e.message,'error');
+  const btn=document.getElementById('premiumModalBuyBtn');
+  if(btn){btn.disabled=false;btn.textContent='Купить Premium · 20 ⭐';}
+ }
 }
 
 const CHANNEL_BONUS_KEY='gdplay_channel_bonus_hidden_v1';
