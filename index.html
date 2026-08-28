@@ -744,7 +744,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 #startupLoader{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;}
 #startupLoader.hide{opacity:0;visibility:hidden;pointer-events:none;}
 .startup-loader-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px;}
-.startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:1px solid rgba(227,184,114,.30);box-shadow:0 8px 22px rgba(0,0,0,.30),inset 0 0 0 1px rgba(255,255,255,.035);animation:startupLogoPulse 1.8s ease-in-out infinite;transform:translateZ(0);backface-visibility:hidden;}
+.startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:0!important;box-shadow:none!important;outline:0!important;animation:startupLogoPulse 1.8s ease-in-out infinite;transform:translateZ(0);backface-visibility:hidden;}
 .startup-loader-brand{font-family:'Fraunces',serif;font-size:30px;font-weight:800;letter-spacing:.5px;color:var(--paper);}
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
@@ -4533,7 +4533,7 @@ function spinWheelIn(container,dial,items,wonIndex){
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');playBeep(920);resolve();},260);},duration+40);});
+  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},260);},duration+40);});
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -4579,6 +4579,7 @@ function showSpinResult(item, isSecret){
 }
 
 let vaultSoundAt = 0;
+let caseBeepCtx = null;
 function playBeep(freq){
   if(!getSetting('sound')) return;
   const now=Date.now();
@@ -4586,14 +4587,17 @@ function playBeep(freq){
   vaultSoundAt=now;
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
-    const ctx = new Ctx();
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type='sine'; o.frequency.value = freq || 880;
+    if(!Ctx) return;
+    if(!caseBeepCtx) caseBeepCtx = new Ctx();
+    if(caseBeepCtx.state==='suspended') caseBeepCtx.resume().catch(()=>{});
+    const ctx=caseBeepCtx;
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='sine'; o.frequency.value=freq||880;
     o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.10, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    o.start(); o.stop(ctx.currentTime + 0.25);
-    setTimeout(()=>ctx.close?.(),350);
+    const t=ctx.currentTime;
+    g.gain.setValueAtTime(0.10,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+    o.start(t); o.stop(t+0.25);
   }catch(e){}
 }
 
@@ -4865,6 +4869,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(dial) dial.style.opacity='1';
   openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
+  playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
   // Show exactly the same authoritative value that was stored on the server.
   showSpinResult(won, isSecret);
