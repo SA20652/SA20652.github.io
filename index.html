@@ -3229,7 +3229,7 @@ function applyServerState(u){
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
-  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
+  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined && String(u.profile_name_style||'default') !== String(data.profileNameStyle||'default')){ data.profileNameStyle=String(u.profile_name_style||'default'); changed=true; } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
   if(Array.isArray(u.buffs) && JSON.stringify(u.buffs)!==JSON.stringify(data.buffs)){ data.buffs=u.buffs; changed=true; }
   if(Array.isArray(u.best_drops) && JSON.stringify(u.best_drops)!==JSON.stringify(data.bestDrops)){ data.bestDrops=u.best_drops; changed=true; }
   if(Array.isArray(u.notifications)){
@@ -4399,7 +4399,6 @@ function renderCases(){
   renderRecentDrops();
   renderBattles();
   startCasePreviewAnimation();
-  requestAnimationFrame(()=>{ el.querySelectorAll(".rad-case-card").forEach(card=>{card.style.transform="translateZ(0)"; card.offsetHeight;}); });
 }
 const caseOpenQty = {};
 
@@ -5944,10 +5943,19 @@ function renderProfileCustomization(){
   });
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
 }
-function setProfileFrame(key){
+async function setProfileFrame(key){
   const info=profileFrameUnlock(key);
   if(!info.ok){ showToast('🔒 '+info.label,'error'); return; }
+  const prev=String(data.profileFrame||'default');
   data.profileFrame=key; persistLocal(); renderProfileCustomization();
+  try{
+    const j=await apiFetch('/api/profile/frame',{frame:key});
+    data.profileFrame=String(j.profile_frame||key); persistLocal(); renderProfileCustomization();
+    showToast('🖼️ Рамка сохранена');
+  }catch(e){
+    data.profileFrame=prev; persistLocal(); renderProfileCustomization();
+    showToast(e.message||'Не удалось сохранить рамку','error');
+  }
 }
 function isPremiumActive(){
   return !!(data && data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now());
