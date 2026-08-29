@@ -1762,7 +1762,7 @@ window.lockUpgradeResult=function(result,angle){
   display:block; overflow:visible;
 }
 #upgradeGauge .exact-wheel-bg{fill:#5a302e;}
-#upgradeGauge .exact-wheel-green{fill:var(--success);stroke:none;}
+#upgradeGauge .exact-wheel-green{fill:none;stroke:var(--success);stroke-width:22;stroke-linecap:butt;}
 #upgradeGauge .exact-wheel-red{
   fill:none; stroke:#6a3431; stroke-width:44;
   stroke-linecap:butt;
@@ -5373,24 +5373,20 @@ async function confirmUpgrade(){
 
     const gauge=document.getElementById('upgradeGauge');
     const pointer=document.getElementById('upgradePointer');
-    const size=212, center=size/2, radius=84, innerRadius=62;
-    // Сервер возвращает одну авторитетную величину зоны. Геометрия ниже
-    // строится непосредственно из неё: 1% = 3.6 градуса, без dasharray
-    // и без зависимости от длины окружности/округления SVG.
-    const zonePercent=Number.isFinite(Number(j.green_zone_percent))
-      ? Math.max(0,Math.min(95,Number(j.green_zone_percent))) : chance;
-    const zoneDeg=zonePercent*3.6;
-    const toPoint=(r,deg)=>{const a=(deg-90)*Math.PI/180;return [center+r*Math.cos(a),center+r*Math.sin(a)];};
-    const outerStart=toPoint(radius,0), outerEnd=toPoint(radius,zoneDeg);
-    const innerEnd=toPoint(innerRadius,zoneDeg), innerStart=toPoint(innerRadius,0);
-    const large=zoneDeg>180?1:0;
-    const greenPath=zoneDeg<=0 ? '' : `M ${outerStart[0]} ${outerStart[1]} A ${radius} ${radius} 0 ${large} 1 ${outerEnd[0]} ${outerEnd[1]} L ${innerEnd[0]} ${innerEnd[1]} A ${innerRadius} ${innerRadius} 0 ${large} 0 ${innerStart[0]} ${innerStart[1]} Z`;
+    const size=212, center=size/2, radius=73;
+    // СЕРВЕР — единственный источник истины. Берём ровно тот процент,
+    // который сервер использовал при проверке roll < chance.
+    const zonePercent=Math.max(0,Math.min(95,Number.isFinite(Number(j.green_zone_percent)) ? Number(j.green_zone_percent) : chance));
+    const exactPercent=Math.round(zonePercent*100)/100;
+    // SVG circle с pathLength=100 делает 1 единицу dash = ровно 1%
+    // полной окружности. Поэтому визуальная зона и серверный процент
+    // используют буквально одно число, без вычисления углов/длины дуги.
     gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 ${size} ${size}" aria-hidden="true">
-      <circle class="exact-wheel-bg" cx="${center}" cy="${center}" r="${radius}" fill="#6a3431"/>
-      <path class="exact-wheel-green" d="${greenPath}" fill="var(--success)" stroke="none"/>
-      <circle class="exact-wheel-inner" cx="${center}" cy="${center}" r="${innerRadius}"/>
+      <circle class="exact-wheel-bg" cx="${center}" cy="${center}" r="${radius}"/>
+      <circle class="exact-wheel-green" cx="${center}" cy="${center}" r="${radius}" pathLength="100" stroke-dasharray="${exactPercent} ${100-exactPercent}" stroke-dashoffset="0"/>
+      <circle class="exact-wheel-inner" cx="${center}" cy="${center}" r="${radius-22}"/>
     </svg>`;
-    gauge.style.setProperty('--upgrade-zone-deg',zoneDeg+'deg');
+    gauge.style.setProperty('--upgrade-zone-percent',exactPercent+'%');
     gauge.style.background='none';
     gauge.style.backgroundImage='none';
     gauge.style.setProperty('--upgrade-chance', chance+'%');
