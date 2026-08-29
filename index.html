@@ -2278,6 +2278,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #page-market .market-buy,#page-market .market-remove{min-width:64px;padding:9px 10px!important;border-radius:11px!important;font-size:10px!important;font-weight:800!important;}
 .market-premium-tag{display:inline-flex;align-items:center;margin-left:5px;padding:2px 5px;border-radius:6px;border:1px solid rgba(201,151,77,.22);color:var(--brass-2);background:rgba(201,151,77,.07);font:800 7px 'IBM Plex Mono',monospace;vertical-align:middle;}
 @media(max-width:390px){.market-hero-stats{gap:5px}.market-hero-stats>div{padding:8px}.market-hero-stats b{font-size:10px}.market-premium-bonus span{font-size:8px}.market-title{font-size:21px}}
+#page-market{overflow-x:hidden;box-sizing:border-box;}#page-market *{box-sizing:border-box;}#page-market .market-hero,#page-market .market-premium-bonus,#page-market .market-form,#page-market .market-list-head,#page-market #marketList{max-width:100%;min-width:0;}#page-market .market-card{min-width:0;overflow:hidden;}#page-market .market-info{min-width:0;overflow:hidden;}#page-market .market-buy,#page-market .market-remove{max-width:100%;white-space:nowrap;}
 
 
 #page-profile .daily-card{margin:0 0 12px!important;padding:14px!important;border-radius:20px!important;background:linear-gradient(135deg,rgba(63,138,112,.13),rgba(255,255,255,.015)),#15120f!important;border-color:rgba(63,138,112,.3)!important;box-shadow:0 12px 28px rgba(0,0,0,.22)!important;}
@@ -5189,6 +5190,19 @@ function rejectSellAll(){ closeModal('sellConfirmModal'); showToast('Прода�
 function formatPrice(v){ return Number(v||0).toLocaleString('ru-RU'); }
 
 let marketItemsCache = [];
+
+// Скрытие Premium-плашки магазина. Работает независимо от общего обработчика кнопок.
+(function initMarketPremiumBonusClose(){
+  const closeBtn = document.getElementById('marketPremiumBonusClose');
+  const bonus = document.getElementById('marketPremiumBonus');
+  if(!closeBtn || !bonus) return;
+  closeBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    storageSet('GDPLAY_MARKET_PREMIUM_BONUS_HIDDEN','1');
+    bonus.style.display='none';
+  });
+})();
 function updateMarketHeader(count){
   const bal=document.getElementById('marketBalance'); if(bal) bal.textContent=Number(data.balance||0).toLocaleString('ru-RU')+' 💰';
   const cnt=document.getElementById('marketCount'); if(cnt) cnt.textContent=String(count ?? marketItemsCache.length);
