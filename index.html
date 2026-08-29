@@ -2537,6 +2537,46 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
 @media(max-width:400px){#page-market .market-form .market-search-icon{left:14px!important;width:24px!important;height:24px!important;}#page-market .market-form .market-search-icon svg{width:21px!important;height:21px!important;}#page-market .market-form input{padding-left:42px!important;}}
 @media(max-width:350px){#page-market .market-form .market-search-icon{left:13px!important;}#page-market .market-form input{padding-left:41px!important;}}
 </style>
+<style id="gdplay-search-icon-final-v5">
+/* FINAL: optical centering for the market search icon. The SVG drawing is asymmetrical
+   because the handle extends to the right, so center the visual glyph rather than its box. */
+#page-market .market-form .market-search-icon{
+  left:16px!important;
+  top:50%!important;
+  width:24px!important;
+  height:24px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  transform:translateY(-50%)!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+}
+#page-market .market-form .market-search-icon svg{
+  display:block!important;
+  width:24px!important;
+  height:24px!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  transform:translateX(1.5px)!important;
+  overflow:visible!important;
+  flex:none!important;
+}
+#page-market .market-form input{padding-left:45px!important;}
+@media(max-width:400px){
+  #page-market .market-form .market-search-icon{left:15px!important;width:23px!important;height:23px!important;}
+  #page-market .market-form .market-search-icon svg{width:23px!important;height:23px!important;transform:translateX(1.5px)!important;}
+  #page-market .market-form input{padding-left:43px!important;}
+}
+@media(max-width:350px){
+  #page-market .market-form .market-search-icon{left:14px!important;}
+  #page-market .market-form input{padding-left:42px!important;}
+}
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -7463,4 +7503,5 @@ boot();
 .referral-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.referral-title{font-weight:800;font-size:13px}.referral-sub{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}.referral-stats{display:flex;gap:8px;margin-top:10px}.referral-stat{flex:1;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.referral-stat b{display:block;font:800 13px 'IBM Plex Mono',monospace}.referral-stat span{font-size:9px;color:var(--muted)}.referral-link{width:100%;margin-top:9px;background:rgba(0,0,0,.18);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:9px;font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}.referral-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.low-power .profile-name.gold-name,.low-power .profile-name.emerald-name,.low-power .profile-name.ruby-name,.low-power .profile-name.amethyst-name,.low-power .profile-name.ice-name,.low-power .profile-name.neon-name,.low-power .lb-user.name-gold,.low-power .lb-user.name-emerald,.low-power .lb-user.name-ruby,.low-power .lb-user.name-amethyst,.low-power .lb-user.name-ice,.low-power .lb-user.name-neon{animation:none!important;background-size:100% 100%;}
 .low-power *{scroll-behavior:auto!important}.low-power .page.active{animation:none!important}.low-power .rad-drop.reward-switch,.low-power #spinModal .wheel-wrap.reel-opening{animation:none!important}.low-power #casesList .rad-drop.reward-switch:after{animation:none!important}
 </style>
+
 
