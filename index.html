@@ -410,7 +410,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .battle-dice-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
 .battle-dice-name{font-size:11px;font-weight:600;color:var(--muted);max-width:78px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .dice3d-scene{width:60px;height:60px;perspective:340px;margin:4px 0;}
-.dice3d-cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 1.5s cubic-bezier(.22,.7,.25,1);transform:rotateX(-24deg) rotateY(-32deg);}
+.dice3d-cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .95s cubic-bezier(.12,.82,.18,1);transform:rotateX(-24deg) rotateY(-32deg);will-change:transform;}
 .dice3d-cube.winner .dice3d-face{border-color:var(--success);box-shadow:inset 0 0 0 1px var(--success), 0 0 14px rgba(76,154,118,.5);}
 .dice3d-face{position:absolute;width:60px;height:60px;background:linear-gradient(155deg,#fbf7ee,#e7ddc4);border:1.5px solid rgba(0,0,0,.18);border-radius:11px;
   display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:9px;box-sizing:border-box;box-shadow:inset 0 0 10px rgba(0,0,0,.08);}
@@ -1949,6 +1949,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .battle-player{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border:1px solid rgba(201,151,77,.12);border-radius:10px;background:rgba(0,0,0,.20);margin-top:6px;font-size:11px;}
 .battle-player>span:last-child{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--brass-2);}
 .battle-cancel,.battle-join{position:relative;z-index:1;}
+.battle-join:disabled,.battle-join-disabled{opacity:.42!important;filter:saturate(.35);cursor:not-allowed!important;box-shadow:none!important;pointer-events:none;}
 
 /* ===== MARKET V2 ===== */
 .market-form{
@@ -4582,6 +4583,14 @@ function switchTab(tab){
 
 function updateBalanceUI(){
   document.getElementById('balanceDisplay').textContent = (data.balance||0).toLocaleString('ru-RU');
+  // Сразу синхронизируем кнопки входа в батлы после любого изменения баланса.
+  document.querySelectorAll('[data-battle-stake]').forEach(btn=>{
+    const stake = Number(btn.dataset.battleStake||0);
+    const canAfford = Number(data.balance||0) >= stake;
+    btn.disabled = !canAfford;
+    btn.classList.toggle('battle-join-disabled', !canAfford);
+    btn.textContent = canAfford ? 'Присоединиться' : 'Недостаточно монет';
+  });
 }
 
 function hexA(hex, alpha){
@@ -5981,6 +5990,8 @@ async function renderBattles(){
   const el = document.getElementById('battlesList');
   try{
     const j = await apiFetch('/api/mp/battles', {});
+    // Баланс берём с сервера перед отрисовкой батлов — локальный кэш мог устареть.
+    if(j.balance != null){ data.balance = Number(j.balance); updateBalanceUI(); persistLocal(); }
     const battles = j.battles || [];
     if(!battles.length){
       el.innerHTML = '<div class="empty-state">Открытых батлов пока нет.<br>Создай первый батл.</div>';
@@ -5992,7 +6003,7 @@ async function renderBattles(){
       const mine = b.is_creator || false;
       const isDone = b.status === 'done';
       const statusBadge = isDone ? `<div class="battle-meta" style="margin-top:6px;color:var(--success)">🏆 Победил ${b.players.find(p=>String(p.user)===String(b.winner))?.name || ''} — ${Number(b.pot||0).toLocaleString('ru-RU')} 💰</div>` : '';
-      return `<div class="battle-card"><div class="battle-top"><div><div class="battle-title">${b.mode==='high'?'Большее число':'Рандом'}</div><div class="battle-meta">${b.players.length}/${b.max} игроков · ставка ${Number(b.stake).toLocaleString('ru-RU')} 💰</div></div><div class="battle-prize">${(b.stake*b.max).toLocaleString('ru-RU')} 💰</div></div><div>${b.players.map(p=>`<div class="battle-player"><span>${p.name}</span><span>${p.roll==null?'Ждёт':p.roll}</span></div>`).join('')}</div>${statusBadge}${mine&&b.status==='open'?`<button class="btn-ghost battle-cancel" data-action="cancel-battle" data-cancel-battle="${b.id}">Отменить батл</button>`:''}${!mine&&!joined&&!full&&b.status==='open'?`<button class="btn" data-action="join-battle" data-join-battle="${b.id}" style="width:100%;margin-top:9px">Присоединиться</button>`:''}</div>`;
+      return `<div class="battle-card"><div class="battle-top"><div><div class="battle-title">${b.mode==='high'?'Большее число':'Рандом'}</div><div class="battle-meta">${b.players.length}/${b.max} игроков · ставка ${Number(b.stake).toLocaleString('ru-RU')} 💰</div></div><div class="battle-prize">${(b.stake*b.max).toLocaleString('ru-RU')} 💰</div></div><div>${b.players.map(p=>`<div class="battle-player"><span>${p.name}</span><span>${p.roll==null?'Ждёт':p.roll}</span></div>`).join('')}</div>${statusBadge}${mine&&b.status==='open'?`<button class="btn-ghost battle-cancel" data-action="cancel-battle" data-cancel-battle="${b.id}">Отменить батл</button>`:''}${!mine&&!joined&&!full&&b.status==='open'?(Number(data.balance||0)>=Number(b.stake||0)?`<button class="btn battle-join" data-action="join-battle" data-join-battle="${b.id}" data-battle-stake="${Number(b.stake||0)}" style="width:100%;margin-top:9px">Присоединиться</button>`:`<button class="btn battle-join battle-join-disabled" data-action="join-battle" data-join-battle="${b.id}" data-battle-stake="${Number(b.stake||0)}" style="width:100%;margin-top:9px" disabled>Недостаточно монет</button>`):''}</div>`;
     }).join('');
 
     // Если батл только что завершился (авто-старт при заполнении) и я в нём участвовал,
@@ -6157,9 +6168,9 @@ function animateBattleDice(result, myId){
           const cube = document.querySelector(`#dicewrap-${r.user} .dice3d-cube`);
           if(!cube) return;
           const rot = DICE_FACE_ROTATION[r.roll] || DICE_FACE_ROTATION[1];
-          // несколько полных оборотов для эффекта броска + финальный угол нужной грани
-          const spinsX = 3 + Math.floor(Math.random()*2);
-          const spinsY = 3 + Math.floor(Math.random()*2);
+            // Быстрый бросок: больше оборотов за короткое время, затем точная остановка на грани.
+          const spinsX = 5 + Math.floor(Math.random()*3);
+          const spinsY = 5 + Math.floor(Math.random()*3);
           cube.style.transform = `rotateX(${spinsX*360 + rot.x + 16}deg) rotateY(${spinsY*360 + rot.y + 22}deg)`;
         });
       });
@@ -6180,7 +6191,7 @@ function animateBattleDice(result, myId){
       closeBtn.onclick = closeBattleDiceModal;
       // Не оставляем экран затемнённым, если пользователь не нажал «Готово».
       battleDiceAutoCloseTimer = setTimeout(closeBattleDiceModal, 3600);
-    }, 1650);
+    }, 1050);
   });
 }
 
