@@ -2497,6 +2497,36 @@ header .header-right{margin-left:auto!important;justify-content:flex-end!importa
 .auth-logo-text{font-family:'Fraunces',serif;font-weight:800;font-size:30px;letter-spacing:.5px;color:var(--paper);}
 </style>
 </style>
+
+<style id="gdplay-profile-top-match-v3">
+/* Small final visual adjustments requested by the user. */
+header .brand-mark{width:38px!important;height:38px!important;flex-basis:38px!important;border-radius:11px!important;}
+header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
+@media(max-width:400px){header .brand-mark{width:36px!important;height:36px!important;flex-basis:36px!important;}header .brand-name{font-size:16px!important;}}
+
+/* Search icon: smaller than the previous version, but still comfortably visible and clipped inside the field. */
+#page-market .market-form{overflow:hidden!important;}
+#page-market .market-search-icon{left:13px!important;width:23px!important;height:23px!important;transform:translateY(-50%)!important;overflow:hidden!important;}
+#page-market .market-search-icon svg{width:22px!important;height:22px!important;max-width:22px!important;max-height:22px!important;}
+#page-market .market-form input{padding-left:42px!important;}
+@media(max-width:400px){#page-market .market-search-icon{left:12px!important;width:22px!important;height:22px!important;}#page-market .market-search-icon svg{width:21px!important;height:21px!important;}#page-market .market-form input{padding-left:40px!important;}}
+
+/* Public profile in TOP intentionally follows the same visual language as the user's own profile. */
+.public-profile-modal{padding:14px!important;background:var(--bg-2)!important;}
+.public-profile-shell{min-width:0;}
+.public-profile-head-v2{margin:0 0 10px!important;padding:13px!important;gap:12px!important;border-radius:16px!important;}
+.public-profile-avatar-wrap{width:76px!important;height:76px!important;}
+.public-profile-avatar-wrap .profile-avatar{width:70px!important;height:70px!important;}
+.public-profile-avatar{font-size:22px!important;}
+.public-profile-avatar-frame{position:absolute!important;inset:0!important;border-radius:50%!important;pointer-events:none!important;z-index:4!important;box-sizing:border-box!important;}
+.public-profile-balance{margin-top:4px;color:var(--brass-2)!important;}
+.public-profile-stats-v2{margin-top:0!important;margin-bottom:10px!important;}
+.public-profile-section-title{margin:12px 2px 7px!important;font-size:11px!important;}
+.public-profile-modal .public-market-list{margin-top:0!important;}
+.public-profile-modal .public-market-card{border-radius:12px!important;padding:9px!important;}
+.public-profile-modal .best-drops{margin-top:0!important;}
+.public-profile-modal .buff-list{margin-top:0!important;}
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -6293,7 +6323,34 @@ async function openPublicProfile(userId, seed={}){
     </div>`;
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
-  body.innerHTML=`<div class="public-profile-head"><div class="public-profile-avatar" style="position:relative;overflow:visible">${p.avatar?`<img src="${p.avatar}" alt="" loading="lazy" decoding="async">`:(p.username||'?')[0].toUpperCase()}${((String(p.username||'').toLowerCase()==='kuro')?'<span class="lb-avatar-frame frame-ghost"></span>':'')}</div><div style="min-width:0"><div class="profile-name ${p.profile_name_style&&p.profile_name_style!=='default'?p.profile_name_style+'-name':''}">${p.username||'Игрок'}</div><div class="public-profile-badges">${profileBadgeHtml(p)}</div><div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div></div></div><div class="public-profile-stats"><div class="public-profile-stat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов</span></div><div class="public-profile-stat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов</span></div><div class="public-profile-stat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div><div class="public-profile-stat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div></div><div class="section-title" style="margin-top:14px">🛒 На продаже</div><div class="public-market-list">${sellingHtml}</div><div class="section-title" style="margin-top:14px">🏆 Лучшие дропы</div><div id="publicBestDrops" class="best-drops"></div><div class="section-title" style="margin-top:14px">⚡ Активные баффы</div><div id="publicBuffs" class="buff-list"></div>`;
+  const publicFrame = String(p.profile_frame||'').toLowerCase();
+  const publicFrameHtml = publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '';
+  body.innerHTML=`<div class="public-profile-shell">
+    <div class="profile-head public-profile-head-v2">
+      <div class="profile-avatar-wrap public-profile-avatar-wrap">
+        <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="lazy" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
+        ${publicFrameHtml}
+      </div>
+      <div class="profile-head-info">
+        <div class="profile-name ${p.profile_name_style&&p.profile_name_style!=='default'?p.profile_name_style+'-name':''}">${p.username||'Игрок'}</div>
+        <div class="profile-badges">${profileBadgeHtml(p)}</div>
+        <div class="profile-rank">${rankForBalance(Number(p.balance||0))}</div>
+        <div class="mono public-profile-balance">${Number(p.balance||0).toLocaleString('ru-RU')} 💰</div>
+      </div>
+    </div>
+    <div class="profile-stats public-profile-stats-v2">
+      <div class="pstat"><b>${Number(p.cases_opened||0).toLocaleString('ru-RU')}</b><span>кейсов открыто</span></div>
+      <div class="pstat"><b>${cubeCount.toLocaleString('ru-RU')}</b><span>кубов в инвентаре</span></div>
+      <div class="pstat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div>
+      <div class="pstat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div>
+    </div>
+    <div class="section-title public-profile-section-title">🛒 На продаже</div>
+    <div class="public-market-list">${sellingHtml}</div>
+    <div class="section-title public-profile-section-title">🏆 Лучшие дропы</div>
+    <div id="publicBestDrops" class="best-drops"></div>
+    <div class="section-title public-profile-section-title">⚡ Активные баффы</div>
+    <div id="publicBuffs" class="buff-list"></div>
+  </div>`;
   renderBestDrops(document.getElementById('publicBestDrops'),best);
   const now=Date.now();
   const list=buffs.filter(b=>!b.expires_at||new Date(b.expires_at).getTime()>now);
