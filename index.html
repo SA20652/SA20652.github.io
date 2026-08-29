@@ -2195,6 +2195,41 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .startup-loader-logo,.dice3d-cube,.wheel-dial{transform:translateZ(0);}
 @media (prefers-reduced-motion: reduce){.startup-loader-logo{animation:none!important;}}
 </style>
+<style id="gdplay-old-upgrader-interface">
+/* ============ UPGRADER ============ */
+.upgrade-modal{max-height:82vh;max-height:82dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.upgrade-catalog-list{max-height:44vh;max-height:44dvh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.upgrade-cat-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;width:100%;text-align:left;font-family:inherit;}
+.upgrade-cat-item:active{transform:scale(.98);}
+.upgrade-cat-name{font-size:13px;font-weight:600;}
+.upgrade-cat-value{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--muted);}
+.upgrade-compare{display:flex;align-items:center;gap:10px;margin:6px 0 14px;}
+.upgrade-compare-item{flex:1;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;}
+.upgrade-arrow{font-size:20px;color:var(--brass);}
+.upgrade-item-name{font-weight:700;font-size:14px;margin:4px 0;}
+.upgrade-chance-box{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;}
+.upgrade-chance-big{font-size:34px;font-weight:800;color:var(--emerald);margin:4px 0;}
+.upgrade-chance-bar{height:8px;border-radius:5px;background:var(--bg-3);overflow:hidden;margin-top:6px;}
+.upgrade-chance-fill{height:100%;background:var(--emerald);border-radius:5px;transition:width .4s ease;}
+.upgrade-ring{width:130px;height:130px;border-radius:50%;margin:10px auto 0;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;border:8px solid var(--bg-3);}
+.upgrade-ring.win{border-color:var(--emerald);color:var(--emerald);}
+.upgrade-ring.lose{border-color:var(--danger);color:var(--danger);}
+.upgrade-gauge-wrap{position:relative;width:200px;height:200px;margin:14px auto 0;}
+.upgrade-gauge{width:100%;height:100%;border-radius:50%;box-shadow:inset 0 0 0 4px var(--bg-3), 0 10px 26px rgba(0,0,0,.45);position:relative;}
+.upgrade-gauge::after{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 22px rgba(0,0,0,.35);pointer-events:none;}
+.upgrade-gauge-center{position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:var(--paper);transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.55);z-index:2;border:2px solid var(--brass-dim);}
+.upgrade-pointer{position:absolute;top:50%;left:50%;width:88px;height:14px;margin-left:0;margin-top:-7px;transform-origin:0 50%;transform:rotate(0deg);transition:transform 2.6s cubic-bezier(.15,.85,.15,1);z-index:1;
+  background:var(--paper);
+  clip-path:polygon(0% 20%, 78% 20%, 78% 0%, 100% 50%, 78% 100%, 78% 80%, 0% 80%);
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));}
+
+
+.upgrade-gauge-wrap{width:200px!important;height:200px!important;margin:14px auto 0!important;filter:none!important;}
+.upgrade-gauge{width:100%!important;height:100%!important;border-radius:50%!important;position:relative!important;overflow:hidden!important;border:0!important;background-image:none!important;box-shadow:inset 0 0 0 4px var(--bg-3),0 10px 26px rgba(0,0,0,.45)!important;}
+.upgrade-gauge::before{display:none!important;}
+.upgrade-gauge::after{display:block!important;content:''!important;position:absolute!important;inset:0!important;border-radius:50%!important;box-shadow:inset 0 0 22px rgba(0,0,0,.35)!important;pointer-events:none!important;}
+.upgrade-pointer{width:88px!important;height:14px!important;margin-top:-7px!important;background:var(--paper)!important;clip-path:polygon(0% 20%,78% 20%,78% 0%,100% 50%,78% 100%,78% 80%,0% 80%)!important;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))!important;}
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -2670,18 +2705,14 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
         </div>
       </div>
       <div class="upgrade-chance-box">
-        <div class="section-sub" style="margin:0">Шанс победы</div>
+        <div class="section-sub" style="margin:0">Шанс улучшения</div>
         <div id="upgradeChanceValue" class="upgrade-chance-big"></div>
         <div class="upgrade-chance-bar"><div id="upgradeChanceFill" class="upgrade-chance-fill"></div></div>
       </div>
       <div class="upgrade-stake">
         <div class="upgrade-stake-row"><span class="section-sub" style="margin:0">Доп. ставка монетами</span><span id="upgradeStakeValue" class="upgrade-stake-value">0 💰</span></div>
         <input id="upgradeStakeRange" class="upgrade-range" type="range" min="0" max="0" step="10" value="0">
-        <div class="upgrade-note">Шанс зависит от редкости цели. Доп. ставка даёт отдельный небольшой бонус, но цена куба на шанс не влияет.</div>
-      </div>
-      <div class="upgrade-fast-row">
-        <div><div class="upgrade-fast-label">⚡ Открыть быстро</div><div class="upgrade-fast-hint">Ускоряет вращение результата. Сохраняется автоматически.</div></div>
-        <label class="upgrade-switch" title="Быстрое открытие"><input type="checkbox" id="upgradeFastToggle"><span class="upgrade-switch-track"><span class="upgrade-switch-thumb"></span></span><span class="upgrade-switch-text" id="upgradeFastLabel">Выключено</span></label>
+        <div class="upgrade-note">Чем больше добавишь к ставке, тем выше текущий шанс.</div>
       </div>
       <button class="btn" id="upgradeConfirmBtn" style="width:100%;margin-top:12px">Улучшить</button>
       <button class="btn-ghost" id="upgradeBackBtn" style="width:100%;margin-top:8px">Выбрать другой предмет</button>
@@ -2699,35 +2730,6 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   </div>
 </div>
 
-
-<div class="modal-overlay" id="clickerModal">
-  <div class="input-modal clicker-modal">
-    <h3>💰 Монетный кликер</h3>
-    <div class="clicker-balance">
-      <div class="clicker-balance-value"><span id="clickerCoinsValue">0</span> 💰</div>
-      <div class="clicker-sub">+1 монета за честный клик · награда подтверждается сервером</div>
-    </div>
-    <button type="button" class="clicker-orb" id="clickerOrb" aria-label="Кликнуть">💰</button>
-    <div class="clicker-progress"><div id="clickerProgressFill"></div></div>
-    <div class="clicker-status" id="clickerStatus">Нажимай в нормальном темпе — слишком частые клики блокируются.</div>
-    <div class="coin-pack-section">
-      <div class="coin-pack-title">⭐ Купить монеты за Stars</div>
-      <div class="coin-pack-list" id="coinPackList">
-        <button type="button" class="coin-pack-btn" data-coin-stars="5"><span class="coin-pack-coins">7 000 💰</span><span class="coin-pack-price">5 ⭐</span></button>
-        <button type="button" class="coin-pack-btn" data-coin-stars="10"><span class="coin-pack-coins">16 000 💰</span><span class="coin-pack-price">10 ⭐</span></button>
-        <button type="button" class="coin-pack-btn" data-coin-stars="25"><span class="coin-pack-coins">45 000 💰</span><span class="coin-pack-price">25 ⭐</span></button>
-        <button type="button" class="coin-pack-btn" data-coin-stars="50"><span class="coin-pack-coins">100 000 💰</span><span class="coin-pack-price">50 ⭐</span></button>
-        <button type="button" class="coin-pack-btn" data-coin-stars="100"><span class="coin-pack-coins">210 000 💰</span><span class="coin-pack-price">100 ⭐</span></button>
-        <button type="button" class="coin-pack-btn" data-coin-stars="250"><span class="coin-pack-coins">500 000 💰</span><span class="coin-pack-price">250 ⭐</span></button>
-        <button type="button" class="coin-pack-btn" data-coin-stars="500"><span class="coin-pack-coins">750 000 💰</span><span class="coin-pack-price">500 ⭐</span></button>
-      </div>
-    </div>
-    <button type="button" class="btn-ghost" id="clickerCloseBtn" style="width:100%;margin-top:14px">Закрыть</button>
-  </div>
-</div>
-
-<div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> Орб-рывков в день</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <div class="spin-topbar">
@@ -5371,44 +5373,19 @@ async function confirmUpgrade(){
     const roll=Math.max(0,Math.min(100,Number(serverRollRaw)||0));
     refreshUpgradeChance(chance);
 
-    const gauge=document.getElementById('upgradeGauge');
-    const pointer=document.getElementById('upgradePointer');
-    const size=212, center=size/2, radius=73;
-    // СЕРВЕР — единственный источник истины. Берём ровно тот процент,
-    // который сервер использовал при проверке roll < chance.
-    const zonePercent=Math.max(0,Math.min(95,Number.isFinite(Number(j.green_zone_percent)) ? Number(j.green_zone_percent) : chance));
-    const exactPercent=Math.round(zonePercent*100)/100;
-    // SVG circle с pathLength=100 делает 1 единицу dash = ровно 1%
-    // полной окружности. Поэтому визуальная зона и серверный процент
-    // используют буквально одно число, без вычисления углов/длины дуги.
-    gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 ${size} ${size}" aria-hidden="true">
-      <circle class="exact-wheel-bg" cx="${center}" cy="${center}" r="${radius}"/>
-      <circle class="exact-wheel-green" cx="${center}" cy="${center}" r="${radius}" pathLength="100" stroke-dasharray="${exactPercent} ${100-exactPercent}" stroke-dashoffset="0"/>
-      <circle class="exact-wheel-inner" cx="${center}" cy="${center}" r="${radius-22}"/>
-    </svg>`;
-    gauge.style.setProperty('--upgrade-zone-percent',exactPercent+'%');
-    gauge.style.background='none';
+    const gauge=document.getElementById('upgradeGauge'), pointer=document.getElementById('upgradePointer');
+    // Старый интерфейс апгрейдера: классический круговой индикатор.
+    const serverChanceRaw=Number(j.chance);
+    const serverRollRaw=Number(j.roll);
+    const chance=Math.max(0,Math.min(95,Number.isFinite(serverChanceRaw)?serverChanceRaw:0));
+    const roll=Math.max(0,Math.min(100,Number.isFinite(serverRollRaw)?serverRollRaw:0));
+    const chanceDeg=(chance/100)*360;
+    gauge.style.background=`conic-gradient(from 0deg, var(--success) 0deg ${chanceDeg}deg, var(--danger) ${chanceDeg}deg 360deg)`;
     gauge.style.backgroundImage='none';
-    gauge.style.setProperty('--upgrade-chance', chance+'%');
-
-    // Положение указателя также считается от того же 0..100 диапазона.
-    const stopDeg=(roll/100)*360;
-    const epsilon=Math.min(1.25,Math.max(.08,chance*3.6/80));
-    let visualDeg=stopDeg;
-    if(j.success && chance<100) visualDeg=Math.min(chance*3.6-epsilon,Math.max(epsilon,visualDeg));
-    if(!j.success) visualDeg=Math.max(chance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
-
-    pointer.style.transform='translateX(-50%)';
-    const fast=isUpgradeFast();
-    const duration=fast ? 400 : 900;
-    const finalAngle=90 - visualDeg + (360*5);
-    gauge.style.transition='none';
-    gauge.style.transform='rotate(0deg)';
-    void gauge.offsetWidth;
-    requestAnimationFrame(()=>{
-      gauge.style.transition=`transform ${duration}ms cubic-bezier(.15,.75,.2,1)`;
-      gauge.style.transform=`rotate(${finalAngle}deg)`;
-    });
+    pointer.style.transition='none'; pointer.style.transform='rotate(0deg)';
+    void pointer.offsetWidth; pointer.style.transition='';
+    const finalAngle=360*4+(roll/100)*360-90;
+    requestAnimationFrame(()=>{pointer.style.transform=`rotate(${finalAngle}deg)`;});
     setTimeout(()=>{
       document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»' + (j.protected ? ' 🛡️ Защита от серии' : '')) : 'Не повезло — предмет потерян';
       playBeep(j.success?1200:300);
