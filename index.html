@@ -1756,6 +1756,7 @@ window.lockUpgradeResult=function(result,angle){
   border-radius:50%!important;
   background:#5a302e;
   overflow:hidden!important;
+  transform-origin:50% 50%!important;
 }
 #upgradeGauge .exact-wheel-svg{
   position:absolute; inset:0; width:100%; height:100%;
@@ -5208,15 +5209,20 @@ function getUpgradeSource(){
   if(found){upgradeSource.index=arr.indexOf(found); upgradeSource.ref=found; return found;}
   return arr[upgradeSource.index] || null;
 }
+function normalizeUpgradeChance(value){
+  const n=Number(value);
+  if(!Number.isFinite(n)) return 0;
+  // One canonical value is used everywhere: label, bar and wheel.
+  // The hard cap is 95%, and we round only once to one decimal place.
+  return Math.max(0, Math.min(95, Math.round(n*10)/10));
+}
 function getUpgradeChance(){
   const source=getUpgradeSource();
   if(!source || !upgradeTarget) return 0;
   const sourceValue=Math.max(0,Number(source.value||0));
   const targetValue=Math.max(1,Number(upgradeTarget.value||1));
   const effectiveCoverage=sourceValue+Math.max(0,Number(upgradeStake||0));
-  // The number shown in the UI is the exact sector size used by the wheel.
-  // Keep one formula and one cap so the label, bar and wheel cannot drift apart.
-  return Math.max(0, Math.min(95, (effectiveCoverage/targetValue)*100));
+  return normalizeUpgradeChance((effectiveCoverage/targetValue)*100);
 }
 function refreshUpgradeStake(){
   const source=getUpgradeSource();
@@ -5233,11 +5239,10 @@ function refreshUpgradeStake(){
   label.textContent=upgradeStake.toLocaleString('ru-RU')+' 💰';
 }
 function refreshUpgradeChance(chanceOverride=null){
-  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(95,Number(chanceOverride)||0));
+  const chance=normalizeUpgradeChance(chanceOverride==null?getUpgradeChance():chanceOverride);
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
-  // Визуальная шкала всегда 1:1 с отображаемым процентом: никаких ±30%.
   if(fill) fill.style.width=chance+'%';
   const stakeValue=document.getElementById('upgradeStakeValue');
   if(stakeValue) stakeValue.textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
@@ -5366,28 +5371,31 @@ async function confirmUpgrade(){
     document.getElementById('upgradeStepResult').style.display='block';
     const serverChanceRaw=Number(j.chance);
     const serverRollRaw=Number(j.roll);
-    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(95,serverChanceRaw)):0;
+    const chance=normalizeUpgradeChance(serverChanceRaw);
     const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
-    refreshUpgradeChance(serverChance);
+    refreshUpgradeChance(chance);
 
     const gauge=document.getElementById('upgradeGauge');
     const pointer=document.getElementById('upgradePointer');
 
-    // Exact probability wheel: conic-gradient uses the same 0..100 value
-    // as the label, so every 1% is exactly 3.6 degrees.
-    // Используем одно и то же округлённое значение для текста и геометрии.
-    // Иначе, например, 37.96% могло отображаться как 38.0%, а сектор строился
-    // по 37.96%, что на небольшом круге визуально давало ощущение меньшей зоны.
-    const chance=Math.max(0,Math.min(95,Number(serverChance.toFixed(1))));
-    const chanceDeg=chance*3.6;
-    gauge.innerHTML='';
+    // The wheel is drawn from the exact same canonical percentage as the label.
+    // SVG pathLength=100 makes the green arc mathematically equal to chance%.
+    // This avoids conic-gradient/compositing rounding differences on WebView.
+    const circumference=100;
+    const green=chance;
+    const red=100-green;
+    gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="exact-wheel-bg" cx="50" cy="50" r="49"/>
+      <circle class="exact-wheel-red" cx="50" cy="50" r="36" pathLength="${circumference}" stroke-dasharray="${red} ${green}" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+      <circle class="exact-wheel-green" cx="50" cy="50" r="36" pathLength="${circumference}" stroke-dasharray="${green} ${red}" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+      <circle class="exact-wheel-inner" cx="50" cy="50" r="27"/>
+    </svg>`;
     gauge.style.background='none';
-    gauge.style.backgroundImage=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, #6a3431 ${chanceDeg}deg 360deg)`;
+    gauge.style.backgroundImage='none';
     gauge.style.setProperty('--upgrade-chance', chance+'%');
 
-    // The roll is also mapped directly: 0..100 -> 0..360 degrees.
-    // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
-    // exactly halfway through that green 95% sector.
+    // 0..100 roll maps directly to 0..360 degrees.
+    // The green arc itself is never scaled or stretched during animation.
     const stopDeg=(roll/100)*360;
     const epsilon=Math.min(1.25,Math.max(.08,serverChance*3.6/80));
     let visualDeg=stopDeg;
