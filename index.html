@@ -1762,7 +1762,10 @@ window.lockUpgradeResult=function(result,angle){
   display:block; overflow:visible;
 }
 #upgradeGauge .exact-wheel-bg{fill:#5a302e;}
-#upgradeGauge .exact-wheel-green{fill:var(--success);stroke:none;}
+#upgradeGauge .exact-wheel-green{
+  fill:none; stroke:var(--success); stroke-width:44;
+  stroke-linecap:butt;
+}
 #upgradeGauge .exact-wheel-red{
   fill:none; stroke:#6a3431; stroke-width:44;
   stroke-linecap:butt;
@@ -5230,7 +5233,7 @@ function refreshUpgradeStake(){
   label.textContent=upgradeStake.toLocaleString('ru-RU')+' 💰';
 }
 function refreshUpgradeChance(chanceOverride=null){
-  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(95,Math.round((Number(chanceOverride)||0)*10)/10));
+  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(95,Number(chanceOverride)||0));
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
@@ -5364,44 +5367,36 @@ async function confirmUpgrade(){
     const serverChanceRaw=Number(j.chance);
     const serverRollRaw=Number(j.roll);
     const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(95,serverChanceRaw)):0;
-    // ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ: одно и то же значение в десятых процента
-    // используется для текста и геометрии колеса. SVG-дуга исключает
-    // расхождения conic-gradient/округления браузера.
-    const chance=Math.max(0,Math.min(95,Math.round((Number(serverChance)||0)*10)/10));
-    const roll=Math.max(0,Math.min(100,Number(serverRollRaw)||0));
-    refreshUpgradeChance(chance);
+    const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
+    refreshUpgradeChance(serverChance);
 
     const gauge=document.getElementById('upgradeGauge');
     const pointer=document.getElementById('upgradePointer');
-    const size=212, center=size/2, radius=84, innerRadius=62;
-    // Сервер возвращает одну авторитетную величину зоны. Геометрия ниже
-    // строится непосредственно из неё: 1% = 3.6 градуса, без dasharray
-    // и без зависимости от длины окружности/округления SVG.
-    const zonePercent=Number.isFinite(Number(j.green_zone_percent))
-      ? Math.max(0,Math.min(95,Number(j.green_zone_percent))) : chance;
-    const zoneDeg=zonePercent*3.6;
-    const toPoint=(r,deg)=>{const a=(deg-90)*Math.PI/180;return [center+r*Math.cos(a),center+r*Math.sin(a)];};
-    const outerStart=toPoint(radius,0), outerEnd=toPoint(radius,zoneDeg);
-    const innerEnd=toPoint(innerRadius,zoneDeg), innerStart=toPoint(innerRadius,0);
-    const large=zoneDeg>180?1:0;
-    const greenPath=zoneDeg<=0 ? '' : `M ${outerStart[0]} ${outerStart[1]} A ${radius} ${radius} 0 ${large} 1 ${outerEnd[0]} ${outerEnd[1]} L ${innerEnd[0]} ${innerEnd[1]} A ${innerRadius} ${innerRadius} 0 ${large} 0 ${innerStart[0]} ${innerStart[1]} Z`;
-    gauge.innerHTML=`<svg class="exact-wheel-svg" viewBox="0 0 ${size} ${size}" aria-hidden="true">
-      <circle class="exact-wheel-bg" cx="${center}" cy="${center}" r="${radius}" fill="#6a3431"/>
-      <path class="exact-wheel-green" d="${greenPath}" fill="var(--success)" stroke="none"/>
-      <circle class="exact-wheel-inner" cx="${center}" cy="${center}" r="${innerRadius}"/>
-    </svg>`;
-    gauge.style.setProperty('--upgrade-zone-deg',zoneDeg+'deg');
+
+    // Exact probability wheel: conic-gradient uses the same 0..100 value
+    // as the label, so every 1% is exactly 3.6 degrees.
+    // Используем одно и то же округлённое значение для текста и геометрии.
+    // Иначе, например, 37.96% могло отображаться как 38.0%, а сектор строился
+    // по 37.96%, что на небольшом круге визуально давало ощущение меньшей зоны.
+    const chance=Math.max(0,Math.min(95,Number(serverChance.toFixed(1))));
+    const chanceDeg=chance*3.6;
+    gauge.innerHTML='';
     gauge.style.background='none';
-    gauge.style.backgroundImage='none';
+    gauge.style.backgroundImage=`conic-gradient(from -90deg, var(--success) 0deg ${chanceDeg}deg, #6a3431 ${chanceDeg}deg 360deg)`;
     gauge.style.setProperty('--upgrade-chance', chance+'%');
 
-    // Положение указателя также считается от того же 0..100 диапазона.
+    // The roll is also mapped directly: 0..100 -> 0..360 degrees.
+    // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
+    // exactly halfway through that green 95% sector.
     const stopDeg=(roll/100)*360;
-    const epsilon=Math.min(1.25,Math.max(.08,chance*3.6/80));
+    const epsilon=Math.min(1.25,Math.max(.08,serverChance*3.6/80));
     let visualDeg=stopDeg;
-    if(j.success && chance<100) visualDeg=Math.min(chance*3.6-epsilon,Math.max(epsilon,visualDeg));
-    if(!j.success) visualDeg=Math.max(chance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
+    if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
+    if(!j.success) visualDeg=Math.max(serverChance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
 
+    // Fixed indicator under the spindle: the wheel rotates beneath it.
+    // This keeps the arrow straight and makes the stopped segment line up
+    // with the exact server roll.
     pointer.style.transform='translateX(-50%)';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
