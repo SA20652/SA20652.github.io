@@ -5233,7 +5233,7 @@ function refreshUpgradeStake(){
   label.textContent=upgradeStake.toLocaleString('ru-RU')+' 💰';
 }
 function refreshUpgradeChance(chanceOverride=null){
-  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(100,Number(chanceOverride)||0));
+  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(95,Number(chanceOverride)||0));
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
