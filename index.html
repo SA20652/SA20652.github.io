@@ -6168,10 +6168,24 @@ function animateBattleDice(result, myId){
           const cube = document.querySelector(`#dicewrap-${r.user} .dice3d-cube`);
           if(!cube) return;
           const rot = DICE_FACE_ROTATION[r.roll] || DICE_FACE_ROTATION[1];
-            // Быстрый бросок: больше оборотов за короткое время, затем точная остановка на грани.
+          // Настоящий быстрый бросок через Web Animations API.
+          // Не зависит от transition в CSS и поэтому не ломается настройкой reduce-motion.
+          const start = 'rotateX(-24deg) rotateY(-32deg)';
           const spinsX = 5 + Math.floor(Math.random()*3);
           const spinsY = 5 + Math.floor(Math.random()*3);
-          cube.style.transform = `rotateX(${spinsX*360 + rot.x + 16}deg) rotateY(${spinsY*360 + rot.y + 22}deg)`;
+          const end = `rotateX(${spinsX*360 + rot.x + 16}deg) rotateY(${spinsY*360 + rot.y + 22}deg)`;
+          cube.style.transition = 'none';
+          cube.style.transform = start;
+          if(cube._battleDiceAnim){ try{ cube._battleDiceAnim.cancel(); }catch(_){} }
+          cube._battleDiceAnim = cube.animate(
+            [{transform:start}, {transform:end}],
+            {duration:900, easing:'cubic-bezier(.12,.82,.18,1)', fill:'forwards'}
+          );
+          cube._battleDiceAnim.onfinish = ()=>{
+            cube.style.transform = end;
+            try{ cube._battleDiceAnim.cancel(); }catch(_){}
+            cube._battleDiceAnim = null;
+          };
         });
       });
     });
