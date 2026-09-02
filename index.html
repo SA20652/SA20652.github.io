@@ -652,24 +652,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 
 /* ============ ORB RUSH ============ */
 
-.mines-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:13px;box-shadow:var(--shadow);}
-.mines-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:11px;}
-.mines-stats>div{min-width:0;padding:9px 7px;border:1px solid var(--line);border-radius:11px;background:var(--bg-3);text-align:center;}
-.mines-stats span{display:block;color:var(--muted);font-size:8px;margin-bottom:4px;}
-.mines-stats b{display:block;font:800 12px 'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mines-message{text-align:center;color:var(--muted);font-size:11px;min-height:18px;margin:8px 0 11px;}
-.mines-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
-.mine-cell{aspect-ratio:1;border:1px solid rgba(236,228,211,.09);border-radius:13px;background:linear-gradient(145deg,#211b17,#15120f);color:var(--paper);font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 7px 14px rgba(0,0,0,.14);transition:transform .15s,border-color .15s,background .15s;}
-.mine-cell:active{transform:scale(.96);}.mine-cell:hover{border-color:rgba(227,184,114,.3);}
-.mine-cell.safe{background:linear-gradient(145deg,rgba(63,138,112,.26),rgba(63,138,112,.08));border-color:rgba(63,138,112,.5);color:var(--success);}
-.mine-cell.mine{background:linear-gradient(145deg,rgba(220,80,80,.28),rgba(220,80,80,.08));border-color:rgba(220,80,80,.55);color:var(--danger);}
-.mine-cell.revealed{cursor:default;}.mine-cell:disabled{opacity:1;}
-.mines-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:11px;}.mines-actions .btn,.mines-actions .btn-ghost{width:100%;}
-.mines-sector-list{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:10px;}
-.mines-sector{padding:7px 4px;border:1px solid var(--line);border-radius:9px;text-align:center;font-size:8px;color:var(--muted);}.mines-sector.active{border-color:rgba(227,184,114,.45);color:var(--brass-2);}.mines-sector.done{border-color:rgba(63,138,112,.45);color:var(--success);}
-.daily-timer{margin-top:4px;font:700 9px 'IBM Plex Mono',monospace;color:var(--brass-dim);}
-@media(max-width:520px){.mines-stats{grid-template-columns:repeat(3,1fr)}.mines-sector-list{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:360px){.mines-actions{grid-template-columns:1fr}.mines-grid{gap:5px}.mine-cell{border-radius:10px;font-size:19px}.mines-actions{grid-template-columns:1fr}.mines-stats b{font-size:10px}}
 .rush-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 12px;}
 .rush-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);}
 .rush-chart{position:relative;height:280px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 25% 85%,rgba(201,151,77,.18),transparent 42%),radial-gradient(circle at 90% 10%,rgba(63,138,112,.08),transparent 40%),#171411;border:1px solid rgba(255,255,255,.055);}
@@ -2800,7 +2782,6 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
       <button class="nav-btn" data-tab="market"><span>🛒</span>Магазин</button>
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
       <button class="nav-btn" data-tab="plinko"><span>🟡</span>Орб-Рывок</button>
-      <button class="nav-btn" data-tab="mines"><span>💣</span>Мины</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
     </nav>
 
@@ -2867,33 +2848,6 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
           <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
         </div>
         <div class="rush-note">Тренировочный режим: результат не меняет баланс орбов. Коэффициент рассчитывается локально по заданной шкале.</div>
-      </div>
-    </div>
-
-    <!-- MINES TRAINING -->
-    <div class="page" id="page-mines">
-      <div class="mines-head">
-        <div>
-          <div class="section-title" style="margin-bottom:3px">Мины</div>
-          <div class="section-sub" style="margin:0">Тренировочный режим: выбирай безопасные клетки и проходи 6 секторов. Орбы не списываются.</div>
-        </div>
-      </div>
-      <div class="mines-card">
-        <div class="mines-stats">
-          <div><span>Режим</span><b id="minesMode">Тренировка</b></div>
-          <div><span>Сектор</span><b id="minesSector">1/6</b></div>
-          <div><span>Мины</span><b id="minesCount">1</b></div>
-          <div><span>Множитель</span><b id="minesMultiplier">×1.30</b></div>
-          <div><span>Очки</span><b id="minesPotential">0</b></div>
-        </div>
-        <div class="mines-message" id="minesMessage">Нажми «Начать тренировку», чтобы получить случайное поле.</div>
-        <div class="mines-grid" id="minesGrid"></div>
-        <div class="mines-actions">
-          <button class="btn" id="minesStartBtn">▶ Начать тренировку</button>
-          <button class="btn-ghost" id="minesCollectBtn" disabled>Забрать очки</button>
-          <button class="btn-ghost" id="minesContinueBtn" disabled>Продолжить →</button>
-        </div>
-        <div class="mines-sector-list" id="minesSectorList"></div>
       </div>
     </div>
 
@@ -4668,46 +4622,6 @@ function startRushAnimation(){stopRushTimers();const startAt=rushRound.startedAt
 function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);rushRound={status:'active',startedAt:Date.now(),bet};setRushState('active',1);startRushAnimation();rushBusy=false;}
 function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active')return;const elapsed=Date.now()-rushRound.startedAt,m=rushMultiplierAt(elapsed);if(m>=7.5){rushRound.status='crashed';stopRushTimers();drawRushPoint(7.5,29000);setRushState('crashed',7.5,0);return;}const payout=Math.floor(rushRound.bet*m);rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,payout);}
 function renderPlinko(){setRushBet(rushBetValue);if(!rushRound){resetRushChart();setRushState('idle',1);}}
-
-// -------------------- МИНЫ: тренировочный режим --------------------
-const MINES_SECTORS=[{mines:1,mult:1.3},{mines:2,mult:1.7},{mines:3,mult:2.4},{mines:4,mult:3.5},{mines:4,mult:5.0},{mines:5,mult:6.5}];
-let minesRound=null;
-function minesShuffle(count){const a=[0,1,2,3,4,5];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return new Set(a.slice(0,count));}
-function renderMinesSectors(){const box=document.getElementById('minesSectorList');if(!box)return;box.innerHTML=MINES_SECTORS.map((s,i)=>`<div class="mines-sector ${minesRound&&minesRound.sector===i?'active':''} ${minesRound&&minesRound.sector>i?'done':''}">С${i+1}<br>${s.mines}💣 · ×${s.mult.toFixed(2)}</div>`).join('');}
-function renderMines(){const grid=document.getElementById('minesGrid');if(!grid)return;const s=MINES_SECTORS[minesRound?.sector||0];document.getElementById('minesSector').textContent=((minesRound?.sector||0)+1)+'/6';document.getElementById('minesCount').textContent=s.mines;document.getElementById('minesMultiplier').textContent='×'+s.mult.toFixed(2);document.getElementById('minesPotential').textContent=Number(minesRound?.points||0).toLocaleString('ru-RU');renderMinesSectors();grid.innerHTML='';for(let i=0;i<6;i++){const b=document.createElement('button');b.className='mine-cell';b.type='button';b.dataset.mineIndex=i;b.textContent=minesRound?.revealed?.has(i)?(minesRound.mines.has(i)?'💣':'✓'):'?';b.disabled=!minesRound||minesRound.status!=='active'||minesRound.revealed.has(i);if(minesRound?.revealed?.has(i))b.classList.add('revealed',minesRound.mines.has(i)?'mine':'safe');grid.appendChild(b);} }
-function startMines(){
-  minesRound={sector:0,points:1000,status:'active',mines:minesShuffle(MINES_SECTORS[0].mines),revealed:new Set(),sectorPassed:false};
-  document.getElementById('minesMessage').textContent='Выбери одну из 6 скрытых клеток.';
-  document.getElementById('minesStartBtn').textContent='↻ Начать заново';
-  document.getElementById('minesCollectBtn').disabled=true;
-  document.getElementById('minesContinueBtn').disabled=true;
-  renderMines();
-}
-function collectMines(){
-  if(!minesRound||minesRound.status!=='active'||!minesRound.sectorPassed)return;
-  minesRound.status='cashed';
-  document.getElementById('minesMessage').textContent=`✓ Забрано ${Number(minesRound.points).toLocaleString('ru-RU')} тренировочных очков.`;
-  document.getElementById('minesCollectBtn').disabled=true;document.getElementById('minesContinueBtn').disabled=true;renderMines();
-}
-function continueMines(){
-  if(!minesRound||minesRound.status!=='active'||!minesRound.sectorPassed)return;
-  if(minesRound.sector===5){minesRound.status='won';document.getElementById('minesMessage').textContent='🏆 Все 6 секторов пройдены · ×6.50';document.getElementById('minesCollectBtn').disabled=true;document.getElementById('minesContinueBtn').disabled=true;renderMines();return;}
-  minesRound.sector++;minesRound.mines=minesShuffle(MINES_SECTORS[minesRound.sector].mines);minesRound.revealed=new Set();minesRound.sectorPassed=false;
-  document.getElementById('minesMessage').textContent=`Сектор ${minesRound.sector+1}/6 · мины скрыты. Выбери клетку.`;document.getElementById('minesCollectBtn').disabled=true;document.getElementById('minesContinueBtn').disabled=true;renderMines();
-}
-function chooseMine(i){
-  if(!minesRound||minesRound.status!=='active'||minesRound.sectorPassed||minesRound.revealed.has(i))return;
-  minesRound.revealed.add(i);const sector=MINES_SECTORS[minesRound.sector];
-  if(minesRound.mines.has(i)){
-    minesRound.status='lost';document.getElementById('minesMessage').textContent='💣 Мина! Тренировочный раунд завершён.';minesRound.mines.forEach(x=>minesRound.revealed.add(x));document.getElementById('minesCollectBtn').disabled=true;document.getElementById('minesContinueBtn').disabled=true;renderMines();return;
-  }
-  minesRound.points=Math.round(minesRound.points*sector.mult);minesRound.sectorPassed=true;
-  document.getElementById('minesMessage').textContent=`✓ Сектор ${minesRound.sector+1} пройден · ×${sector.mult.toFixed(2)}. Забрать или продолжить.`;
-  document.getElementById('minesCollectBtn').disabled=false;document.getElementById('minesContinueBtn').disabled=false;
-  if(minesRound.sector===5){document.getElementById('minesMessage').textContent='🏆 Все 6 секторов пройдены · ×6.50';document.getElementById('minesContinueBtn').disabled=true;document.getElementById('minesCollectBtn').disabled=false;}
-  renderMines();
-}
-
 
 const CASE_KEY_REQUIREMENTS = {
   rust:['rust-key'],
@@ -6731,10 +6645,6 @@ function handleButton(button, e){
   if(button.matches('.rush-preset')){ setRushBet(Number(button.dataset.rushPreset||10)); return; }
   if(button.id==='rushStartBtn'){ startRush(); return; }
   if(button.id==='rushCashoutBtn'){ cashoutRush(); return; }
-  if(button.id==='minesStartBtn'){ startMines(); return; }
-  if(button.id==='minesCollectBtn'){ collectMines(); return; }
-  if(button.id==='minesContinueBtn'){ continueMines(); return; }
-  if(button.matches('.mine-cell')){ chooseMine(Number(button.dataset.mineIndex)); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
