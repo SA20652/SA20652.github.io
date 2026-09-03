@@ -651,7 +651,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .cube-visual .front{transform:translateZ(12.5px)} .cube-visual .right{transform:rotateY(90deg) translateZ(12.5px)} .cube-visual .top{transform:rotateX(90deg) translateZ(12.5px)}
 
 /* ============ ORB RUSH ============ */
-
 .rush-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 12px;}
 .rush-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);}
 .rush-chart{position:relative;height:280px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 25% 85%,rgba(201,151,77,.18),transparent 42%),radial-gradient(circle at 90% 10%,rgba(63,138,112,.08),transparent 40%),#171411;border:1px solid rgba(255,255,255,.055);}
@@ -2815,7 +2814,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
       <div class="rush-head">
         <div>
           <div class="section-title" style="margin-bottom:3px">Орб-Рывок</div>
-          <div class="section-sub" style="margin:0">Тренировочный режим: коэффициент растёт плавно до ×7.50. Орбы не ставятся и не списываются.</div>
+          <div class="section-sub" style="margin:0">Забирай выигрыш до максимальных x2.5 — если орб сорвётся, ставка сгорит.</div>
         </div>
       </div>
       <div class="rush-card">
@@ -2833,7 +2832,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
         <div class="rush-result" id="rushResult"></div>
         <div class="rush-bet-row">
           <button class="rush-step" data-rush-bet="-10">−10</button>
-          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="1000" aria-label="Количество тренировочных очков">
+          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="10" aria-label="Ставка в орбах">
           <button class="rush-step" data-rush-bet="10">+10</button>
         </div>
         <div class="rush-presets">
@@ -2844,10 +2843,10 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
           <button class="btn-ghost rush-preset" data-rush-preset="1000">1000</button>
         </div>
         <div class="rush-actions">
-          <button class="btn" id="rushStartBtn">🟢 Начать</button>
+          <button class="btn" id="rushStartBtn">Начать</button>
           <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
         </div>
-        <div class="rush-note">Тренировочный режим: результат не меняет баланс орбов. Коэффициент рассчитывается локально по заданной шкале.</div>
+        <div class="rush-note">Ставка списывается сервером до старта. Сервер следит за срывом, поэтому после срыва результат появляется автоматически.</div>
       </div>
     </div>
 
@@ -2947,7 +2946,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
         </div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
-        <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div><div class="daily-timer" id="dailyTimer">Следующая награда доступна сейчас</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
+        <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
       <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>7 500 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+7 500 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать</button><button type="button" class="btn" id="referralShareBtn">Поделиться</button></div></div>
@@ -3451,8 +3450,6 @@ function normalizeAllCubeValues(){
 // ===== STATE =====
 let currentUser = null;
 let data = null;
-let dailyState = {nextAt:0, streak:0, claims:0, reward:1000, premium:false};
-let dailyStatusInFlight = false;
 const LOW_POWER_DEVICE = (Number(navigator.hardwareConcurrency||8)<=4) || (Number(navigator.deviceMemory||8)<=4);
 if(LOW_POWER_DEVICE) document.documentElement.classList.add('low-power');
 let spinning = false;
@@ -4578,7 +4575,6 @@ function switchTab(tab){
   if(tab==='market') renderMarket();
   if(tab==='battles') renderBattles();
   if(tab==='plinko') renderPlinko();
-  if(tab==='mines') renderMines();
   if(tab==='admin' && window.isAdmin) renderAdmin();
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
@@ -4604,10 +4600,8 @@ function hexA(hex, alpha){
 }
 
 const RUSH_MAX_BET = 1000000;
+const RUSH_MAX_MULTIPLIER = 2.5;
 const ADMIN_SESSION_KEY = 'gdplay_admin_session_v1';
-const RUSH_MAX_MULTIPLIER = 7.5;
-const RUSH_TIMELINE = [1.00,1.12,1.25,1.40,1.57,1.75,1.95,2.17,2.40,2.65,2.90,3.15,3.40,3.65,3.90,4.15,4.40,4.65,4.90,5.15,5.40,5.65,5.90,6.15,6.40,6.65,6.90,7.15,7.35,7.50];
-const RUSH_RISK = [[1.00,10],[1.50,15],[2.00,20],[2.50,24],[3.00,30],[3.50,35],[4.00,40],[4.50,50],[5.00,60],[5.50,65],[6.00,73],[6.50,82],[7.00,87],[7.50,100]];
 let rushBusy = false;
 let rushRound = null;
 let rushPollTimer = null;
@@ -4675,8 +4669,8 @@ function setRushState(status,mult,payout=0){
   if(start) start.disabled=status==='active';
   if(statusEl){statusEl.textContent=status==='active'?'Раунд идёт…':status==='crashed'?'💥 Орб сорвался':status==='cashed'?'Выигрыш забран':'Выбери ставку и запускай игру';}
   if(result){
-    if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Срыв — 0 монет';}
-    else if(status==='cashed'){result.className='rush-result win';result.textContent=`+${Number(payout).toLocaleString('ru-RU')} монет · ${rushDisplayMultiplier(m)}`;}
+    if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Срыв — 0 орбов';}
+    else if(status==='cashed'){result.className='rush-result win';result.textContent=`Награда: +${Number(payout).toLocaleString('ru-RU')} орбов · ${rushDisplayMultiplier(m)}`;}
     else result.textContent='';
   }
 }
@@ -4689,7 +4683,7 @@ function rushNotifyTerminal(status,payout=0){
   if(rushTerminalNotified) return;
   rushTerminalNotified=true;
   if(status==='crashed') showToast('💥 Орб сорвался — ставка потеряна','error');
-  else if(status==='cashed') showToast(`🟡 Выигрыш: +${Number(payout||0).toLocaleString('ru-RU')} монет`,'success');
+  else if(status==='cashed') showToast(`Награда получена: +${Number(payout||0).toLocaleString('ru-RU')} орбов`,'success');
 }
 function startRushAnimation(startedAtMs){
   stopRushTimers();
@@ -4739,7 +4733,7 @@ async function startRush(){
   if(rushBusy || rushRound?.status==='active')return;
   const bet=clampRushBet(document.getElementById('rushBet')?.value);
   setRushBet(bet);
-  if(bet>Number(data.balance||0)){showToast('❌ Недостаточно монет','error');return;}
+  if(bet>Number(data.balance||0)){showToast('❌ Недостаточно орбов','error');return;}
   if(!tgInitData()){showToast('Открой игру через Telegram','error');return;}
   rushBusy=true; rushTerminalNotified=false; rushCashoutInFlight=false; serverActionInFlight++; serverBusyUntil=Date.now()+100;
   resetRushChart(); setRushState('active',1); 
@@ -4785,7 +4779,8 @@ async function cashoutRush(){
 }
 function renderPlinko(){
   setRushBet(rushBetValue);
-  if(!rushRound){resetRushChart();setRushState('idle'
+  if(!rushRound){resetRushChart();setRushState('idle',1);}
+}
 
 const CASE_KEY_REQUIREMENTS = {
   rust:['rust-key'],
@@ -6580,62 +6575,44 @@ function renderProfile(){
   document.getElementById('statCubes').textContent=data.cubes.length;
   document.getElementById('statBattles').textContent=data.battles||0;
   document.getElementById('statWins').textContent=data.wins||0;
-  const streak=Number(dailyState.streak||data.dailyStreak||0);
-  const nextAt=Number(dailyState.nextAt||0);
-  const can=!nextAt || Date.now()>=nextAt;
-  const nextReward=Number(dailyState.reward||((streak?([1000,1500,2000,2500,3000,4000,5000][Math.max(0,Math.min(6,streak-1))]):1000)*(isPremium?2:1)));
-  document.getElementById('dailyDesc').textContent='Следующая награда: '+nextReward.toLocaleString('ru-RU')+' 💰';
+  const now=Date.now(); const lastDaily=Number(data.lastDaily||0); const BONUS_COOLDOWN_MS=12*60*60*1000; const can=!lastDaily || (now-lastDaily)>=BONUS_COOLDOWN_MS;
+  const streak=Number(data.dailyStreak||0);
+  const nextRewardBase=1000+Math.max(0,Math.min(6,streak))*100;
+  const nextReward=isPremium?nextRewardBase*2:nextRewardBase;
+  document.getElementById('dailyDesc').textContent=can?('Следующая награда: '+nextReward.toLocaleString('ru-RU')+' 💰'):'Следующий бонус через 12 часов';
   document.getElementById('dailyBtn').disabled=!can;
-  const timer=document.getElementById('dailyTimer'); if(timer){ if(can) timer.textContent='Следующая награда доступна сейчас'; else { const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } }
   const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/7';
   const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/7*100)+'%';
-  loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
   renderBestDrops(document.getElementById('profileBestDrops'), data.bestDrops);
   renderBuffs();
 }
 
-async function loadDailyStatus(){
-  if(dailyStatusInFlight||!currentUser||!tgInitData()) return;
-  dailyStatusInFlight=true;
-  try{
-    const j=await apiFetch('/api/daily/status',{});
-    dailyState.nextAt=Number(j.next_daily||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||1000); dailyState.premium=!!j.premium;
-    data.dailyStreak=dailyState.streak;
-    data.lastDaily=Number(j.last_daily||data.lastDaily||0);
-    updateDailyUI();
-  }catch(e){}finally{dailyStatusInFlight=false;}
-}
-function updateDailyUI(){
-  if(!data)return;
-  const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
-  const streak=Math.max(0,Math.min(7,Number(dailyState.streak||data.dailyStreak||0)));
-  const nextAt=Number(dailyState.nextAt||0),can=!nextAt||Date.now()>=nextAt;
-  const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
-  const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующая награда: '+reward.toLocaleString('ru-RU')+' 💰';
-  const btn=document.getElementById('dailyBtn');if(btn)btn.disabled=!can;
-  const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Следующая награда доступна сейчас';else{const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}}
-  const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/7';
-  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/7*100)+'%';
-}
 async function claimDaily(){
-  if(!data)return;
-  if(dailyState.nextAt&&Date.now()<dailyState.nextAt){updateDailyUI();return;}
-  serverActionInFlight++;serverBusyUntil=Date.now()+150;
+  const localLast=Number(data?.lastDaily||0);
+  if(localLast && Date.now()-localLast < 12*60*60*1000){ renderProfile(); return; }
+  serverActionInFlight++; serverBusyUntil=Date.now()+150;
   try{
-    const j=await apiFetch('/api/daily',{});
-    data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
-    dailyState.nextAt=Number(j.next_daily||Date.now()+12*60*60*1000);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=Number(j.claims_in_day||1);dailyState.reward=Number(j.reward||1000);dailyState.premium=!!j.premium;
-    persistLocal();updateBalanceUI();renderProfile();
-    const msg=dailyState.streak>=7?' 🔥 7/7 — максимум':' 🔥 День '+dailyState.streak+'/7';
-    showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
+    const j = await apiFetch('/api/daily', {});
+    data.balance = Number(j.balance ?? data.balance);
+    data.lastDaily = Number(j.last_daily||j.lastDaily||Date.now());
+    data.dailyStreak = Number(j.streak||data.dailyStreak||1);
+    persistLocal();
+    updateBalanceUI();
+    renderProfile();
+    const streakMsg = data.dailyStreak>=7 ? ' 🔥 7/7 — серия завершена!' : ' 🔥 Серия '+data.dailyStreak+'/7';
+    // Daily rewards are intentionally toast-only; they never enter the notification center.
+    const box=document.getElementById('toastBox');
+    const t=document.createElement('div'); t.className='toast'; t.textContent=(j.premium ? '⭐ Premium x2! ' : '🎁 ')+'+'+j.reward+' 💰 Ежедневный бонус'+streakMsg;
+    box?.appendChild(t); setTimeout(()=>t.remove(),2700);
   }catch(e){
     const msg=String(e?.message||'');
-    const m=msg.match(/через\s+(\d{2}):(\d{2}):(\d{2})/i);
-    if(m){dailyState.nextAt=Date.now()+((+m[1])*3600+(+m[2])*60+(+m[3]))*1000;updateDailyUI();return;}
+    if(/уже|получ|сегодня|12 часа|12 ч/i.test(msg)){
+      data.lastDaily=Date.now(); persistLocal(); renderProfile(); return;
+    }
     showToast('❌ '+msg,'error');
-  }finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+100;}
+  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+100; }
 }
 
 async function setAccountPassword(){
@@ -6852,7 +6829,6 @@ function handleButton(button, e){
 
 
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
-setInterval(()=>{ if(data) updateDailyUI(); }, 1000);
 
 // Быстрый и безопасный ввод для iOS/Telegram WebView.
 // Действие запускаем на pointerup, чтобы не ждать запаздывающий click в iOS.
