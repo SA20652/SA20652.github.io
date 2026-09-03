@@ -4,7 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>GDPLAY</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js">
+
+let minesState=null;
+const MINE_SECTORS=[
+ {m:1.3,n:1},{m:1.7,n:2},{m:2.4,n:3},{m:3.5,n:4},{m:5,n:4},{m:6.5,n:5}
+];
+function renderMines(){
+ const el=document.getElementById('minesGame'); if(!el)return;
+ if(!minesState) minesState={sector:0,bet:1000,mult:1,hidden:[],active:false};
+ el.innerHTML=`<div class="card"><div>Ставка: <input id="mineBet" type="number" value="${minesState.bet}" min="1"></div><div>Сектор: ${minesState.sector+1}/6</div><div>Мины: ${MINE_SECTORS[minesState.sector].n} · Множитель: x${minesState.mult.toFixed(2)}</div><div>Выигрыш: ${Math.floor(minesState.bet*minesState.mult)} 💰</div><button class="btn" id="mineStart">Играть</button><div id="mineGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px"></div><div id="mineMsg"></div></div>`;
+ document.getElementById('mineStart').onclick=startMines;
+ drawMineGrid();
+}
+function startMines(){
+ const bet=Number(document.getElementById('mineBet').value||0); if(!bet||data.balance<bet){showToast('Недостаточно орбов','error');return;}
+ data.balance-=bet; minesState={sector:0,bet,mult:1,active:true,hidden:makeMines(1)}; updateBalanceUI(); renderMines();
+}
+function makeMines(count){let a=[];while(a.length<count){let x=Math.floor(Math.random()*6);if(!a.includes(x))a.push(x)}return a;}
+function drawMineGrid(){let g=document.getElementById('mineGrid');if(!g)return;g.innerHTML='';for(let i=0;i<6;i++){let b=document.createElement('button');b.className='btn';b.textContent='❔';b.onclick=()=>pickMine(i);g.appendChild(b)}}
+function pickMine(i){if(!minesState.active)return;let msg=document.getElementById('mineMsg');if(minesState.hidden.includes(i)){minesState.active=false;msg.textContent='💥 Мина! Ставка потеряна';renderMines();return;}if(minesState.sector===5){data.balance+=Math.floor(minesState.bet*6.5);minesState.active=false;msg.textContent='🏆 Максимальный выигрыш';updateBalanceUI();return;}minesState.sector++;minesState.mult=MINE_SECTORS[minesState.sector].m;minesState.hidden=makeMines(MINE_SECTORS[minesState.sector].n);renderMines();}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -651,6 +671,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .cube-visual .front{transform:translateZ(12.5px)} .cube-visual .right{transform:rotateY(90deg) translateZ(12.5px)} .cube-visual .top{transform:rotateX(90deg) translateZ(12.5px)}
 
 /* ============ ORB RUSH ============ */
+
 .rush-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 12px;}
 .rush-card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);}
 .rush-chart{position:relative;height:280px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 25% 85%,rgba(201,151,77,.18),transparent 42%),radial-gradient(circle at 90% 10%,rgba(63,138,112,.08),transparent 40%),#171411;border:1px solid rgba(255,255,255,.055);}
@@ -2779,6 +2800,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
       <button class="nav-btn active" data-tab="cases"><span>🗝️</span>Кейсы</button>
       <button class="nav-btn" data-tab="inventory"><span>🎒</span>Кубы</button>
       <button class="nav-btn" data-tab="market"><span>🛒</span>Магазин</button>
+      <button class="nav-btn" data-tab="games"><span>🎮</span>Игры</button>
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
       <button class="nav-btn" data-tab="plinko"><span>🟡</span>Орб-Рывок</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
@@ -2809,12 +2831,26 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
       <div id="battlesList"></div>
     </div>
 
+    <!-- GAMES HUB -->
+    <div class="page" id="page-games">
+      <div class="section-title">🎮 Игры</div>
+      <div class="section-sub">Все режимы с орбами в одном разделе</div>
+      <div class="card"><button class="btn" onclick="switchTab('plinko')" style="width:100%;margin-bottom:10px">🟡 Орб-Рывок</button><button class="btn" onclick="switchTab('battles')" style="width:100%;margin-bottom:10px">⚔️ Батлы</button><button class="btn" onclick="switchTab('mines')" style="width:100%">💣 Мины</button></div>
+    </div>
+
+    <!-- MINES -->
+    <div class="page" id="page-mines">
+      <div class="section-title">💣 Мины</div>
+      <div class="section-sub">6 секторов. Выбирай клетку, забирай выигрыш или рискуй дальше.</div>
+      <div id="minesGame"></div>
+    </div>
+
     <!-- ORB RUSH -->
     <div class="page" id="page-plinko">
       <div class="rush-head">
         <div>
           <div class="section-title" style="margin-bottom:3px">Орб-Рывок</div>
-          <div class="section-sub" style="margin:0">Забирай выигрыш до максимальных x2.5 — если орб сорвётся, ставка сгорит.</div>
+          <div class="section-sub" style="margin:0">Тренировочный режим: коэффициент растёт плавно до ×7.50. Орбы не ставятся и не списываются.</div>
         </div>
       </div>
       <div class="rush-card">
@@ -2832,7 +2868,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
         <div class="rush-result" id="rushResult"></div>
         <div class="rush-bet-row">
           <button class="rush-step" data-rush-bet="-10">−10</button>
-          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="10" aria-label="Ставка в орбах">
+          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="1000" aria-label="Ставка орбов">
           <button class="rush-step" data-rush-bet="10">+10</button>
         </div>
         <div class="rush-presets">
@@ -2843,10 +2879,10 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
           <button class="btn-ghost rush-preset" data-rush-preset="1000">1000</button>
         </div>
         <div class="rush-actions">
-          <button class="btn" id="rushStartBtn">Начать</button>
+          <button class="btn" id="rushStartBtn">🟢 Начать</button>
           <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
         </div>
-        <div class="rush-note">Ставка списывается сервером до старта. Сервер следит за срывом, поэтому после срыва результат появляется автоматически.</div>
+        <div class="rush-note">Ставка списывается с баланса орбов. Выигрыш возвращается по коэффициенту.</div>
       </div>
     </div>
 
@@ -2946,7 +2982,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
         </div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
-        <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои монеты</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
+        <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div><div class="daily-timer" id="dailyTimer">Следующая награда доступна сейчас</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
       <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>7 500 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+7 500 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать</button><button type="button" class="btn" id="referralShareBtn">Поделиться</button></div></div>
@@ -3450,6 +3486,8 @@ function normalizeAllCubeValues(){
 // ===== STATE =====
 let currentUser = null;
 let data = null;
+let dailyState = {nextAt:0, streak:0, claims:0, reward:1000, premium:false};
+let dailyStatusInFlight = false;
 const LOW_POWER_DEVICE = (Number(navigator.hardwareConcurrency||8)<=4) || (Number(navigator.deviceMemory||8)<=4);
 if(LOW_POWER_DEVICE) document.documentElement.classList.add('low-power');
 let spinning = false;
@@ -4573,8 +4611,10 @@ function switchTab(tab){
   if(tab==='top') renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort || 'cases');
   if(tab==='inventory') renderInventory();
   if(tab==='market') renderMarket();
+  if(tab==='games') {}
   if(tab==='battles') renderBattles();
   if(tab==='plinko') renderPlinko();
+  if(tab==='mines') renderMines();
   if(tab==='admin' && window.isAdmin) renderAdmin();
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
@@ -4600,187 +4640,27 @@ function hexA(hex, alpha){
 }
 
 const RUSH_MAX_BET = 1000000;
-const RUSH_MAX_MULTIPLIER = 2.5;
 const ADMIN_SESSION_KEY = 'gdplay_admin_session_v1';
-let rushBusy = false;
-let rushRound = null;
-let rushPollTimer = null;
-let rushAnimTimer = null;
-let rushPollInFlight = false;
-let rushCashoutInFlight = false;
-let rushTerminalNotified = false;
-let rushServerOffsetMs = 0;
-let rushAuthoritativeMultiplier = 1;
-let rushAuthoritativeAtClientMs = 0;
-let rushBetValue = 10;
-
-function rushDisplayMultiplier(v){
-  const n=Math.min(RUSH_MAX_MULTIPLIER,Math.max(1,Number(v)||1));
-  return `x${n.toFixed(2)}`;
+const RUSH_MAX_MULTIPLIER = 7.5;
+const RUSH_TIMELINE = [1.00,1.12,1.25,1.40,1.57,1.75,1.95,2.17,2.40,2.65,2.90,3.15,3.40,3.65,3.90,4.15,4.40,4.65,4.90,5.15,5.40,5.65,5.90,6.15,6.40,6.65,6.90,7.15,7.35,7.50];
+const RUSH_RISK = [[1.00,10],[1.50,15],[2.00,20],[2.50,24],[3.00,30],[3.50,35],[4.00,40],[4.50,50],[5.00,60],[5.50,65],[6.00,73],[6.50,82],[7.00,87],[7.50,100]];
+let rushBusy=false,rushRound=null,rushAnimTimer=null,rushBetValue=1000;
+function rushMoney(){return Math.max(0,Math.floor(Number(data?.balance||0)));}
+function changeRushMoney(v){data.balance=Math.max(0,Math.floor(Number(data.balance||0)+v)); if(typeof renderBalance==='function') renderBalance(); if(typeof saveData==='function') saveData();}
+function rushDisplayMultiplier(v){return `x${Math.min(7.5,Math.max(1,Number(v)||1)).toFixed(2)}`;}
+function clampRushBet(v){return Math.max(1,Math.min(RUSH_MAX_BET,Math.round(Number(v)||1)));}
+function setRushBet(v){rushBetValue=clampRushBet(v);const input=document.getElementById('rushBet');if(input)input.value=rushBetValue;}
+function resetRushChart(){const line=document.getElementById('rushLine'),area=document.getElementById('rushArea'),dot=document.getElementById('rushDot');if(!line||!area||!dot)return;line.setAttribute('points','6,92 6,92');area.setAttribute('points','6,92 6,92 6,92');dot.setAttribute('cx','6');dot.setAttribute('cy','92');const m=document.getElementById('rushMultiplier');if(m){m.className='rush-mult active';m.textContent='x1.00';}}
+function rushMultiplierAt(ms){const sec=Math.min(29,Math.max(0,ms/1000));const i=Math.floor(sec),f=sec-i;if(i>=29)return 7.5;return RUSH_TIMELINE[i]+(RUSH_TIMELINE[i+1]-RUSH_TIMELINE[i])*f;}
+function rushRiskAt(mult){if(mult>=7.5)return 100;for(let i=0;i<RUSH_RISK.length-1;i++){const [m1,r1]=RUSH_RISK[i],[m2,r2]=RUSH_RISK[i+1];if(mult<=m2){const f=(mult-m1)/(m2-m1);return r1+(r2-r1)*Math.max(0,Math.min(1,f));}}return 100;}
+function drawRushPoint(mult,elapsedMs){const line=document.getElementById('rushLine'),area=document.getElementById('rushArea'),dot=document.getElementById('rushDot');if(!line||!area||!dot)return;const t=Math.min(1,Math.max(0,elapsedMs/29000)),x=6+t*88,m=Math.min(7.5,Math.max(1,Number(mult)||1)),norm=(m-1)/6.5,y=92-norm*72,old=line.getAttribute('points')||'6,92',pts=old.split(' ').filter(Boolean);const last=pts[pts.length-1]||'6,92',[lx,ly]=last.split(',').map(Number),nx=Math.max(lx,x),ny=Math.min(ly,y);if(!pts.length||Math.abs(Number(pts[pts.length-1].split(',')[0])-nx)>0.05)pts.push(`${nx.toFixed(2)},${ny.toFixed(2)}`);line.setAttribute('points',pts.join(' '));area.setAttribute('points',`${pts.join(' ')} ${nx.toFixed(2)},92 6,92`);dot.setAttribute('cx',nx.toFixed(2));dot.setAttribute('cy',ny.toFixed(2));const multEl=document.getElementById('rushMultiplier');if(multEl){multEl.textContent=rushDisplayMultiplier(m);multEl.className='rush-mult active';}const cash=document.getElementById('rushCashoutBtn');if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=!rushRound||rushRound.status!=='active';}const status=document.getElementById('rushStatus');if(status)status.textContent=`Риск срыва: ${rushRiskAt(m).toFixed(0)}%`;
 }
-function clampRushBet(v){
-  const n=Math.round(Number(v)||1);
-  return Math.max(1,Math.min(RUSH_MAX_BET,n));
-}
-function setRushBet(v){
-  rushBetValue=clampRushBet(v);
-  const input=document.getElementById('rushBet');
-  if(input) input.value=rushBetValue;
-}
-function rushRoundId(){
-  const a=new Uint32Array(4);
-  if(window.crypto?.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<a.length;i++) a[i]=Math.floor(Math.random()*0xffffffff);
-  return Array.from(a).map(x=>x.toString(36)).join('')+'_'+Date.now().toString(36);
-}
-function resetRushChart(){
-  const line=document.getElementById('rushLine'), area=document.getElementById('rushArea'), dot=document.getElementById('rushDot');
-  if(!line||!area||!dot)return;
-  line.setAttribute('points','6,92 6,92');
-  area.setAttribute('points','6,92 6,92 6,92');
-  dot.setAttribute('cx','6'); dot.setAttribute('cy','92');
-  const mult=document.getElementById('rushMultiplier'); if(mult){mult.className='rush-mult active';mult.textContent='x1.00';}
-}
-function drawRushPoint(mult, elapsedMs){
-  const line=document.getElementById('rushLine'), area=document.getElementById('rushArea'), dot=document.getElementById('rushDot');
-  if(!line||!area||!dot)return;
-  const t=Math.min(1,elapsedMs/12000);
-  const x=6+t*88;
-  const m=Math.min(RUSH_MAX_MULTIPLIER,Math.max(1,Number(mult)||1));
-  const norm=(m-1)/(RUSH_MAX_MULTIPLIER-1);
-  const y=92-norm*72;
-  const old=line.getAttribute('points')||'6,92';
-  const pts=old.split(' ').filter(Boolean);
-  const last=pts[pts.length-1]||'6,92';
-  const [lx,ly]=last.split(',').map(Number);
-  const nx=Math.max(lx,x), ny=Math.min(ly,y);
-  pts.push(`${nx.toFixed(2)},${ny.toFixed(2)}`);
-  line.setAttribute('points',pts.join(' '));
-  area.setAttribute('points',`${pts.join(' ')} ${nx.toFixed(2)},92 6,92`);
-  dot.setAttribute('cx',nx.toFixed(2)); dot.setAttribute('cy',ny.toFixed(2));
-  const multEl=document.getElementById('rushMultiplier');
-  if(multEl){multEl.textContent=rushDisplayMultiplier(m);multEl.className='rush-mult active';}
-  const cash=document.getElementById('rushCashoutBtn'); if(cash) cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;
-}
-function setRushState(status,mult,payout=0){
-  const m=Math.min(RUSH_MAX_MULTIPLIER,Math.max(1,Number(mult)||1));
-  const multEl=document.getElementById('rushMultiplier'), statusEl=document.getElementById('rushStatus'), result=document.getElementById('rushResult'), cash=document.getElementById('rushCashoutBtn'), start=document.getElementById('rushStartBtn');
-  if(multEl){multEl.textContent=rushDisplayMultiplier(m);multEl.className='rush-mult '+(status==='crashed'?'crashed':status==='cashed'?'cashed':'active');}
-  if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=status!=='active';}
-  if(start) start.disabled=status==='active';
-  if(statusEl){statusEl.textContent=status==='active'?'Раунд идёт…':status==='crashed'?'💥 Орб сорвался':status==='cashed'?'Выигрыш забран':'Выбери ставку и запускай игру';}
-  if(result){
-    if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Срыв — 0 орбов';}
-    else if(status==='cashed'){result.className='rush-result win';result.textContent=`Награда: +${Number(payout).toLocaleString('ru-RU')} орбов · ${rushDisplayMultiplier(m)}`;}
-    else result.textContent='';
-  }
-}
-function stopRushTimers(){
-  if(rushPollTimer){clearInterval(rushPollTimer);rushPollTimer=null;}
-  if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}
-  rushPollInFlight=false;
-}
-function rushNotifyTerminal(status,payout=0){
-  if(rushTerminalNotified) return;
-  rushTerminalNotified=true;
-  if(status==='crashed') showToast('💥 Орб сорвался — ставка потеряна','error');
-  else if(status==='cashed') showToast(`Награда получена: +${Number(payout||0).toLocaleString('ru-RU')} орбов`,'success');
-}
-function startRushAnimation(startedAtMs){
-  stopRushTimers();
-  const tick=()=>{
-    if(!rushRound || rushRound.status!=='active')return;
-    const clientNow=Date.now()+rushServerOffsetMs;
-    const elapsed=Math.max(0,clientNow-Number(startedAtMs||clientNow));
-    const seconds=elapsed/1000;
-    // Экран синхронизирован с серверными часами; локальная машина пользователя
-    // больше не может показать коэффициент, отличный от серверного из-за clock skew.
-    const mult=Math.min(RUSH_MAX_MULTIPLIER,1+seconds/11.0+(seconds**1.4)/65.0);
-    const shown = Math.max(rushAuthoritativeMultiplier, mult);
-    drawRushPoint(shown,elapsed);
-    rushAnimTimer=requestAnimationFrame(tick);
-  };
-  tick();
-}
-async function pollRushStatus(){
-  if(!rushRound || rushRound.status!=='active' || rushPollInFlight)return;
-  const roundId=rushRound.id;
-  rushPollInFlight=true;
-  try{
-    const j=await apiFetch('/api/game/rush/status',{round_id:roundId});
-    // Ответ от старого/параллельного запроса больше не должен менять новый раунд.
-    if(!rushRound || rushRound.id!==roundId || rushRound.status!=='active')return;
-    data.balance=Number(j.balance||data.balance); updateBalanceUI(); persistLocal();
-    if(j.server_now_ms) rushServerOffsetMs=Number(j.server_now_ms)-Date.now();
-    rushAuthoritativeMultiplier=Math.max(rushAuthoritativeMultiplier, Number(j.multiplier)||1);
-    rushAuthoritativeAtClientMs=Date.now();
-    const syncedElapsed=Math.max(0,Number(j.server_now_ms||Date.now()+rushServerOffsetMs)-rushRound.startedAt);
-    if(j.status==='crashed' || j.status==='cashed'){
-      rushRound.status=j.status;
-      stopRushTimers();
-      drawRushPoint(j.multiplier,syncedElapsed);
-      setRushState(j.status,j.multiplier,j.payout||0);
-      rushNotifyTerminal(j.status,j.payout||0);
-      return;
-    }
-    drawRushPoint(j.multiplier,syncedElapsed);
-  }catch(e){
-    // Краткий сетевой сбой не завершает игру локально; следующий тик попробует снова.
-  }finally{
-    rushPollInFlight=false;
-  }
-}
-async function startRush(){
-  if(rushBusy || rushRound?.status==='active')return;
-  const bet=clampRushBet(document.getElementById('rushBet')?.value);
-  setRushBet(bet);
-  if(bet>Number(data.balance||0)){showToast('❌ Недостаточно орбов','error');return;}
-  if(!tgInitData()){showToast('Открой игру через Telegram','error');return;}
-  rushBusy=true; rushTerminalNotified=false; rushCashoutInFlight=false; serverActionInFlight++; serverBusyUntil=Date.now()+100;
-  resetRushChart(); setRushState('active',1); 
-  try{
-    const j=await apiFetch('/api/game/rush/start',{round_id:rushRoundId(),bet});
-    data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
-    rushServerOffsetMs=Number(j.server_now_ms||Date.now())-Date.now();
-    rushAuthoritativeMultiplier=1; rushAuthoritativeAtClientMs=Date.now();
-    rushRound={id:j.round_id,bet:Number(j.bet),startedAt:Number(j.started_at_ms),status:'active'};
-    setRushState('active',1);
-    startRushAnimation(rushRound.startedAt);
-    rushPollTimer=setInterval(pollRushStatus,150);
-    await pollRushStatus();
-  }catch(e){
-    rushRound=null; stopRushTimers(); resetRushChart(); setRushState('idle',1); showToast('❌ '+e.message,'error');
-  }finally{rushBusy=false;serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+100;}
-}
-async function cashoutRush(){
-  if(!rushRound || rushRound.status!=='active' || rushCashoutInFlight)return;
-  const roundId=rushRound.id;
-  rushCashoutInFlight=true;
-  const cash=document.getElementById('rushCashoutBtn');
-  if(cash) cash.disabled=true;
-  try{
-    const j=await apiFetch('/api/game/rush/cashout',{round_id:roundId});
-    if(!rushRound || rushRound.id!==roundId)return;
-    data.balance=Number(j.balance); updateBalanceUI(); persistLocal();
-    rushRound.status=j.status;
-    stopRushTimers();
-    const cashoutElapsed=Math.max(0,Number(j.server_now_ms||Date.now()+rushServerOffsetMs)-rushRound.startedAt);
-    drawRushPoint(j.multiplier,cashoutElapsed);
-    setRushState(j.status,j.multiplier,j.payout||0);
-    rushNotifyTerminal(j.status,j.payout||0);
-  }catch(e){
-    if(rushRound && rushRound.id===roundId && rushRound.status==='active'){
-      const b=document.getElementById('rushCashoutBtn');
-      if(b) b.disabled=false;
-    }
-    showToast('❌ '+e.message,'error');
-  }finally{
-    rushCashoutInFlight=false;
-  }
-}
-function renderPlinko(){
-  setRushBet(rushBetValue);
-  if(!rushRound){resetRushChart();setRushState('idle',1);}
-}
+function setRushState(status,mult,payout=0){const m=Math.min(7.5,Math.max(1,Number(mult)||1)),el=document.getElementById('rushMultiplier'),statusEl=document.getElementById('rushStatus'),result=document.getElementById('rushResult'),cash=document.getElementById('rushCashoutBtn'),start=document.getElementById('rushStartBtn');if(el){el.textContent=rushDisplayMultiplier(m);el.className='rush-mult '+(status==='crashed'?'crashed':status==='cashed'?'cashed':'active');}if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=status!=='active';}if(start)start.disabled=status==='active';if(statusEl)statusEl.textContent=status==='active'?`Риск срыва: ${rushRiskAt(m).toFixed(0)}%`:status==='crashed'?'💥 Ставка потеряна':status==='cashed'?`Орбы забраны · ${rushDisplayMultiplier(m)}`:'Нажми «Начать»';if(result){if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Раунд завершён — ставка потеряна';}else if(status==='cashed'){result.className='rush-result win';result.textContent=`+${Number(payout||0).toLocaleString('ru-RU')} 💰 орбов · ${rushDisplayMultiplier(m)}`;}else{result.className='rush-result';result.textContent='';}}}
+function stopRushTimers(){if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}}
+function startRushAnimation(){stopRushTimers();const startAt=rushRound.startedAt;const tick=()=>{if(!rushRound||rushRound.status!=='active')return;const elapsed=Date.now()-startAt,m=rushMultiplierAt(elapsed);drawRushPoint(m,elapsed);if(elapsed>=29000){cashoutRush(true);return;}rushAnimTimer=requestAnimationFrame(tick);};tick();}
+function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;} changeRushMoney(-bet); rushRound={status:'active',startedAt:Date.now(),bet};setRushState('active',1);startRushAnimation();rushBusy=false;}
+function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active')return;const elapsed=Date.now()-rushRound.startedAt,m=rushMultiplierAt(elapsed);if(m>=7.5){rushRound.status='crashed';stopRushTimers();drawRushPoint(7.5,29000);setRushState('crashed',7.5,0);return;}const payout=Math.floor(rushRound.bet*m);changeRushMoney(payout);rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,payout);}
+function renderPlinko(){setRushBet(rushBetValue);if(!rushRound){resetRushChart();setRushState('idle',1);}}
 
 const CASE_KEY_REQUIREMENTS = {
   rust:['rust-key'],
@@ -6575,44 +6455,62 @@ function renderProfile(){
   document.getElementById('statCubes').textContent=data.cubes.length;
   document.getElementById('statBattles').textContent=data.battles||0;
   document.getElementById('statWins').textContent=data.wins||0;
-  const now=Date.now(); const lastDaily=Number(data.lastDaily||0); const BONUS_COOLDOWN_MS=12*60*60*1000; const can=!lastDaily || (now-lastDaily)>=BONUS_COOLDOWN_MS;
-  const streak=Number(data.dailyStreak||0);
-  const nextRewardBase=1000+Math.max(0,Math.min(6,streak))*100;
-  const nextReward=isPremium?nextRewardBase*2:nextRewardBase;
-  document.getElementById('dailyDesc').textContent=can?('Следующая награда: '+nextReward.toLocaleString('ru-RU')+' 💰'):'Следующий бонус через 12 часов';
+  const streak=Number(dailyState.streak||data.dailyStreak||0);
+  const nextAt=Number(dailyState.nextAt||0);
+  const can=!nextAt || Date.now()>=nextAt;
+  const nextReward=Number(dailyState.reward||((streak?([1000,1500,2000,2500,3000,4000,5000][Math.max(0,Math.min(6,streak-1))]):1000)*(isPremium?2:1)));
+  document.getElementById('dailyDesc').textContent='Следующая награда: '+nextReward.toLocaleString('ru-RU')+' 💰';
   document.getElementById('dailyBtn').disabled=!can;
+  const timer=document.getElementById('dailyTimer'); if(timer){ if(can) timer.textContent='Следующая награда доступна сейчас'; else { const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } }
   const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/7';
   const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/7*100)+'%';
+  loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
   renderBestDrops(document.getElementById('profileBestDrops'), data.bestDrops);
   renderBuffs();
 }
 
-async function claimDaily(){
-  const localLast=Number(data?.lastDaily||0);
-  if(localLast && Date.now()-localLast < 12*60*60*1000){ renderProfile(); return; }
-  serverActionInFlight++; serverBusyUntil=Date.now()+150;
+async function loadDailyStatus(){
+  if(dailyStatusInFlight||!currentUser||!tgInitData()) return;
+  dailyStatusInFlight=true;
   try{
-    const j = await apiFetch('/api/daily', {});
-    data.balance = Number(j.balance ?? data.balance);
-    data.lastDaily = Number(j.last_daily||j.lastDaily||Date.now());
-    data.dailyStreak = Number(j.streak||data.dailyStreak||1);
-    persistLocal();
-    updateBalanceUI();
-    renderProfile();
-    const streakMsg = data.dailyStreak>=7 ? ' 🔥 7/7 — серия завершена!' : ' 🔥 Серия '+data.dailyStreak+'/7';
-    // Daily rewards are intentionally toast-only; they never enter the notification center.
-    const box=document.getElementById('toastBox');
-    const t=document.createElement('div'); t.className='toast'; t.textContent=(j.premium ? '⭐ Premium x2! ' : '🎁 ')+'+'+j.reward+' 💰 Ежедневный бонус'+streakMsg;
-    box?.appendChild(t); setTimeout(()=>t.remove(),2700);
+    const j=await apiFetch('/api/daily/status',{});
+    dailyState.nextAt=Number(j.next_daily||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||1000); dailyState.premium=!!j.premium;
+    data.dailyStreak=dailyState.streak;
+    data.lastDaily=Number(j.last_daily||data.lastDaily||0);
+    updateDailyUI();
+  }catch(e){}finally{dailyStatusInFlight=false;}
+}
+function updateDailyUI(){
+  if(!data)return;
+  const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
+  const streak=Math.max(0,Math.min(7,Number(dailyState.streak||data.dailyStreak||0)));
+  const nextAt=Number(dailyState.nextAt||0),can=!nextAt||Date.now()>=nextAt;
+  const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
+  const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующая награда: '+reward.toLocaleString('ru-RU')+' 💰';
+  const btn=document.getElementById('dailyBtn');if(btn)btn.disabled=!can;
+  const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Следующая награда доступна сейчас';else{const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}}
+  const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/7';
+  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/7*100)+'%';
+}
+async function claimDaily(){
+  if(!data)return;
+  if(dailyState.nextAt&&Date.now()<dailyState.nextAt){updateDailyUI();return;}
+  serverActionInFlight++;serverBusyUntil=Date.now()+150;
+  try{
+    const j=await apiFetch('/api/daily',{});
+    data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
+    dailyState.nextAt=Number(j.next_daily||Date.now()+12*60*60*1000);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=Number(j.claims_in_day||1);dailyState.reward=Number(j.reward||1000);dailyState.premium=!!j.premium;
+    persistLocal();updateBalanceUI();renderProfile();
+    const msg=dailyState.streak>=7?' 🔥 7/7 — максимум':' 🔥 День '+dailyState.streak+'/7';
+    showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
   }catch(e){
     const msg=String(e?.message||'');
-    if(/уже|получ|сегодня|12 часа|12 ч/i.test(msg)){
-      data.lastDaily=Date.now(); persistLocal(); renderProfile(); return;
-    }
+    const m=msg.match(/через\s+(\d{2}):(\d{2}):(\d{2})/i);
+    if(m){dailyState.nextAt=Date.now()+((+m[1])*3600+(+m[2])*60+(+m[3]))*1000;updateDailyUI();return;}
     showToast('❌ '+msg,'error');
-  }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+100; }
+  }finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+100;}
 }
 
 async function setAccountPassword(){
@@ -6829,6 +6727,7 @@ function handleButton(button, e){
 
 
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
+setInterval(()=>{ if(data) updateDailyUI(); }, 1000);
 
 // Быстрый и безопасный ввод для iOS/Telegram WebView.
 // Действие запускаем на pointerup, чтобы не ждать запаздывающий click в iOS.
