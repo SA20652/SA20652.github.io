@@ -751,6 +751,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .input-modal h3{margin:0 0 7px;font-size:18px}.input-modal p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.45}.input-modal input{width:100%;box-sizing:border-box;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:11px;padding:12px;font-size:14px;outline:none}.input-modal input:focus{border-color:var(--brass)}.input-modal-actions{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:-1px;padding-top:10px;background:var(--bg-2);z-index:3}.input-modal-actions button{flex:1}
 .battle-cancel{margin-top:8px;width:100%;}
 
+.bottom-top-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:50;background:var(--bg-2);border:1px solid var(--line);color:var(--paper);border-radius:18px;padding:8px 28px;font-size:12px;box-shadow:var(--shadow);}
 /* ===== MINES / TECH BREAK ===== */
 .mines-nav-btn{flex:1;min-width:0;}
 .tech-break-overlay{position:fixed;inset:0;z-index:1000002;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,8,7,.88);backdrop-filter:blur(10px);}
@@ -4343,7 +4344,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-buff" data-uid="${u.user_id}">⚡ Выдать бафф</button>
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-creator" data-uid="${u.user_id}" data-enabled="${creatorActive?0:1}">${creatorActive?'Снять 🛠️':'Выдать 🛠️'}</button>` : ''}
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-tester" data-uid="${u.user_id}" data-enabled="${testerActive?0:1}">${testerActive?'Снять 🛡️':'Выдать 🛡️'}</button>` : ''}
-          ${!creatorActive && String(u.username||'').toLowerCase()!=='kuro' ? (u.tech_break_enabled ? `<button type="button" class="btn-ghost danger-admin" data-action="admin-tech-break-off" data-uid="${u.user_id}">🛠️ Убрать тех. перерыв</button>` : `<button type="button" class="btn-ghost" data-action="admin-tech-break" data-uid="${u.user_id}">🛠️ Тех. перерыв</button>`) : ''}
+          ${!creatorActive && String(u.username||'').toLowerCase()!=='kuro' ? (u.tech_break_enabled ? `<button type="button" class="btn-ghost danger-admin" data-action="admin-tech-break-off" data-uid="${u.user_id}">🛠️ Убрать тех. перерыв</button>` : `<button type="button" class="btn-ghost" data-action="admin-tech-break" data-uid="${u.user_id}">🌐 Глобальный тех. перерыв</button>`) : ''}
           <button type="button" class="btn-ghost danger-admin" data-action="admin-delete-user" data-uid="${u.user_id}">🗑️ Удалить аккаунт</button>
           <button type="button" class="btn-ghost" data-action="admin-toggle-cubes" data-uid="${u.user_id}">Кубы (${u.cube_count||0})</button>
           <button type="button" class="btn-ghost" data-action="admin-account" data-uid="${u.user_id}">⚙️ Аккаунт</button>
