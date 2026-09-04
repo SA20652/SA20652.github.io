@@ -11,23 +11,40 @@ const MINE_SECTORS=[
 ];
 function renderMines(){
  const el=document.getElementById('minesGame'); if(!el)return;
- if(!minesState) minesState={sector:1,bet:1000,mult:1.3,active:false,roundId:null,canCash:false,revealed:[]};
- const s=MINE_SECTORS[Math.max(0,(minesState.sector||1)-1)];
- const won=Math.floor(minesState.bet*minesState.mult);
+ if(!minesState) minesState={sector:1,bet:1000,mult:1.3,active:false,roundId:null,canCash:false,revealed:[],message:''};
+ const s=MINE_SECTORS[Math.max(0,Math.min(5,(minesState.sector||1)-1))];
+ const won=Math.floor(Number(minesState.bet||0)*Number(minesState.mult||s.m));
+ const active=!!minesState.active;
  el.innerHTML=`<div class="mines-shell">
-   <div class="mines-hero"><div><div class="mines-kicker">GDPLAY · MINES</div><h2>Мины</h2><p>6 клеток · выбирай безопасную клетку и повышай множитель.</p></div><div class="mines-bet-badge"><span>СТАВКА</span><input id="mineBet" type="number" min="1" inputmode="numeric" value="${Number(minesState.bet||1000)}"><small>ОРБОВ</small></div></div>
+   <div class="mines-hero"><div><div class="mines-kicker">GDPLAY · MINES</div><h2>Мины</h2><p>6 клеток · безопасная клетка переводит тебя в следующий сектор.</p></div><div class="mines-status-pill ${active?'live':''}">${active?'РАУНД':'ГОТОВ'}</div></div>
+   <div class="mines-bet-card">
+     <div class="mines-bet-head"><div><span>СТАВКА</span><small>Сколько орбов поставить</small></div><b>💰 ОРБЫ</b></div>
+     <div class="mines-bet-input-wrap"><button type="button" class="mines-step" data-mine-step="-100">−</button><input id="mineBet" type="number" min="1" max="1000000" step="1" inputmode="numeric" value="${Number(minesState.bet||1000)}" ${active?'disabled':''}><button type="button" class="mines-step" data-mine-step="100">+</button></div>
+     <div class="mines-presets"><button type="button" class="mines-preset" data-mine-preset="100">100</button><button type="button" class="mines-preset" data-mine-preset="1000">1 000</button><button type="button" class="mines-preset" data-mine-preset="5000">5 000</button><button type="button" class="mines-preset" data-mine-preset="10000">10 000</button></div>
+   </div>
    <div class="mines-stats">
     <div><span>Сектор</span><b>${minesState.sector}/6</b></div><div><span>Мины</span><b>${s.n}</b></div><div><span>Множитель</span><b>×${Number(minesState.mult||s.m).toFixed(2)}</b></div><div><span>Выигрыш</span><b>${won.toLocaleString('ru-RU')}</b></div>
    </div>
    <div class="mines-progress"><div class="mines-progress-label"><span>Прогресс</span><span>${Math.min(100,Math.round(((minesState.sector-1)/6)*100))}%</span></div><div class="mines-progress-track"><i style="width:${Math.min(100,((minesState.sector-1)/6)*100)}%"></i></div></div>
    <div class="mines-grid" id="mineGrid"></div>
-   <div class="mines-actions"><button class="btn mines-main-btn" id="mineStart">${minesState.active?'Раунд идёт':'Играть'}</button><button class="btn-ghost mines-cash-btn" id="mineCash" ${!minesState.active||!minesState.canCash?'disabled':''}>Забрать ${won.toLocaleString('ru-RU')}</button><button class="btn-ghost mines-continue-btn" id="mineContinue" ${!minesState.active||!minesState.canCash?'disabled':''}>Продолжить</button></div>
+   <div class="mines-actions"><button class="btn mines-main-btn" id="mineStart" ${active?'disabled':''}>${active?'Раунд идёт':'Играть'}</button><button class="btn-ghost mines-cash-btn" id="mineCash" ${!active||!minesState.canCash?'disabled':''}>Забрать ${won.toLocaleString('ru-RU')}</button><button class="btn-ghost mines-continue-btn" id="mineContinue" ${!active||!minesState.canCash?'disabled':''}>Продолжить</button></div>
    <div class="mines-message" id="mineMsg">${minesState.message||'Выбери одну из шести клеток.'}</div>
    <div class="mines-sectors">${MINE_SECTORS.map((x,i)=>`<div class="mines-sector ${i+1===minesState.sector?'current':''} ${i+1<minesState.sector?'done':''}"><span>${i+1}</span><b>×${x.m.toFixed(1)}</b><small>${x.n} ${x.n===1?'мина':'мины'}</small></div>`).join('')}</div>
  </div>`;
  document.getElementById('mineStart').onclick=startMines;
  document.getElementById('mineCash').onclick=cashMines; document.getElementById('mineContinue').onclick=continueMines;
+ document.querySelectorAll('[data-mine-step]').forEach(b=>b.onclick=()=>setMinesBet(Number(document.getElementById('mineBet')?.value||1000)+Number(b.dataset.mineStep||0)));
+ document.querySelectorAll('[data-mine-preset]').forEach(b=>b.onclick=()=>setMinesBet(Number(b.dataset.minePreset||1000)));
+ document.getElementById('mineBet')?.addEventListener('input',()=>{ minesState.bet=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('mineBet').value||1)))); });
  drawMineGrid();
+}
+function setMinesBet(v){ if(minesState?.active)return; const n=Math.max(1,Math.min(1000000,Math.floor(Number(v)||1))); minesState.bet=n; renderMines(); const input=document.getElementById('mineBet'); if(input){input.focus();input.select();} }
+async function restoreActiveMines(){
+ if(minesState?.active) return;
+ try{
+  const j=await apiFetch('/api/game/mines/active',{});
+  if(j?.active){ minesState={sector:Number(j.sector||1),mult:Number(j.multiplier||1.3),bet:Number(j.bet||1000),roundId:j.round_id,active:true,canCash:!!j.can_cash,revealed:[],message:j.can_cash?'Сектор пройден. Забери выигрыш или продолжи.':'Раунд восстановлен. Выбери клетку.'}; renderMines(); }
+ }catch(e){}
 }
 function drawMineGrid(){
  const g=document.getElementById('mineGrid'); if(!g)return; g.innerHTML='';
@@ -44,7 +61,7 @@ async function startMines(){
  try{
   const j=await apiFetch('/api/game/mines/start',{round_id:'m_'+crypto.randomUUID().replaceAll('-',''),bet});
   data.balance=Number(j.balance||data.balance||0); updateBalanceUI();
-  minesState={sector:j.sector,mult:j.multiplier,bet:j.bet,roundId:j.round_id,active:true,canCash:false,revealed:[],message:'Раунд начат. Выбери клетку.'};
+  minesState={sector:j.sector,mult:j.multiplier,bet:j.bet,roundId:j.round_id,active:j.status==='active',canCash:!!j.can_cash,revealed:[],message:'Раунд начат. Выбери клетку.'};
   renderMines();
  }catch(e){showToast(e.message||'Не удалось начать игру','error');}
 }
@@ -53,15 +70,15 @@ async function cashMines(){
  try{
   const j=await apiFetch('/api/game/mines/cashout',{round_id:minesState.roundId});
   data.balance=Number(j.balance||data.balance||0); updateBalanceUI();
-  minesState.active=false; minesState.message=`Вы забрали ${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines();
+  minesState.active=false; minesState.canCash=false; minesState.message=`Вы забрали ${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines();
  }catch(e){showToast(e.message||'Не удалось забрать выигрыш','error');}
 }
 async function continueMines(){
  if(!minesState?.active||!minesState.canCash)return;
  try{
   const j=await apiFetch('/api/game/mines/continue',{round_id:minesState.roundId});
-  minesState.canCash=false;
-  minesState.message='Продолжаем. Выбери клетку следующего сектора.';
+  minesState.sector=Number(j.sector||minesState.sector); minesState.mult=Number(j.multiplier||minesState.mult); minesState.canCash=false;
+  minesState.message='Продолжаем. Выбери клетку следующего сектора.'; minesState.revealed=[];
   renderMines();
  }catch(e){showToast(e.message||'Не удалось продолжить','error');}
 }
@@ -71,12 +88,12 @@ async function pickMine(i){
   const j=await apiFetch('/api/game/mines/pick',{round_id:minesState.roundId,cell:i});
   data.balance=Number(j.balance||data.balance||0); updateBalanceUI();
   if(j.status==='lost'){
-   minesState.active=false; minesState.message='Мина. Ставка потеряна.'; minesState.revealed=[...new Set([...(minesState.revealed||[]),i])]; renderMines(); return;
+   minesState.active=false; minesState.canCash=false; minesState.message='💣 Мина. Ставка потеряна.'; minesState.revealed=Array.isArray(j.bombs)?j.bombs.map(Number):[i]; renderMines(); return;
   }
   if(j.status==='won'){
    minesState.active=false; minesState.canCash=false; minesState.message=`Все 6 секторов пройдены. +${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines(); return;
   }
-  minesState.sector=j.sector; minesState.mult=j.multiplier; minesState.canCash=true; minesState.revealed=[i]; minesState.message=`Сектор пройден. Можно забрать ${Number(j.current_win||0).toLocaleString('ru-RU')} орбов или продолжить.`; renderMines();
+  minesState.sector=j.sector; minesState.mult=j.multiplier; minesState.canCash=true; minesState.revealed=[]; minesState.message=`Сектор пройден. Можно забрать ${Number(j.current_win||0).toLocaleString('ru-RU')} орбов или продолжить.`; renderMines();
  }catch(e){showToast(e.message||'Ошибка игры','error');}
 }
 let bomberState=null;
@@ -959,7 +976,8 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
 .notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
 
 /* Mines redesign */
-.mines-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.18));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden;position:relative}.mines-shell:before{content:"";position:absolute;inset:-80px auto auto -80px;width:180px;height:180px;background:radial-gradient(circle,rgba(201,151,77,.14),transparent 68%);pointer-events:none}.mines-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;position:relative}.mines-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2);opacity:.85}.mines-hero h2{font-size:28px;margin:4px 0}.mines-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:240px}.mines-bet-badge{min-width:82px;text-align:right}.mines-bet-badge span,.mines-bet-badge small{display:block;font:600 9px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-bet-badge b{display:block;font:700 18px 'IBM Plex Mono',monospace;color:var(--paper);margin:2px 0}.mines-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}.mines-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.mines-stats span{display:block;color:var(--muted);font-size:9px}.mines-stats b{display:block;margin-top:3px;font:700 14px 'IBM Plex Mono',monospace}.mines-progress{margin-top:12px}.mines-progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:5px}.mines-progress-track{height:5px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden}.mines-progress-track i{display:block;height:100%;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));border-radius:10px;transition:width .35s}.mines-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}.mine-cell{height:88px;border:1px solid rgba(201,151,77,.16);border-radius:16px;background:linear-gradient(145deg,#27211c,#191512);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 18px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;transition:transform .15s,border-color .15s,background .15s}.mine-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.5)}.mine-cell:disabled{opacity:1}.mine-cell-core{width:27px;height:27px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff5c7 0 8%,#e3b872 17%,#c9974d 42%,#704b19 72%,#2a1c0d 100%);box-shadow:0 0 18px rgba(227,184,114,.22)}.mine-cell small{font:600 9px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mine-cell.revealed{border-color:rgba(76,154,118,.6);background:linear-gradient(145deg,rgba(76,154,118,.14),rgba(255,255,255,.025))}.mine-cell.revealed .mine-cell-core{background:radial-gradient(circle,#eaffdf 0 10%,#65b889 32%,#317050 70%,#193d2d 100%);box-shadow:0 0 18px rgba(76,154,118,.35)}.mines-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mines-main-btn,.mines-cash-btn{min-height:46px}.mines-cash-btn:disabled{opacity:.35}.mines-message{min-height:32px;text-align:center;color:var(--muted);font-size:11px;padding:10px 4px}.mines-sectors{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:4px}.mines-sector{padding:7px 3px;border:1px solid var(--line);border-radius:10px;text-align:center;background:rgba(255,255,255,.018)}.mines-sector span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mines-sector b{display:block;font:700 11px 'IBM Plex Mono',monospace;margin:2px 0}.mines-sector small{display:block;font-size:7px;color:var(--muted)}.mines-sector.current{border-color:rgba(227,184,114,.45);background:rgba(201,151,77,.08)}.mines-sector.done{opacity:.58}.promo-row{align-items:center}.promo-row #adminTechBreakPromoBtn{flex:0 0 auto}.bomber-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.2));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden}.bomber-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.bomber-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2)}.bomber-hero h2{font-size:28px;margin:4px 0}.bomber-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:235px}.bomber-live{padding:9px 10px;border-radius:13px;background:rgba(201,151,77,.08);border:1px solid rgba(227,184,114,.18);text-align:right;white-space:nowrap}.bomber-live span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted)}.bomber-live b{display:block;font:800 18px 'IBM Plex Mono',monospace;color:var(--brass-2);margin-top:2px}.bomber-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}.bomber-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.bomber-stats span{display:block;color:var(--muted);font-size:9px}.bomber-stats b{display:block;margin-top:3px;font:700 13px 'IBM Plex Mono',monospace}.bomber-stats small{font:500 8px 'Inter',sans-serif;color:var(--muted)}.bomber-board{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:9px;border-radius:18px;background:radial-gradient(circle at 50% 20%,rgba(201,151,77,.09),transparent 60%),#171411;border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.bomber-cell{aspect-ratio:1;border:1px solid rgba(201,151,77,.15);border-radius:12px;background:linear-gradient(145deg,#29221c,#1a1512);color:var(--paper);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 12px rgba(0,0,0,.18);transition:.16s}.bomber-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.55);box-shadow:0 8px 18px rgba(0,0,0,.25),0 0 16px rgba(201,151,77,.08)}.bomber-cell:disabled{cursor:default}.bomber-hidden{font:700 20px 'IBM Plex Mono',monospace;color:rgba(227,184,114,.32)}.bomber-cell.safe{background:linear-gradient(145deg,rgba(76,154,118,.2),rgba(40,71,55,.25));border-color:rgba(76,154,118,.65)}.bomber-safe{font-size:20px;color:#8fd1ad;text-shadow:0 0 12px rgba(76,154,118,.5)}.bomber-cell.bomb{background:linear-gradient(145deg,rgba(168,74,74,.24),rgba(65,25,25,.35));border-color:rgba(193,85,79,.7);animation:bomberBomb .35s ease}.bomber-bomb{font-size:28px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}.bomber-bet-card{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--bg-3)}.bomber-bet-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-weight:700}.bomber-bet-input-wrap{display:grid;grid-template-columns:48px 1fr 48px;gap:7px}.bomber-bet-input-wrap input{width:100%;background:#171411;border:1px solid rgba(227,184,114,.18);color:var(--paper);border-radius:12px;text-align:center;padding:12px;font:800 17px 'IBM Plex Mono',monospace;outline:none}.bomber-bet-input-wrap input:focus{border-color:var(--brass-2);box-shadow:0 0 0 3px rgba(201,151,77,.08)}.bomber-step,.bomber-preset{border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:11px;font-weight:800}.bomber-step{font-size:18px}.bomber-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.bomber-preset{padding:9px 4px;font:700 10px 'IBM Plex Mono',monospace;color:var(--muted)}.bomber-preset:active,.bomber-step:active{transform:scale(.96)}.bomber-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.bomber-actions button{min-height:46px}.bomber-actions .btn-ghost:disabled{opacity:.35}.bomber-message{text-align:center;min-height:32px;padding:10px 4px;color:var(--muted);font-size:11px}.bomber-message.win{color:var(--success)}.bomber-message.loss{color:var(--danger)}@keyframes bomberBomb{50%{transform:scale(.94)}}
+.mines-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.18));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden;position:relative}.mines-shell:before{content:"";position:absolute;inset:-80px auto auto -80px;width:180px;height:180px;background:radial-gradient(circle,rgba(201,151,77,.14),transparent 68%);pointer-events:none}.mines-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;position:relative}.mines-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2);opacity:.85}.mines-hero h2{font-size:28px;margin:4px 0}.mines-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:240px}.mines-bet-badge{min-width:82px;text-align:right}.mines-bet-badge span,.mines-bet-badge small{display:block;font:600 9px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-bet-badge b{display:block;font:700 18px 'IBM Plex Mono',monospace;color:var(--paper);margin:2px 0}.mines-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}.mines-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.mines-stats span{display:block;color:var(--muted);font-size:9px}.mines-stats b{display:block;margin-top:3px;font:700 14px 'IBM Plex Mono',monospace}.mines-progress{margin-top:12px}.mines-progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:5px}.mines-progress-track{height:5px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden}.mines-progress-track i{display:block;height:100%;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));border-radius:10px;transition:width .35s}.mines-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}.mine-cell{height:88px;border:1px solid rgba(201,151,77,.16);border-radius:16px;background:linear-gradient(145deg,#27211c,#191512);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 18px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;transition:transform .15s,border-color .15s,background .15s}.mine-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.5)}.mine-cell:disabled{opacity:1}.mine-cell-core{width:27px;height:27px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff5c7 0 8%,#e3b872 17%,#c9974d 42%,#704b19 72%,#2a1c0d 100%);box-shadow:0 0 18px rgba(227,184,114,.22)}.mine-cell small{font:600 9px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mine-cell.revealed{border-color:rgba(76,154,118,.6);background:linear-gradient(145deg,rgba(76,154,118,.14),rgba(255,255,255,.025))}.mine-cell.revealed .mine-cell-core{background:radial-gradient(circle,#eaffdf 0 10%,#65b889 32%,#317050 70%,#193d2d 100%);box-shadow:0 0 18px rgba(76,154,118,.35)}.mines-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mines-main-btn,.mines-cash-btn{min-height:46px}.mines-cash-btn:disabled{opacity:.35}.mines-message{min-height:32px;text-align:center;color:var(--muted);font-size:11px;padding:10px 4px}.mines-sectors{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:4px}.mines-sector{padding:7px 3px;border:1px solid var(--line);border-radius:10px;text-align:center;background:rgba(255,255,255,.018)}.mines-sector span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mines-sector b{display:block;font:700 11px 'IBM Plex Mono',monospace;margin:2px 0}.mines-sector small{display:block;font-size:7px;color:var(--muted)}.mines-sector.current{border-color:rgba(227,184,114,.45);background:rgba(201,151,77,.08)}.mines-sector.done{opacity:.58}.promo-row{align-items:center}.promo-row #adminTechBreakPromoBtn{flex:0 0 auto}.mines-status-pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);font:700 9px 'IBM Plex Mono',monospace;color:var(--muted);background:rgba(255,255,255,.025)}.mines-status-pill.live{color:var(--brass-2);border-color:rgba(227,184,114,.35);background:rgba(201,151,77,.08)}.mines-bet-card{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(0,0,0,.12))}.mines-bet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.mines-bet-head span{display:block;font:800 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;color:var(--paper)}.mines-bet-head small{display:block;margin-top:3px;color:var(--muted);font-size:9px}.mines-bet-head b{font:800 9px 'IBM Plex Mono',monospace;color:var(--brass-2)}.mines-bet-input-wrap{display:grid;grid-template-columns:44px 1fr 44px;gap:7px}.mines-bet-input-wrap input{width:100%;box-sizing:border-box;background:#171411;border:1px solid rgba(227,184,114,.2);color:var(--paper);border-radius:12px;text-align:center;padding:11px 8px;font:800 17px 'IBM Plex Mono',monospace;outline:none}.mines-bet-input-wrap input:focus{border-color:var(--brass-2);box-shadow:0 0 0 3px rgba(201,151,77,.08)}.mines-step,.mines-preset{border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:11px;font-weight:800}.mines-step{font-size:19px}.mines-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.mines-preset{padding:8px 4px;font:700 10px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-step:active,.mines-preset:active{transform:scale(.96)}.mines-bet-input-wrap input:disabled{opacity:.55}.mines-actions{grid-template-columns:1fr 1fr 1fr}.mines-main-btn:disabled{opacity:.55}
+.bomber-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.2));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden}.bomber-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.bomber-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2)}.bomber-hero h2{font-size:28px;margin:4px 0}.bomber-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:235px}.bomber-live{padding:9px 10px;border-radius:13px;background:rgba(201,151,77,.08);border:1px solid rgba(227,184,114,.18);text-align:right;white-space:nowrap}.bomber-live span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted)}.bomber-live b{display:block;font:800 18px 'IBM Plex Mono',monospace;color:var(--brass-2);margin-top:2px}.bomber-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}.bomber-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.bomber-stats span{display:block;color:var(--muted);font-size:9px}.bomber-stats b{display:block;margin-top:3px;font:700 13px 'IBM Plex Mono',monospace}.bomber-stats small{font:500 8px 'Inter',sans-serif;color:var(--muted)}.bomber-board{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:9px;border-radius:18px;background:radial-gradient(circle at 50% 20%,rgba(201,151,77,.09),transparent 60%),#171411;border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.bomber-cell{aspect-ratio:1;border:1px solid rgba(201,151,77,.15);border-radius:12px;background:linear-gradient(145deg,#29221c,#1a1512);color:var(--paper);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 12px rgba(0,0,0,.18);transition:.16s}.bomber-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.55);box-shadow:0 8px 18px rgba(0,0,0,.25),0 0 16px rgba(201,151,77,.08)}.bomber-cell:disabled{cursor:default}.bomber-hidden{font:700 20px 'IBM Plex Mono',monospace;color:rgba(227,184,114,.32)}.bomber-cell.safe{background:linear-gradient(145deg,rgba(76,154,118,.2),rgba(40,71,55,.25));border-color:rgba(76,154,118,.65)}.bomber-safe{font-size:20px;color:#8fd1ad;text-shadow:0 0 12px rgba(76,154,118,.5)}.bomber-cell.bomb{background:linear-gradient(145deg,rgba(168,74,74,.24),rgba(65,25,25,.35));border-color:rgba(193,85,79,.7);animation:bomberBomb .35s ease}.bomber-bomb{font-size:28px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}.bomber-bet-card{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--bg-3)}.bomber-bet-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-weight:700}.bomber-bet-input-wrap{display:grid;grid-template-columns:48px 1fr 48px;gap:7px}.bomber-bet-input-wrap input{width:100%;background:#171411;border:1px solid rgba(227,184,114,.18);color:var(--paper);border-radius:12px;text-align:center;padding:12px;font:800 17px 'IBM Plex Mono',monospace;outline:none}.bomber-bet-input-wrap input:focus{border-color:var(--brass-2);box-shadow:0 0 0 3px rgba(201,151,77,.08)}.bomber-step,.bomber-preset{border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:11px;font-weight:800}.bomber-step{font-size:18px}.bomber-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.bomber-preset{padding:9px 4px;font:700 10px 'IBM Plex Mono',monospace;color:var(--muted)}.bomber-preset:active,.bomber-step:active{transform:scale(.96)}.bomber-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.bomber-actions button{min-height:46px}.bomber-actions .btn-ghost:disabled{opacity:.35}.bomber-message{text-align:center;min-height:32px;padding:10px 4px;color:var(--muted);font-size:11px}.bomber-message.win{color:var(--success)}.bomber-message.loss{color:var(--danger)}@keyframes bomberBomb{50%{transform:scale(.94)}}
 @media(max-width:430px){.mines-stats{grid-template-columns:repeat(2,1fr)}.mines-sectors{grid-template-columns:repeat(3,1fr)}.mines-grid{gap:7px}.mine-cell{height:80px}}
 </style>
 
@@ -2940,7 +2958,6 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
       <button class="nav-btn" data-tab="battles"><span>⚔️</span>Батлы</button>
       <button class="nav-btn" data-tab="plinko"><span>🟡</span>Орб-Рывок</button>
       <button class="nav-btn mines-nav-btn" data-tab="mines"><span>💣</span>Мины</button>
-      <button class="nav-btn mines-nav-btn" data-tab="bomber"><span>💣</span>Мины</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
     </nav>
 
@@ -3930,7 +3947,7 @@ async function adminGlobalTechBreakToggle(){
   if(active){
     if(!await tgConfirm('Снять технический перерыв у всех игроков?')) return;
     try{
-      await apiFetch('/api/admin/account',{user_id:Number(tgUserId()||0),action:'clear_tech_break'});
+      await apiFetch('/api/admin/tech-break',{action:'clear'});
       updateAdminTechBreakPromoButton(false);
       hideTechBreak();
       showToast('✅ Глобальный тех. перерыв снят','success');
@@ -4103,6 +4120,7 @@ async function showApp(skipServer=false){
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
   renderAll();
+  refreshGlobalTechBreak();
   if(!skipServer) registerWithServer();
 }
 
@@ -4739,7 +4757,7 @@ async function adminBuff(uid){
 async function adminTechBreak(uid){
   askReason('🛠️ Технический перерыв','Укажи причину. Она будет показана игроку в отдельном окне.', '', async reason=>{
     try{
-      const j=await apiFetch('/api/admin/account',{user_id:Number(uid),action:'tech_break',reason});
+      const j=await apiFetch('/api/admin/tech-break',{action:'enable',reason});
       showToast('🛠️ Тех. перерыв включён','success');
       updateAdminTechBreakPromoButton(true);
       loadAdminUsers(document.getElementById('adminSearch')?.value||'');
@@ -4848,8 +4866,7 @@ function switchTab(tab){
   if(tab==='games') {}
   if(tab==='battles') renderBattles();
   if(tab==='plinko') renderPlinko();
-  if(tab==='mines') renderMines();
-  if(tab==='bomber') renderMines();
+  if(tab==='mines'){ renderMines(); restoreActiveMines(); }
   if(tab==='admin' && window.isAdmin) renderAdmin();
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
@@ -6871,6 +6888,8 @@ function renderAll(){
   renderMarket();
   renderBattles();
   renderPlinko();
+  renderMines();
+  restoreActiveMines();
   updateSettingsUI();
 }
 
