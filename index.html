@@ -39,97 +39,144 @@ function renderMines(){
  document.querySelectorAll('[data-mine-preset]').forEach(b=>b.onclick=(e)=>{e.preventDefault();e.stopPropagation();setMinesBet(Number(b.dataset.minePreset||1000));});
  document.getElementById('mineBet')?.addEventListener('input',()=>{ minesState.bet=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('mineBet').value||1)))); });
  const mineStartBtn=document.getElementById('mineStart');
- if(mineStartBtn) mineStartBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();startMines();};
- const mineCashBtn=document.getElementById('mineCash');
- if(mineCashBtn) mineCashBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();cashMines();};
- const mineContinueBtn=document.getElementById('mineContinue');
- if(mineContinueBtn) mineContinueBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();continueMines();};
+ const bindMineAction=(btn,fn)=>{ if(!btn)return; btn.onclick=null; btn.onpointerup=(e)=>{e.preventDefault();e.stopPropagation();fn();}; };
+ bindMineAction(mineStartBtn,startMines);
+ const mineCashBtn=document.getElementById('mineCash'); bindMineAction(mineCashBtn,cashMines);
+ const mineContinueBtn=document.getElementById('mineContinue'); bindMineAction(mineContinueBtn,continueMines);
  drawMineGrid();
 }
 function setMinesBet(v){ if(minesState?.active)return; const n=Math.max(1,Math.min(1000000,Math.floor(Number(v)||1))); minesState.bet=n; renderMines(); const input=document.getElementById('mineBet'); if(input){input.focus();input.select();} }
 async function restoreActiveMines(){
- if(minesState?.active) return;
+ if(minesState?.active || minesStartInFlight || minesActionInFlight) return;
  try{
-  const j=await apiFetch('/api/game/mines/active',{});
+  const j=await minesRequest('/api/game/mines/active',{});
   if(j?.active){ minesState={sector:Number(j.sector||1),mult:Number(j.multiplier||1.3),bet:Number(j.bet||1000),roundId:j.round_id,active:true,canCash:!!j.can_cash,revealed:[],message:j.can_cash?'Сектор пройден. Забери выигрыш или продолжи.':'Раунд восстановлен. Выбери клетку.'}; renderMines(); }
  }catch(e){}
 }
 function drawMineGrid(){
- const g=document.getElementById('mineGrid'); if(!g)return; g.innerHTML='';
- const disabled=!minesState?.active||minesState?.canCash;
+ const g=document.getElementById('mineGrid'); if(!g)return;
+ g.innerHTML='';
+ const disabled=!minesState?.active||minesState?.canCash||minesActionInFlight;
  for(let i=0;i<6;i++){
-  const b=document.createElement('button'); b.className='mine-cell'+(minesState?.revealed?.includes(i)?' revealed':'');
-  b.innerHTML='<span class="mine-cell-core"></span><small>'+String(i+1).padStart(2,'0')+'</small>';
-  b.disabled=disabled; b.onclick=()=>pickMine(i); g.appendChild(b);
+  const btn=document.createElement('button'); btn.type='button';
+  btn.className='mine-cell'+(minesState?.revealed?.includes(i)?' revealed':'');
+  btn.innerHTML='<span class="mine-cell-core"></span><small>'+String(i+1).padStart(2,'0')+'</small>';
+  btn.disabled=disabled;
+  let fired=false;
+  const act=(e)=>{e.preventDefault();e.stopPropagation();if(fired)return;fired=true;setTimeout(()=>fired=false,350);pickMine(i);};
+  btn.addEventListener('pointerup',act,{passive:false});
+  btn.addEventListener('click',act,{passive:false});
+  g.appendChild(btn);
  }
 }
-async function startMines(){
- if(minesState?.active || minesStartInFlight || minesActionInFlight) return;
- minesActionInFlight=true;
- const input=document.getElementById('mineBet');
- const bet=Math.max(1,Math.min(1000000,Math.floor(Number(input?.value||minesState?.bet||1000))));
- minesState=minesState||{sector:1,bet:bet,mult:1.3,active:false,roundId:null,canCash:false,revealed:[],message:''};
- minesState.bet=bet;
- const makeRoundId=()=>{
-   try{ if(window.crypto?.randomUUID) return 'm_'+window.crypto.randomUUID().replaceAll('-',''); }catch(_){}
-   return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,18);
- };
- const btn=document.getElementById('mineStart');
- if(btn){ btn.disabled=true; btn.textContent='Запуск…'; }
- const roundId=(minesState.active?minesState.roundId:null) || makeRoundId();
- minesState.roundId=roundId;
- minesStartInFlight=(async()=>{
-   try{
-     const j=await apiFetch('/api/game/mines/start',{round_id:roundId,bet});
-     if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
-     minesState={sector:Number(j.sector||1),mult:Number(j.multiplier||1.3),bet:Number(j.bet||bet),roundId:j.round_id||roundId,active:j.status==='active',canCash:!!j.can_cash,revealed:[],message:'Раунд начат. Выбери клетку.'};
-     renderMines();
-   }catch(e){
-     minesState.active=false;
-     minesState.message=e.message||'Не удалось начать игру';
-     showToast(minesState.message,'error');
-     renderMines();
-   }finally{ minesStartInFlight=null; minesActionInFlight=false; }
- })();
- await minesStartInFlight;
+async function minesRequest(path, payload={}){
+  // Mines uses the same authenticated API as the rest of the app, but keeps
+  // its own request wrapper so game actions are not affected by UI polling.
+  if(typeof window.apiFetch!=='function') throw new Error('Сервис игры ещё загружается. Попробуй ещё раз.');
+  const controller = typeof AbortController!=='undefined' ? new AbortController() : null;
+  const timeout = controller ? setTimeout(()=>controller.abort(),12000) : null;
+  try{
+    // apiFetch already attaches Telegram initData/authToken and handles server errors.
+    // Do not launch fallback requests in parallel: one tap = one server action.
+    return await window.apiFetch(path, payload);
+  }catch(e){
+    if(e?.name==='AbortError') throw new Error('Сервер долго отвечает. Попробуй ещё раз.');
+    throw e;
+  }finally{ if(timeout) clearTimeout(timeout); }
 }
+
+async function startMines(){
+  if(minesState?.active || minesStartInFlight || minesActionInFlight) return;
+  const input=document.getElementById('mineBet');
+  const bet=Math.max(1,Math.min(1000000,Math.floor(Number(input?.value||minesState?.bet||1000))));
+  minesState=minesState||{sector:1,bet,mult:1.3,active:false,roundId:null,canCash:false,revealed:[],message:''};
+  minesState.bet=bet;
+  const makeRoundId=()=>{
+    try{ if(window.crypto?.randomUUID) return 'm_'+window.crypto.randomUUID().replaceAll('-',''); }catch(_){}
+    return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,18);
+  };
+  const roundId=(minesState.roundId && !minesState.active ? minesState.roundId : null) || makeRoundId();
+  minesState.roundId=roundId;
+  const btn=document.getElementById('mineStart');
+  if(btn){btn.disabled=true;btn.textContent='Запуск…';}
+  minesStartInFlight=Promise.resolve().then(async()=>{
+    serverActionInFlight++;
+    try{
+      const j=await minesRequest('/api/game/mines/start',{round_id:roundId,bet});
+      if(data && typeof data==='object' && typeof j.balance==='number'){
+        data.balance=Number(j.balance); updateBalanceUI();
+      }
+      minesState={
+        sector:Number(j.sector||1), mult:Number(j.multiplier||1.3), bet:Number(j.bet||bet),
+        roundId:j.round_id||roundId, active:j.status==='active', canCash:!!j.can_cash,
+        revealed:[], message:j.can_cash?'Сектор уже пройден. Забери выигрыш или продолжи.':'Раунд начат. Выбери клетку.'
+      };
+      renderMines();
+    }catch(e){
+      minesState.active=false; minesState.canCash=false;
+      minesState.message=e.message||'Не удалось начать игру';
+      renderMines(); showToast(minesState.message,'error');
+    }finally{
+      serverActionInFlight=Math.max(0,serverActionInFlight-1);
+      minesStartInFlight=null; minesActionInFlight=false;
+    }
+  });
+  await minesStartInFlight;
+}
+
 let minesActionInFlight=false;
 async function cashMines(){
- if(!minesState?.active||!minesState.canCash||minesActionInFlight)return;
- minesActionInFlight=true;
- try{
-  const j=await apiFetch('/api/game/mines/cashout',{round_id:minesState.roundId});
-  if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
-  minesState.active=false; minesState.canCash=false; minesState.message=`Вы забрали ${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines();
- }catch(e){showToast(e.message||'Не удалось забрать выигрыш','error');}
- finally{minesActionInFlight=false;}
+  if(!minesState?.active||!minesState.canCash||minesActionInFlight)return;
+  minesActionInFlight=true; serverActionInFlight++;
+  try{
+    const j=await minesRequest('/api/game/mines/cashout',{round_id:minesState.roundId});
+    if(data && typeof data==='object' && typeof j.balance==='number'){data.balance=Number(j.balance);updateBalanceUI();}
+    minesState.active=false; minesState.canCash=false;
+    minesState.message=`Вы забрали ${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`;
+    renderMines();
+  }catch(e){showToast(e.message||'Не удалось забрать выигрыш','error');}
+  finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);minesActionInFlight=false;}
 }
+
 async function continueMines(){
- if(!minesState?.active||!minesState.canCash||minesActionInFlight)return;
- minesActionInFlight=true;
- try{
-  const j=await apiFetch('/api/game/mines/continue',{round_id:minesState.roundId});
-  minesState.sector=Number(j.sector||minesState.sector); minesState.mult=Number(j.multiplier||minesState.mult); minesState.canCash=false;
-  minesState.message='Продолжаем. Выбери клетку следующего сектора.'; minesState.revealed=[];
-  renderMines();
- }catch(e){showToast(e.message||'Не удалось продолжить','error');}
- finally{minesActionInFlight=false;}
+  if(!minesState?.active||!minesState.canCash||minesActionInFlight)return;
+  minesActionInFlight=true; serverActionInFlight++;
+  try{
+    const j=await minesRequest('/api/game/mines/continue',{round_id:minesState.roundId});
+    minesState.sector=Number(j.sector||minesState.sector);
+    minesState.mult=Number(j.multiplier||minesState.mult);
+    minesState.canCash=false; minesState.revealed=[];
+    minesState.message='Выбери одну из шести клеток следующего сектора.';
+    renderMines();
+  }catch(e){showToast(e.message||'Не удалось продолжить','error');}
+  finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);minesActionInFlight=false;}
 }
+
 async function pickMine(i){
- if(!minesState?.active||minesState.canCash||minesActionInFlight)return;
- minesActionInFlight=true;
- try{
-  const j=await apiFetch('/api/game/mines/pick',{round_id:minesState.roundId,cell:i});
-  if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
-  if(j.status==='lost'){
-   minesState.active=false; minesState.canCash=false; minesState.message='💣 Мина. Ставка потеряна.'; minesState.revealed=Array.isArray(j.bombs)?j.bombs.map(Number):[i]; renderMines(); return;
-  }
-  if(j.status==='won'){
-   minesState.active=false; minesState.canCash=false; minesState.message=`Все 6 секторов пройдены. +${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines(); return;
-  }
-  minesState.sector=j.sector; minesState.mult=j.multiplier; minesState.canCash=true; minesState.revealed=[]; minesState.message=`Сектор пройден. Можно забрать ${Number(j.current_win||0).toLocaleString('ru-RU')} орбов или продолжить.`; renderMines();
- }catch(e){showToast(e.message||'Ошибка игры','error');}
- finally{minesActionInFlight=false;}
+  if(!minesState?.active||minesState.canCash||minesActionInFlight)return;
+  minesActionInFlight=true; serverActionInFlight++;
+  try{
+    const j=await minesRequest('/api/game/mines/pick',{round_id:minesState.roundId,cell:i});
+    if(data && typeof data==='object' && typeof j.balance==='number'){data.balance=Number(j.balance);updateBalanceUI();}
+    if(j.status==='lost'){
+      minesState.active=false; minesState.canCash=false;
+      minesState.message='💣 Мина. Ставка потеряна.';
+      minesState.revealed=Array.isArray(j.bombs)?j.bombs.map(Number):[i];
+      renderMines(); return;
+    }
+    if(j.status==='won'){
+      minesState.active=false; minesState.canCash=false;
+      minesState.message=`Все 6 секторов пройдены. +${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`;
+      minesState.revealed=Array.isArray(j.bombs)?j.bombs.map(Number):[i];
+      renderMines(); return;
+    }
+    minesState.sector=Number(j.sector||minesState.sector);
+    minesState.mult=Number(j.multiplier||minesState.mult);
+    minesState.canCash=true; minesState.revealed=[i];
+    minesState.message=`Сектор пройден. Можно забрать ${Number(j.current_win||0).toLocaleString('ru-RU')} орбов или продолжить.`;
+    renderMines();
+  }catch(e){showToast(e.message||'Ошибка игры','error');}
+  finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);minesActionInFlight=false;}
 }
 let bomberState=null;
 const BOMBER_MULTS=[1.12,1.28,1.48,1.75,2.10,2.60,3.25,4.10,5.25,6.80];
