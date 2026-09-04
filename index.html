@@ -4955,6 +4955,11 @@ function switchTab(tab){
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
   if(tab==='cases') renderCases();
 }
+// Expose the shared API helper to the standalone Mines module.
+// Mines is declared in an earlier <script> block, so lexical scope does not
+// include the later auth IIFE where apiFetch lives.
+window.apiFetch = apiFetch;
+
 
 function updateBalanceUI(){
   document.getElementById('balanceDisplay').textContent = (data.balance||0).toLocaleString('ru-RU');
