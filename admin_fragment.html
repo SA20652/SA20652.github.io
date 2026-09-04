@@ -1,0 +1,382 @@
+<!-- ADMIN FRAGMENT (separate) -->
+<button class="menu-item" id="adminMenuBtn" data-menu-tab="admin">🛡️ Админ-панель</button>
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="section-title">🛡️ Админ-панель</div>
+      <div class="section-sub">Управление игроками и серверной базой</div>
+      <div class="admin-card">
+        <div class="admin-search">
+          <input id="adminSearch" placeholder="Ник или Telegram ID">
+          <button class="btn" id="adminSearchBtn">Найти</button>
+        </div>
+        <div style="margin-top:10px;font-size:13px;color:var(--muted)">
+          Всего игроков: <b id="adminTotalPlayers" style="color:var(--paper)">Загрузка…</b>
+        </div>
+        <div id="adminUsersList"></div>
+      </div>
+      <div class="admin-card" style="margin-top:12px"><h3>Управление доступностью</h3><button type="button" class="btn-ghost" id="adminTechBreakPanelBtn">Тех. перерыв для игроков</button><div class="section-sub" style="margin-top:6px">Администратор продолжает пользоваться панелью и играми.</div></div>
+<div class="admin-grid">
+        <div class="admin-card"><h3>📊 Система</h3><div id="adminStats" style="font-size:12px;color:var(--muted)">Загрузка…</div></div>
+        <div class="admin-card"><h3>🌐 IP-блокировка</h3><div class="section-sub">Блокирует доступ к приложению с указанного IP. Для общего Wi‑Fi используй осторожно.</div><div class="promo-admin-form"><input id="adminIp" placeholder="IP-адрес"><input id="adminIpReason" maxlength="500" placeholder="Причина"><input id="adminIpMinutes" type="number" min="1" max="43200" value="60" placeholder="Минуты"><label style="display:flex;align-items:center;gap:8px;font-size:12px"><input id="adminIpPermanent" type="checkbox"> Навсегда</label><button class="btn" data-action="admin-ip-ban">Заблокировать IP</button><button class="btn-ghost" data-action="admin-ip-unban">Снять IP-блок</button></div></div>
+        <div class="admin-card"><h3>📜 Последние действия</h3><div id="adminLogs"></div></div>
+      </div>
+      <div class="admin-card">
+        <h3>🔔 Рассылка уведомлений</h3>
+        <div class="section-sub">Отправка уведомления всем игрокам или одному игроку.</div>
+        <div class="promo-admin-form">
+          <select id="adminNotificationTarget">
+            <option value="all">Все игроки</option>
+            <option value="one">Одному игроку</option>
+          </select>
+          <input id="adminNotificationPlayer" placeholder="Ник или Telegram ID (для одного игрока)">
+          <textarea id="adminNotificationText" placeholder="Текст уведомления"></textarea>
+          <button class="btn" id="adminNotificationSend">Отправить уведомление</button>
+        </div>
+      </div>
+      <div class="admin-card">
+        <h3>🎟️ Промокоды</h3>
+        <div class="section-sub">Промокод может выдать обычную награду и показать одну или несколько полноэкранных картинок. Каждая картинка показывается 3 секунды и может иметь свою награду.</div>
+
+        <div class="promo-admin-form">
+          <input id="promoAdminCode" maxlength="32" placeholder="Код, например GDPLAY2026">
+          <select id="promoAdminReward">
+            <option value="coins">Только монеты</option>
+            <option value="vip">Только VIP</option>
+            <option value="both">Монеты + VIP</option>
+          </select>
+          <input id="promoAdminCoins" type="number" min="0" value="1000" placeholder="Монеты">
+          <input id="promoAdminVipDays" type="number" min="0" value="7" placeholder="VIP дней">
+          <input id="promoAdminMaxUses" type="number" min="1" value="1" placeholder="Использований">
+        </div>
+
+        <div style="margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2)">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <div>
+              <b>🖼️ Полноэкранные картинки</b>
+              <div class="section-sub">Показываются по очереди на весь экран ровно 3 секунды.</div>
+            </div>
+            <label class="btn-ghost" for="promoAdminImageFiles" style="cursor:pointer">＋ Добавить картинки</label>
+            <input id="promoAdminImageFiles" type="file" accept="image/*" multiple hidden>
+          </div>
+          <div id="promoAdminSlides" style="display:grid;gap:10px;margin-top:12px"></div>
+        </div>
+
+        <div class="input-modal-actions" style="margin-top:12px">
+          <button class="btn" id="promoAdminCreateBtn">Создать промокод</button>
+        </div>
+        <div id="promoAdminMessage" class="promo-message"></div>
+        <div id="promoAdminList" class="promo-admin-list"></div>
+      </div>
+    </div>
+
+<div class="modal-overlay" id="adminAccountModal">
+  <div class="input-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+      <h3 style="margin:0">⚙️ Управление аккаунтом</h3>
+      <button type="button" class="btn-ghost" id="adminAccountCloseBtn" style="flex-shrink:0">✕ Закрыть</button>
+    </div>
+    <p>Игрок ID: <span id="adminAccountUid" class="mono"></span></p>
+    <div style="display:grid;gap:8px">
+      <input id="adminAccountNick" maxlength="16" placeholder="Новый ник">
+      <button class="btn-ghost" id="adminAccountNickBtn">✏️ Поменять ник</button>
+      <input id="adminAccountPassword" type="password" minlength="4" placeholder="Новый пароль">
+      <button class="btn-ghost" id="adminAccountPasswordBtn">🔑 Поменять пароль</button>
+      <button class="btn-ghost" id="adminAccount2faBtn">🔐 Отключить 2FA</button>
+      <button class="btn-ghost" id="adminAccountSessionsBtn">🚪 Завершить все сессии</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input id="adminAccountBalance" type="number" min="0" placeholder="Баланс">
+        <button class="btn-ghost" id="adminAccountBalanceBtn">💰 Установить баланс</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input id="adminAccountLevel" type="number" min="0" placeholder="Уровень">
+        <button class="btn-ghost" id="adminAccountLevelBtn">🏆 Установить уровень</button>
+      </div>
+      <div class="admin-avatar-row">
+        <div class="admin-avatar-preview" id="adminAccountAvatarPreview">?</div>
+        <div class="admin-avatar-controls">
+          <label class="btn-ghost" for="adminAccountAvatarFile" style="text-align:center;cursor:pointer">🖼️ Выбрать фото из галереи</label>
+          <input class="avatar-file" id="adminAccountAvatarFile" type="file" accept="image/*">
+          <button type="button" class="btn-ghost" id="adminAccountAvatarClear">🗑️ Убрать фото</button>
+        </div>
+      </div>
+      <button class="btn-ghost danger-admin" id="adminAccountRemovePremiumBtn">⭐ Снять Premium + Premium-баффы</button>
+      <button class="btn-ghost" id="adminAccountClearBuffsBtn">⚡ Очистить активные баффы</button>
+      <button class="btn-ghost" id="adminAccountClearDropsBtn">🏆 Очистить лучшие дропы</button>
+      <button class="btn-ghost" id="adminAccountGrantAdminBtn">🛡️ Выдать админ-панель</button>
+      <button class="btn-ghost" id="adminAccountRevokeAdminBtn">🚫 Забрать админ-панель</button>
+      <button class="btn-ghost" id="adminAccountCheckBtn">🔎 Проверить пароль/2FA</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminCubeModal">
+  <div class="input-modal">
+    <h3>🎁 Выдать куб</h3>
+    <p class="section-sub" style="margin:0 0 8px">Игрок ID: <span id="adminCubeUid" class="mono"></span></p>
+    <label class="section-sub" style="display:block;margin:8px 0 4px">Название</label>
+    <input id="adminCubeName" type="text" placeholder="Подарок от админа" value="Подарок от админа">
+    <label class="section-sub" style="display:block;margin:8px 0 4px">Редкость</label>
+    <select id="adminCubeRarity" style="width:100%;padding:10px;border-radius:10px;background:var(--bg-2);border:1px solid var(--line);color:var(--paper);">
+      <option value="common">Обычный</option>
+      <option value="rare">Редкий</option>
+      <option value="epic">Эпохальный</option>
+      <option value="legendary">Легендарный</option>
+      <option value="mythic">Мифический</option>
+      <option value="divine">Божественный</option>
+      <option value="emerald">Изумрудный</option>
+    </select>
+    <label class="section-sub" style="display:block;margin:8px 0 4px">Стоимость (монеты)</label>
+    <input id="adminCubeValue" type="number" inputmode="numeric" value="500">
+    <div class="input-modal-actions">
+      <button class="btn" id="adminCubeAccept">Выдать</button>
+      <button class="btn-ghost" id="adminCubeCancel">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminBuffModal">
+  <div class="input-modal">
+    <h3>⚡ Выдать бафф</h3>
+    <p>Игрок ID: <span id="adminBuffUid" class="mono"></span></p>
+    <select id="adminBuffType" style="width:100%;padding:10px;border-radius:10px;background:var(--bg-2);border:1px solid var(--line);color:var(--paper);">
+      <option value="luck">🍀 Удача — повышенный шанс редких дропов</option>
+      <option value="profit">💰 Профит — повышенная цена продажи</option>
+      <option value="upgrade">📈 Апгрейд — бонус к шансу улучшения</option>
+      <option value="premium_drop">⭐ Premium Drop — бонус к редкости</option>
+    </select>
+    <input id="adminBuffHours" type="number" min="1" max="720" step="1" value="24" placeholder="Часы">
+    <div class="input-modal-actions">
+      <button class="btn" id="adminBuffAccept">Выдать</button>
+      <button class="btn-ghost" id="adminBuffCancel">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminCustomStatusModal">
+  <div class="input-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+      <h3 style="margin:0">🏷️ Свой статус</h3>
+      <button type="button" class="btn-ghost" id="adminCustomStatusCloseBtn" style="flex-shrink:0">✕ Закрыть</button>
+    </div>
+    <p class="section-sub" style="margin:0 0 10px">Игрок ID: <span id="adminCustomStatusUid" class="mono"></span></p>
+    <div style="display:grid;gap:8px">
+      <input id="adminCustomStatusEmoji" maxlength="8" placeholder="Эмодзи, например 👑">
+      <input id="adminCustomStatusText" maxlength="32" placeholder="Текст статуса, например VIP+">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px">
+        <span><b>Переливание цвета</b><small style="display:block;opacity:.65">Плавно переливать статус между 2 цветами</small></span>
+        <label class="upgrade-switch" style="flex:0 0 auto">
+          <input id="adminCustomStatusGradient" type="checkbox">
+          <span class="upgrade-switch-track"><span class="upgrade-switch-thumb"></span></span>
+        </label>
+      </div>
+      <div id="adminCustomStatusColors" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <label class="section-sub">Цвет 1<input id="adminCustomStatusColor1" type="color" value="#f0c674" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
+        <label class="section-sub">Цвет 2<input id="adminCustomStatusColor2" type="color" value="#ffffff" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
+      </div>
+      <div class="section-sub">Если переливание выключено, используется обычный цвет статуса. Пустое поле текста удаляет текущий статус.</div>
+      <div class="input-modal-actions">
+        <button class="btn" id="adminCustomStatusAccept">Выдать статус</button>
+        <button class="btn-ghost" id="adminCustomStatusClear">Снять статус</button>
+        <button class="btn-ghost" id="adminCustomStatusCancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const slideState = [];
+  window.__promoSlideState = slideState;
+  const $ = id => document.getElementById(id);
+
+  function renderPromoSlides() {
+    const root = $('promoAdminSlides');
+    if (!root) return;
+    if (!slideState.length) {
+      root.innerHTML = '<div class="section-sub">Картинки не добавлены.</div>';
+      return;
+    }
+    root.innerHTML = slideState.map((slide, index) => `
+      <div style="display:grid;grid-template-columns:86px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px">
+        <img src="${slide.preview}" alt="" style="width:86px;height:64px;object-fit:cover;border-radius:8px;background:var(--bg)">
+        <div style="display:grid;gap:7px">
+          <div style="font-size:12px"><b>Картинка ${index + 1}</b> · <b>3 сек.</b></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+            <select data-slide-reward="${index}">
+              <option value="none">Без дополнительной награды</option>
+              <option value="coins">💰 Монеты</option>
+              <option value="vip">⭐ VIP</option>
+              <option value="cube">🎁 Куб</option>
+              <option value="buff">⚡ Бафф</option>
+            </select>
+            <input data-slide-value="${index}" type="number" min="0" value="${Number(slide.rewardValue)||0}" placeholder="Количество / дней">
+          </div>
+        </div>
+        <button type="button" class="btn-ghost" data-slide-remove="${index}">🗑️</button>
+      </div>`).join('');
+
+    slideState.forEach((slide,index)=>{
+      const reward=document.querySelector(`[data-slide-reward="${index}"]`);
+      const value=document.querySelector(`[data-slide-value="${index}"]`);
+      if(reward) reward.value=slide.rewardType||'none';
+      reward?.addEventListener('change',e=>slide.rewardType=e.target.value);
+      value?.addEventListener('input',e=>slide.rewardValue=Number(e.target.value)||0);
+    });
+    root.querySelectorAll('[data-slide-remove]').forEach(btn=>btn.addEventListener('click',()=>{
+      const i=Number(btn.dataset.slideRemove);
+      if(slideState[i]?.preview) URL.revokeObjectURL(slideState[i].preview);
+      slideState.splice(i,1); renderPromoSlides();
+    }));
+  }
+
+  $('promoAdminImageFiles')?.addEventListener('change', e=>{
+    [...e.target.files].filter(f=>f.type.startsWith('image/')).forEach(file=>{
+      slideState.push({file,preview:URL.createObjectURL(file),durationSeconds:3,rewardType:'none',rewardValue:0});
+    });
+    e.target.value=''; renderPromoSlides();
+  });
+
+  // Used by the existing admin request code. Images are converted to data URLs,
+  // so they can actually be sent as JSON to the server and saved in SQLite.
+  async function readSlides() {
+    return Promise.all(slideState.map(slide => new Promise((resolve,reject)=>{
+      const r=new FileReader();
+      r.onload=()=>resolve({image:r.result,duration:3,reward_type:slide.rewardType||'none',reward_value:Number(slide.rewardValue)||0});
+      r.onerror=reject; r.readAsDataURL(slide.file);
+    })));
+  }
+
+  window.getPromoAdminSlides = readSlides;
+  window.clearPromoAdminSlides = () => {
+    slideState.splice(0, slideState.length);
+    renderPromoSlides();
+  };
+  window.getPromoAdminPayload = async () => ({
+    code:$('promoAdminCode')?.value.trim().toUpperCase()||'',
+    reward_type:$('promoAdminReward')?.value||'coins',
+    coins:Number($('promoAdminCoins')?.value)||0,
+    vip_days:Number($('promoAdminVipDays')?.value)||0,
+    max_uses:Math.max(1,Number($('promoAdminMaxUses')?.value)||1),
+    fullscreen_slides:await readSlides()
+  });
+
+  // The list is intentionally NOT paginated. database.list_users() now returns
+  // all matching users by default. Keep the total badge synced to the rendered list.
+  function syncPlayerTotal() {
+    const root=$('adminUsersList'), total=$('adminTotalPlayers');
+    if(!root||!total) return;
+    const rows=root.querySelectorAll('[data-user-id], .admin-user-row, .user-row');
+    if(rows.length) total.textContent=rows.length.toLocaleString('ru-RU');
+  }
+  const root=$('adminUsersList');
+  if(root && window.MutationObserver){
+    new MutationObserver(syncPlayerTotal).observe(root,{childList:true,subtree:true});
+  }
+  window.syncAdminPlayerTotal=syncPlayerTotal;
+  syncPlayerTotal();
+
+  // Compatibility: old code may ask for a page. Return a single unpaged query.
+  window.adminPlayersQuery = (search='') => ({search:String(search||'').trim(),limit:null,offset:0});
+})();
+</script>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  function getAdminSession() {
+    if (window.adminSession) return String(window.adminSession);
+    if (window.__adminSession) return String(window.__adminSession);
+    const stores=[];
+    try { stores.push(localStorage, sessionStorage); } catch (_) {}
+    for (const st of stores) {
+      if (!st) continue;
+      for (let i=0;i<st.length;i++) {
+        const k=st.key(i); const v=st.getItem(k);
+        if (/admin.*session|session.*admin/i.test(k||'') && /^[A-Za-z0-9_-]{40,100}$/.test(v||'')) return v;
+      }
+    }
+    return '';
+  }
+  function getInitData() {
+    return window.Telegram?.WebApp?.initData || window.__telegramInitData || '';
+  }
+  async function adminPost(path, body={}) {
+    const payload={...body, initData:getInitData(), adminSession:getAdminSession()};
+    const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json().catch(()=>({ok:false,error:'Некорректный ответ сервера'}));
+    if (!r.ok || !data.ok) throw new Error(data.error || 'Ошибка сервера');
+    return data;
+  }
+
+  async function refreshAdminPlayers(search='') {
+    const data=await adminPost('/api/admin/users',{search});
+    const total=$('adminTotalPlayers');
+    if(total) total.textContent=Number(data.total_players ?? data.total ?? data.users?.length ?? 0).toLocaleString('ru-RU');
+    // Existing application code remains responsible for rendering rows.
+    return data;
+  }
+
+  async function refreshAdminStats() {
+    const el=$('adminStats'); if(!el) return;
+    try {
+      const data=await adminPost('/api/admin/stats');
+      el.innerHTML='Игроков: <b style="color:var(--paper)">'+Number(data.players||0).toLocaleString('ru-RU')+'</b>';
+      const total=$('adminTotalPlayers');
+      if(total) total.textContent=Number(data.players||0).toLocaleString('ru-RU');
+    } catch(e) {
+      // Don't overwrite an already populated stats block with a transient error.
+    }
+  }
+
+  $('adminAccountRemovePremiumBtn')?.addEventListener('click', async () => {
+    const uid=$('adminAccountUid')?.textContent?.trim();
+    if(!uid) return;
+    if(!confirm('Снять Premium и удалить Premium-баффы у игрока?')) return;
+    try { await adminPost('/api/admin/account',{user_id:Number(uid),action:'remove_premium'}); alert('Premium снят'); if(window.refreshAdminPlayers) await window.refreshAdminPlayers($('adminSearch')?.value||''); } catch(e){ alert('Ошибка: '+e.message); }
+  });
+
+  $('adminSearchBtn')?.addEventListener('click', async () => {
+    try { await refreshAdminPlayers($('adminSearch')?.value || ''); }
+    catch(e) { alert(e.message); }
+  });
+
+  $('adminNotificationSend')?.addEventListener('click', async () => {
+    const btn=$('adminNotificationSend');
+    const text=$('adminNotificationText')?.value.trim()||'';
+    const targetSelect=$('adminNotificationTarget')?.value||'all';
+    const player=targetSelect==='one' ? ($('adminNotificationPlayer')?.value.trim()||'') : '';
+    if(!text){ alert('Введите текст уведомления'); return; }
+    if(targetSelect==='one' && !player){ alert('Укажите ник или Telegram ID'); return; }
+    try{
+      btn.disabled=true;
+      const data=await adminPost('/api/admin/notifications/send',{text,player:player||null});
+      $('adminNotificationText').value='';
+      alert('Уведомление отправлено: '+Number(data.sent||0)+' получателей');
+    }catch(e){ alert('Ошибка: '+(e.message||'Не удалось отправить уведомление')); }
+    finally{ btn.disabled=false; }
+  });
+
+  $('promoAdminCreateBtn')?.addEventListener('click', async () => {
+    const btn=$('promoAdminCreateBtn'), msg=$('promoAdminMessage');
+    try {
+      btn.disabled=true;
+      if(msg) msg.textContent='Сохраняем промокод…';
+      const payload=await window.getPromoAdminPayload();
+      const data=await adminPost('/api/admin/promo/create',payload);
+      if(msg) msg.textContent='Промокод '+data.promo.code+' создан.';
+      // Reset image builder after a successful save.
+      if (window.clearPromoAdminSlides) window.clearPromoAdminSlides();
+      if($('promoAdminSlides')) $('promoAdminSlides').innerHTML='<div class="section-sub">Картинки не добавлены.</div>';
+    } catch(e) {
+      if(msg) msg.textContent='Ошибка: '+e.message;
+      else alert(e.message);
+    } finally { btn.disabled=false; }
+  });
+
+  // The stats endpoint is authoritative and does not depend on the visible 100-row list.
+  setTimeout(() => { refreshAdminStats(); }, 0);
+  window.refreshAdminPlayers=refreshAdminPlayers;
+  window.refreshAdminStats=refreshAdminStats;
+})();
+</script>
+
+<style id="gdplay-square-profile-avatar">#page-profile .profile-avatar{border-radius:16px !important;}#page-profile .profile-avatar-frame{border-radius:16px !important;}</style>
