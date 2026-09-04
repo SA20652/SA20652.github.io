@@ -32,8 +32,9 @@ function renderMines(){
    <div class="mines-message" id="mineMsg">${minesState.message||'Выбери одну из шести клеток.'}</div>
    <div class="mines-sectors">${MINE_SECTORS.map((x,i)=>`<div class="mines-sector ${i+1===minesState.sector?'current':''} ${i+1<minesState.sector?'done':''}"><span>${i+1}</span><b>×${x.m.toFixed(1)}</b><small>${x.n} ${x.n===1?'мина':'мины'}</small></div>`).join('')}</div>
  </div>`;
- document.getElementById('mineStart').onclick=startMines;
- document.getElementById('mineCash').onclick=cashMines; document.getElementById('mineContinue').onclick=continueMines;
+ // Mine action buttons use the single global click dispatcher below.
+ // This prevents a Telegram WebView click from invoking the same request twice.
+
  document.querySelectorAll('[data-mine-step]').forEach(b=>b.onclick=()=>setMinesBet(Number(document.getElementById('mineBet')?.value||1000)+Number(b.dataset.mineStep||0)));
  document.querySelectorAll('[data-mine-preset]').forEach(b=>b.onclick=()=>setMinesBet(Number(b.dataset.minePreset||1000)));
  document.getElementById('mineBet')?.addEventListener('input',()=>{ minesState.bet=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('mineBet').value||1)))); });
@@ -68,7 +69,7 @@ async function startMines(){
  };
  const btn=document.getElementById('mineStart');
  if(btn){ btn.disabled=true; btn.textContent='Запуск…'; }
- const roundId=minesState.roundId || makeRoundId();
+ const roundId=(minesState.active?minesState.roundId:null) || makeRoundId();
  minesState.roundId=roundId;
  minesStartInFlight=(async()=>{
    try{
@@ -89,7 +90,7 @@ async function cashMines(){
  if(!minesState?.active||!minesState.canCash)return;
  try{
   const j=await apiFetch('/api/game/mines/cashout',{round_id:minesState.roundId});
-  data.balance=Number(j.balance||data.balance||0); updateBalanceUI();
+  if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
   minesState.active=false; minesState.canCash=false; minesState.message=`Вы забрали ${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines();
  }catch(e){showToast(e.message||'Не удалось забрать выигрыш','error');}
 }
@@ -106,7 +107,7 @@ async function pickMine(i){
  if(!minesState?.active||minesState.canCash)return;
  try{
   const j=await apiFetch('/api/game/mines/pick',{round_id:minesState.roundId,cell:i});
-  data.balance=Number(j.balance||data.balance||0); updateBalanceUI();
+  if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
   if(j.status==='lost'){
    minesState.active=false; minesState.canCash=false; minesState.message='💣 Мина. Ставка потеряна.'; minesState.revealed=Array.isArray(j.bombs)?j.bombs.map(Number):[i]; renderMines(); return;
   }
@@ -3745,7 +3746,7 @@ async function apiFetch(path, payload={}, _retry=false){
   payload = {...payload, ...(initData ? {initData} : {})};
   if(authToken) payload.authToken = authToken;
 
-  if(path.startsWith('/api/admin/') && path !== '/api/admin/session'){
+  if(path.startsWith('/api/admin/') && path !== '/api/admin/session' && path !== '/api/admin/tech-break'){
     let adminSession = storageGet(ADMIN_SESSION_KEY);
     if(!adminSession){
       let sessionError=null;
@@ -3939,6 +3940,14 @@ async function loadAdminUI(){
     if(page){ page.classList.add('admin-dynamic-page'); root.appendChild(page); }
     wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>{ el.classList.add('admin-dynamic-modal'); root.appendChild(el); });
     window.adminUIReady = !!(menu.querySelector('#adminMenuBtn') && root.querySelector('#page-admin'));
+    if(window.adminUIReady){
+      // The fragment is injected after the initial /api/me call, so apply the
+      // current state to the newly created tech-break button as well.
+      try{
+        const tb = await apiFetch('/api/me',{});
+        updateAdminTechBreakPromoButton(!!tb?.global_tech_break?.enabled);
+      }catch(_){}
+    }
     // Обработчик кнопок админки подключается ниже через единый делегированный
     // listener. Здесь ничего дополнительно не навешиваем, чтобы при повторной
     // загрузке admin_fragment.html не появлялись дубли обработчиков.
@@ -3987,7 +3996,7 @@ function updateAdminTechBreakPromoButton(enabled){
 }
 
 async function adminGlobalTechBreakToggle(){
-  const b=document.getElementById('adminTechBreakPromoBtn');
+  const b=document.getElementById('adminTechBreakPanelBtn') || document.getElementById('adminTechBreakPromoBtn');
   const active=b?.dataset.active==='1';
   if(active){
     if(!await tgConfirm('Снять технический перерыв у всех игроков?')) return;
@@ -6988,6 +6997,9 @@ function handleButton(button, e){
   if(button.matches('.rush-preset')){ setRushBet(Number(button.dataset.rushPreset||10)); return; }
   if(button.id==='rushStartBtn'){ startRush(); return; }
   if(button.id==='rushCashoutBtn'){ cashoutRush(); return; }
+  if(button.id==='mineStart'){ startMines(); return; }
+  if(button.id==='mineCash'){ cashMines(); return; }
+  if(button.id==='mineContinue'){ continueMines(); return; }
   if(button.id==='adminTechBreakPanelBtn'){ const active=button.dataset.active==='1'; if(active) adminGlobalTechBreakToggle(); else adminTechBreak(tgUserId()); return; }
   if(button.id==='adminTechBreakPromoBtn'){ adminGlobalTechBreakToggle(); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
@@ -7051,7 +7063,7 @@ async function refreshGlobalTechBreak(){
     if(j?.global_tech_break?.enabled && !j?.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
   }catch(e){}
 }
-setInterval(refreshGlobalTechBreak, 5000);
+setInterval(refreshGlobalTechBreak, 15000);
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
 setInterval(()=>{ if(data) updateDailyUI(); }, 1000);
 
