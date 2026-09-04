@@ -4074,6 +4074,24 @@ async function boot(){
   return serverBoot;
 }
 
+async function waitForTelegramInitData(timeoutMs=4000){
+  // Telegram WebApp иногда отдаёт initData не в тот же момент, когда загружается DOM.
+  // Ждём его немного, чтобы автоматический вход не падал после перезахода/перезагрузки.
+  const started=Date.now();
+  while(Date.now()-started<timeoutMs){
+    try{
+      if(window.Telegram?.WebApp){
+        const tw=window.Telegram.WebApp;
+        try{tw.ready();}catch(e){}
+        try{tw.expand();}catch(e){}
+        if(tw.initData) return tw.initData;
+      }
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,150));
+  }
+  return tgInitData();
+}
+
 async function bootSafe(){
   const savedTheme = storageGet(THEME_KEY);
   if(savedTheme === 'light'){ document.body.classList.add('light'); }
@@ -4083,7 +4101,7 @@ async function bootSafe(){
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
   // а имя и фото берутся непосредственно из Telegram. Формы входа/регистрации
   // остаются в DOM и доступны для ручного входа в другой аккаунт.
-  const initData = tgInitData();
+  const initData = await waitForTelegramInitData(4000);
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
   if(!initData){
