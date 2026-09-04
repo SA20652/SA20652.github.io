@@ -3760,7 +3760,7 @@ async function apiFetch(path, payload={}){
 
   // Не даём WebView зависнуть навсегда, если Railway/сервер временно недоступен.
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timer = controller ? setTimeout(()=>controller.abort(), 15000) : null;
+  const timer = controller ? setTimeout(()=>controller.abort(), 8000) : null;
   try{
     const r = await fetch(API_BASE + path, {
       method: 'POST',
@@ -3952,6 +3952,11 @@ function ensureTechBreakFrame(){
     techBreakFrame.title='Технический перерыв';
     techBreakFrame.src='maintenance.html';
     techBreakFrame.setAttribute('aria-hidden','true');
+    techBreakFrame.addEventListener('load',()=>{
+      if(host.classList.contains('open')){
+        techBreakFrame.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:true,reason:String(window.__gdplayTechBreakReason||'Игра временно недоступна.')},'*');
+      }
+    });
     host.appendChild(techBreakFrame);
   }
   return techBreakFrame;
@@ -3959,12 +3964,14 @@ function ensureTechBreakFrame(){
 function showTechBreak(reason){
   const host=document.getElementById('techBreakHost');
   const frame=ensureTechBreakFrame();
+  window.__gdplayTechBreakReason=String(reason||'Игра временно недоступна.');
   if(host) host.classList.add('open');
-  frame?.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:true,reason:String(reason||'Игра временно недоступна.')},'*');
+  frame?.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:true,reason:window.__gdplayTechBreakReason},'*');
 }
 function hideTechBreak(){
   const host=document.getElementById('techBreakHost');
   if(host) host.classList.remove('open');
+  window.__gdplayTechBreakReason='';
   techBreakFrame?.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:false,reason:''},'*');
 }
 
