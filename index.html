@@ -7697,6 +7697,7 @@ boot();
   let minesState={active:false,roundId:null,bet:1000,sector:1,mult:1.3,canCash:false,status:'idle'};
 
   const $=id=>document.getElementById(id);
+  let minesStartBusy=false;
   const fmt=n=>Number(n||0).toLocaleString('ru-RU');
   const multText=n=>'×'+Number(n||1).toFixed(2);
   function uid(){try{return tgUserId()||data?.user_id||data?.id||''}catch(e){return ''}}
@@ -7746,9 +7747,12 @@ boot();
     setMsg('Выбери ставку и нажми «Играть».');
   }
   async function start(){
+    if(minesStartBusy||minesState.active)return;
     const bet=Math.floor(Number($('minesBet').value));
     if(!Number.isFinite(bet)||bet<1){setMsg('Укажи корректную ставку.','danger');return}
     try{
+      minesStartBusy=true;
+      $('minesStartBtn').disabled=true;
       const rid=newId();
       const r=await apiFetch('/api/game/mines/start',{round_id:rid,bet});
       minesState={active:r.status==='active',roundId:r.round_id,bet:r.bet,sector:r.sector,mult:r.multiplier,canCash:!!r.can_cash,status:r.status};
@@ -7756,6 +7760,10 @@ boot();
       setMsg('Сектор '+r.sector+': выбери одну из 6 клеток. Мины скрыты.','info');
       if(typeof updateBalanceUI==='function'){data.balance=r.balance;updateBalanceUI()}
     }catch(e){setMsg(e.message||'Не удалось начать игру.','danger')}
+    finally{
+      minesStartBusy=false;
+      renderStats();
+    }
   }
   async function pick(cell){
     if(!minesState.active||minesState.canCash)return;
