@@ -2769,6 +2769,15 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
   #page-market .market-form input{padding-left:42px!important;}
 }
 </style>
+
+<style id="gdplay-case-reward-performance">
+/* Reward presentation is intentionally compositor-only: no blur/filter or
+large DOM rebuilds while the result card appears. */
+#spinModal .spin-result, #spinModal .spin-result-multi, #spinModal .spin-result-multi-item { contain: layout paint; }
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"] { animation: none !important; filter: none !important; transform: scale(1.04) !important; }
+#spinModal .confetti-piece { animation: none !important; opacity: 0 !important; display: none !important; }
+#spinModal .spin-result, #spinModal .spin-result-multi { will-change: auto; }
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -5166,6 +5175,8 @@ function spawnConfetti(container, color){
   }
 }
 
+let caseUiDirty=false;
+
 function showSpinResult(item, isSecret){
   const m = RARITY_META[item.rarity];
   const box = document.getElementById('spinResult');
@@ -5381,10 +5392,10 @@ async function openCaseBatch(c, qty, useKey=false){
   if(closeBtn) closeBtn.classList.remove('hidden');
   closeBtn.onclick=()=>{
     closeModal('spinModal'); wheelWrap.classList.remove('reel-opening'); if(multiRow){multiRow.classList.remove('reel-opening');multiRow.style.display='none';multiRow.innerHTML='';}
-    multiResult.classList.add('hidden'); multiResult.innerHTML=''; renderInventory(); renderCases(); updateBalanceUI(); closeBtn.onclick=null;
+    multiResult.classList.add('hidden'); multiResult.innerHTML=''; if(caseUiDirty){ renderInventory(); renderCases(); caseUiDirty=false; } updateBalanceUI(); closeBtn.onclick=null;
   };
   wins.forEach(won=>{pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});recordBestDrop(won);});
-  persistLocal(); spinning=false; renderCases(); document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
+  persistLocal(); caseUiDirty=true; spinning=false; document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
 }
 async function openCaseOnce(c, seq, total, useKey=false){
   spinning = true;
@@ -5482,9 +5493,11 @@ async function openCaseOnce(c, seq, total, useKey=false){
   recordBestDrop(won);
   persistLocal();
 
+  // Do not rebuild the large cases/inventory DOM while the result is being
+  // painted. The reward modal is the only visible UI at this point; defer the
+  // heavy lists until the player closes the result.
+  caseUiDirty=true;
   spinning=false;
-  renderInventory();
-  renderCases();
   document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
   return true;
 }
@@ -5501,8 +5514,7 @@ function collectSpinReward(){
   if(multiResult){ multiResult.classList.add('hidden'); multiResult.innerHTML=''; }
   document.getElementById('wheelWrap').style.display='block';
   document.getElementById('wheelWrap').classList.remove('reel-opening');
-  renderInventory();
-  renderCases();
+  if(caseUiDirty){ renderInventory(); renderCases(); caseUiDirty=false; }
   updateBalanceUI();
   persistLocal();
   showToast('Награда забрана в инвентарь','success');
