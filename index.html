@@ -57,13 +57,48 @@ function drawMineGrid(){
 }
 async function startMines(){
  if(minesState?.active)return;
- const bet=Math.max(1,Math.floor(Number(document.getElementById('mineBet')?.value||minesState?.bet||1000)));
+
+ const input=document.getElementById('mineBet');
+ const bet=Math.max(1,Math.min(1000000,Math.floor(Number(input?.value||minesState?.bet||1000))));
+ minesState=minesState||{sector:1,bet:bet,mult:1.3,active:false,roundId:null,canCash:false,revealed:[],message:''};
+ minesState.bet=bet;
+
+ // Telegram WebView on some devices does not expose crypto.randomUUID().
+ // Use it when available and fall back to a local unique id so the
+ // "Играть" button always reaches the server.
+ const makeRoundId=()=>{
+   try{
+     if(window.crypto?.randomUUID) return 'm_'+window.crypto.randomUUID().replaceAll('-','');
+   }catch(_){}
+   return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,18);
+ };
+
+ if(Number(data?.balance||0)<bet){
+   showToast('Недостаточно орбов для этой ставки','error');
+   return;
+ }
+
+ const btn=document.getElementById('mineStart');
+ if(btn){ btn.disabled=true; btn.textContent='Запуск…'; }
+
  try{
-  const j=await apiFetch('/api/game/mines/start',{round_id:'m_'+crypto.randomUUID().replaceAll('-',''),bet});
-  data.balance=Number(j.balance||data.balance||0); updateBalanceUI();
-  minesState={sector:j.sector,mult:j.multiplier,bet:j.bet,roundId:j.round_id,active:j.status==='active',canCash:!!j.can_cash,revealed:[],message:'Раунд начат. Выбери клетку.'};
+  const j=await apiFetch('/api/game/mines/start',{round_id:makeRoundId(),bet});
+  data.balance=Number(j.balance??data.balance??0); updateBalanceUI();
+  minesState={
+    sector:Number(j.sector||1),
+    mult:Number(j.multiplier||1.3),
+    bet:Number(j.bet||bet),
+    roundId:j.round_id,
+    active:j.status==='active',
+    canCash:!!j.can_cash,
+    revealed:[],
+    message:'Раунд начат. Выбери клетку.'
+  };
   renderMines();
- }catch(e){showToast(e.message||'Не удалось начать игру','error');}
+ }catch(e){
+   showToast(e.message||'Не удалось начать игру','error');
+   renderMines();
+ }
 }
 async function cashMines(){
  if(!minesState?.active||!minesState.canCash)return;
