@@ -3617,11 +3617,14 @@ function tgConfirm(message){
 
 async function apiFetch(path, payload={}){
   const initData = tgInitData();
-  if(!initData){
-    throw new Error('Открой игру через кнопку «Играть» в Telegram-боте — магазин, батлы и топ игроков работают только внутри Telegram');
-  }
-  payload = {...payload, initData};
   const authToken = storageGet(AUTH_TOKEN_KEY);
+  // При восстановлении уже созданной серверной сессии Telegram может
+  // кратковременно не вернуть initData. Разрешаем /api/me восстановиться по
+  // валидному authToken; первичные auth-операции по-прежнему требуют Telegram.
+  if(!initData && !(authToken && path === '/api/me')){
+    throw new Error('Открой игру через кнопку «Играть» в Telegram-боте — Telegram не передал данные запуска');
+  }
+  payload = {...payload, ...(initData ? {initData} : {})};
   if(authToken) payload.authToken = authToken;
 
   // Для админских запросов поверх Telegram initData нужен отдельный короткий
@@ -4131,7 +4134,6 @@ async function bootSafe(){
         if(tgAvatar) data.avatar = tgAvatar;
         window.isAdmin = !!j.is_admin;
       updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
-        updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
         showApp();
         return;
@@ -4147,7 +4149,21 @@ async function bootSafe(){
   // Это НЕ удаляет логин/регистрацию — они остаются доступными через
   // кнопку «Войти другим аккаунтом» в настройках.
   try{
-    const j = await apiFetch('/api/me', {});
+    let j=null, lastError=null;
+    for(let attempt=0; attempt<4; attempt++){
+      try{
+        j = await apiFetch('/api/me', {});
+        if(j && j.user) break;
+      }catch(err){
+        lastError=err;
+        // Если Telegram ещё не успел передать initData, даём WebView время
+        // обновить объект WebApp перед следующей попыткой.
+        if(attempt<3){
+          await new Promise(r=>setTimeout(r,350));
+          continue;
+        }
+      }
+    }
     if(j && j.user){
       const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
       const tgName = String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ') || j.user.display_name || j.user.username || 'Игрок');
@@ -4161,7 +4177,7 @@ async function bootSafe(){
       showApp();
       return;
     }
-    throw new Error('Не удалось получить Telegram-профиль');
+    throw lastError || new Error('Не удалось получить Telegram-профиль');
   }catch(e){
     console.warn('Telegram guest mode failed:', e);
     currentUser = null;
