@@ -3025,7 +3025,7 @@ large DOM rebuilds while the result card appears. */
           <button type="button" class="profile-style-btn" data-profile-name="neon"><span style="color:#d9ff5b">Aa</span>Неон</button>
         </div>
       </div>
-      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
+      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div><div class="daily-timer" id="dailyTimer">Следующая награда доступна сейчас</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
@@ -6637,6 +6637,18 @@ function renderProfile(){
   const badges=document.getElementById('profileBadges');
   if(badges) badges.innerHTML=(isPremium?'<span class="profile-badge premium">⭐ Premium</span>':'')+(data.creatorBadge?'<span class="profile-badge creator">🛠️ Создатель</span>':'')+(data.testerBadge?'<span class="profile-badge tester">🛡️ Тестер</span>':'')+((data.customStatus&&(data.customStatus.text||data.customStatus.emoji))?'<span class="profile-badge" style="color:#f0c674;border-color:rgba(240,198,116,.45)">'+(data.customStatus.emoji||'')+' '+(data.customStatus.text||'')+'</span>':'');
   renderProfileCustomization();
+  const premiumTimer=document.getElementById('premiumTimeLeft');
+  if(premiumTimer){
+    if(isPremium){
+      const left=Math.max(0,new Date(data.premiumUntil).getTime()-Date.now());
+      const days=Math.floor(left/86400000);
+      const hours=Math.floor((left%86400000)/3600000);
+      const mins=Math.floor((left%3600000)/60000);
+      premiumTimer.textContent='Осталось: '+days+' дн. '+hours+' ч. '+mins+' мин.';
+    } else {
+      premiumTimer.textContent='Premium не активен';
+    }
+  }
   document.getElementById('profileRank').textContent=rankForBalance(data.balance);
   document.getElementById('profileBalance').textContent=data.balance.toLocaleString('ru-RU');
   document.getElementById('statCases').textContent=data.cases_opened||0;
