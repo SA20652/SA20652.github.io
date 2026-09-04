@@ -73,17 +73,14 @@ async function startMines(){
    return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,18);
  };
 
- if(Number(data?.balance||0)<bet){
-   showToast('Недостаточно орбов для этой ставки','error');
-   return;
- }
-
+ // Не блокируем запуск по локальному balance: сервер — источник истины.
+ // Это также исправляет запуск в случаях, когда объект data ещё не успел загрузиться.
  const btn=document.getElementById('mineStart');
  if(btn){ btn.disabled=true; btn.textContent='Запуск…'; }
 
  try{
   const j=await apiFetch('/api/game/mines/start',{round_id:makeRoundId(),bet});
-  data.balance=Number(j.balance??data.balance??0); updateBalanceUI();
+  if(typeof data==='object' && data) data.balance=Number(j.balance??data.balance??0); updateBalanceUI();
   minesState={
     sector:Number(j.sector||1),
     mult:Number(j.multiplier||1.3),
