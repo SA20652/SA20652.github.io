@@ -3749,7 +3749,13 @@ function tgConfirm(message){
 async function apiFetch(path, payload={}, _retry=false){
   const initData = tgInitData();
   const authToken = storageGet(AUTH_TOKEN_KEY);
-  if(!initData && !(authToken && path === '/api/me')){
+  // Сервер (current()) проверяет authToken раньше initData и полностью
+  // самодостаточен по нему для ЛЮБОГО маршрута — как и для /api/me.
+  // Раньше это разрешение действовало только для /api/me, из-за чего
+  // любое действие (например, старт игры в Минах) падало с ошибкой
+  // «Telegram не передал данные запуска», если Telegram WebView на миг
+  // не отдавал initData при живой сохранённой сессии.
+  if(!initData && !authToken){
     throw new Error('Открой игру через кнопку «Играть» в Telegram-боте — Telegram не передал данные запуска');
   }
   payload = {...payload, ...(initData ? {initData} : {})};
