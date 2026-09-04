@@ -73,7 +73,7 @@ async function startMines(){
  minesStartInFlight=(async()=>{
    try{
      const j=await apiFetch('/api/game/mines/start',{round_id:roundId,bet});
-     if(typeof data==='object' && data){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
+     if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
      minesState={sector:Number(j.sector||1),mult:Number(j.multiplier||1.3),bet:Number(j.bet||bet),roundId:j.round_id||roundId,active:j.status==='active',canCash:!!j.can_cash,revealed:[],message:'Раунд начат. Выбери клетку.'};
      renderMines();
    }catch(e){
@@ -911,8 +911,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .battle-cancel{margin-top:8px;width:100%;}
 
 .bottom-top-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:50;background:var(--bg-2);border:1px solid var(--line);color:var(--paper);border-radius:18px;padding:8px 28px;font-size:12px;box-shadow:var(--shadow);}
-/* ===== MINES ===== */
+/* ===== MINES / TECH BREAK ===== */
 .mines-nav-btn{flex:1;min-width:0;}
+#techBreakHost{position:fixed;inset:0;z-index:2147483000;display:none;pointer-events:none;}#techBreakHost.open{display:block;pointer-events:auto;}#techBreakHost iframe{display:block;width:100%;height:100%;border:0;background:transparent;}
 /* ===== FINAL ADMIN / SERVER UI ===== */
 .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.admin-card{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow)}.admin-card h3{margin:0 0 8px;font-size:14px}.admin-search{display:flex;gap:7px}.admin-search input{flex:1;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:10px;padding:10px;outline:none}.admin-user{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg-3);margin-top:8px}.admin-user-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.admin-user-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.danger-admin{border-color:rgba(220,80,80,.45)!important}.admin-log{font-size:10px;color:var(--muted);padding:7px 0;border-bottom:1px solid var(--line)}.promo-card{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2)}.promo-row{display:flex;gap:8px;margin-top:10px}.promo-row input{flex:1;min-width:0;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:10px;padding:11px;outline:none;text-transform:uppercase}.promo-message{min-height:18px;margin-top:8px;font-size:12px;color:var(--muted)}.promo-admin-form{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:8px;margin-top:10px}.promo-admin-form input,.promo-admin-form select{width:100%;box-sizing:border-box;background:var(--bg-3);border:1px solid var(--line);color:var(--paper);border-radius:10px;padding:10px}.promo-admin-list{margin-top:12px}.promo-admin-item{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}.promo-admin-item .promo-meta{color:var(--muted);font-size:11px;margin-top:3px}.promo-code{font-weight:800;letter-spacing:.5px}@media(max-width:650px){.promo-row{flex-direction:column}.promo-admin-form{grid-template-columns:1fr 1fr}.promo-admin-form .btn{grid-column:1/-1}}@media(max-width:430px){.admin-grid{grid-template-columns:1fr}.admin-user-actions{grid-template-columns:1fr 1fr}}
 
@@ -990,7 +991,7 @@ body.theme-transition{transition:background-color .55s ease,color .55s ease}
 .notif-badge{display:none;position:absolute;top:-5px;right:-6px;width:12px;height:12px;background:#e53935;border-radius:50%;box-shadow:0 0 8px rgba(229,57,53,.7);}
 
 /* Mines redesign */
-.mines-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.18));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden;position:relative}.mines-shell:before{content:"";position:absolute;inset:-80px auto auto -80px;width:180px;height:180px;background:radial-gradient(circle,rgba(201,151,77,.14),transparent 68%);pointer-events:none}.mines-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;position:relative}.mines-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2);opacity:.85}.mines-hero h2{font-size:28px;margin:4px 0}.mines-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:240px}.mines-bet-badge{min-width:82px;text-align:right}.mines-bet-badge span,.mines-bet-badge small{display:block;font:600 9px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-bet-badge b{display:block;font:700 18px 'IBM Plex Mono',monospace;color:var(--paper);margin:2px 0}.mines-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}.mines-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.mines-stats span{display:block;color:var(--muted);font-size:9px}.mines-stats b{display:block;margin-top:3px;font:700 14px 'IBM Plex Mono',monospace}.mines-progress{margin-top:12px}.mines-progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:5px}.mines-progress-track{height:5px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden}.mines-progress-track i{display:block;height:100%;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));border-radius:10px;transition:width .35s}.mines-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}.mine-cell{height:88px;border:1px solid rgba(201,151,77,.16);border-radius:16px;background:linear-gradient(145deg,#27211c,#191512);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 18px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;transition:transform .15s,border-color .15s,background .15s}.mine-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.5)}.mine-cell:disabled{opacity:1}.mine-cell-core{width:27px;height:27px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff5c7 0 8%,#e3b872 17%,#c9974d 42%,#704b19 72%,#2a1c0d 100%);box-shadow:0 0 18px rgba(227,184,114,.22)}.mine-cell small{font:600 9px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mine-cell.revealed{border-color:rgba(76,154,118,.6);background:linear-gradient(145deg,rgba(76,154,118,.14),rgba(255,255,255,.025))}.mine-cell.revealed .mine-cell-core{background:radial-gradient(circle,#eaffdf 0 10%,#65b889 32%,#317050 70%,#193d2d 100%);box-shadow:0 0 18px rgba(76,154,118,.35)}.mines-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mines-main-btn,.mines-cash-btn{min-height:46px}.mines-cash-btn:disabled{opacity:.35}.mines-message{min-height:32px;text-align:center;color:var(--muted);font-size:11px;padding:10px 4px}.mines-sectors{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:4px}.mines-sector{padding:7px 3px;border:1px solid var(--line);border-radius:10px;text-align:center;background:rgba(255,255,255,.018)}.mines-sector span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mines-sector b{display:block;font:700 11px 'IBM Plex Mono',monospace;margin:2px 0}.mines-sector small{display:block;font-size:7px;color:var(--muted)}.mines-sector.current{border-color:rgba(227,184,114,.45);background:rgba(201,151,77,.08)}.mines-sector.done{opacity:.58}.promo-row{align-items:center}.mines-status-pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);font:700 9px 'IBM Plex Mono',monospace;color:var(--muted);background:rgba(255,255,255,.025)}.mines-status-pill.live{color:var(--brass-2);border-color:rgba(227,184,114,.35);background:rgba(201,151,77,.08)}.mines-bet-card{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(0,0,0,.12))}.mines-bet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.mines-bet-head span{display:block;font:800 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;color:var(--paper)}.mines-bet-head small{display:block;margin-top:3px;color:var(--muted);font-size:9px}.mines-bet-head b{font:800 9px 'IBM Plex Mono',monospace;color:var(--brass-2)}.mines-bet-input-wrap{display:grid;grid-template-columns:44px 1fr 44px;gap:7px}.mines-bet-input-wrap input{width:100%;box-sizing:border-box;background:#171411;border:1px solid rgba(227,184,114,.2);color:var(--paper);border-radius:12px;text-align:center;padding:11px 8px;font:800 17px 'IBM Plex Mono',monospace;outline:none}.mines-bet-input-wrap input:focus{border-color:var(--brass-2);box-shadow:0 0 0 3px rgba(201,151,77,.08)}.mines-step,.mines-preset{border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:11px;font-weight:800}.mines-step{font-size:19px}.mines-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.mines-preset{padding:8px 4px;font:700 10px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-step:active,.mines-preset:active{transform:scale(.96)}.mines-bet-input-wrap input:disabled{opacity:.55}.mines-actions{grid-template-columns:1fr 1fr 1fr}.mines-main-btn:disabled{opacity:.55}
+.mines-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.18));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden;position:relative}.mines-shell:before{content:"";position:absolute;inset:-80px auto auto -80px;width:180px;height:180px;background:radial-gradient(circle,rgba(201,151,77,.14),transparent 68%);pointer-events:none}.mines-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;position:relative}.mines-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2);opacity:.85}.mines-hero h2{font-size:28px;margin:4px 0}.mines-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:240px}.mines-bet-badge{min-width:82px;text-align:right}.mines-bet-badge span,.mines-bet-badge small{display:block;font:600 9px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-bet-badge b{display:block;font:700 18px 'IBM Plex Mono',monospace;color:var(--paper);margin:2px 0}.mines-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:16px}.mines-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.mines-stats span{display:block;color:var(--muted);font-size:9px}.mines-stats b{display:block;margin-top:3px;font:700 14px 'IBM Plex Mono',monospace}.mines-progress{margin-top:12px}.mines-progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:5px}.mines-progress-track{height:5px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden}.mines-progress-track i{display:block;height:100%;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));border-radius:10px;transition:width .35s}.mines-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}.mine-cell{height:88px;border:1px solid rgba(201,151,77,.16);border-radius:16px;background:linear-gradient(145deg,#27211c,#191512);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 18px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;transition:transform .15s,border-color .15s,background .15s}.mine-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.5)}.mine-cell:disabled{opacity:1}.mine-cell-core{width:27px;height:27px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff5c7 0 8%,#e3b872 17%,#c9974d 42%,#704b19 72%,#2a1c0d 100%);box-shadow:0 0 18px rgba(227,184,114,.22)}.mine-cell small{font:600 9px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mine-cell.revealed{border-color:rgba(76,154,118,.6);background:linear-gradient(145deg,rgba(76,154,118,.14),rgba(255,255,255,.025))}.mine-cell.revealed .mine-cell-core{background:radial-gradient(circle,#eaffdf 0 10%,#65b889 32%,#317050 70%,#193d2d 100%);box-shadow:0 0 18px rgba(76,154,118,.35)}.mines-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mines-main-btn,.mines-cash-btn{min-height:46px}.mines-cash-btn:disabled{opacity:.35}.mines-message{min-height:32px;text-align:center;color:var(--muted);font-size:11px;padding:10px 4px}.mines-sectors{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:4px}.mines-sector{padding:7px 3px;border:1px solid var(--line);border-radius:10px;text-align:center;background:rgba(255,255,255,.018)}.mines-sector span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted-2)}.mines-sector b{display:block;font:700 11px 'IBM Plex Mono',monospace;margin:2px 0}.mines-sector small{display:block;font-size:7px;color:var(--muted)}.mines-sector.current{border-color:rgba(227,184,114,.45);background:rgba(201,151,77,.08)}.mines-sector.done{opacity:.58}.promo-row{align-items:center}.promo-row #adminTechBreakPromoBtn{flex:0 0 auto}.mines-status-pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);font:700 9px 'IBM Plex Mono',monospace;color:var(--muted);background:rgba(255,255,255,.025)}.mines-status-pill.live{color:var(--brass-2);border-color:rgba(227,184,114,.35);background:rgba(201,151,77,.08)}.mines-bet-card{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(0,0,0,.12))}.mines-bet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.mines-bet-head span{display:block;font:800 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;color:var(--paper)}.mines-bet-head small{display:block;margin-top:3px;color:var(--muted);font-size:9px}.mines-bet-head b{font:800 9px 'IBM Plex Mono',monospace;color:var(--brass-2)}.mines-bet-input-wrap{display:grid;grid-template-columns:44px 1fr 44px;gap:7px}.mines-bet-input-wrap input{width:100%;box-sizing:border-box;background:#171411;border:1px solid rgba(227,184,114,.2);color:var(--paper);border-radius:12px;text-align:center;padding:11px 8px;font:800 17px 'IBM Plex Mono',monospace;outline:none}.mines-bet-input-wrap input:focus{border-color:var(--brass-2);box-shadow:0 0 0 3px rgba(201,151,77,.08)}.mines-step,.mines-preset{border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:11px;font-weight:800}.mines-step{font-size:19px}.mines-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.mines-preset{padding:8px 4px;font:700 10px 'IBM Plex Mono',monospace;color:var(--muted)}.mines-step:active,.mines-preset:active{transform:scale(.96)}.mines-bet-input-wrap input:disabled{opacity:.55}.mines-actions{grid-template-columns:1fr 1fr 1fr}.mines-main-btn:disabled{opacity:.55}
 .bomber-shell{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.2));border:1px solid rgba(201,151,77,.18);border-radius:22px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,.28);overflow:hidden}.bomber-hero{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.bomber-kicker{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:var(--brass-2)}.bomber-hero h2{font-size:28px;margin:4px 0}.bomber-hero p{font-size:11px;color:var(--muted);line-height:1.45;max-width:235px}.bomber-live{padding:9px 10px;border-radius:13px;background:rgba(201,151,77,.08);border:1px solid rgba(227,184,114,.18);text-align:right;white-space:nowrap}.bomber-live span{display:block;font:600 8px 'IBM Plex Mono',monospace;color:var(--muted)}.bomber-live b{display:block;font:800 18px 'IBM Plex Mono',monospace;color:var(--brass-2);margin-top:2px}.bomber-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}.bomber-stats>div{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:13px;padding:9px 8px}.bomber-stats span{display:block;color:var(--muted);font-size:9px}.bomber-stats b{display:block;margin-top:3px;font:700 13px 'IBM Plex Mono',monospace}.bomber-stats small{font:500 8px 'Inter',sans-serif;color:var(--muted)}.bomber-board{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:9px;border-radius:18px;background:radial-gradient(circle at 50% 20%,rgba(201,151,77,.09),transparent 60%),#171411;border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.bomber-cell{aspect-ratio:1;border:1px solid rgba(201,151,77,.15);border-radius:12px;background:linear-gradient(145deg,#29221c,#1a1512);color:var(--paper);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 12px rgba(0,0,0,.18);transition:.16s}.bomber-cell:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(227,184,114,.55);box-shadow:0 8px 18px rgba(0,0,0,.25),0 0 16px rgba(201,151,77,.08)}.bomber-cell:disabled{cursor:default}.bomber-hidden{font:700 20px 'IBM Plex Mono',monospace;color:rgba(227,184,114,.32)}.bomber-cell.safe{background:linear-gradient(145deg,rgba(76,154,118,.2),rgba(40,71,55,.25));border-color:rgba(76,154,118,.65)}.bomber-safe{font-size:20px;color:#8fd1ad;text-shadow:0 0 12px rgba(76,154,118,.5)}.bomber-cell.bomb{background:linear-gradient(145deg,rgba(168,74,74,.24),rgba(65,25,25,.35));border-color:rgba(193,85,79,.7);animation:bomberBomb .35s ease}.bomber-bomb{font-size:28px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}.bomber-bet-card{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--bg-3)}.bomber-bet-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-weight:700}.bomber-bet-input-wrap{display:grid;grid-template-columns:48px 1fr 48px;gap:7px}.bomber-bet-input-wrap input{width:100%;background:#171411;border:1px solid rgba(227,184,114,.18);color:var(--paper);border-radius:12px;text-align:center;padding:12px;font:800 17px 'IBM Plex Mono',monospace;outline:none}.bomber-bet-input-wrap input:focus{border-color:var(--brass-2);box-shadow:0 0 0 3px rgba(201,151,77,.08)}.bomber-step,.bomber-preset{border:1px solid var(--line);background:var(--bg-2);color:var(--paper);border-radius:11px;font-weight:800}.bomber-step{font-size:18px}.bomber-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.bomber-preset{padding:9px 4px;font:700 10px 'IBM Plex Mono',monospace;color:var(--muted)}.bomber-preset:active,.bomber-step:active{transform:scale(.96)}.bomber-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.bomber-actions button{min-height:46px}.bomber-actions .btn-ghost:disabled{opacity:.35}.bomber-message{text-align:center;min-height:32px;padding:10px 4px;color:var(--muted);font-size:11px}.bomber-message.win{color:var(--success)}.bomber-message.loss{color:var(--danger)}@keyframes bomberBomb{50%{transform:scale(.94)}}
 @media(max-width:430px){.mines-stats{grid-template-columns:repeat(2,1fr)}.mines-sectors{grid-template-columns:repeat(3,1fr)}.mines-grid{gap:7px}.mine-cell{height:80px}}
 </style>
@@ -2813,7 +2814,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
 <!-- ============ APP SCREEN ============ -->
 <div id="appScreen" style="display:none;">
   <div class="app-shell">
-    </div>
+    <div id="techBreakHost" aria-hidden="true"></div>
     <div id="adminDynamicRoot"></div>
 <template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-menu-tab="admin">Админ-панель</button>
 <div class="page" id="page-admin">
@@ -2981,7 +2982,7 @@ header .brand-name{font-size:17px!important;letter-spacing:.35px!important;}
       <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
       <div class="channel-bonus-card" id="channelBonusCard"><div class="channel-bonus-icon">📢</div><div class="channel-bonus-copy"><div class="channel-bonus-title">GDplay · +1000 💰 за подписку</div><div class="channel-bonus-sub">Подпишись на канал и забери бонус.</div></div><div class="channel-bonus-actions"><button type="button" class="btn" id="channelSubscribeBtn">Подписаться</button></div><button type="button" class="channel-bonus-close" id="channelBonusClose" aria-label="Скрыть">×</button></div>
       <div id="casesList"></div>
-      <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div id="promoMessage" class="promo-message"></div></div>
+      <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div style="margin-top:8px"><button type="button" class="btn-ghost" id="adminTechBreakPromoBtn" style="display:none;width:100%">🛠️ Тех. перерыв</button></div><div id="promoMessage" class="promo-message"></div></div>
     </div>
 
     <!-- BATTLES -->
@@ -3942,6 +3943,52 @@ async function loadAdminUI(){
   }
 }
 
+let techBreakFrame=null;
+function ensureTechBreakFrame(){
+  const host=document.getElementById('techBreakHost');
+  if(!host) return null;
+  if(!techBreakFrame){
+    techBreakFrame=document.createElement('iframe');
+    techBreakFrame.title='Технический перерыв';
+    techBreakFrame.src='maintenance.html';
+    techBreakFrame.setAttribute('aria-hidden','true');
+    host.appendChild(techBreakFrame);
+  }
+  return techBreakFrame;
+}
+function showTechBreak(reason){
+  const host=document.getElementById('techBreakHost');
+  const frame=ensureTechBreakFrame();
+  if(host) host.classList.add('open');
+  frame?.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:true,reason:String(reason||'Игра временно недоступна.')},'*');
+}
+function hideTechBreak(){
+  const host=document.getElementById('techBreakHost');
+  if(host) host.classList.remove('open');
+  techBreakFrame?.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:false,reason:''},'*');
+}
+
+function updateAdminTechBreakPromoButton(enabled){
+  const buttons=[document.getElementById('adminTechBreakPromoBtn'),document.getElementById('adminTechBreakPanelBtn')].filter(Boolean);
+  buttons.forEach(b=>{ if(!window.isAdmin){b.style.display='none';return;} b.style.display='inline-flex'; b.textContent=enabled?'Снять тех. перерыв':'Тех. перерыв'; b.classList.toggle('danger-admin',!!enabled); b.dataset.active=enabled?'1':'0'; });
+}
+
+async function adminGlobalTechBreakToggle(){
+  const b=document.getElementById('adminTechBreakPromoBtn');
+  const active=b?.dataset.active==='1';
+  if(active){
+    if(!await tgConfirm('Снять технический перерыв у всех игроков?')) return;
+    try{
+      await apiFetch('/api/admin/tech-break',{action:'clear'});
+      updateAdminTechBreakPromoButton(false);
+      hideTechBreak();
+      showToast('✅ Глобальный тех. перерыв снят','success');
+    }catch(e){ showToast(e.message||'Ошибка','error'); }
+    return;
+  }
+  adminTechBreak(tgUserId());
+}
+
 function showModerationNotice(notice){
   if(!notice || !notice.reason) return;
   const type=notice.notice_type==='delete' ? '🗑️ Аккаунт удалён' : '🚫 Аккаунт заблокирован';
@@ -3961,6 +4008,7 @@ async function registerWithServer(){
     const j = await apiFetch('/api/me', {});
     if(j.moderation_notice) showModerationNotice(j.moderation_notice);
     window.isAdmin = !!j.is_admin;
+    updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
     if(window.isAdmin) await loadAdminUI();
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
     if(j.user && j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
@@ -3970,6 +4018,7 @@ async function registerWithServer(){
     if(j.user && j.user.custom_status !== undefined){ data.customStatus = j.user.custom_status || null; }
     // Restore saved profile frame/name color before any legacy migration sync.
     if(j.user) applyServerState(j.user);
+    if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
     if(!data.serverSynced){
       data.profileFrame = String(j.user?.profile_frame || data.profileFrame || 'default');
       data.profileNameStyle = String(j.user?.profile_name_style || data.profileNameStyle || 'default');
@@ -4072,7 +4121,7 @@ function serverUserToGame(u,fallbackName){
     cases_opened:Number(u?.cases_opened||0), lastDaily:u?.daily_claimed?Date.parse(u.daily_claimed):0, dailyStreak:Number(u?.daily_streak||0),
     avatar:u?.avatar||'', buffs:Array.isArray(u?.buffs)?u.buffs:[], bestDrops:Array.isArray(u?.best_drops)?u.best_drops:[],
     battles:0,wins:0,battle_winnings:Number(u?.battle_winnings||0),
-    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, customStatus:u?.custom_status||null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
+    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
 
@@ -4103,6 +4152,7 @@ async function showApp(skipServer=false){
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
   renderAll();
+  refreshGlobalTechBreak();
   if(!skipServer) registerWithServer();
 }
 
@@ -4211,9 +4261,11 @@ async function bootSafe(){
         const tgAvatar = String(tgUser?.photo_url || j.user.avatar || '');
         currentUser = String(j.user.user_id || savedSession).toLowerCase();
         data = serverUserToGame(j.user, tgName);
+        if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
         data.username = tgName;
         if(tgAvatar) data.avatar = tgAvatar;
         window.isAdmin = !!j.is_admin;
+      updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
         showApp();
         return;
@@ -4444,6 +4496,7 @@ async function redeemPromo(){
       if(!window.isAdmin && redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
       const j=await apiFetch('/api/promo/redeem',{code:'ATTASHA'});
       if(j.user) applyServerState(j.user);
+    if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
       if(!window.isAdmin) data.redeemedPromos=[...redeemed,'ATTASHA'];
       persistLocal();
       if(i)i.value='';
@@ -4522,7 +4575,7 @@ async function loadAdminUsers(search){
       return `
       <div class="admin-user">
         <div class="admin-user-head">
-          <div><b>${u.username||'Без имени'}</b><span class="admin-badges">${premiumActive?' ⭐':''}${creatorActive?' 🛠️':''}${testerActive?' 🧪':''}${customStatusHtml}</span><br><span style="color:var(--muted);font-size:11px">ID ${u.user_id} · 💰${Number(u.balance||0).toLocaleString('ru-RU')} · кубов ${u.cube_count||0}</span></div>
+          <div><b>${u.username||'Без имени'}</b><span class="admin-badges">${premiumActive?' ⭐':''}${creatorActive?' 🛠️':''}${testerActive?' 🧪':''}${customStatusHtml}</span><br><span style="color:var(--muted);font-size:11px">ID ${u.user_id} · 💰${Number(u.balance||0).toLocaleString('ru-RU')} · кубов ${u.cube_count||0}${u.tech_break_enabled?' · 🛠️ Тех. перерыв':''}</span></div>
           <div style="font-size:11px;color:${u.banned?'var(--danger)':'var(--success)'}">${u.banned?'Забанен':(u.shadow_banned?'Теневой бан':'Активен')}</div>
         </div>
         <div class="admin-user-actions">
@@ -4731,6 +4784,27 @@ async function adminBuff(uid){
     }catch(e){showToast('❌ '+e.message,'error');}
   };
   accept.onclick=done; cancel.onclick=()=>{accept.onclick=null;cancel.onclick=null;closeModal('adminBuffModal');};
+}
+
+async function adminTechBreak(uid){
+  askReason('🛠️ Технический перерыв','Укажи причину. Она будет показана игроку в отдельном окне.', '', async reason=>{
+    try{
+      const j=await apiFetch('/api/admin/tech-break',{action:'enable',reason});
+      showToast('🛠️ Тех. перерыв включён','success');
+      updateAdminTechBreakPromoButton(true);
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+      if(String(uid)===String(tgUserId()||'') && !window.isAdmin) showTechBreak(j.user?.tech_break_reason||reason);
+    }catch(e){showToast('❌ '+e.message,'error');}
+  });
+}
+async function adminClearTechBreak(uid){
+  if(!await tgConfirm('Убрать технический перерыв у этого игрока?')) return;
+  try{
+    const j=await apiFetch('/api/admin/account',{user_id:Number(uid),action:'clear_tech_break'});
+    showToast('✅ Тех. перерыв снят','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    if(String(uid)===String(tgUserId()||'')) hideTechBreak();
+  }catch(e){showToast('❌ '+e.message,'error');}
 }
 
 async function adminIpBan(){
@@ -6901,6 +6975,8 @@ function handleButton(button, e){
   if(button.matches('.rush-preset')){ setRushBet(Number(button.dataset.rushPreset||10)); return; }
   if(button.id==='rushStartBtn'){ startRush(); return; }
   if(button.id==='rushCashoutBtn'){ cashoutRush(); return; }
+  if(button.id==='adminTechBreakPanelBtn'){ const active=button.dataset.active==='1'; if(active) adminGlobalTechBreakToggle(); else adminTechBreak(tgUserId()); return; }
+  if(button.id==='adminTechBreakPromoBtn'){ adminGlobalTechBreakToggle(); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
@@ -6913,6 +6989,8 @@ function handleButton(button, e){
   if(action==='admin-remove-premium'){ tgConfirm('Снять Premium и удалить Premium-баффы?').then(ok=>{ if(ok) adminAccountAction(button.dataset.uid,'remove_premium'); }); return; }
   if(action==='admin-custom-status'){ if(typeof window.adminCustomStatus==='function') window.adminCustomStatus(button.dataset.uid); else showToast('❌ Окно статуса ещё загружается','error'); return; }
   if(action==='admin-buff'){ adminBuff(button.dataset.uid); return; }
+  if(action==='admin-tech-break'){ adminTechBreak(button.dataset.uid); return; }
+  if(action==='admin-tech-break-off'){ adminClearTechBreak(button.dataset.uid); return; }
   if(action==='view-profile'){ openPublicProfile(button.dataset.profileUid, leaderboardProfileSeeds[String(button.dataset.profileUid)]||{}); return; }
   if(action==='admin-creator'){ adminCreator(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
   if(action==='admin-tester'){ adminTester(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
@@ -6943,6 +7021,24 @@ function handleButton(button, e){
 }
 
 
+window.addEventListener('message',e=>{
+  if(e.source!==techBreakFrame?.contentWindow) return;
+  if(e.data?.type==='gdplay-tech-break-ready'){
+    refreshGlobalTechBreak();
+  }
+});
+
+async function refreshGlobalTechBreak(){
+  if(!currentUser || !data) return;
+  try{
+    const j=await apiFetch('/api/me',{});
+    if(j?.user) applyServerState(j.user);
+    window.isAdmin=!!j?.is_admin;
+    updateAdminTechBreakPromoButton(!!j?.global_tech_break?.enabled);
+    if(j?.global_tech_break?.enabled && !j?.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
+  }catch(e){}
+}
+setInterval(refreshGlobalTechBreak, 5000);
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
 setInterval(()=>{ if(data) updateDailyUI(); }, 1000);
 
