@@ -4104,23 +4104,20 @@ async function bootSafe(){
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
   // а имя и фото берутся непосредственно из Telegram. Формы входа/регистрации
   // остаются в DOM и доступны для ручного входа в другой аккаунт.
-  const initData = await waitForTelegramInitData(4000);
+  const initData = await waitForTelegramInitData(5000);
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
-  if(!initData){
-    currentUser = null;
-    data = null;
-    showAuth();
-    showAuthError('Открой GDPLAY через кнопку «Играть» в Telegram-боте.');
-    return;
-  }
 
-  // Сначала пробуем обычную сохранённую авторизацию.
+  // Важно: сохранённая серверная сессия должна восстанавливаться даже тогда,
+  // когда Telegram WebView на этом запуске временно/полностью не предоставил
+  // initData. /api/me уже умеет безопасно проверять authToken на сервере.
+  // Раньше здесь был ранний выход при !initData, из-за чего действующая сессия
+  // ошибочно отправляла пользователя на экран входа.
 
   // Если есть сохранённая серверная сессия — пытаемся восстановить её.
   // При любой ошибке просто возвращаем обычный экран входа, не оставляя
   // пользователя на пустом/зависшем экране.
-  if(storageGet(MANUAL_AUTH_KEY)==='1' && token && savedSession){
+  if(token && savedSession){
     try{
       const j = await apiFetch('/api/me', {});
       if(j && j.user){
@@ -4145,9 +4142,17 @@ async function bootSafe(){
     storageRemove(SESSION_KEY);
   }
 
-  // Нет рабочей сессии: продолжаем автоматически как Telegram-гость.
-  // Это НЕ удаляет логин/регистрацию — они остаются доступными через
-  // кнопку «Войти другим аккаунтом» в настройках.
+  // Нет рабочей сохранённой сессии: продолжаем автоматически как Telegram-гость.
+  // Для нового входа серверу нужна криптографически проверяемая initData.
+  // Если Telegram её не передал, не показываем ложную ошибку для уже
+  // авторизованного пользователя — выше сессия уже была проверена.
+  if(!initData){
+    currentUser = null;
+    data = null;
+    showAuth();
+    showAuthError('Telegram не передал данные запуска. Открой GDPLAY через кнопку «Играть» в Telegram-боте или войди сохранённым аккаунтом.');
+    return;
+  }
   try{
     let j=null, lastError=null;
     for(let attempt=0; attempt<4; attempt++){
