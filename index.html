@@ -32,12 +32,18 @@ function renderMines(){
    <div class="mines-message" id="mineMsg">${minesState.message||'Выбери одну из шести клеток.'}</div>
    <div class="mines-sectors">${MINE_SECTORS.map((x,i)=>`<div class="mines-sector ${i+1===minesState.sector?'current':''} ${i+1<minesState.sector?'done':''}"><span>${i+1}</span><b>×${x.m.toFixed(1)}</b><small>${x.n} ${x.n===1?'мина':'мины'}</small></div>`).join('')}</div>
  </div>`;
- // Mine action buttons use the single global click dispatcher below.
- // This prevents a Telegram WebView click from invoking the same request twice.
-
- document.querySelectorAll('[data-mine-step]').forEach(b=>b.onclick=()=>setMinesBet(Number(document.getElementById('mineBet')?.value||1000)+Number(b.dataset.mineStep||0)));
- document.querySelectorAll('[data-mine-preset]').forEach(b=>b.onclick=()=>setMinesBet(Number(b.dataset.minePreset||1000)));
+ // Mines gets its own direct handlers. This is deliberately independent of the
+ // document-wide button dispatcher: Telegram WebView can occasionally retarget
+ // delegated clicks when the game panel is re-rendered.
+ document.querySelectorAll('[data-mine-step]').forEach(b=>b.onclick=(e)=>{e.preventDefault();e.stopPropagation();setMinesBet(Number(document.getElementById('mineBet')?.value||1000)+Number(b.dataset.mineStep||0));});
+ document.querySelectorAll('[data-mine-preset]').forEach(b=>b.onclick=(e)=>{e.preventDefault();e.stopPropagation();setMinesBet(Number(b.dataset.minePreset||1000));});
  document.getElementById('mineBet')?.addEventListener('input',()=>{ minesState.bet=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('mineBet').value||1)))); });
+ const mineStartBtn=document.getElementById('mineStart');
+ if(mineStartBtn) mineStartBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();startMines();};
+ const mineCashBtn=document.getElementById('mineCash');
+ if(mineCashBtn) mineCashBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();cashMines();};
+ const mineContinueBtn=document.getElementById('mineContinue');
+ if(mineContinueBtn) mineContinueBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();continueMines();};
  drawMineGrid();
 }
 function setMinesBet(v){ if(minesState?.active)return; const n=Math.max(1,Math.min(1000000,Math.floor(Number(v)||1))); minesState.bet=n; renderMines(); const input=document.getElementById('mineBet'); if(input){input.focus();input.select();} }
@@ -58,7 +64,8 @@ function drawMineGrid(){
  }
 }
 async function startMines(){
- if(minesState?.active || minesStartInFlight) return;
+ if(minesState?.active || minesStartInFlight || minesActionInFlight) return;
+ minesActionInFlight=true;
  const input=document.getElementById('mineBet');
  const bet=Math.max(1,Math.min(1000000,Math.floor(Number(input?.value||minesState?.bet||1000))));
  minesState=minesState||{sector:1,bet:bet,mult:1.3,active:false,roundId:null,canCash:false,revealed:[],message:''};
@@ -82,29 +89,35 @@ async function startMines(){
      minesState.message=e.message||'Не удалось начать игру';
      showToast(minesState.message,'error');
      renderMines();
-   }finally{ minesStartInFlight=null; }
+   }finally{ minesStartInFlight=null; minesActionInFlight=false; }
  })();
  await minesStartInFlight;
 }
+let minesActionInFlight=false;
 async function cashMines(){
- if(!minesState?.active||!minesState.canCash)return;
+ if(!minesState?.active||!minesState.canCash||minesActionInFlight)return;
+ minesActionInFlight=true;
  try{
   const j=await apiFetch('/api/game/mines/cashout',{round_id:minesState.roundId});
   if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
   minesState.active=false; minesState.canCash=false; minesState.message=`Вы забрали ${Number(j.payout||0).toLocaleString('ru-RU')} орбов.`; renderMines();
  }catch(e){showToast(e.message||'Не удалось забрать выигрыш','error');}
+ finally{minesActionInFlight=false;}
 }
 async function continueMines(){
- if(!minesState?.active||!minesState.canCash)return;
+ if(!minesState?.active||!minesState.canCash||minesActionInFlight)return;
+ minesActionInFlight=true;
  try{
   const j=await apiFetch('/api/game/mines/continue',{round_id:minesState.roundId});
   minesState.sector=Number(j.sector||minesState.sector); minesState.mult=Number(j.multiplier||minesState.mult); minesState.canCash=false;
   minesState.message='Продолжаем. Выбери клетку следующего сектора.'; minesState.revealed=[];
   renderMines();
  }catch(e){showToast(e.message||'Не удалось продолжить','error');}
+ finally{minesActionInFlight=false;}
 }
 async function pickMine(i){
- if(!minesState?.active||minesState.canCash)return;
+ if(!minesState?.active||minesState.canCash||minesActionInFlight)return;
+ minesActionInFlight=true;
  try{
   const j=await apiFetch('/api/game/mines/pick',{round_id:minesState.roundId,cell:i});
   if(data && typeof data==='object'){ data.balance=Number(j.balance??data.balance??0); updateBalanceUI(); }
@@ -116,6 +129,7 @@ async function pickMine(i){
   }
   minesState.sector=j.sector; minesState.mult=j.multiplier; minesState.canCash=true; minesState.revealed=[]; minesState.message=`Сектор пройден. Можно забрать ${Number(j.current_win||0).toLocaleString('ru-RU')} орбов или продолжить.`; renderMines();
  }catch(e){showToast(e.message||'Ошибка игры','error');}
+ finally{minesActionInFlight=false;}
 }
 let bomberState=null;
 const BOMBER_MULTS=[1.12,1.28,1.48,1.75,2.10,2.60,3.25,4.10,5.25,6.80];
@@ -7015,9 +7029,6 @@ function handleButton(button, e){
   if(button.matches('.rush-preset')){ setRushBet(Number(button.dataset.rushPreset||10)); return; }
   if(button.id==='rushStartBtn'){ startRush(); return; }
   if(button.id==='rushCashoutBtn'){ cashoutRush(); return; }
-  if(button.id==='mineStart'){ startMines(); return; }
-  if(button.id==='mineCash'){ cashMines(); return; }
-  if(button.id==='mineContinue'){ continueMines(); return; }
   if(button.id==='adminTechBreakPanelBtn'){ const active=button.dataset.active==='1'; if(active) adminGlobalTechBreakToggle(); else adminTechBreak(tgUserId()); return; }
   if(button.id==='adminTechBreakPromoBtn'){ adminGlobalTechBreakToggle(); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
