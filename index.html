@@ -3408,6 +3408,10 @@ function bindCriticalAuth(){
 bindCriticalAuth();
 
 const API_BASE = "https://gdplay.up.railway.app";
+const API_BASES = [...new Set([
+  API_BASE.replace(/\/$/, ''),
+  (window.location?.origin && window.location.origin !== 'null') ? window.location.origin.replace(/\/$/, '') : ''
+].filter(Boolean))];
 
 try{
   if(window.Telegram && window.Telegram.WebApp){
@@ -3732,59 +3736,61 @@ function tgConfirm(message){
   });
 }
 
-async function apiFetch(path, payload={}){
+async function apiFetch(path, payload={}, _retry=false){
   const initData = tgInitData();
   const authToken = storageGet(AUTH_TOKEN_KEY);
-  // При восстановлении уже созданной серверной сессии Telegram может
-  // кратковременно не вернуть initData. Разрешаем /api/me восстановиться по
-  // валидному authToken; первичные auth-операции по-прежнему требуют Telegram.
   if(!initData && !(authToken && path === '/api/me')){
     throw new Error('Открой игру через кнопку «Играть» в Telegram-боте — Telegram не передал данные запуска');
   }
   payload = {...payload, ...(initData ? {initData} : {})};
   if(authToken) payload.authToken = authToken;
 
-  // Для админских запросов поверх Telegram initData нужен отдельный короткий
-  // серверный session-токен. Сам токен без свежего initData бесполезен.
-  if(path.startsWith('/api/admin/') && path !== '/api/admin/session') {
+  if(path.startsWith('/api/admin/') && path !== '/api/admin/session'){
     let adminSession = storageGet(ADMIN_SESSION_KEY);
     if(!adminSession){
-      const sr = await fetch(API_BASE + '/api/admin/session', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData})});
-      const sj = await sr.json().catch(()=>({error:'Не удалось открыть админ-сессию'}));
-      if(!sr.ok) throw new Error(sj.error||'Нет доступа');
-      adminSession=sj.adminSession;
-      storageSet(ADMIN_SESSION_KEY,adminSession);
+      let sessionError=null;
+      for(const base of API_BASES){
+        const controller=typeof AbortController!=='undefined'?new AbortController():null;
+        const timer=controller?setTimeout(()=>controller.abort(),8000):null;
+        try{
+          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData}),signal:controller?.signal});
+          const sj=await sr.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
+          if(sr.ok && sj.adminSession){ adminSession=sj.adminSession; storageSet(ADMIN_SESSION_KEY,adminSession); sessionError=null; break; }
+          if(sr.status && sr.status<500) throw new Error(sj.error||'Нет доступа');
+          sessionError=new Error(sj.error||`Сервер недоступен (${sr.status})`);
+        }catch(e){
+          sessionError=e?.name==='AbortError' ? new Error('Сервер долго не отвечает. Попробуй ещё раз через несколько секунд.') : e;
+        }finally{ if(timer) clearTimeout(timer); }
+      }
+      if(!adminSession) throw sessionError||new Error('Не удалось подключиться к серверу.');
     }
     payload.adminSession=adminSession;
   }
 
-  // Не даём WebView зависнуть навсегда, если Railway/сервер временно недоступен.
-  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timer = controller ? setTimeout(()=>controller.abort(), 8000) : null;
-  try{
-    const r = await fetch(API_BASE + path, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload),
-      signal: controller?.signal
-    });
-    const j = await r.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
-    // Если короткая админ-сессия истекла, молча получаем новую.
-    // Это особенно важно в Telegram WebView после долгого простоя.
-    if(r.status===403 && path.startsWith('/api/admin/') && path!=='/api/admin/session' && !payload.__adminRetry){
-      storageRemove(ADMIN_SESSION_KEY);
-      return apiFetch(path,{...payload,__adminRetry:true});
-    }
-    if(j.farm_action){ showToast(j.farm_action.permanent?'⛔ Античит: бан навсегда':`⛔ Античит: временный бан (${j.farm_action.strike||1}-е нарушение)`,'error'); }
-    if(!r.ok) throw new Error(j.error||'Ошибка сервера');
-    return j;
-  }catch(e){
-    if(e?.name === 'AbortError') throw new Error('Сервер долго не отвечает. Попробуй ещё раз через несколько секунд.');
-    if(e instanceof TypeError) throw new Error('Не удалось подключиться к серверу. Проверь интернет и попробуй ещё раз.');
-    throw e;
-  }finally{
-    if(timer) clearTimeout(timer);
+  let lastNetworkError=null;
+  for(const base of API_BASES){
+    const controller=typeof AbortController!=='undefined'?new AbortController():null;
+    const timer=controller?setTimeout(()=>controller.abort(),8000):null;
+    try{
+      const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller?.signal});
+      const j=await r.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
+      if(r.status===403 && path.startsWith('/api/admin/') && path!=='/api/admin/session' && !_retry){
+        storageRemove(ADMIN_SESSION_KEY);
+        return apiFetch(path,{...payload,__adminRetry:true},true);
+      }
+      if(j.farm_action){ showToast(j.farm_action.permanent?'⛔ Античит: бан навсегда':`⛔ Античит: временный бан (${j.farm_action.strike||1}-е нарушение)`,'error'); }
+      if(!r.ok){
+        if(r.status>=500){ lastNetworkError=new Error(j.error||`Сервер недоступен (${r.status})`); continue; }
+        throw new Error(j.error||'Ошибка сервера');
+      }
+      return j;
+    }catch(e){
+      if(e?.name==='AbortError') lastNetworkError=new Error('Сервер долго не отвечает. Попробуй ещё раз через несколько секунд.');
+      else if(e instanceof TypeError || /Failed to fetch|NetworkError|Load failed/i.test(String(e?.message||''))) lastNetworkError=new Error('Не удалось подключиться к серверу. Проверь интернет и попробуй ещё раз.');
+      else throw e;
+    }finally{ if(timer) clearTimeout(timer); }
   }
+  throw lastNetworkError||new Error('Не удалось подключиться к серверу.');
 }
 
 // Отправляет локальный игровой прогресс (баланс, кубы, кол-во кейсов, выигрыши в батлах)
