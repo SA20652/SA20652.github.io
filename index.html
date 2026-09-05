@@ -4854,7 +4854,20 @@ function setRushState(status,mult,payout=0){const m=Math.min(7.5,Math.max(1,Numb
 function stopRushTimers(){if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}if(rushPollTimer){clearInterval(rushPollTimer);rushPollTimer=null;}}
 let rushPollTimer=null;
 function startRushAnimation(){stopRushTimers();if(rushPollTimer)clearInterval(rushPollTimer);const startAt=rushRound.startedAt;const tick=()=>{if(!rushRound||rushRound.status!=='active')return;const elapsed=Math.max(0,Date.now()-startAt),m=rushMultiplierAt(elapsed);drawRushPoint(m,elapsed);if(elapsed>=29000){cashoutRush(true);return;}rushAnimTimer=requestAnimationFrame(tick);};tick();rushPollTimer=setInterval(async()=>{if(!rushRound||rushRound.status!=='active')return;try{const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();clearInterval(rushPollTimer);rushPollTimer=null;drawRushPoint(Number(j.multiplier||1),Math.max(0,Date.now()-startAt));setRushState('crashed',Number(j.multiplier||1),0);}}catch(e){}},350);}
-async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
+
+async function updateGameLimits(){
+  try{
+    const j=await apiFetch('/api/game/limits',{});
+    const r=j.rush||{}, m=j.mines||{};
+    const rEl=document.getElementById('rushAttempts');
+    if(rEl) rEl.textContent=`${Math.max(0,(r.max||5)-(r.used||0))} / ${r.max||5}`;
+    const mEl=document.getElementById('minesAttempts');
+    if(mEl) mEl.textContent=`${Math.max(0,(m.max||5)-(m.used||0))} / ${m.max||5}`;
+  }catch(e){}
+}
+setInterval(updateGameLimits,5000);
+
+async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
 async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier||rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');}finally{rushBusy=false;}}
 function renderPlinko(){setRushBet(rushBetValue);if(!rushRound){resetRushChart();setRushState('idle',1);}}
 
