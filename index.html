@@ -2849,7 +2849,7 @@ large DOM rebuilds while the result card appears. */
         </div>
       </div>
       <div class="rush-card">
-        <div class="limit-box" id="rushLimitBox">🚀 <b>Лимит Орб-Рывка</b><br><span>🎯 Осталось попыток: <b id="rushAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="rushLimitTimer">6ч 00м</b></span></div>
+        <div class="limit-box" id="rushLimitBox" style="display:none">🚀 <b>Лимит Орб-Рывка</b><br><span>🎯 Осталось попыток: <b id="rushAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="rushLimitTimer">6ч 00м</b></span></div>
         <div class="rush-chart" id="rushChart" aria-label="График Орб-Рывка">
           <div class="rush-grid"></div>
           <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -2934,7 +2934,7 @@ large DOM rebuilds while the result card appears. */
       </div>
 
       <div class="mines-card">
-        <div class="limit-box" id="minesLimitBox">💣 <b>Лимит Мин</b><br><span>🎯 Осталось попыток: <b id="minesAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="minesLimitTimer">6ч 00м</b></span></div>
+        <div class="limit-box" id="minesLimitBox" style="display:none">💣 <b>Лимит Мин</b><br><span>🎯 Осталось попыток: <b id="minesAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="minesLimitTimer">6ч 00м</b></span></div>
         <div class="mines-stats">
           <div><span>Ставка</span><b id="minesBetStat">1 000 💰</b></div>
           <div><span>Сектор</span><b id="minesSectorStat">1 / 6</b></div>
@@ -3036,7 +3036,7 @@ large DOM rebuilds while the result card appears. */
           <button type="button" class="profile-style-btn" data-profile-name="diamond"><span style="background:linear-gradient(90deg,#ffffff,#7ee8ff,#c58cff);-webkit-background-clip:text;color:transparent">Aa</span>Алмаз</button>
         </div>
       </div>
-      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 10 Орб-рывков · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
+      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 6 часов · 💣 10 игр в «Минах» каждые 6 часов · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div><div class="daily-timer" id="dailyTimer">Следующая награда доступна сейчас</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/7</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
