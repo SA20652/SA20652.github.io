@@ -6687,7 +6687,7 @@ function renderProfile(){
   document.getElementById('dailyBtn').disabled=!can;
   const timer=document.getElementById('dailyTimer'); if(timer){ if(can) timer.textContent='Следующая награда доступна сейчас'; else { const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } }
   const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/7';
-  const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/7*100)+'%';
+  const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/14*100)+'%';
   loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
@@ -6709,14 +6709,14 @@ async function loadDailyStatus(){
 function updateDailyUI(){
   if(!data)return;
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
-  const streak=Math.max(0,Math.min(7,Number(dailyState.streak||data.dailyStreak||0)));
+  const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
   const nextAt=Number(dailyState.nextAt||0),can=!nextAt||Date.now()>=nextAt;
   const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующая награда: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn)btn.disabled=!can;
   const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Следующая награда доступна сейчас';else{const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}}
-  const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/7';
-  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/7*100)+'%';
+  const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/14';
+  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/14*100)+'%';
 }
 async function claimDaily(){
   if(!data)return;
@@ -6727,7 +6727,7 @@ async function claimDaily(){
     data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
     dailyState.nextAt=Number(j.next_daily||Date.now()+12*60*60*1000);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=Number(j.claims_in_day||1);dailyState.reward=Number(j.reward||1000);dailyState.premium=!!j.premium;
     persistLocal();updateBalanceUI();renderProfile();
-    const msg=dailyState.streak>=7?' 🔥 7/7 — максимум':' 🔥 День '+dailyState.streak+'/7';
+    const msg=dailyState.streak>=14?' 🔥 14/14 — максимум':' 🔥 Забирание '+dailyState.streak+'/14';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
   }catch(e){
     const msg=String(e?.message||'');
