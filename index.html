@@ -4593,7 +4593,8 @@ async function adminGrantCases(uid){
   ok.onclick=async()=>{
     const amount=Math.max(1,Number(document.getElementById('adminCasesAmount').value||0));
     try{
-      await apiFetch('/api/admin/add-cases',{user_id:Number(uid),amount});
+      const res=await apiFetch('/api/admin/add-cases',{user_id:Number(uid),amount});
+      if(!res || res.ok===false) throw new Error('Сервер не подтвердил выдачу кейсов');
       closeModal('adminCasesModal');
       showToast('📦 Кейсы выданы','success');
       loadAdminUsers(document.getElementById('adminSearch')?.value||'');
