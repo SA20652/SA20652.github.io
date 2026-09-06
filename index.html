@@ -2759,6 +2759,18 @@ large DOM rebuilds while the result card appears. */
   </div>
 </div>
 
+<div class="modal-overlay" id="adminCasesModal">
+  <div class="input-modal">
+    <h3>📦 Выдать открытые кейсы</h3>
+    <p>Игрок: <b id="adminCasesUid"></b></p>
+    <input id="adminCasesAmount" type="number" min="1" value="100" placeholder="Количество кейсов">
+    <div class="input-modal-actions">
+      <button id="adminCasesCancel" class="btn-ghost" type="button">Отмена</button>
+      <button id="adminCasesAccept" class="btn" type="button">Выдать</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="adminCubeModal">
   <div class="input-modal">
     <h3>Выдать куб</h3><p>Игрок: <b id="adminCubeUid"></b></p>
@@ -4496,6 +4508,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
+          <button type="button" class="btn-ghost" data-action="admin-grant-cases" data-uid="${u.user_id}">📦 Выдать кейсы</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
           <button type="button" class="btn-ghost" data-action="admin-premium" data-uid="${u.user_id}">Выдать Premium</button>
           ${premiumActive ? `<button type="button" class="btn-ghost danger-admin" data-action="admin-remove-premium" data-uid="${u.user_id}">⭐ Снять Premium</button>` : ''}
@@ -4567,6 +4580,26 @@ function openAdminAccount(uid){
 function adminToggleCubes(uid){
   const el = document.getElementById('adminCubes-'+uid);
   if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+
+async function adminGrantCases(uid){
+  const modal=document.getElementById('adminCasesModal');
+  document.getElementById('adminCasesUid').textContent=uid;
+  document.getElementById('adminCasesAmount').value='100';
+  openModal('adminCasesModal');
+  const ok=document.getElementById('adminCasesAccept');
+  const cancel=document.getElementById('adminCasesCancel');
+  ok.onclick=async()=>{
+    const amount=Math.max(1,Number(document.getElementById('adminCasesAmount').value||0));
+    try{
+      await apiFetch('/api/admin/add-cases',{user_id:Number(uid),amount});
+      closeModal('adminCasesModal');
+      showToast('📦 Кейсы выданы','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){showToast('❌ '+e.message,'error');}
+  };
+  cancel.onclick=()=>closeModal('adminCasesModal');
 }
 
 async function adminGrantCube(uid){
@@ -6921,6 +6954,7 @@ function handleButton(button, e){
   if(action==='admin-ban'){ adminBan(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-shadow'){ adminShadow(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-reset'){ tgConfirm('Точно сбросить весь прогресс этого игрока?').then(ok=>{ if(ok) adminReset(button.dataset.uid); }); return; }
+  if(action==='admin-grant-cases'){ adminGrantCases(button.dataset.uid); return; }
   if(action==='admin-grant-cube'){ adminGrantCube(button.dataset.uid); return; }
   if(action==='admin-premium'){ adminPremium(button.dataset.uid); return; }
   if(action==='admin-remove-premium'){ tgConfirm('Снять Premium и удалить Premium-баффы?').then(ok=>{ if(ok) adminAccountAction(button.dataset.uid,'remove_premium'); }); return; }
