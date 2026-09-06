@@ -4508,7 +4508,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
-          <button type="button" class="btn-ghost" data-action="admin-grant-cases" data-uid="${u.user_id}">📦 Выдать кейсы</button>
+          <button type="button" class="btn-ghost" onclick="adminGrantCases(${u.user_id})">📦 Выдать кейсы</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
           <button type="button" class="btn-ghost" data-action="admin-premium" data-uid="${u.user_id}">Выдать Premium</button>
           ${premiumActive ? `<button type="button" class="btn-ghost danger-admin" data-action="admin-remove-premium" data-uid="${u.user_id}">⭐ Снять Premium</button>` : ''}
