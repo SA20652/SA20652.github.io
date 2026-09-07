@@ -4665,6 +4665,26 @@ document.addEventListener('click', function(ev){
   if(uid) window.adminCustomStatus(uid);
 }, true);
 
+document.addEventListener('click', async function(ev){
+  const btn = ev.target && ev.target.closest ? ev.target.closest('[data-action="admin-add-cases-panel"]') : null;
+  if(!btn) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  const uidEl = document.getElementById('casesUserId');
+  const amountEl = document.getElementById('casesAmount');
+  const user_id = Number(uidEl?.value);
+  const amount = Number(amountEl?.value);
+  if(!user_id || !amount || amount<=0){ showToast('❌ Введите ID и количество кейсов','error'); return; }
+  btn.disabled = true;
+  try{
+    await apiFetch('/api/admin/add-cases', {user_id, amount});
+    showToast('✅ Выдано '+amount+' кейсов','success');
+    if(amountEl) amountEl.value='';
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
+  finally{ btn.disabled = false; }
+}, true);
+
 async function adminCustomStatus(uid){
   if(!window.isAdmin){ showToast('❌ Нет прав администратора','error'); return; }
   const modal=document.getElementById('adminCustomStatusModal');
