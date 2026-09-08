@@ -932,6 +932,21 @@ const PROMO_ATTASHA_IMAGE_DATA_URI = "data:image/webp;base64,UklGRr4uCwBXRUJQVlA
 @keyframes gdAmbientDrift{from{transform:translate3d(-2%, -1%,0) scale(.96)}to{transform:translate3d(2%,2%,0) scale(1.05)}}
 @keyframes gdSweep{to{transform:rotate(360deg)}}
 
+
+/* PROFILE FRAME PACK + NAME SHIMMER */
+.profile-avatar-frame{pointer-events:none}
+.profile-head,.profile-stats,.profile-customize,.pstat{position:relative}
+.profile-customize{overflow:hidden}
+.profile-style-btn{min-height:42px}
+.frame-neon,.frame-rainbow{animation:frameGlow 2.5s infinite alternate}
+@keyframes frameGlow{from{filter:drop-shadow(0 0 2px var(--brass-2))}to{filter:drop-shadow(0 0 10px var(--brass-2))}}
+.profile-name{background:linear-gradient(90deg,var(--paper),var(--brass-2),var(--paper));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:textFlow 4s linear infinite}
+@keyframes textFlow{to{background-position:200% center}}
+.inventory-search{width:100%;margin:10px 0;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg-2);color:var(--paper);font-size:14px}
+.balance-plus-btn{width:32px;height:32px;font-size:20px;vertical-align:middle;margin-left:5px}
+.clicker-modal{padding:22px}
+.clicker-balance{min-height:110px;display:flex;align-items:center;justify-content:center}
+
 /* ===== CLICKER ===== */
 .balance-chip{position:relative}
 .balance-plus-btn{
@@ -2915,7 +2930,7 @@ large DOM rebuilds while the result card appears. */
         </div>
         <button class="btn-sell-all" id="sellAllBtn">Продать всё</button>
       </div>
-      <div id="inventoryList"></div>
+      <input id="inventorySearch" class="inventory-search" placeholder="🔍 Поиск кубов..."><div id="inventoryList"></div>
     </div>
 
     <!-- MARKET -->
@@ -3050,7 +3065,9 @@ large DOM rebuilds while the result card appears. */
       </div>
       <div class="profile-customize" id="profileCustomize">
         <div class="profile-customize-head"><div><div class="profile-customize-title">🎨 Оформление профиля</div><div class="profile-customize-sub">Выбирай рамку и стиль имени</div></div><span class="profile-badge premium" id="profileStyleStatus">Стиль</span></div>
-        <div class="profile-customize-grid" id="profileFrameGrid">
+        <div class="profile-customize-grid" id="profileFrameGrid"><button type="button" class="profile-style-btn" data-profile-frame="neon"><span class="style-dot" style="color:#00e5ff"></span>Неон</button>
+<button type="button" class="profile-style-btn" data-profile-frame="rainbow"><span class="style-dot" style="color:#ff66cc"></span>Радужная</button>
+
           <button type="button" class="profile-style-btn" data-profile-frame="default" style="display:none"><span class="style-dot" style="color:#777"></span>Обычная</button>
           <button type="button" class="profile-style-btn" data-profile-frame="gold"><span class="style-dot" style="color:#e3b872"></span>Золото</button>
           <button type="button" class="profile-style-btn" data-profile-frame="emerald"><span class="style-dot" style="color:#6fc59c"></span>Изумруд</button>
@@ -5522,6 +5539,7 @@ function collectSpinReward(){
 }
 
 const expandedCubeStacks = new Set();
+setTimeout(()=>document.getElementById("inventorySearch")?.addEventListener("input",renderInventory),500);
 function renderInventory(){
   normalizeGameState();
   const list=document.getElementById('inventoryList');
