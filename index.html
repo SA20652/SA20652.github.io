@@ -3817,6 +3817,8 @@ function applyServerState(u){
       const caseNoise=['кейс','дроп','выпал','открыт сейф','открытие сейфа','открытие кейса','получен куб','получена награда из кейса'];
       if(!msg || caseNoise.some(k=>lower.includes(k))) return;
       const id=String(n?.id||n?.notification_id||msg+'|'+(n?.created_at||n?.time||''));
+      const tomb=loadNotificationTombstones();
+      if(tomb.has(id)) return;
       if(!local.some(x=>String(x.id||'')===id)) local.unshift({id,message:String(msg),time:Number(n?.time||Date.parse(n?.created_at||'')||Date.now()),read:false});
     });
     saveNotifications(local); updateNotificationBadge();
@@ -4413,7 +4415,8 @@ document.getElementById('notificationsClearBtn')?.addEventListener('click',async
   current.forEach(n=>{if(n.id)tomb.add(String(n.id));});
   saveNotificationTombstones(tomb);
   saveNotifications([]);
-  try{await apiFetch('/api/notifications/clear',{});}catch(e){}
+  try{await apiFetch('/api/notifications/clear',{});}catch(e){ console.debug('notification clear',e); }
+  updateNotificationBadge();
   renderNotifications();
 });
 updateNotificationBadge();
