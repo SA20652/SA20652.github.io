@@ -563,7 +563,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar-frame.frame-ice{border:3px solid #8fcbe8;box-shadow:0 0 16px rgba(143,203,232,.25);}
 .profile-avatar-frame.frame-obsidian{border:3px solid #737373;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),0 0 16px rgba(0,0,0,.5);}
 .profile-avatar-frame.frame-neon{border:3px solid #d9ff5b;box-shadow:0 0 18px rgba(217,255,91,.28);}
-.profile-avatar-frame.frame-premium{border:3px solid #f1c76d;box-shadow:0 0 20px rgba(241,199,109,.38),inset 0 0 8px rgba(255,255,255,.12);}
+
 .profile-avatar-frame.frame-ghost{border:3px solid #b8b8ff;box-shadow:0 0 18px rgba(184,184,255,.34),inset 0 0 8px rgba(255,255,255,.12);opacity:.92;}
 .profile-customize{margin-top:12px;background:linear-gradient(145deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:14px;padding:12px;}
 .profile-customize-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -2088,6 +2088,16 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .premium-modal-card::before{content:"";position:absolute;inset:-45% 35% auto -20%;height:170px;background:radial-gradient(circle,rgba(201,151,77,.16),transparent 68%);pointer-events:none;}
 .premium-modal-top{position:relative;display:flex;align-items:center;gap:12px;}.premium-modal-star{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.24);font-size:27px;box-shadow:inset 0 0 18px rgba(201,151,77,.08);}.premium-modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:800;}.premium-modal-sub{font-size:10px;color:var(--muted);margin-top:3px;}.premium-perks{position:relative;display:grid;gap:7px;margin:16px 0;}.premium-perk{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.055);font-size:11px;line-height:1.25;}.premium-perk b{color:var(--brass-2);}.premium-price{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:11px 12px;border-radius:12px;background:rgba(201,151,77,.07);border:1px solid rgba(201,151,77,.14);}.premium-price-label{font-size:10px;color:var(--muted);}.premium-price-value{font:800 15px 'IBM Plex Mono',monospace;color:var(--brass-2);}.premium-buy-action{width:100%;height:44px;border-radius:12px;font-weight:800;}.premium-close-action{width:100%;margin-top:7px;height:38px;}
 .profile-premium-open{position:relative;margin:12px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,rgba(201,151,77,.12),rgba(255,255,255,.02));border:1px solid rgba(201,151,77,.22);box-shadow:0 10px 28px rgba(0,0,0,.16);overflow:hidden;}.profile-premium-open .title{font-weight:800;font-size:14px;}.profile-premium-open .desc{margin-top:5px;color:var(--muted);font-size:10.5px;line-height:1.35;}.profile-premium-open .btn-main{margin-top:11px;width:100%;}
+
+/* GDPLAY frame order / name effects update */
+.profile-frame-obtained{display:flex;flex-direction:column;gap:8px}
+.frame-order-badge{font-size:11px;color:var(--muted)}
+.profile-name.shimmer-name{
+ background:linear-gradient(90deg,#ffe08a,#7ee8ff,#d98cff,#ffe08a);
+ background-size:300% 100%;
+ -webkit-background-clip:text;background-clip:text;color:transparent!important;
+ animation:nameShimmer 3s linear infinite;
+}
 </style>
 
 <style id="gdplay-premium-buttons-style">
