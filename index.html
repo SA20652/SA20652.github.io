@@ -437,6 +437,8 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 /* ============ PROFILE ============ */
 .profile-card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow);}
 .profile-avatar{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:24px;color:#1c1509;}
+.profile-name.rainbow-name,.profile-name.plasma-name{background-size:300% 300%;animation:nameGradient 3s linear infinite;-webkit-background-clip:text;color:transparent;}
+@keyframes nameGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 .profile-name{font-weight:700;font-size:16px;}
 .profile-rank{color:var(--brass-2);font-size:12px;margin-top:2px;font-weight:600;}
 .profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
@@ -563,7 +565,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar-frame.frame-ice{border:3px solid #8fcbe8;box-shadow:0 0 16px rgba(143,203,232,.25);}
 .profile-avatar-frame.frame-obsidian{border:3px solid #737373;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),0 0 16px rgba(0,0,0,.5);}
 .profile-avatar-frame.frame-neon{border:3px solid #d9ff5b;box-shadow:0 0 18px rgba(217,255,91,.28);}
-.profile-avatar-frame.frame-premium{border:3px solid #f1c76d;box-shadow:0 0 20px rgba(241,199,109,.38),inset 0 0 8px rgba(255,255,255,.12);}
+
 .profile-avatar-frame.frame-ghost{border:3px solid #b8b8ff;box-shadow:0 0 18px rgba(184,184,255,.34),inset 0 0 8px rgba(255,255,255,.12);opacity:.92;}
 .profile-customize{margin-top:12px;background:linear-gradient(145deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:14px;padding:12px;}
 .profile-customize-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -593,7 +595,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar{margin:0;width:76px;height:76px;overflow:hidden;}
 .profile-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
 .profile-head-info{min-width:0;flex:1;display:flex;flex-direction:column;align-items:flex-start;}
-.profile-head-info .profile-name{font-size:18px;}
+.profile-head-info .profile-name.rainbow-name,.profile-name.plasma-name{background-size:300% 300%;animation:nameGradient 3s linear infinite;-webkit-background-clip:text;color:transparent;}
+@keyframes nameGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.profile-name{font-size:18px;}
 .profile-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
 .profile-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:var(--bg-3);border:1px solid var(--line);font-size:11px;font-weight:800;}
 .profile-badge.premium{color:var(--brass-2);border-color:rgba(201,151,77,.45);}
@@ -2015,7 +2019,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .public-profile-avatar img{border-radius:50% !important;clip-path:circle(50% at 50% 50%) !important;}
 
 .profile-head-info{position:relative;z-index:1;min-width:0;flex:1;display:flex;flex-direction:column;align-items:flex-start;}
-.profile-head-info .profile-name{font-family:'Fraunces',serif;font-weight:800;font-size:19px;}
+.profile-head-info .profile-name.rainbow-name,.profile-name.plasma-name{background-size:300% 300%;animation:nameGradient 3s linear infinite;-webkit-background-clip:text;color:transparent;}
+@keyframes nameGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.profile-name{font-family:'Fraunces',serif;font-weight:800;font-size:19px;}
 .profile-rank{color:var(--brass-2);font-size:11px;margin-top:3px;font-weight:700;background:rgba(201,151,77,.10);border:1px solid rgba(201,151,77,.20);border-radius:20px;padding:2px 8px;display:inline-block;}
 .profile-head-info .mono{margin-top:6px;font-size:15px;font-weight:800;color:var(--brass-2);}
 .profile-edit{margin-top:8px;}
@@ -2238,7 +2244,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #page-profile .profile-avatar{width:82px!important;height:82px!important;border:2px solid rgba(236,205,143,.65)!important;box-shadow:0 0 0 5px rgba(201,151,77,.08),0 12px 25px rgba(0,0,0,.42)!important;background:linear-gradient(145deg,#5b4528,#1a130d)!important;}
 #page-profile .profile-avatar-frame{inset:0!important;}
 #page-profile .profile-head-info{gap:0!important;min-width:0!important;}
-#page-profile .profile-head-info .profile-name{font-size:21px!important;line-height:1.08!important;letter-spacing:.1px!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
+#page-profile .profile-head-info .profile-name.rainbow-name,.profile-name.plasma-name{background-size:300% 300%;animation:nameGradient 3s linear infinite;-webkit-background-clip:text;color:transparent;}
+@keyframes nameGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.profile-name{font-size:21px!important;line-height:1.08!important;letter-spacing:.1px!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
 #page-profile .profile-badges{gap:5px!important;margin-top:7px!important;}
 #page-profile .profile-badge{padding:4px 8px!important;border-radius:8px!important;font-size:9px!important;background:rgba(255,255,255,.035)!important;backdrop-filter:blur(5px);}
 #page-profile .profile-rank{margin-top:7px!important;padding:4px 8px!important;font:800 9px 'IBM Plex Mono',monospace!important;letter-spacing:.2px!important;color:var(--muted)!important;background:rgba(255,255,255,.035)!important;border-color:rgba(255,255,255,.07)!important;border-radius:8px!important;}
@@ -2330,7 +2338,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
  #page-profile .profile-head{grid-template-columns:72px minmax(0,1fr)!important;gap:11px!important;padding:14px!important;}
  #page-profile .profile-avatar-wrap{width:72px!important;height:72px!important;}
  #page-profile .profile-avatar{width:68px!important;height:68px!important;}
- #page-profile .profile-head-info .profile-name{font-size:18px!important;}
+ #page-profile .profile-head-info .profile-name.rainbow-name,.profile-name.plasma-name{background-size:300% 300%;animation:nameGradient 3s linear infinite;-webkit-background-clip:text;color:transparent;}
+@keyframes nameGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.profile-name{font-size:18px!important;}
  #page-profile .profile-customize-grid{grid-template-columns:repeat(3,1fr)!important;}
 }
 </style>
@@ -3052,6 +3062,7 @@ large DOM rebuilds while the result card appears. */
         <div class="profile-customize-head"><div><div class="profile-customize-title">🎨 Оформление профиля</div><div class="profile-customize-sub">Выбирай рамку и стиль имени</div></div><span class="profile-badge premium" id="profileStyleStatus">Стиль</span></div>
         <div class="profile-customize-grid" id="profileFrameGrid">
           <button type="button" class="profile-style-btn" data-profile-frame="default" style="display:none"><span class="style-dot" style="color:#777"></span>Обычная</button>
+          <button type="button" class="btn-ghost" id="profileHowGetFramesBtn">❓ Как получить</button>
           <button type="button" class="profile-style-btn" data-profile-frame="gold"><span class="style-dot" style="color:#e3b872"></span>Золото</button>
           <button type="button" class="profile-style-btn" data-profile-frame="emerald"><span class="style-dot" style="color:#6fc59c"></span>Изумруд</button>
           <button type="button" class="profile-style-btn" data-profile-frame="ruby"><span class="style-dot" style="color:#d96b76"></span>Рубин</button>
@@ -3060,7 +3071,7 @@ large DOM rebuilds while the result card appears. */
           <button type="button" class="profile-style-btn" data-profile-frame="obsidian"><span class="style-dot" style="color:#737373"></span>Обсидиан</button>
           <button type="button" class="profile-style-btn" data-profile-frame="neon"><span class="style-dot" style="color:#d9ff5b"></span>Неон</button>
           <button type="button" class="profile-style-btn" data-profile-frame="ghost"><span class="style-dot" style="color:#b8b8ff"></span>Призрачная</button>
-          <button type="button" class="profile-style-btn" data-profile-frame="premium"><span class="style-dot" style="color:#e2b75f"></span>Premium</button>
+          
         </div>
         
         <div class="profile-customize-grid" id="profileNameGrid">
@@ -6658,7 +6669,7 @@ function profileFrameUnlock(key){
   const balance=Number(data?.balance||0);
   const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
-  if(key==='gold') return {ok:vipActive, label:'Premium'};
+  if(key==='gold') return {ok:cases>=25, label:'25 открытых кейсов'};
   if(key==='emerald') return {ok:cases>=100, label:'100 открытых кейсов'};
   if(key==='ruby') return {ok:cases>=2000, label:'2 000 открытых кейсов'};
   if(key==='amethyst') return {ok:balance>=2500000, label:'2 500 000 орбов'};
@@ -6668,6 +6679,8 @@ function profileFrameUnlock(key){
   if(key==='ghost') return {ok:userId==='74915228121' || String(data?.username||'').toLowerCase()==='kuro', label:'Только для Kuro'};
   return {ok:false,label:'Недоступно'};
 }
+
+document.addEventListener('click',e=>{ if(e.target && e.target.id==='profileHowGetFramesBtn') showFrameHelp(); });
 
 function renderProfileCustomization(){
   const frame=document.getElementById('profileAvatarFrame');
@@ -6692,9 +6705,22 @@ function renderProfileCustomization(){
   });
   document.querySelectorAll('[data-profile-name]').forEach(b=>{
     const key=b.dataset.profileName; b.classList.toggle('active',key===nameStyle);
-    const locked=key!=='default'; b.disabled=locked && !vipActive;
+    const locked=key!=='default'; b.disabled=false;
   });
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
+}
+function showFrameHelp(){
+  const items=[
+    ['Золото','25 открытых кейсов','Лёгкая'],
+    ['Изумруд','100 открытых кейсов','Обычная'],
+    ['Рубин','2000 открытых кейсов','Редкая'],
+    ['Аметист','2500000 орбов','Эпическая'],
+    ['Лёд','28 дней стрика','Эпическая'],
+    ['Обсидиан','1000 открытых кейсов','Легендарная'],
+    ['Неон','100000000 орбов','Мифическая'],
+    ['Призрачная','Специальная выдача','Особая']
+  ];
+  showToast(items.map(x=>'🖼️ '+x[0]+': '+x[1]+' ('+x[2]+')').join('\n'),'info');
 }
 async function refreshProfileAppearanceFromServer(){
   if(!tgInitData() || !data) return;
@@ -6730,7 +6756,7 @@ function isPremiumActive(){
 }
 async function setProfileNameStyle(key){
   const premiumActive=isPremiumActive();
-  if(key!=='default' && !premiumActive){ showToast('⭐ Доступно с Premium-статусом','error'); return; }
+  if(key==='default'){ data.profileNameStyle=key; } 
   const prev=String(data.profileNameStyle||'default');
   data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
   try{
@@ -7986,5 +8012,12 @@ boot();
     if(e.target.closest?.('#minesContinueBtn'))cont();
   });
   document.addEventListener('DOMContentLoaded',()=>{renderRules();renderStats();renderGrid()});
+})();
+</script>
+
+<script>
+(function(){
+const b=document.getElementById('profileHowGetFramesBtn');
+if(b)b.onclick=async()=>{try{const j=await apiFetch('/api/profile/rewards',{}); showToast((j.frames||[]).map(x=\`${x.name}: ${x.owned?'получена':'не получена'} — ${x.condition}\`).join('\n')||'Нет рамок');}catch(e){showToast(e.message,'error')}};
 })();
 </script>
