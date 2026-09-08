@@ -1865,6 +1865,12 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   z-index:30!important;
 }
 </style><style>@keyframes gdplayStatusGradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}</style>
+<style id="gdplay-inventory-search">
+.inv-search-wrap{margin:0 0 10px;}
+.inv-search{width:100%;box-sizing:border-box;height:42px;padding:0 13px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--text);outline:none;font:600 12px 'IBM Plex Mono',monospace;}
+.inv-search::placeholder{color:var(--muted);}
+.inv-search:focus{border-color:rgba(201,151,77,.55);box-shadow:0 0 0 2px rgba(201,151,77,.08);}
+</style>
 <style id="gdplay-inventory-top-v2">
 /* ===== INVENTORY V2 — matches bot-case-card visual language ===== */
 .inv-toolbar{
@@ -2898,6 +2904,9 @@ large DOM rebuilds while the result card appears. */
     <!-- INVENTORY -->
     <div class="page" id="page-inventory">
       <div class="section-title">Твои кубы</div>
+      <div class="inv-search-wrap">
+        <input id="inventorySearch" class="inv-search" type="search" autocomplete="off" placeholder="Поиск кубов…" aria-label="Поиск кубов в инвентаре">
+      </div>
       <div class="inv-toolbar">
         <div class="inv-toolbar-icon">💼</div>
         <div class="inv-toolbar-info">
@@ -5520,8 +5529,18 @@ function renderInventory(){
   document.getElementById('invTotalValue').textContent=total.toLocaleString('ru-RU');
   const isPremium=data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now();
   const sellRatioLabel=isPremium?'0,85':'0,7';
+  const searchInput=document.getElementById('inventorySearch');
+  const inventoryQuery=String(searchInput?.value||'').trim().toLocaleLowerCase('ru-RU');
   const cubeStacks={};
-  (data.cubes||[]).forEach((c,i)=>{ const id=String(c.name)+'|'+String(c.rarity)+'|'+String(c.value); if(!cubeStacks[id]) cubeStacks[id]={cube:c,count:0,indices:[]}; cubeStacks[id].count++; cubeStacks[id].indices.push(i); });
+  (data.cubes||[]).forEach((c,i)=>{
+    const rarityMeta=RARITY_META[c.rarity]||RARITY_META.common;
+    const haystack=[c.name,c.rarity,rarityMeta.label].map(v=>String(v||'').toLocaleLowerCase('ru-RU')).join(' ');
+    if(inventoryQuery && !haystack.includes(inventoryQuery)) return;
+    const id=String(c.name)+'|'+String(c.rarity)+'|'+String(c.value);
+    if(!cubeStacks[id]) cubeStacks[id]={cube:c,count:0,indices:[]};
+    cubeStacks[id].count++;
+    cubeStacks[id].indices.push(i);
+  });
   const stackedCubes=Object.values(cubeStacks);
   const cubeLockButton=(c,i)=>`<button type="button" class="btn-ghost cube-lock-btn" title="${c.metadata?.locked?'Разблокировать':'Заморозить'}" aria-label="${c.metadata?.locked?'Разблокировать':'Заморозить'}" data-action="toggle-cube-lock" data-index="${i}">${c.metadata?.locked?'🔓':'❄️'}</button>`;
   const cubeItemActions=(c,i)=>`
@@ -5556,7 +5575,7 @@ function renderInventory(){
       </div>`;
     }).join('');
     return header + `<div class="inv-stack-list">${rows}</div>`;
-  }).join('') : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>';
+  }).join('') : (inventoryQuery ? '<div class="empty-state">По запросу ничего не найдено.</div>' : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>');
 }
 
 async function openCaseWithKeyStack(keyId){
@@ -6027,7 +6046,7 @@ async function confirmUpgrade(){
       gauge.style.transform=`rotate(${finalAngle}deg)`;
     });
     setTimeout(()=>{
-      document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»' + (j.protected ? ' 🛡️ Защита от серии' : '')) : 'Не повезло — предмет потерян';
+      document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»') : 'Не повезло — предмет потерян';
       playBeep(j.success?1200:300);
     },duration);
   }catch(e){showToast('❌ '+e.message,'error');}
@@ -6035,6 +6054,7 @@ async function confirmUpgrade(){
 }
 
 document.getElementById('upgradeSearch')?.addEventListener('input',function(){renderUpgradeCatalog(this.value);});
+document.getElementById('inventorySearch')?.addEventListener('input',function(){renderInventory();});
 document.getElementById('upgradeFastToggle')?.addEventListener('change',function(){setUpgradeFast(this.checked);});
 refreshUpgradeFastButton();
 
