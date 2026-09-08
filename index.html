@@ -559,6 +559,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar-frame{position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:1;box-sizing:border-box;}
 
 .profile-avatar-frame.frame-gold{border:3px solid #e3b872;box-shadow:inset 0 0 0 2px rgba(255,235,174,.18),0 0 14px rgba(227,184,114,.25);}
+.profile-avatar-frame.frame-premium{border:3px solid #ff3fa4;box-shadow:inset 0 0 0 2px rgba(255,168,221,.22),0 0 18px rgba(255,63,164,.42);}
 .profile-avatar-frame.frame-emerald{border:3px solid #6fc59c;box-shadow:0 0 16px rgba(111,197,156,.25);}
 .profile-avatar-frame.frame-ruby{border:3px solid #d96b76;box-shadow:0 0 16px rgba(217,107,118,.25);}
 .profile-avatar-frame.frame-amethyst{border:3px solid #a987e8;box-shadow:0 0 16px rgba(169,135,232,.25);}
@@ -2153,6 +2154,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .lb-avatar{position:relative!important;overflow:visible!important;z-index:0;}
 .lb-avatar-frame{position:absolute!important;inset:-3px!important;border-radius:50%!important;pointer-events:none!important;z-index:5!important;box-sizing:border-box!important;}
 .lb-avatar-frame.frame-gold{border:3px solid #e3b872;box-shadow:0 0 0 2px rgba(201,151,77,.22),0 0 16px rgba(227,184,114,.28);}
+.lb-avatar-frame.frame-premium{border:3px solid #ff3fa4;box-shadow:0 0 0 2px rgba(255,168,221,.18),0 0 18px rgba(255,63,164,.42);}
 .lb-avatar-frame.frame-emerald{border:3px solid #6fc59c;box-shadow:0 0 16px rgba(111,197,156,.25);}
 .lb-avatar-frame.frame-ruby{border:3px solid #d96b76;box-shadow:0 0 16px rgba(217,107,118,.25);}
 .lb-avatar-frame.frame-amethyst{border:3px solid #a987e8;box-shadow:0 0 16px rgba(169,135,232,.25);}
@@ -2181,7 +2183,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .lb-avatar-frame{inset:-4px!important;border-radius:50%!important;}
 </style>
 <style id="profile-cosmetic-reset-fix">
-#profileAvatarFrame:not(.frame-gold):not(.frame-emerald):not(.frame-ruby):not(.frame-amethyst):not(.frame-ice):not(.frame-obsidian):not(.frame-neon):not(.frame-ghost){display:none!important;box-shadow:none!important;filter:none!important;}
+#profileAvatarFrame:not(.frame-gold):not(.frame-premium):not(.frame-emerald):not(.frame-ruby):not(.frame-amethyst):not(.frame-ice):not(.frame-obsidian):not(.frame-neon):not(.frame-ghost){display:none!important;box-shadow:none!important;filter:none!important;}
 .profile-style-reset{grid-column:1/-1!important;border-style:dashed!important;opacity:.9;}
 </style>
 <style id="cases-total-redesign"> /* TOTAL CASES REDESIGN */ #page-cases{padding-bottom:24px!important} #casesList{display:grid!important;grid-template-columns:1fr!important;gap:16px!important} #casesList .rad-case-card{position:relative;display:grid;grid-template-columns:112px 1fr;gap:16px;min-height:190px;padding:14px!important;border-radius:26px!important;background:linear-gradient(135deg,#24201b 0%,#151311 58%,#0e0d0c 100%)!important;border:1px solid rgba(201,151,77,.28)!important;box-shadow:0 18px 45px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.05)!important;overflow:hidden} #casesList .rad-case-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 20%,rgba(201,151,77,.18),transparent 32%),linear-gradient(115deg,transparent 35%,rgba(255,255,255,.025),transparent 70%);pointer-events:none} #casesList .rad-case-number{position:absolute!important;right:14px;top:10px;font:800 9px 'IBM Plex Mono';color:rgba(201,151,77,.35);z-index:2} #casesList .rad-case-art{position:relative!important;width:112px!important;height:160px!important;margin:0!important;border-radius:22px!important;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#3a2b1b,#18130e)!important;border:1px solid rgba(201,151,77,.35)!important;box-shadow:inset 0 0 35px rgba(201,151,77,.12),0 12px 25px rgba(0,0,0,.35)!important;overflow:hidden} #casesList .rad-case-art span{font-size:54px!important;filter:drop-shadow(0 12px 16px rgba(0,0,0,.5));transform:translateY(-3px);transition:transform .25s} #casesList .rad-case-card:hover .rad-case-art span{transform:translateY(-8px) scale(1.06)} #casesList .rad-case-main{position:relative;z-index:2;display:flex;flex-direction:column;min-width:0} #casesList .rad-case-top{padding-right:18px!important} #casesList .rad-case-top h3{font-size:23px!important;margin:4px 0!important} #casesList .rad-case-label{font:700 9px 'IBM Plex Mono'!important;letter-spacing:1.6px!important;color:var(--brass-2)!important} #casesList .rad-price{font-size:13px!important;border-radius:12px!important;padding:8px 10px!important} #casesList .rad-case-stats{margin:8px 0 10px!important;font-size:10px!important;gap:8px!important;flex-wrap:wrap} #casesList .rad-drops{display:flex!important;gap:6px!important;overflow:hidden!important;padding:0!important;background:none!important;border:0!important} #casesList .rad-drop{min-width:76px!important;padding:8px!important;border-radius:12px!important;background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.06)!important;display:grid!important;grid-template-columns:20px 1fr!important;grid-template-rows:auto auto!important} #casesList .rad-drop b{grid-column:2!important;font-size:8px!important} #casesList .rad-actions{margin-top:auto!important;padding-top:12px!important;display:grid!important;grid-template-columns:auto 1fr!important;gap:9px!important} #casesList .rad-open{height:42px!important;border-radius:14px!important;background:linear-gradient(135deg,#d6a85b,#a87532)!important;color:#17110a!important;border:1px solid rgba(255,231,180,.25)!important;font-weight:900!important;box-shadow:0 8px 20px rgba(201,151,77,.18)!important} #casesList .rad-open:disabled{opacity:.38!important;filter:none!important} #spinModal{background:rgba(7,6,5,.94)!important;backdrop-filter:blur(10px)!important} #spinModal .spin-modal{width:min(460px,calc(100vw - 24px))!important;max-height:calc(100dvh - 30px)!important;padding:16px!important;border-radius:30px!important;background:linear-gradient(160deg,#25201a,#12100e 65%)!important;border:1px solid rgba(201,151,77,.3)!important;box-shadow:0 30px 80px rgba(0,0,0,.65)!important;overflow:auto!important} #spinModal .spin-topbar{padding:2px 2px 12px!important;border-bottom:1px solid rgba(255,255,255,.06)!important} #spinModal .spin-case-icon{width:54px!important;height:54px!important;border-radius:17px!important;background:linear-gradient(145deg,#49361f,#17120d)!important;border:1px solid rgba(201,151,77,.4)!important;font-size:28px!important;box-shadow:0 8px 22px rgba(0,0,0,.3)!important} #spinModal .wheel-wrap{height:220px!important;margin:18px 0!important;border-radius:24px!important;background:linear-gradient(180deg,#0c0b0a,#18130e)!important;border:1px solid rgba(201,151,77,.2)!important;box-shadow:inset 0 0 35px rgba(0,0,0,.55)!important;overflow:hidden!important} #spinModal .reel-mask{height:100%!important;background:linear-gradient(90deg,#090807 0%,transparent 18%,transparent 82%,#090807 100%)!important;box-shadow:none!important} #spinModal .reel-line{width:2px!important;height:82%!important;top:9%!important;background:linear-gradient(180deg,transparent,#e2b86d 20%,#fff0c8 50%,#e2b86d 80%,transparent)!important;box-shadow:0 0 18px rgba(226,184,109,.55)!important} #spinModal .wheel-dial{gap:10px!important;padding:0 20px!important;align-items:center!important} #spinModal .wheel-item{width:122px!important;height:158px!important;flex:0 0 122px!important;border-radius:20px!important;border:1px solid rgba(255,255,255,.08)!important;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.015))!important;box-shadow:0 8px 20px rgba(0,0,0,.3)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:12px!important} #spinModal .wheel-item span{font-size:42px!important;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))} #spinModal .wheel-item small{font-size:11px!important;font-weight:900!important} #spinModal .wheel-dial.is-spinning .wheel-item{animation:case-card-pulse .5s infinite alternate} @keyframes case-card-pulse{from{transform:scale(.98);opacity:.82}to{transform:scale(1);opacity:1}} #spinModal .vault-crack{height:210px!important;border-radius:25px!important;background:radial-gradient(circle,#4a3821,#110f0c 68%)!important;border:1px solid rgba(201,151,77,.3)!important;overflow:hidden!important;box-shadow:inset 0 0 50px rgba(201,151,77,.08)!important} #spinModal .vault-door{background:linear-gradient(145deg,#5c4527,#20180f)!important;border-color:rgba(255,216,143,.25)!important} #spinModal .vault-key{font-size:42px!important;filter:drop-shadow(0 0 18px rgba(226,184,109,.5))} #spinModal #spinCloseBtn{width:100%!important;height:46px!important;border-radius:15px!important;background:linear-gradient(135deg,#d6a85b,#9d6c2f)!important;color:#17110a!important;font-weight:900!important} @media(max-width:430px){#casesList .rad-case-card{grid-template-columns:88px 1fr;min-height:170px;gap:11px}#casesList .rad-case-art{width:88px!important;height:140px!important}#casesList .rad-case-art span{font-size:43px!important}#casesList .rad-case-top h3{font-size:19px!important}#spinModal .wheel-item{width:105px!important;flex-basis:105px!important;height:145px!important}} </style><style>.case-price-shift{position:relative;left:24px;transform:none!important}</style>
@@ -3062,8 +3064,8 @@ large DOM rebuilds while the result card appears. */
         <div class="profile-customize-head"><div><div class="profile-customize-title">🎨 Оформление профиля</div><div class="profile-customize-sub">Выбирай рамку и стиль имени</div></div><span class="profile-badge premium" id="profileStyleStatus">Стиль</span></div>
         <div class="profile-customize-grid" id="profileFrameGrid">
           <button type="button" class="profile-style-btn" data-profile-frame="default" style="display:none"><span class="style-dot" style="color:#777"></span>Обычная</button>
-          <button type="button" class="btn-ghost" id="profileHowGetFramesBtn">❓ Как получить</button>
           <button type="button" class="profile-style-btn" data-profile-frame="gold"><span class="style-dot" style="color:#e3b872"></span>Золото</button>
+          <button type="button" class="profile-style-btn" data-profile-frame="premium"><span class="style-dot" style="color:#ff3fa4"></span>Premium</button>
           <button type="button" class="profile-style-btn" data-profile-frame="emerald"><span class="style-dot" style="color:#6fc59c"></span>Изумруд</button>
           <button type="button" class="profile-style-btn" data-profile-frame="ruby"><span class="style-dot" style="color:#d96b76"></span>Рубин</button>
           <button type="button" class="profile-style-btn" data-profile-frame="amethyst"><span class="style-dot" style="color:#a987e8"></span>Аметист</button>
@@ -6670,6 +6672,7 @@ function profileFrameUnlock(key){
   const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
   if(key==='gold') return {ok:cases>=25, label:'25 открытых кейсов'};
+  if(key==='premium') return {ok:vipActive, label:'Активный Premium'};
   if(key==='emerald') return {ok:cases>=100, label:'100 открытых кейсов'};
   if(key==='ruby') return {ok:cases>=2000, label:'2 000 открытых кейсов'};
   if(key==='amethyst') return {ok:balance>=2500000, label:'2 500 000 орбов'};
@@ -6680,7 +6683,6 @@ function profileFrameUnlock(key){
   return {ok:false,label:'Недоступно'};
 }
 
-document.addEventListener('click',e=>{ if(e.target && e.target.id==='profileHowGetFramesBtn') showFrameHelp(); });
 
 function renderProfileCustomization(){
   const frame=document.getElementById('profileAvatarFrame');
@@ -6707,19 +6709,6 @@ function renderProfileCustomization(){
     const locked=key!=='default'; b.disabled=false;
   });
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
-}
-function showFrameHelp(){
-  const items=[
-    ['Золото','25 открытых кейсов','Лёгкая'],
-    ['Изумруд','100 открытых кейсов','Обычная'],
-    ['Рубин','2000 открытых кейсов','Редкая'],
-    ['Аметист','2500000 орбов','Эпическая'],
-    ['Лёд','28 дней стрика','Эпическая'],
-    ['Обсидиан','1000 открытых кейсов','Легендарная'],
-    ['Неон','100000000 орбов','Мифическая'],
-    ['Призрачная','Специальная выдача','Особая']
-  ];
-  showToast(items.map(x=>'🖼️ '+x[0]+': '+x[1]+' ('+x[2]+')').join('\n'),'info');
 }
 async function refreshProfileAppearanceFromServer(){
   if(!tgInitData() || !data) return;
