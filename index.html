@@ -2818,6 +2818,7 @@ large DOM rebuilds while the result card appears. */
       <button class="nav-btn" data-tab="plinko"><span>🟡</span>Орб-Рывок</button>
       <button class="nav-btn" data-tab="mines"><span>💣</span>Мины</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
+      <button class="nav-btn" data-tab="vault"><span>🔒</span>Сейф</button>
     </nav>
 
     <!-- CASES -->
@@ -2998,6 +2999,25 @@ large DOM rebuilds while the result card appears. */
         <button type="button" class="top-tab" data-action="top-sort" data-top-sort="winnings"><span class="top-tab-icon">⚔️</span>Батлы</button>
       </div>
       <div id="leaderboardList"></div>
+    </div>
+
+    <!-- VAULT (СЕЙФ) -->
+    <div class="page" id="page-vault">
+      <div class="section-title">Сейф</div>
+      <div class="section-sub">Деньги, отложенные в сейф, никогда не участвуют в игре — их не заберут кейсы, апгрейд, батлы и переводы. Забрать обратно на баланс можно в любой момент. Сейф обнуляется только вместе со всем аккаунтом, если администратор делает полный сброс.</div>
+      <div class="promo-card">
+        <div class="section-title" style="margin-top:0;font-size:14px">В сейфе сейчас</div>
+        <div id="vaultBalanceDisplay" style="font:800 28px 'IBM Plex Mono',monospace;color:var(--brass-2);margin:6px 0 4px">0 💰</div>
+        <div class="promo-row">
+          <input id="vaultDepositInput" type="number" min="1" step="1" inputmode="numeric" autocomplete="off" placeholder="Сумма, чтобы положить">
+          <button type="button" class="btn" id="vaultDepositBtn">Положить</button>
+        </div>
+        <div class="promo-row">
+          <input id="vaultWithdrawInput" type="number" min="1" step="1" inputmode="numeric" autocomplete="off" placeholder="Сумма, чтобы забрать">
+          <button type="button" class="btn-ghost" id="vaultWithdrawBtn">Забрать</button>
+        </div>
+        <div id="vaultMessage" class="promo-message"></div>
+      </div>
     </div>
 
     <!-- PROFILE -->
@@ -3598,6 +3618,7 @@ function newUserData(username){
     battles: 0,
     wins: 0,
     battle_winnings: 0,
+    vault_balance: 0,
     creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default',
     created: Date.now()
   };
@@ -3609,6 +3630,7 @@ function normalizeGameState(){
   data.keys=[];
   if(!Array.isArray(data.buffs)) data.buffs=[];
   if(!Array.isArray(data.bestDrops)) data.bestDrops=[];
+  if(typeof data.vault_balance !== 'number' || !isFinite(data.vault_balance)) data.vault_balance=0;
   normalizeAllCubeValues();
   if(typeof data.creatorBadge !== 'boolean') data.creatorBadge=!!data.creatorBadge;
   if(!data.profileFrame) data.profileFrame='default';
@@ -3780,6 +3802,7 @@ function applyServerState(u){
   }
   if(typeof u.daily_streak === 'number' && u.daily_streak !== Number(data.dailyStreak || 0)){ data.dailyStreak = Number(u.daily_streak || 0); changed = true; }
   if(typeof u.battle_winnings === 'number' && u.battle_winnings !== data.battle_winnings){ data.battle_winnings = u.battle_winnings; changed = true; }
+  if(typeof u.vault_balance === 'number' && u.vault_balance !== data.vault_balance){ data.vault_balance = u.vault_balance; changed = true; }
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
@@ -3803,6 +3826,7 @@ function applyServerState(u){
   updateBalanceUI();
   renderProfile();
   renderInventory();
+  renderVault();
 }
 
 // Догоняет сервер сразу при входе в игру: регистрирует игрока (чтобы он
@@ -4045,7 +4069,7 @@ function serverUserToGame(u,fallbackName){
     username:u?.display_name||u?.username||fallbackName, balance:Number(u?.balance||0), cubes,
     cases_opened:Number(u?.cases_opened||0), lastDaily:u?.daily_claimed?Date.parse(u.daily_claimed):0, dailyStreak:Number(u?.daily_streak||0),
     avatar:u?.avatar||'', buffs:Array.isArray(u?.buffs)?u.buffs:[], bestDrops:Array.isArray(u?.best_drops)?u.best_drops:[],
-    battles:0,wins:0,battle_winnings:Number(u?.battle_winnings||0),
+    battles:0,wins:0,battle_winnings:Number(u?.battle_winnings||0),vault_balance:Number(u?.vault_balance||0),
     creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
@@ -4850,6 +4874,43 @@ function switchTab(tab){
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
   if(tab==='cases') renderCases();
+  if(tab==='vault') renderVault();
+}
+function renderVault(){
+  const el=document.getElementById('vaultBalanceDisplay');
+  if(el) el.textContent = Number(data?.vault_balance||0).toLocaleString('ru-RU')+' 💰';
+}
+async function vaultDeposit(){
+  const input=document.getElementById('vaultDepositInput');
+  const msg=document.getElementById('vaultMessage');
+  const amount=Math.floor(Number(input?.value||0));
+  if(!amount || amount<1){ if(msg) msg.textContent='Введи сумму больше 0'; return; }
+  const btn=document.getElementById('vaultDepositBtn'); if(btn) btn.disabled=true;
+  try{
+    const j=await apiFetch('/api/vault/deposit',{amount});
+    data.balance=Number(j.balance||0);
+    data.vault_balance=Number(j.vault_balance||0);
+    if(input) input.value='';
+    if(msg) msg.textContent='В сейф положено '+amount.toLocaleString('ru-RU')+' 💰';
+    updateBalanceUI(); renderVault(); persistLocal();
+  }catch(e){ if(msg) msg.textContent='❌ '+(e.message||'Не удалось положить в сейф'); }
+  finally{ if(btn) btn.disabled=false; }
+}
+async function vaultWithdraw(){
+  const input=document.getElementById('vaultWithdrawInput');
+  const msg=document.getElementById('vaultMessage');
+  const amount=Math.floor(Number(input?.value||0));
+  if(!amount || amount<1){ if(msg) msg.textContent='Введи сумму больше 0'; return; }
+  const btn=document.getElementById('vaultWithdrawBtn'); if(btn) btn.disabled=true;
+  try{
+    const j=await apiFetch('/api/vault/withdraw',{amount});
+    data.balance=Number(j.balance||0);
+    data.vault_balance=Number(j.vault_balance||0);
+    if(input) input.value='';
+    if(msg) msg.textContent='Из сейфа возвращено '+amount.toLocaleString('ru-RU')+' 💰';
+    updateBalanceUI(); renderVault(); persistLocal();
+  }catch(e){ if(msg) msg.textContent='❌ '+(e.message||'Не удалось забрать из сейфа'); }
+  finally{ if(btn) btn.disabled=false; }
 }
 function updateBalanceUI(){
   document.getElementById('balanceDisplay').textContent = (data.balance||0).toLocaleString('ru-RU');
@@ -6894,6 +6955,7 @@ function renderAll(){
   renderMarket();
   renderBattles();
   renderPlinko();
+  renderVault();
   updateSettingsUI();
 }
 
@@ -6990,6 +7052,8 @@ function handleButton(button, e){
     case 'adminSearchBtn': loadAdminUsers(document.getElementById('adminSearch')?.value||''); break;
     case 'promoRedeemBtn': redeemPromo(); break;
     case 'promoAdminCreateBtn': createAdminPromo(); break;
+    case 'vaultDepositBtn': vaultDeposit(); break;
+    case 'vaultWithdrawBtn': vaultWithdraw(); break;
   }
 }
 
