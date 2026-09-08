@@ -4665,26 +4665,6 @@ document.addEventListener('click', function(ev){
   if(uid) window.adminCustomStatus(uid);
 }, true);
 
-document.addEventListener('click', async function(ev){
-  const btn = ev.target && ev.target.closest ? ev.target.closest('[data-action="admin-add-cases-panel"]') : null;
-  if(!btn) return;
-  ev.preventDefault();
-  ev.stopPropagation();
-  const uidEl = document.getElementById('casesUserId');
-  const amountEl = document.getElementById('casesAmount');
-  const user_id = Number(uidEl?.value);
-  const amount = Number(amountEl?.value);
-  if(!user_id || !amount || amount<=0){ showToast('❌ Введите ID и количество кейсов','error'); return; }
-  btn.disabled = true;
-  try{
-    await apiFetch('/api/admin/add-cases', {user_id, amount});
-    showToast('✅ Выдано '+amount+' кейсов','success');
-    if(amountEl) amountEl.value='';
-    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
-  }catch(e){ showToast('❌ '+e.message,'error'); }
-  finally{ btn.disabled = false; }
-}, true);
-
 async function adminCustomStatus(uid){
   if(!window.isAdmin){ showToast('❌ Нет прав администратора','error'); return; }
   const modal=document.getElementById('adminCustomStatusModal');
@@ -5807,7 +5787,7 @@ function refreshUpgradeStake(){
   label.textContent=upgradeStake.toLocaleString('ru-RU')+' 💰';
 }
 function refreshUpgradeChance(chanceOverride=null){
-  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(95,Number(chanceOverride)||0));
+  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(99.5,Number(chanceOverride)||0));
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
@@ -5940,7 +5920,7 @@ async function confirmUpgrade(){
     document.getElementById('upgradeStepResult').style.display='block';
     const serverChanceRaw=Number(j.chance);
     const serverRollRaw=Number(j.roll);
-    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(95,serverChanceRaw)):0;
+    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(99.5,serverChanceRaw)):0;
     const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
     refreshUpgradeChance(serverChance);
 
@@ -5952,7 +5932,7 @@ async function confirmUpgrade(){
     // Используем одно и то же округлённое значение для текста и геометрии.
     // Иначе, например, 37.96% могло отображаться как 38.0%, а сектор строился
     // по 37.96%, что на небольшом круге визуально давало ощущение меньшей зоны.
-    const chance=Math.max(0,Math.min(95,Number(serverChance.toFixed(1))));
+    const chance=Math.max(0,Math.min(99.5,Number(serverChance.toFixed(1))));
     const chanceDeg=chance*3.6;
     gauge.innerHTML='';
     gauge.style.background='none';
