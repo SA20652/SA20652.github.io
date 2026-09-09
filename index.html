@@ -6016,9 +6016,20 @@ async function confirmUpgrade(){
     document.getElementById('upgradeCancelBtn').style.display='none';
     document.getElementById('upgradeResultText').textContent='';
     document.getElementById('upgradeStepResult').style.display='block';
-    const serverChanceRaw=Number(j.chance);
+    // Bug fix: the server returns TWO numbers — `base_chance` (the exact percent
+    // shown to the player before they hit "confirm") and `chance` (the internal,
+    // pity-boosted probability actually used for the roll, which can silently
+    // jump up to 99.5% after a losing streak). The wheel used to be drawn with
+    // `chance`, so the green zone on the result screen could look completely
+    // different from the percent the player was promised a second earlier
+    // (e.g. promised 50%, reveal shows a ~99% green zone, or — if the field
+    // ever arrived empty/NaN — collapses to a 0% zone). Always draw the wheel
+    // and the percentage label with `base_chance`, so the number never changes
+    // between the confirm screen and the result screen.
+    const serverChanceRaw=Number(j.base_chance);
     const serverRollRaw=Number(j.roll);
-    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(99.5,serverChanceRaw)):0;
+    const fallbackChance=Math.max(0,Math.min(99.5,Number(getUpgradeChance())||0));
+    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(99.5,serverChanceRaw)):fallbackChance;
     const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
     refreshUpgradeChance(serverChance);
 
@@ -6077,7 +6088,10 @@ async function confirmUpgrade(){
       gauge.style.transform=`rotate(${finalAngle}deg)`;
     });
     setTimeout(()=>{
-      document.getElementById('upgradeResultText').textContent=j.success ? ('Успех! Получен «'+upgradeTarget.name+'»') : 'Не повезло — предмет потерян';
+      const protectedWin=Boolean(j.success && j.protected);
+      document.getElementById('upgradeResultText').textContent=j.success
+        ? ('Успех! Получен «'+upgradeTarget.name+'»'+(protectedWin?' 🛡 (сработала защита от серии неудач)':''))
+        : 'Не повезло — предмет потерян';
       playBeep(j.success?1200:300);
     },duration);
   }catch(e){showToast('❌ '+e.message,'error');}
