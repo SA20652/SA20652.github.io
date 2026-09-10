@@ -8152,7 +8152,6 @@ function renderModal(){let t=current;if(!t)return;let mine=!!t.is_from,g=t.give|
 function countdown(at){clearInterval(timer);let e=document.getElementById('tradeCountdown');let tick=()=>{let ms=new Date(at).getTime()-Date.now();if(ms>0)e.textContent=`⏳ Финальная проверка через ${(ms/1000).toFixed(1)} сек.`;else{clearInterval(timer);e.textContent='🔄 Завершаем обмен…';finalize()}};tick();timer=setInterval(tick,100)}
 async function act(path,payload){try{let j=await apiFetch(path,payload);current=j.trade;if(j.cubes)data.cubes=j.cubes;persistLocal();renderInventory();renderModal();load()}catch(e){showToast('❌ '+e.message,'error')}}
 async function finalize(){if(!current)return;try{let j=await apiFetch('/api/trade/finalize',{trade_id:current.id});current=j.trade;if(j.cubes)data.cubes=j.cubes;persistLocal();renderInventory();renderModal();load();if(current.status==='completed')showToast('✅ Обмен завершён','success')}catch(e){if(!/Подожди/.test(e.message||''))showToast('❌ '+e.message,'error')}}
-document.addEventListener('click',e=>{let b=e.target.closest?.('[data-trade-player],[data-trade-accept],[data-trade-decline],[data-trade-open],[data-trade-add],[data-trade-remove],[data-trade-cancel]');if(!b)return;if(b.dataset.tradePlayer)pick(b.dataset.tradePlayer,b.dataset.tradePlayerName);if(b.dataset.tradeAccept)act('/api/trade/respond',{trade_id:+b.dataset.tradeAccept,accept:1});if(b.dataset.tradeDecline)act('/api/trade/respond',{trade_id:+b.dataset.tradeDecline,accept:0});if(b.dataset.tradeOpen)open(+b.dataset.tradeOpen);if(b.dataset.tradeAdd)act('/api/trade/add',{trade_id:current.id,cube_id:+b.dataset.tradeAdd});if(b.dataset.tradeRemove)act('/api/trade/remove',{trade_id:current.id,cube_id:+b.dataset.tradeRemove});if(b.dataset.tradeCancel)act('/api/trade/cancel',{trade_id:+b.dataset.tradeCancel})});
 document.addEventListener('click',e=>{
   const b=e.target.closest?.('[data-trade-player],[data-trade-accept],[data-trade-decline],[data-trade-open],[data-trade-add],[data-trade-remove],[data-trade-cancel]');
   if(b){
@@ -8177,6 +8176,8 @@ document.addEventListener('input',e=>{
   }
 });
 document.addEventListener('keydown',e=>{if(e.target?.id==='tradePlayerSearch'&&e.key==='Enter'){e.preventDefault();search();}});
-window.renderTradePage=render;window.loadTradeData=load;window.openTradeModal=open;setInterval(load,3000);
+window.renderTradePage=render;window.loadTradeData=load;window.openTradeModal=open;
+setTimeout(()=>{if(document.getElementById('tradePlayerSearch')) search();},0);
+setInterval(load,3000);
 
 })();</script>
