@@ -2624,8 +2624,6 @@ large DOM rebuilds while the result card appears. */
 .case-pity-head b{font-family:'IBM Plex Mono',monospace;color:var(--paper)}
 .case-pity-track{height:6px;margin-top:7px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.07)}
 .case-pity-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));transition:width .2s ease}
-</style><style id="gdplay-trades-v1">
-#page-trades{padding:4px 0 34px}.trade-hero{padding:16px;border-radius:20px;background:linear-gradient(145deg,rgba(201,151,77,.11),rgba(255,255,255,.02)),#171310;border:1px solid rgba(227,184,114,.18);margin-bottom:12px}.trade-hero-title{font:800 21px 'Fraunces',serif}.trade-hero-sub{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.45}.trade-search{display:flex;gap:7px;margin-top:12px}.trade-search input{flex:1;min-width:0}.trade-user-list{display:grid;gap:7px;margin-top:9px}.trade-user{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025)}.trade-user-avatar{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;overflow:hidden;background:#241d17;border:1px solid rgba(227,184,114,.16);flex:0 0 34px}.trade-user-avatar img{width:100%;height:100%;object-fit:cover}.trade-user-info{min-width:0;flex:1}.trade-user-name{font-weight:800;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trade-user-id{font:9px 'IBM Plex Mono',monospace;color:var(--muted)}.trade-card{padding:13px;border:1px solid rgba(227,184,114,.14);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.012)),#171310;margin-bottom:10px}.trade-card-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.trade-status{font:800 8px 'IBM Plex Mono',monospace;padding:5px 7px;border-radius:7px;background:rgba(201,151,77,.1);color:var(--brass-2)}.trade-peer{font-size:12px;font-weight:800}.trade-peer small{display:block;color:var(--muted);font-size:9px;font-weight:500;margin-top:2px}.trade-sides{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.trade-side{min-width:0;border:1px solid var(--line);border-radius:12px;padding:9px;background:rgba(0,0,0,.12)}.trade-side-title{font-size:9px;color:var(--muted);margin-bottom:7px}.trade-side-title b{color:var(--paper)}.trade-items{display:grid;gap:5px;min-height:38px}.trade-item{display:flex;align-items:center;gap:6px;padding:6px;border-radius:9px;background:rgba(255,255,255,.025);font-size:9px}.trade-item-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.trade-item button{border:0;background:transparent;color:var(--danger);font-size:13px}.trade-empty{font-size:8px;color:var(--muted-2);padding:10px 0;text-align:center}.trade-actions{display:flex;gap:6px;margin-top:9px}.trade-actions>*{flex:1}.trade-confirm{width:100%;margin-top:7px}.trade-confirmed{border-color:rgba(76,154,118,.35);background:rgba(76,154,118,.08);color:var(--success)}.trade-cubes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px;max-height:280px;overflow:auto}.trade-cube{padding:8px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02);cursor:pointer;text-align:left}.trade-cube b{display:block;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.trade-cube span{font:8px 'IBM Plex Mono',monospace;color:var(--muted)}.trade-history{margin-top:14px}.trade-history details{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,.018)}.trade-history summary{cursor:pointer;font-size:9px}.trade-history .mono{font-size:8px;color:var(--muted)}.trade-empty-card{text-align:center;padding:22px 12px;color:var(--muted);border:1px dashed var(--line);border-radius:14px;font-size:10px}@media(max-width:380px){.trade-sides{grid-template-columns:1fr}}
 </style></head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -2844,7 +2842,7 @@ large DOM rebuilds while the result card appears. */
       <button class="nav-btn" data-tab="plinko"><span>🟡</span>Орб-Рывок</button>
       <button class="nav-btn" data-tab="mines"><span>💣</span>Мины</button>
       <button class="nav-btn" data-tab="top"><span>🏆</span>Топ</button>
-      <button class="nav-btn" data-tab="vault"><span>🔒</span>Сейф</button><button class="nav-btn" data-tab="trades"><span>🤝</span>Трейды</button>
+      <button class="nav-btn" data-tab="vault"><span>🔒</span>Сейф</button>
     </nav>
 
     <!-- CASES -->
@@ -3048,20 +3046,6 @@ large DOM rebuilds while the result card appears. */
         <div id="vaultMessage" class="promo-message"></div>
       </div>
     </div>
-
-    <!-- TRADES -->
-<div class="page" id="page-trades">
- <div class="trade-hero">
-  <div class="trade-hero-title">🤝 Трейды</div>
-  <div class="trade-hero-sub">Найди игрока по нику или Telegram ID. Офлайн-игроки тоже доступны. Самого себя поиск не показывает.</div>
-  <div class="trade-search"><input id="tradePlayerSearch" type="search" maxlength="50" autocomplete="off" placeholder="Ник или ID"><button class="btn" id="tradePlayerSearchBtn">Найти</button></div>
-  <div id="tradeUserList"></div>
- </div>
- <div class="section-title">Активные обмены</div>
- <div class="section-sub">При изменении состава оба подтверждения автоматически сбрасываются.</div>
- <div id="tradeActiveList"></div>
- <div class="trade-history"><div class="section-title">История трейдов</div><div id="tradeHistoryList"></div></div>
-</div>
 
     <!-- PROFILE -->
     <div class="page" id="page-profile">
