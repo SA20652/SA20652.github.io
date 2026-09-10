@@ -8153,5 +8153,30 @@ function countdown(at){clearInterval(timer);let e=document.getElementById('trade
 async function act(path,payload){try{let j=await apiFetch(path,payload);current=j.trade;if(j.cubes)data.cubes=j.cubes;persistLocal();renderInventory();renderModal();load()}catch(e){showToast('❌ '+e.message,'error')}}
 async function finalize(){if(!current)return;try{let j=await apiFetch('/api/trade/finalize',{trade_id:current.id});current=j.trade;if(j.cubes)data.cubes=j.cubes;persistLocal();renderInventory();renderModal();load();if(current.status==='completed')showToast('✅ Обмен завершён','success')}catch(e){if(!/Подожди/.test(e.message||''))showToast('❌ '+e.message,'error')}}
 document.addEventListener('click',e=>{let b=e.target.closest?.('[data-trade-player],[data-trade-accept],[data-trade-decline],[data-trade-open],[data-trade-add],[data-trade-remove],[data-trade-cancel]');if(!b)return;if(b.dataset.tradePlayer)pick(b.dataset.tradePlayer,b.dataset.tradePlayerName);if(b.dataset.tradeAccept)act('/api/trade/respond',{trade_id:+b.dataset.tradeAccept,accept:1});if(b.dataset.tradeDecline)act('/api/trade/respond',{trade_id:+b.dataset.tradeDecline,accept:0});if(b.dataset.tradeOpen)open(+b.dataset.tradeOpen);if(b.dataset.tradeAdd)act('/api/trade/add',{trade_id:current.id,cube_id:+b.dataset.tradeAdd});if(b.dataset.tradeRemove)act('/api/trade/remove',{trade_id:current.id,cube_id:+b.dataset.tradeRemove});if(b.dataset.tradeCancel)act('/api/trade/cancel',{trade_id:+b.dataset.tradeCancel})});
-document.getElementById('tradeSearchBtn')?.addEventListener('click',search);document.getElementById('tradePlayerSearch')?.addEventListener('input',()=>{clearTimeout(window.__tradeSearchTimer);window.__tradeSearchTimer=setTimeout(search,120)});document.getElementById('tradePlayerSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter')search()});document.getElementById('tradeStartBtn')?.addEventListener('click',create);document.getElementById('tradeModalClose')?.addEventListener('click',()=>{closeModal('tradeModal');current=null});document.getElementById('tradeCancelBtn')?.addEventListener('click',()=>current&&act('/api/trade/cancel',{trade_id:current.id}));document.getElementById('tradeConfirmBtn')?.addEventListener('click',()=>current&&act('/api/trade/confirm',{trade_id:current.id}));window.renderTradePage=render;window.loadTradeData=load;window.openTradeModal=open;setInterval(load,3000);
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-trade-player],[data-trade-accept],[data-trade-decline],[data-trade-open],[data-trade-add],[data-trade-remove],[data-trade-cancel]');
+  if(b){
+    if(b.dataset.tradePlayer) pick(b.dataset.tradePlayer,b.dataset.tradePlayerName);
+    if(b.dataset.tradeAccept) act('/api/trade/respond',{trade_id:+b.dataset.tradeAccept,accept:1}).then(()=>open(+b.dataset.tradeAccept));
+    if(b.dataset.tradeDecline) act('/api/trade/respond',{trade_id:+b.dataset.tradeDecline,accept:0});
+    if(b.dataset.tradeOpen) open(+b.dataset.tradeOpen);
+    if(b.dataset.tradeAdd) act('/api/trade/add',{trade_id:current.id,cube_id:+b.dataset.tradeAdd});
+    if(b.dataset.tradeRemove) act('/api/trade/remove',{trade_id:current.id,cube_id:+b.dataset.tradeRemove});
+    if(b.dataset.tradeCancel) act('/api/trade/cancel',{trade_id:+b.dataset.tradeCancel});
+  }
+  if(e.target.closest?.('#tradeSearchBtn')) search();
+  if(e.target.closest?.('#tradeStartBtn')) create();
+  if(e.target.closest?.('#tradeModalClose')) {closeModal('tradeModal');current=null;}
+  if(e.target.closest?.('#tradeCancelBtn') && current) act('/api/trade/cancel',{trade_id:current.id});
+  if(e.target.closest?.('#tradeConfirmBtn') && current) act('/api/trade/confirm',{trade_id:current.id});
+});
+document.addEventListener('input',e=>{
+  if(e.target?.id==='tradePlayerSearch'){
+    clearTimeout(window.__tradeSearchTimer);
+    window.__tradeSearchTimer=setTimeout(search,120);
+  }
+});
+document.addEventListener('keydown',e=>{if(e.target?.id==='tradePlayerSearch'&&e.key==='Enter'){e.preventDefault();search();}});
+window.renderTradePage=render;window.loadTradeData=load;window.openTradeModal=open;setInterval(load,3000);
+
 })();</script>
