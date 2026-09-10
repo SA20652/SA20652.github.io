@@ -2624,7 +2624,54 @@ large DOM rebuilds while the result card appears. */
 .case-pity-head b{font-family:'IBM Plex Mono',monospace;color:var(--paper)}
 .case-pity-track{height:6px;margin-top:7px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.07)}
 .case-pity-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));transition:width .2s ease}
-</style></head>
+</style>
+<style id="gdplay-trades-ui-v2">
+/* ===== TRADES UI ===== */
+.trade-hero,.trade-create-card,.trade-panel,.trade-history-card{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.16));border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);}
+.trade-hero{padding:16px;margin-bottom:12px;}
+.trade-create-card,.trade-history-card{padding:14px;margin-bottom:12px;}
+.trade-kicker{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:1.5px;color:var(--brass-dim);text-transform:uppercase;}
+.trade-card-title{font-size:13px;font-weight:800;margin-bottom:9px;}
+.trade-search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;}
+.trade-search-row .btn{min-width:72px;}
+.trade-players{display:flex;flex-direction:column;gap:7px;margin-top:10px;}
+.trade-player{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:12px;background:var(--bg-3);border:1px solid var(--line);}
+.trade-player-name{font-size:12px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trade-player-id{font:9px 'IBM Plex Mono',monospace;color:var(--muted);margin-top:3px;}
+.trade-selected{align-items:center;justify-content:space-between;gap:8px;margin-top:9px;padding:10px 11px;border-radius:12px;background:rgba(201,151,77,.09);border:1px solid rgba(201,151,77,.22);font-size:11px;}
+.trade-panel{padding:12px;margin:0 0 9px;}
+.trade-alert{border-color:rgba(201,151,77,.3);}
+.trade-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.trade-panel-head b{font-size:12px;}
+.trade-status{font:800 8px 'IBM Plex Mono',monospace;color:var(--brass-2);padding:4px 7px;border-radius:999px;background:rgba(201,151,77,.1);white-space:nowrap;}
+.trade-modal-actions{display:flex;gap:8px;margin-top:10px;}
+.trade-modal-actions>*{flex:1;min-width:0;}
+.trade-empty{text-align:center;color:var(--muted);font-size:11px;padding:14px 8px;}
+.trade-history-row{padding:11px 0;border-bottom:1px solid var(--line);font-size:11px;line-height:1.45;}
+.trade-history-row:last-child{border-bottom:0;}
+.trade-modal{width:min(720px,100%);background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 20px 70px rgba(0,0,0,.45);box-sizing:border-box;margin:auto;}
+.trade-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.trade-modal-head h3{margin:3px 0 3px;font-family:'Fraunces',serif;font-size:20px;}
+.trade-sides{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.trade-side{min-width:0;background:var(--bg-3);border:1px solid var(--line);border-radius:13px;padding:10px;}
+.trade-side-head{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-bottom:8px;}
+.trade-side-title{font-size:11px;font-weight:800;}
+.trade-total{font:800 10px 'IBM Plex Mono',monospace;color:var(--brass-2);white-space:nowrap;}
+.trade-cube-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto;}
+.trade-cube{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:8px;border-radius:9px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.04);}
+.trade-cube-name{font-size:10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trade-cube-value{font:700 9px 'IBM Plex Mono',monospace;color:var(--muted);white-space:nowrap;}
+.trade-confirm-status{margin-top:10px;padding:9px 10px;border-radius:10px;background:rgba(201,151,77,.07);border:1px solid rgba(201,151,77,.14);font-size:10px;text-align:center;}
+.trade-cube-picker{margin-top:10px;}
+.trade-add-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:230px;overflow:auto;}
+.trade-pick{text-align:left;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg-3);color:var(--paper);cursor:pointer;}
+.trade-pick b{display:block;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trade-pick small{font:700 9px 'IBM Plex Mono',monospace;color:var(--brass-2);}
+.trade-pick:active{transform:scale(.98);}
+.trade-countdown{text-align:center;font:800 11px 'IBM Plex Mono',monospace;color:var(--brass-2);margin-top:9px;min-height:15px;}
+@media(max-width:520px){.trade-sides{grid-template-columns:1fr;}.trade-add-grid{grid-template-columns:1fr 1fr;}.trade-modal{border-radius:16px;padding:12px;}}
+</style>
+</head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
     <img id="startupLoaderLogo" class="startup-loader-logo" alt="GDPLAY" decoding="async" fetchpriority="high">
@@ -8084,7 +8131,7 @@ const nm=(t,from)=>esc(from?t.from_name:t.to_name)||'Игрок';
 async function load(){try{let j=await apiFetch('/api/trade/list',{});S={...S,...j};render();if(current){let q=await apiFetch('/api/trade/get',{trade_id:current.id});if(q.trade){current=q.trade;renderModal()}}}catch(e){} try{let h=await apiFetch('/api/trade/history',{});S.history=h.history||[];historyRender()}catch(e){}}
 function render(){let i=document.getElementById('tradeIncoming'),a=document.getElementById('tradeActive');if(!i||!a)return;i.innerHTML=S.incoming?.length?'<div class="trade-card-title">📨 Входящие предложения</div>'+S.incoming.map(t=>`<div class="trade-panel trade-alert"><div class="trade-panel-head"><b>От ${nm(t,true)}</b><span class="trade-status">ОЖИДАЕТ</span></div><div class="section-sub">Отдаёт: ${(t.give||[]).length} куб. · ${money(t.give_total)}</div><div class="trade-modal-actions"><button class="btn-ghost" data-trade-decline="${t.id}">Отклонить</button><button class="btn-main" data-trade-accept="${t.id}">Принять</button></div></div>`).join(''):'<div class="trade-panel"><div class="trade-empty">Новых предложений нет.</div></div>';let out=S.outgoing?.length?'<div class="trade-card-title" style="margin-top:12px">📤 Ожидают ответа</div>'+S.outgoing.map(t=>`<div class="trade-panel"><div class="trade-panel-head"><b>Для ${nm(t,false)}</b><span class="trade-status">ОЖИДАЕТ</span></div><div class="section-sub">Вы предлагаете: ${(t.give||[]).length} куб. · ${money(t.give_total)}</div><button class="btn" style="width:100%;margin-top:8px" data-trade-open="${t.id}">Изменить предложение</button></div>`).join(''):'';i.innerHTML+=out;a.innerHTML=S.active?.length?'<div class="trade-card-title">🔄 Активные трейды</div>'+S.active.map(t=>`<div class="trade-panel"><div class="trade-panel-head"><b>С ${t.is_from?nm(t,false):nm(t,true)}</b><span class="trade-status">АКТИВЕН</span></div><div class="section-sub">Отдаёте: ${money(t.is_from?t.give_total:t.get_total)} · Получаете: ${money(t.is_from?t.get_total:t.give_total)}</div><button class="btn" style="width:100%;margin-top:8px" data-trade-open="${t.id}">Открыть</button></div>`).join(''):'<div class="trade-panel"><div class="trade-empty">Активных трейдов нет.</div></div>'}
 function historyRender(){let e=document.getElementById('tradeHistoryList');if(!e)return;e.innerHTML=(S.history||[]).length?S.history.map(x=>`<div class="trade-history-row"><b>${esc(x.other_name||'Игрок')}</b> · ${x.status==='completed'?'Завершён':x.status==='declined'?'Отклонён':'Отменён'}<div style="margin-top:4px;color:#9a9186">Отдали: ${(x.given||[]).map(v=>esc(v.name)).join(', ')||'—'}<br>Получили: ${(x.received||[]).map(v=>esc(v.name)).join(', ')||'—'}</div><div style="margin-top:3px;color:#746d65">${esc(x.closed_at||x.created_at||'')}</div></div>`).join(''):'<div class="trade-empty">История пока пуста.</div>'}
-async function search(){try{let j=await apiFetch('/api/trade/users',{search:document.getElementById('tradePlayerSearch')?.value||''});document.getElementById('tradePlayers').innerHTML=(j.users||[]).map(u=>`<div class="trade-player"><div><div class="trade-player-name">${esc(u.display_name||u.username||'Игрок')}</div><div class="trade-player-id">ID ${u.user_id}</div></div><button class="btn" data-trade-player="${u.user_id}" data-trade-player-name="${esc(u.display_name||u.username||'Игрок')}">Выбрать</button></div>`).join('')||'<div class="trade-empty">Игроки не найдены.</div>'}catch(e){showToast('❌ '+e.message,'error')}}
+async function search(){try{let j=await apiFetch('/api/trade/users',{search:document.getElementById('tradePlayerSearch')?.value||''});document.getElementById('tradePlayers').innerHTML=(j.users||[]).filter(u=>Number(u.user_id)!==Number(currentUser||0)).map(u=>`<div class="trade-player"><div><div class="trade-player-name">${esc(u.display_name||u.username||'Игрок')}</div><div class="trade-player-id">ID ${u.user_id}</div></div><button class="btn" data-trade-player="${u.user_id}" data-trade-player-name="${esc(u.display_name||u.username||'Игрок')}">Выбрать</button></div>`).join('')||'<div class="trade-empty">Игроки не найдены.</div>'}catch(e){showToast('❌ '+e.message,'error')}}
 function pick(id,name){selected={id:Number(id),name};let b=document.getElementById('tradeSelectedPlayer');b.style.display='flex';b.innerHTML=`<span>Выбран: <b>${esc(name)}</b> · ID ${id}</span><button class="btn-ghost" id="tradeClearPlayer">✕</button>`;document.getElementById('tradeStartBtn').style.display='block';document.getElementById('tradeClearPlayer').onclick=()=>{selected=null;b.style.display='none';document.getElementById('tradeStartBtn').style.display='none'}}
 async function create(){if(!selected)return;try{let j=await apiFetch('/api/trade/create',{to_user:selected.id});current=j.trade;await load();open(current.id)}catch(e){showToast('❌ '+e.message,'error')}}
 async function open(id){try{let j=await apiFetch('/api/trade/get',{trade_id:id});current=j.trade;renderModal();openModal('tradeModal')}catch(e){showToast('❌ '+e.message,'error')}}
