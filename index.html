@@ -2624,12 +2624,7 @@ large DOM rebuilds while the result card appears. */
 .case-pity-head b{font-family:'IBM Plex Mono',monospace;color:var(--paper)}
 .case-pity-track{height:6px;margin-top:7px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.07)}
 .case-pity-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--brass-dim),var(--brass-2));transition:width .2s ease}
-</style>
-<style id="gdplay-trades-ui-v2">
-/* ===== TRADES UI ===== */
-</style>
-
-</head>
+</style></head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
     <img id="startupLoaderLogo" class="startup-loader-logo" alt="GDPLAY" decoding="async" fetchpriority="high">
@@ -2939,10 +2934,6 @@ large DOM rebuilds while the result card appears. */
         <button class="btn-sell-all" id="sellAllBtn">Продать всё</button>
       </div>
       <div id="inventoryList"></div>
-    </div>
-
-    <div class="page" id="page-trades">
-      <div id="tradeIncoming"></div><div id="tradeActive"></div>
     </div>
 
     <!-- MARKET -->
@@ -3288,7 +3279,6 @@ large DOM rebuilds while the result card appears. */
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
 <div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> игр в «Орб-Рывке» каждые 6 часов</span><div class="premium-perk">💣 <span><b>10</b> игр в «Минах» каждые 6 часов</span></div></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
-
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <div class="spin-topbar">
@@ -5200,12 +5190,12 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?650:3600;
+  const duration=reduced?650:4200;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},duration+30);});
+  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},260);},duration+40);});
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -5375,8 +5365,7 @@ async function openCaseBatch(c, qty, useKey=false){
   if(icon) icon.textContent=c.icon;
   if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
   if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие сейфа';
-  if(pill) pill.textContent='ПРОВЕРКА';
-  openModal('spinModal');
+  if(pill) pill.textContent='КРУТИМ';
 
   const wins=[];
   try{
@@ -5406,6 +5395,8 @@ async function openCaseBatch(c, qty, useKey=false){
     showToast('❌ '+e.message,'error'); spinning=false; closeModal('spinModal');
     document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false); return;
   }
+
+  openModal('spinModal');
 
   // Для 2x/3x все рулетки создаются заранее и запускаются ОДНОВРЕМЕННО.
   // Никаких последовательных прокруток и повторного layout между наградами.
@@ -5473,14 +5464,6 @@ async function openCaseOnce(c, seq, total, useKey=false){
   document.getElementById('spinCloseBtn').classList.add('hidden');
   document.getElementById('wheelWrap').style.display = 'block';
   document.getElementById('vaultCrack').style.display = 'none';
-  // Open the visual shell immediately. Server-side validation/result selection
-  // can happen while the reel is preparing instead of leaving a frozen screen.
-  const earlyPill=document.getElementById('spinStatusPill');
-  if(earlyPill) earlyPill.textContent='ПРОВЕРКА';
-  const earlyTitle=document.getElementById('spinCaseTitle');
-  if(earlyTitle) earlyTitle.textContent=total>1?`${c.name} (${seq}/${total})`:c.name;
-  const earlyIcon=document.getElementById('spinCaseIcon'); if(earlyIcon) earlyIcon.textContent=c.icon;
-  openModal('spinModal');
 
   let won;
   try{
@@ -5552,6 +5535,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   const wheelWrap = document.getElementById('wheelWrap');
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); requestAnimationFrame(()=>wheelWrap.classList.add('reel-opening')); }
   if(dial) dial.style.opacity='1';
+  openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
   playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
@@ -8073,3 +8057,4 @@ boot();
   document.addEventListener('DOMContentLoaded',()=>{renderRules();renderStats();renderGrid()});
 })();
 </script>
+
