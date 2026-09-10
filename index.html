@@ -2666,148 +2666,6 @@ large DOM rebuilds while the result card appears. */
   <div class="app-shell">
     <div id="techBreakHost" aria-hidden="true"></div>
     <div id="adminDynamicRoot"></div>
-<template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-menu-tab="admin">Админ-панель</button>
-<div class="page" id="page-admin">
-  <div class="section-title">Админ-панель</div>
-  <div class="section-sub">Управление игроками и сервером</div>
-  <div class="admin-grid">
-    <div class="admin-card">
-      <h3>Статистика</h3>
-      <div id="adminStats" class="admin-log">Загрузка…</div>
-    </div>
-    <div class="admin-card">
-      <h3>Журнал</h3>
-      <div id="adminLogs"><div class="admin-log">Загрузка…</div></div>
-    </div>
-  </div>
-  <div class="admin-card" style="margin-top:10px">
-    <h3>Игроки</h3>
-    <div class="admin-search">
-      <input id="adminSearch" type="search" placeholder="Ник или Telegram ID">
-      <button id="adminSearchBtn" type="button" class="btn">Найти</button>
-    </div>
-    <div id="adminUsersList" style="margin-top:10px"><div class="admin-log">Загрузка…</div></div>
-  </div>
-  <div class="admin-card" style="margin-top:10px">
-    <h3>Промокоды</h3>
-    <div class="promo-admin-form" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:7px">
-      <input id="promoAdminCode" placeholder="Промокод" autocomplete="off">
-      <select id="promoAdminReward">
-        <option value="coins">Монеты</option>
-        <option value="vip">VIP</option>
-        <option value="coins_vip">Монеты + VIP</option>
-      </select>
-      <input id="promoAdminCoins" type="number" min="0" value="0" placeholder="Монеты">
-      <input id="promoAdminVipDays" type="number" min="0" value="0" placeholder="VIP дней">
-      <input id="promoAdminMaxUses" type="number" min="1" value="1" placeholder="Макс. активаций">
-      <button id="promoAdminCreateBtn" type="button" class="btn" style="grid-column:1/-1">Создать промокод</button>
-    </div>
-    <div id="promoAdminMessage" class="admin-log" style="margin-top:7px"></div>
-    <div id="promoAdminList" class="promo-admin-list"><div class="admin-log">Загрузка промокодов…</div></div>
-  </div>
-
-  <div class="admin-card" style="margin-top:10px">
-    <h3>IP-блокировка</h3>
-    <input id="adminIp" class="admin-input" placeholder="IP-адрес" style="width:100%;box-sizing:border-box;margin:4px 0">
-    <input id="adminIpReason" class="admin-input" placeholder="Причина" style="width:100%;box-sizing:border-box;margin:4px 0">
-    <input id="adminIpMinutes" class="admin-input" type="number" min="1" value="60" placeholder="Минут" style="width:100%;box-sizing:border-box;margin:4px 0">
-    <label style="display:block;margin:6px 0;font-size:12px"><input id="adminIpPermanent" type="checkbox"> Навсегда</label>
-    <div class="admin-user-actions">
-      <button type="button" class="btn-ghost" data-action="admin-ip-ban">Заблокировать IP</button>
-      <button type="button" class="btn-ghost" data-action="admin-ip-unban">Снять блок IP</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="adminAccountModal">
-  <div class="input-modal">
-    <h3>Аккаунт #<span id="adminAccountUid"></span></h3>
-    <input id="adminAccountNick" placeholder="Ник">
-    <button id="adminAccountNickBtn" class="btn" style="width:100%;margin-top:7px">Изменить ник</button>
-    <input id="adminAccountPassword" type="password" placeholder="Новый пароль" style="margin-top:7px">
-    <button id="adminAccountPasswordBtn" class="btn" style="width:100%;margin-top:7px">Изменить пароль</button>
-    <input id="adminAccountBalance" type="number" placeholder="Баланс" style="margin-top:7px">
-    <button id="adminAccountBalanceBtn" class="btn" style="width:100%;margin-top:7px">Установить баланс</button>
-    <input id="adminAccountLevel" type="number" placeholder="Уровень" style="margin-top:7px">
-    <button id="adminAccountLevelBtn" class="btn" style="width:100%;margin-top:7px">Установить уровень</button>
-    <div class="admin-avatar-row">
-      <div id="adminAccountAvatarPreview" class="admin-avatar-preview">?</div>
-      <div class="admin-avatar-controls"><button id="adminAccountAvatarClear" class="btn-ghost" type="button">Убрать аватар</button></div>
-    </div>
-    <div class="admin-user-actions">
-      <button id="adminAccount2faBtn" class="btn-ghost" type="button">🔐 2FA</button>
-      <button id="adminAccountSessionsBtn" class="btn-ghost" type="button">Завершить сессии</button>
-      <button id="adminAccountRemovePremiumBtn" class="btn-ghost danger-admin" type="button">⭐ Снять Premium + Premium-баффы</button>
-      <button id="adminAccountClearBuffsBtn" class="btn-ghost" type="button">Удалить баффы</button>
-      <button id="adminAccountClearDropsBtn" class="btn-ghost" type="button">Очистить дропы</button>
-      <button id="adminAccountCheckBtn" class="btn-ghost" type="button">Проверить пароль</button>
-    </div>
-    <div class="input-modal-actions"><button id="adminAccountCloseBtn" class="btn-ghost" type="button">Закрыть</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="adminCustomStatusModal">
-  <div class="input-modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-      <h3 style="margin:0">🏷️ Свой статус</h3>
-      <button type="button" class="btn-ghost" id="adminCustomStatusCloseBtn" style="flex-shrink:0">✕ Закрыть</button>
-    </div>
-    <p class="section-sub" style="margin:0 0 10px">Игрок ID: <span id="adminCustomStatusUid" class="mono"></span></p>
-    <div style="display:grid;gap:8px">
-      <input id="adminCustomStatusEmoji" maxlength="8" placeholder="Эмодзи, например 👑">
-      <input id="adminCustomStatusText" maxlength="32" placeholder="Текст статуса, например VIP+">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px">
-        <span><b>Переливание цвета</b><small style="display:block;opacity:.65">Плавно переливать статус между 2 цветами</small></span>
-        <label class="upgrade-switch" style="flex:0 0 auto">
-          <input id="adminCustomStatusGradient" type="checkbox">
-          <span class="upgrade-switch-track"><span class="upgrade-switch-thumb"></span></span>
-        </label>
-      </div>
-      <div id="adminCustomStatusColors" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <label class="section-sub">Цвет 1<input id="adminCustomStatusColor1" type="color" value="#f0c674" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
-        <label class="section-sub">Цвет 2<input id="adminCustomStatusColor2" type="color" value="#ffffff" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
-      </div>
-      <div class="section-sub">Если переливание выключено, используется обычный цвет статуса. Пустое поле текста удаляет текущий статус.</div>
-      <div class="input-modal-actions">
-        <button class="btn" id="adminCustomStatusAccept">Выдать статус</button>
-        <button class="btn-ghost" id="adminCustomStatusClear">Снять статус</button>
-        <button class="btn-ghost" id="adminCustomStatusCancel">Отмена</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="adminCasesModal">
-  <div class="input-modal">
-    <h3>📦 Выдать открытые кейсы</h3>
-    <p>Игрок: <b id="adminCasesUid"></b></p>
-    <input id="adminCasesAmount" type="number" min="1" value="100" placeholder="Количество кейсов">
-    <div class="input-modal-actions">
-      <button id="adminCasesCancel" class="btn-ghost" type="button">Отмена</button>
-      <button id="adminCasesAccept" class="btn" type="button">Выдать</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="adminCubeModal">
-  <div class="input-modal">
-    <h3>Выдать куб</h3><p>Игрок: <b id="adminCubeUid"></b></p>
-    <input id="adminCubeName" placeholder="Название">
-    <select id="adminCubeRarity" style="width:100%;margin-top:7px"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпохальный</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option><option value="divine">Божественный</option><option value="emerald">Изумрудный</option></select>
-    <input id="adminCubeValue" type="number" min="0" placeholder="Стоимость" style="margin-top:7px">
-    <div class="input-modal-actions"><button id="adminCubeCancel" class="btn-ghost" type="button">Отмена</button><button id="adminCubeAccept" class="btn" type="button">Выдать</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="adminBuffModal">
-  <div class="input-modal">
-    <h3>Выдать бафф</h3><p>Игрок: <b id="adminBuffUid"></b></p>
-    <select id="adminBuffType" style="width:100%"><option value="master">Master Boost</option><option value="fortune">Fortune</option><option value="drop">Drop Boost</option></select>
-    <input id="adminBuffHours" type="number" min="1" max="720" value="24" style="margin-top:7px">
-    <div class="input-modal-actions"><button id="adminBuffCancel" class="btn-ghost" type="button">Отмена</button><button id="adminBuffAccept" class="btn" type="button">Выдать</button></div>
-  </div>
-</div>
-</template>
 
     <header>
       <div class="brand">
@@ -3860,8 +3718,17 @@ function applyServerState(u){
 // Локальный прогресс отправляется на сервер только ОДИН РАЗ (для миграции
 // старых игроков) — дальше сервер всегда источник истины, чтобы действия
 // админа (баланс/сброс/куб) никогда не затирались устаревшими локальными данными.
+// Полностью запретить открытие DevTools в браузере технически невозможно,
+// но мы можем не показывать админ-панель, пока консоль разработчика похожа
+// на открытую (эвристика по разнице outer/inner размеров окна — стандартный
+// приближённый способ, надёжной альтернативы у браузеров нет).
+function isDevtoolsLikelyOpen(){
+  const threshold = 160;
+  return (window.outerWidth - window.innerWidth) > threshold || (window.outerHeight - window.innerHeight) > threshold;
+}
 async function loadAdminUI(){
   if(!window.isAdmin || window.adminUIReady) return true;
+  if(isDevtoolsLikelyOpen()){ console.warn('Admin UI: DevTools appears open, panel not loaded'); return false; }
   const root = document.getElementById('adminDynamicRoot');
   const menu = document.getElementById('menuPanel');
   if(!root || !menu) return false;
@@ -3878,12 +3745,11 @@ async function loadAdminUI(){
     }catch(e){
       console.warn('admin UI API unavailable, using built-in admin UI:', e);
     }
-    // Встроенный fallback гарантирует, что панель добавится даже если
-    // admin_fragment.html временно недоступен на сервере.
-    if(!html){
-      const tpl = document.getElementById('adminUiFallback');
-      html = tpl ? tpl.innerHTML : '';
-    }
+    // Никакого локального fallback-шаблона больше нет: раньше он хранил
+    // полную разметку админ-панели прямо в исходнике страницы, и её можно
+    // было отрендерить из консоли DevTools простым window.isAdmin=true,
+    // даже не будучи админом. Теперь панель существует только если её
+    // прислал сервер после реальной проверки прав.
     if(!html) return false;
     const wrap = document.createElement('div');
     wrap.innerHTML = html;
@@ -4885,6 +4751,22 @@ async function adminReset(uid){
 
 
 
+// Если DevTools открыли уже после того, как админ-панель была отрисована
+// (например, легитимный админ открыл её, а потом открыл консоль), скрываем
+// динамическую часть панели и уводим со вкладки admin.
+(function(){
+  function guardAdminAgainstDevtools(){
+    if(!window.adminUIReady) return;
+    if(!isDevtoolsLikelyOpen()) return;
+    try{
+      document.querySelectorAll('.admin-dynamic-page, .admin-dynamic-modal, .admin-dynamic-menu').forEach(el=>el.remove());
+      window.adminUIReady = false;
+      if(typeof currentTab!=='undefined' && currentTab==='admin' && typeof switchTab==='function') switchTab('profile');
+    }catch(e){}
+  }
+  setInterval(guardAdminAgainstDevtools, 1000);
+  window.addEventListener('resize', guardAdminAgainstDevtools);
+})();
 function switchTab(tab){
   if(document.getElementById('battleDiceModal')?.classList.contains('open')) closeBattleDiceModal();
   currentTab = tab;
@@ -6837,7 +6719,7 @@ function renderProfile(){
   document.getElementById('dailyDesc').textContent='Следующая награда: '+nextReward.toLocaleString('ru-RU')+' 💰';
   document.getElementById('dailyBtn').disabled=!can;
   const timer=document.getElementById('dailyTimer'); if(timer){ if(can) timer.textContent='Следующая награда доступна сейчас'; else { const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } }
-  const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/7';
+  const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/14';
   const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/14*100)+'%';
   loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
