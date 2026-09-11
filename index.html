@@ -1873,6 +1873,9 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 <style id="gdplay-inventory-search">
 .inv-search-wrap{margin:0 0 10px;}
 .inv-search{width:100%;box-sizing:border-box;height:42px;padding:0 13px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--text);outline:none;font:600 12px 'IBM Plex Mono',monospace;}
+.inv-sort-row{display:flex;align-items:center;gap:8px;margin:8px 0 10px;}
+.inv-sort{flex:1;min-width:0;background:var(--bg-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:11px;outline:none;}
+
 .inv-search::placeholder{color:var(--muted);}
 .inv-search:focus{border-color:rgba(201,151,77,.55);box-shadow:0 0 0 2px rgba(201,151,77,.08);}
 </style>
@@ -2925,6 +2928,19 @@ large DOM rebuilds while the result card appears. */
       <div class="inv-search-wrap">
         <input id="inventorySearch" class="inv-search" type="search" autocomplete="off" placeholder="Поиск кубов…" aria-label="Поиск кубов в инвентаре">
       </div>
+      <div class="inv-sort-row">
+        <label for="inventorySort" class="section-sub" style="margin:0">Сортировка</label>
+        <select id="inventorySort" class="inv-sort" aria-label="Сортировка кубов">
+          <option value="value-desc">Стоимость: сначала дорогие</option>
+          <option value="value-asc">Стоимость: сначала дешёвые</option>
+          <option value="rarity-desc">Редкость: сначала редкие</option>
+          <option value="rarity-asc">Редкость: сначала обычные</option>
+          <option value="name-asc">Название: А → Я</option>
+          <option value="name-desc">Название: Я → А</option>
+          <option value="count-desc">Количество: больше → меньше</option>
+          <option value="count-asc">Количество: меньше → больше</option>
+        </select>
+      </div>
       <div class="inv-toolbar">
         <div class="inv-toolbar-icon">💼</div>
         <div class="inv-toolbar-info">
@@ -3608,7 +3624,7 @@ function normalizeAllCubeValues(){
 // ===== STATE =====
 let currentUser = null;
 let data = null;
-let dailyState = {nextAt:0, streak:0, claims:0, reward:1000, premium:false};
+let dailyState = {nextAt:0, availableAt:0, streak:0, claims:0, reward:1000, premium:false, loaded:false, available:false, completed:false};
 let dailyStatusInFlight = false;
 const LOW_POWER_DEVICE = (Number(navigator.hardwareConcurrency||8)<=4) || (Number(navigator.deviceMemory||8)<=4);
 if(LOW_POWER_DEVICE) document.documentElement.classList.add('low-power');
@@ -5229,7 +5245,7 @@ function spawnConfetti(container, color){
 
 let caseUiDirty=false;
 
-function showSpinResult(item, isSecret, isGuaranteed=false){
+function showSpinResult(item, isSecret){
   const m = RARITY_META[item.rarity];
   const box = document.getElementById('spinResult');
   box.innerHTML = `
@@ -5238,7 +5254,6 @@ function showSpinResult(item, isSecret, isGuaranteed=false){
     <div class="spin-result-rarity" style="color:${m.color}">${isSecret ? 'Секретный предмет' : m.label}</div>
     <div class="spin-result-value">💰 ${item.value.toLocaleString('ru-RU')}</div>
     <div class="spin-result-value">Итого: ${item.value.toLocaleString('ru-RU')} орбов</div>
-    ${isGuaranteed ? '<div style="margin-top:8px;font-size:11px;font-weight:800;color:var(--brass-2)">🛡️ Гарант-сейф сработал — это гарантированный крупный выигрыш</div>' : ''}
     ${isSecret ? '<div style="margin-top:8px;font-size:11px;color:var(--brass-2)">✨ Ты нашёл тайную комнату хранилища</div>' : ''}`;
   box.classList.remove('hidden');
   document.getElementById('spinCloseBtn').classList.remove('hidden');
@@ -5375,7 +5390,7 @@ async function openCaseBatch(c, qty, useKey=false){
       const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
       const j=await apiFetch('/api/cube/open-batch',{case_id:c.id,qty,use_key:!!useKey,request_id:requestId});
       if(!Array.isArray(j.drops)||j.drops.length!==qty) throw new Error('Сервер вернул некорректные результаты кейсов');
-      j.drops.forEach(d=>wins.push({name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id),guaranteed:Boolean(d.guaranteed)}));
+      j.drops.forEach(d=>wins.push({name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
       data.balance=Number(j.balance)||0;
       if(Array.isArray(j.cubes)) data.cubes=j.cubes.map(x=>({...x}));
       if(Array.isArray(j.keys)) data.keys=j.keys.map(x=>({...x}));
@@ -5436,7 +5451,7 @@ async function openCaseBatch(c, qty, useKey=false){
   playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald')?1180:840);
   if(multiResult){
     multiResult.classList.remove('hidden');
-    multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${String(w.name).slice(0,24)}</b>${w.guaranteed?' 🛡️':''}</span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
+    multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
   }
   const totalWonValue=wins.reduce((sum,w)=>sum+Math.max(0,Number(w.value)||0),0);
   if(resultBox){
@@ -5542,7 +5557,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
   // Show exactly the same authoritative value that was stored on the server.
-  showSpinResult(won, isSecret, Boolean(j?.guaranteed));
+  showSpinResult(won, isSecret);
   const spinPillDone=document.getElementById('spinStatusPill'); if(spinPillDone) spinPillDone.textContent='ГОТОВО';
   pushDrop({ username:data.username, item:won.name, rarity:won.rarity, value:won.value, time:Date.now() });
   recordBestDrop(won);
@@ -5596,6 +5611,23 @@ function renderInventory(){
     cubeStacks[id].indices.push(i);
   });
   const stackedCubes=Object.values(cubeStacks);
+  const sortKey=String(document.getElementById('inventorySort')?.value || storageGet('GDPLAY_CUBE_SORT') || 'value-desc');
+  const sortSelect=document.getElementById('inventorySort'); if(sortSelect && sortSelect.value!==sortKey) sortSelect.value=sortKey;
+  const rarityRank=(r)=>({common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6}[String(r||'common').toLowerCase()] ?? 0);
+  const compare=(a,b)=>{
+    const av=Number(a.cube?.value||0), bv=Number(b.cube?.value||0);
+    const ar=rarityRank(a.cube?.rarity), br=rarityRank(b.cube?.rarity);
+    const an=String(a.cube?.name||'').localeCompare(String(b.cube?.name||''),'ru',{sensitivity:'base'});
+    if(sortKey==='value-asc') return av-bv || an;
+    if(sortKey==='rarity-desc') return br-ar || bv-av || an;
+    if(sortKey==='rarity-asc') return ar-br || av-bv || an;
+    if(sortKey==='name-asc') return an || bv-av;
+    if(sortKey==='name-desc') return -an || bv-av;
+    if(sortKey==='count-desc') return b.count-a.count || bv-av || an;
+    if(sortKey==='count-asc') return a.count-b.count || av-bv || an;
+    return bv-av || br-ar || an;
+  };
+  stackedCubes.sort(compare);
   const cubeLockButton=(c,i)=>`<button type="button" class="btn-ghost cube-lock-btn" title="${c.metadata?.locked?'Разблокировать':'Заморозить'}" aria-label="${c.metadata?.locked?'Разблокировать':'Заморозить'}" data-action="toggle-cube-lock" data-index="${i}">${c.metadata?.locked?'🔓':'❄️'}</button>`;
   const cubeItemActions=(c,i)=>`
        <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${c.metadata?.locked?'disabled':''}>💰 Продать</button>
@@ -5928,16 +5960,10 @@ function refreshUpgradeChance(chanceOverride=null){
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
+  // Визуальная шкала всегда 1:1 с отображаемым процентом: никаких ±30%.
   if(fill) fill.style.width=chance+'%';
   const stakeValue=document.getElementById('upgradeStakeValue');
   if(stakeValue) stakeValue.textContent=Number(upgradeStake||0).toLocaleString('ru-RU')+' 💰';
-}
-
-// The green wheel sector is ALWAYS exactly the declared server chance.
-// 1 percentage point = 3.6 degrees; no visual randomization is applied.
-function getUpgradeVisualChance(chance){
-  const value=Number(chance);
-  return Number.isFinite(value) ? Math.max(0, Math.min(99.5, value)) : 0;
 }
 function openUpgradeModal(index,kind='cube'){
   if(kind==='key'){ showToast('❌ Ключи нельзя улучшать','error'); return; }
@@ -6070,12 +6096,16 @@ async function confirmUpgrade(){
     const gauge=document.getElementById('upgradeGauge');
     const pointer=document.getElementById('upgradePointer');
 
-    // The displayed percentage is the real server chance. The wheel sector is
-    // deliberately randomized around it so it can visually be a little larger
-    // or smaller than the stated chance. The wheel never changes the result.
+    // Exact probability wheel: conic-gradient uses the same 0..100 value
+    // as the label, so every 1% is exactly 3.6 degrees.
+    // Используем одно и то же округлённое значение для текста и геометрии.
+    // Иначе, например, 37.96% могло отображаться как 38.0%, а сектор строился
+    // по 37.96%, что на небольшом круге визуально давало ощущение меньшей зоны.
+    // Use exactly the same one-decimal value for the label and the wheel.
+    // The wheel is drawn as two SVG arcs, so the green arc length is mathematically
+    // identical to the displayed percentage: 1% = 3.6 degrees.
     const chance=Math.max(0,Math.min(99.5,Number(serverChance.toFixed(1))));
-    const visualChance=getUpgradeVisualChance(chance);
-    const chanceDeg=visualChance*3.6;
+    const chanceDeg=chance*3.6;
     const cx=100, cy=100, r=78;
     const start=-90;
     const end=start+chanceDeg;
@@ -6094,17 +6124,14 @@ async function confirmUpgrade(){
     gauge.style.backgroundImage='none';
     gauge.style.setProperty('--upgrade-chance', chance+'%');
 
-    // The result is already decided by the server. For the animation we only
-    // place the pointer on the matching color: success in green, failure in red.
-    const epsilon=Math.min(2.5,Math.max(.35,visualChance*3.6/55));
-    let visualDeg;
-    if(j.success){
-      const greenEnd=Math.max(epsilon,visualChance*3.6-epsilon);
-      visualDeg=epsilon + Math.random()*Math.max(.1,greenEnd-epsilon);
-    }else{
-      const redStart=visualChance*3.6+epsilon;
-      visualDeg=redStart + Math.random()*Math.max(.1,360-redStart-epsilon);
-    }
+    // The roll is also mapped directly: 0..100 -> 0..360 degrees.
+    // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
+    // exactly halfway through that green 95% sector.
+    const stopDeg=(roll/100)*360;
+    const epsilon=Math.min(1.25,Math.max(.08,serverChance*3.6/80));
+    let visualDeg=stopDeg;
+    if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
+    if(!j.success) visualDeg=Math.max(serverChance*3.6+epsilon,Math.min(360-epsilon,visualDeg));
 
     // Fixed indicator under the spindle: the wheel rotates beneath it.
     // This keeps the arrow straight and makes the stopped segment line up
@@ -6130,6 +6157,7 @@ async function confirmUpgrade(){
 
 document.getElementById('upgradeSearch')?.addEventListener('input',function(){renderUpgradeCatalog(this.value);});
 document.getElementById('inventorySearch')?.addEventListener('input',function(){renderInventory();});
+document.getElementById('inventorySort')?.addEventListener('change',function(){storageSet('GDPLAY_CUBE_SORT',this.value);renderInventory();});
 document.getElementById('upgradeFastToggle')?.addEventListener('change',function(){setUpgradeFast(this.checked);});
 refreshUpgradeFastButton();
 
@@ -6874,16 +6902,25 @@ function renderProfile(){
   document.getElementById('statCubes').textContent=data.cubes.length;
   document.getElementById('statBattles').textContent=data.battles||0;
   document.getElementById('statWins').textContent=data.wins||0;
-  const streak=Number(dailyState.streak||data.dailyStreak||0);
+  if(!dailyState.loaded){
+    document.getElementById('dailyDesc').textContent='Загрузка бонуса…';
+    document.getElementById('dailyBtn').disabled=true;
+    const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Проверяем сохранённый прогресс…';
+    const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent='—/14';
+    const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width='0%';
+    loadDailyStatus();
+    return;
+  }
+  const streak=Number(dailyState.streak||0);
   const nextAt=Number(dailyState.nextAt||0);
-  const can=!nextAt || Date.now()>=nextAt;
-  const nextReward=Number(dailyState.reward||((streak?([1000,1500,2000,2500,3000,4000,5000][Math.max(0,Math.min(6,streak-1))]):1000)*(isPremium?2:1)));
-  document.getElementById('dailyDesc').textContent='Следующая награда: '+nextReward.toLocaleString('ru-RU')+' 💰';
+  const can=!!dailyState.available && streak<14 && Date.now()<nextAt;
+  const nextReward=Number(dailyState.reward||0);
+  document.getElementById('dailyDesc').textContent=streak>=14?'Серия 14/14 завершена':'Награда: '+nextReward.toLocaleString('ru-RU')+' 💰';
   document.getElementById('dailyBtn').disabled=!can;
-  const timer=document.getElementById('dailyTimer'); if(timer){ if(can) timer.textContent='Следующая награда доступна сейчас'; else { const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } }
+  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=14) timer.textContent='Все 14 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else timer.textContent='Награда недоступна'; }
   const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/14';
   const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/14*100)+'%';
-  loadDailyStatus();
+  if(nextAt && Date.now()>=nextAt && !dailyStatusInFlight) loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
   renderBestDrops(document.getElementById('profileBestDrops'), data.bestDrops);
@@ -6895,10 +6932,11 @@ async function loadDailyStatus(){
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
-    dailyState.nextAt=Number(j.next_daily||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||1000); dailyState.premium=!!j.premium;
+    dailyState.nextAt=Number(j.expires_at||j.next_daily||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
     data.dailyStreak=dailyState.streak;
     data.lastDaily=Number(j.last_daily||data.lastDaily||0);
     updateDailyUI();
+    if(j.reset) showToast('⚠️ Бонус сброшен — награда не была забрана за 12 часов','error');
   }catch(e){}finally{dailyStatusInFlight=false;}
 }
 function updateDailyUI(){
@@ -6915,14 +6953,16 @@ function updateDailyUI(){
 }
 async function claimDaily(){
   if(!data)return;
-  if(dailyState.nextAt&&Date.now()<dailyState.nextAt){updateDailyUI();return;}
+  if(!dailyState.loaded){ await loadDailyStatus(); return; }
+  if(!dailyState.available){ await loadDailyStatus(); return; }
+  if(dailyState.nextAt&&Date.now()>=dailyState.nextAt){ await loadDailyStatus(); return; }
   serverActionInFlight++;serverBusyUntil=Date.now()+150;
   try{
     const j=await apiFetch('/api/daily',{});
     data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
-    dailyState.nextAt=Number(j.next_daily||Date.now()+12*60*60*1000);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=Number(j.claims_in_day||1);dailyState.reward=Number(j.reward||1000);dailyState.premium=!!j.premium;
+    dailyState.nextAt=Number(j.expires_at||j.next_daily||0);dailyState.availableAt=Number(j.available_at||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=dailyState.streak<14&&!!dailyState.nextAt;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
     persistLocal();updateBalanceUI();renderProfile();
-    const msg=dailyState.streak>=14?' 🔥 14/14 — максимум':' 🔥 Забирание '+dailyState.streak+'/14';
+    const msg=dailyState.streak>=14?' 🔥 14/14 — максимум':' 🔥 Забрано '+dailyState.streak+'/14';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
   }catch(e){
     const msg=String(e?.message||'');
@@ -7176,7 +7216,7 @@ async function refreshGlobalTechBreak(){
 }
 setInterval(refreshGlobalTechBreak, 15000);
 setInterval(()=>{ if(data) renderBuffs(); }, 30000);
-setInterval(()=>{ if(data) updateDailyUI(); }, 1000);
+setInterval(()=>{ if(data){ updateDailyUI(); if(dailyState.loaded && dailyState.nextAt && Date.now()>=dailyState.nextAt && !dailyStatusInFlight) loadDailyStatus(); } }, 1000);
 
 // Быстрый и безопасный ввод для iOS/Telegram WebView.
 // Действие запускаем на pointerup, чтобы не ждать запаздывающий click в iOS.
