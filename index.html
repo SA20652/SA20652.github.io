@@ -2113,6 +2113,8 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 #premiumModalBuyBtn:active {
   transform: translateY(0);
 }
+
+.premium-choice-actions{display:grid;grid-template-columns:1fr;gap:8px}.premium-gift-open{width:100%;height:42px;border-radius:12px;font-weight:800}.premium-gift-search{display:grid;grid-template-columns:1fr auto;gap:8px;margin:12px 0}.premium-gift-search .input{width:100%;min-width:0}.premium-gift-results{max-height:260px;overflow:auto;display:grid;gap:7px;margin:8px 0}.premium-gift-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(236,228,211,.07);cursor:pointer}.premium-gift-item:hover,.premium-gift-item.selected{border-color:rgba(201,151,77,.45);background:rgba(201,151,77,.08)}.premium-gift-name{font-weight:800}.premium-gift-meta{font-size:10px;color:var(--muted);margin-top:2px}.premium-gift-selected{font-size:11px;color:var(--brass-2);padding:8px 10px;border-radius:10px;background:rgba(201,151,77,.06);border:1px solid rgba(201,151,77,.12)}.premium-gift-empty{font-size:11px;color:var(--muted);text-align:center;padding:16px}.premium-gift-card{width:min(440px,calc(100vw - 28px))}
 </style>
 
 <style id="top-frame-fix">
@@ -3221,7 +3223,7 @@ select optgroup {
           <button type="button" class="profile-style-btn" data-profile-name="diamond"><span style="background:linear-gradient(90deg,#ffffff,#7ee8ff,#c58cff);-webkit-background-clip:text;color:transparent">Aa</span>Алмаз</button>
         </div>
       </div>
-      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 6 часов · 💣 10 игр в «Минах» каждые 6 часов · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium · 20 ⭐</button></div> <div class="daily-card" style="margin-top:12px">
+      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 6 часов · 💣 10 игр в «Минах» каждые 6 часов · x0.85 продажа · +10% удачи · +25% Battle · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div> <div class="daily-card" style="margin-top:12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div><div class="daily-timer" id="dailyTimer">Следующая награда доступна сейчас</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/14</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
       </div>
@@ -3403,7 +3405,8 @@ select optgroup {
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> игр в «Орб-Рывке» каждые 6 часов</span><div class="premium-perk">💣 <span><b>10</b> игр в «Минах» каждые 6 часов</span></div></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
+<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> игр в «Орб-Рывке» каждые 6 часов</span></div><div class="premium-perk">💣 <span><b>10</b> игр в «Минах» каждые 6 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">⚔️ <span><b>+25%</b> награды в батлах</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="premium-price"><span class="premium-price-label">Стоимость</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">🎁 Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
+<div class="modal-overlay" id="premiumGiftModal"><div class="premium-modal-card premium-gift-card"><div class="premium-modal-top"><div class="premium-modal-star">🎁</div><div><div class="premium-modal-title">Подарить Premium</div><div class="premium-modal-sub">Выберите игрока — поиск по нику, ID или Telegram username</div></div></div><div class="premium-gift-search"><input id="premiumGiftSearch" class="input" type="search" placeholder="Ник, @username или ID"><button type="button" class="btn-ghost" id="premiumGiftSearchBtn">Найти</button></div><div id="premiumGiftSelected" class="premium-gift-selected">Игрок не выбран</div><div id="premiumGiftResults" class="premium-gift-results"><div class="premium-gift-empty">Введите запрос для поиска игроков</div></div><div class="premium-price"><span class="premium-price-label">Подарок</span><span class="premium-price-value">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action" id="premiumGiftPayBtn" disabled>Подарить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumGiftCloseBtn">Назад</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <div class="spin-topbar">
@@ -7130,6 +7133,56 @@ function updateThemeIcon(){
   const btn1 = document.getElementById('themeToggle');
   if(btn1) btn1.textContent = icon;
 }
+function escapeHtml(v){const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML;}
+let premiumGiftSelected=null;
+let premiumGiftSearchTimer=null;
+function renderPremiumGiftResults(users){
+  const box=document.getElementById('premiumGiftResults'); if(!box) return;
+  if(!users.length){box.innerHTML='<div class="premium-gift-empty">Ничего не найдено</div>';return;}
+  box.innerHTML=users.map(u=>{
+    const uname=u.username?('@'+u.username):'';
+    const meta=[uname,u.user_id].filter(Boolean).join(' · ');
+    return `<div class="premium-gift-item" data-gift-user="${u.user_id}"><div><div class="premium-gift-name">${escapeHtml(u.display_name||'Игрок')}</div><div class="premium-gift-meta">${escapeHtml(meta)}</div></div><span>🎁</span></div>`;
+  }).join('');
+  box.querySelectorAll('[data-gift-user]').forEach(el=>el.addEventListener('click',()=>selectPremiumGiftUser(el.dataset.giftUser, users)));
+}
+function selectPremiumGiftUser(id, users){
+  const u=users.find(x=>String(x.user_id)===String(id)); if(!u) return;
+  premiumGiftSelected=u;
+  const sel=document.getElementById('premiumGiftSelected'); if(sel) sel.textContent='Выбран: '+(u.display_name||u.username||u.user_id);
+  const pay=document.getElementById('premiumGiftPayBtn'); if(pay){pay.disabled=false;pay.textContent='Подарить Premium · 20 ⭐';}
+  document.querySelectorAll('#premiumGiftResults .premium-gift-item').forEach(x=>x.classList.toggle('selected',String(x.dataset.giftUser)===String(id)));
+}
+async function searchPremiumGiftUsers(){
+  const q=(document.getElementById('premiumGiftSearch')?.value||'').trim();
+  if(!q){renderPremiumGiftResults([]);return;}
+  try{const j=await apiFetch('/api/all-users',{search:q});renderPremiumGiftResults(j.users||[]);}catch(e){showToast('❌ '+(e.message||'Не удалось найти игроков'),'error');}
+}
+function openPremiumGift(){
+  premiumGiftSelected=null;
+  const s=document.getElementById('premiumGiftSearch'); if(s) s.value='';
+  const sel=document.getElementById('premiumGiftSelected'); if(sel) sel.textContent='Игрок не выбран';
+  const pay=document.getElementById('premiumGiftPayBtn'); if(pay){pay.disabled=true;pay.textContent='Подарить Premium · 20 ⭐';}
+  renderPremiumGiftResults([]);
+  closeModal('premiumModal'); openModal('premiumGiftModal');
+}
+async function startPremiumGiftPayment(){
+  if(!premiumGiftSelected) return showToast('❌ Сначала выберите игрока','error');
+  try{
+    if(!window.Telegram?.WebApp?.openInvoice) throw new Error('Оплата доступна только внутри Telegram');
+    const btn=document.getElementById('premiumGiftPayBtn'); if(btn){btn.disabled=true;btn.textContent='Создаём счёт…';}
+    const j=await apiFetch('/api/premium/gift/create',{recipient_id:Number(premiumGiftSelected.user_id)});
+    if(!j.invoice) throw new Error('Не удалось создать счёт');
+    Telegram.WebApp.openInvoice(j.invoice,(status)=>{
+      if(status==='paid'){closeModal('premiumGiftModal');showToast('🎁 Premium подарен на 30 дней','success');setTimeout(()=>loadMe(),350);}
+      else if(status==='failed') showToast('❌ Оплата не прошла','error');
+      else if(status==='cancelled') showToast('Оплата отменена','error');
+      else if(status==='pending') showToast('⏳ Платёж ещё обрабатывается','success');
+      if(btn){btn.disabled=false;btn.textContent='Подарить Premium · 20 ⭐';}
+    });
+  }catch(e){showToast('❌ '+e.message,'error');const btn=document.getElementById('premiumGiftPayBtn');if(btn){btn.disabled=false;btn.textContent='Подарить Premium · 20 ⭐';}}
+}
+
 async function buyPremium(){
   openModal('premiumModal');
 }
@@ -7189,6 +7242,11 @@ document.getElementById('channelSubscribeBtn')?.addEventListener('click',channel
 document.getElementById('channelBonusClose')?.addEventListener('click',hideChannelBonus);
 document.getElementById('settingsChannelBonusBtn')?.addEventListener('click',restoreChannelBonus);
 document.getElementById('premiumModalBuyBtn')?.addEventListener('click',startPremiumPayment);
+document.getElementById('premiumGiftOpenBtn')?.addEventListener('click',openPremiumGift);
+document.getElementById('premiumGiftCloseBtn')?.addEventListener('click',()=>{closeModal('premiumGiftModal');openModal('premiumModal');});
+document.getElementById('premiumGiftPayBtn')?.addEventListener('click',startPremiumGiftPayment);
+document.getElementById('premiumGiftSearchBtn')?.addEventListener('click',searchPremiumGiftUsers);
+document.getElementById('premiumGiftSearch')?.addEventListener('input',()=>{clearTimeout(premiumGiftSearchTimer);premiumGiftSearchTimer=setTimeout(searchPremiumGiftUsers,250);});
 document.getElementById('premiumModalCloseBtn')?.addEventListener('click',()=>closeModal('premiumModal'));
 setTimeout(updateChannelBonusUI,0);
 
