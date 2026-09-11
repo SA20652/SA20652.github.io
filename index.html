@@ -2686,6 +2686,55 @@ select optgroup {
 }
 .inv-sort{min-height:40px;padding:9px 38px 9px 12px!important;background-color:#1a1512!important;}
 </style>
+
+<style id="gdplay-custom-selects">
+/* Native Android/iOS select sheets are intentionally replaced with GDPLAY's
+   own modal so selection looks identical across devices and themes. */
+.gdplay-select-wrap{flex:1;min-width:0;position:relative}
+.gdplay-select-trigger{
+  width:100%;min-height:40px;padding:9px 38px 9px 12px;
+  border:1px solid rgba(201,151,77,.22);border-radius:12px;
+  color:var(--paper);background:
+    linear-gradient(145deg,rgba(201,151,77,.10),rgba(255,255,255,.025) 48%,rgba(0,0,0,.18)),
+    var(--bg-2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 7px 18px rgba(0,0,0,.14);
+  font:600 12px 'Inter',sans-serif;text-align:left;position:relative;
+  transition:border-color .16s ease,box-shadow .16s ease,transform .12s ease;
+}
+.gdplay-select-trigger::after{
+  content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;
+  border-right:2px solid var(--brass-2);border-bottom:2px solid var(--brass-2);
+  transform:translateY(-65%) rotate(45deg);
+}
+.gdplay-select-trigger:active{transform:translateY(1px)}
+.gdplay-select-trigger:focus{outline:none;border-color:rgba(227,184,114,.62);box-shadow:0 0 0 2px rgba(201,151,77,.10),inset 0 1px 0 rgba(255,255,255,.045)}
+.gdplay-select-native-hidden{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+.gdplay-choice-modal{width:min(430px,100%);padding:0;overflow:hidden;background:
+  linear-gradient(145deg,rgba(255,255,255,.035),transparent 42%),
+  linear-gradient(180deg,#211b17,#171310);
+  border:1px solid rgba(201,151,77,.24);border-radius:22px;
+  box-shadow:0 28px 90px rgba(0,0,0,.68),inset 0 1px 0 rgba(255,255,255,.035)}
+.gdplay-choice-head{padding:18px 18px 14px;border-bottom:1px solid rgba(201,151,77,.15)}
+.gdplay-choice-kicker{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:1.2px;text-transform:uppercase;color:var(--brass-dim);margin-bottom:5px}
+.gdplay-choice-title{font:800 19px 'Fraunces',serif;color:var(--paper)}
+.gdplay-choice-sub{margin-top:5px;font-size:11px;color:var(--muted)}
+.gdplay-choice-list{padding:8px;max-height:min(65dvh,520px);overflow:auto}
+.gdplay-choice-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 12px;margin:3px 0;border:1px solid transparent;border-radius:13px;
+  background:rgba(255,255,255,.018);color:var(--paper);font:600 12px 'Inter',sans-serif;text-align:left}
+.gdplay-choice-option:active{transform:scale(.99)}
+.gdplay-choice-option.is-selected{
+  background:linear-gradient(90deg,rgba(201,151,77,.15),rgba(201,151,77,.055));
+  border-color:rgba(201,151,77,.34);box-shadow:inset 3px 0 0 var(--brass)
+}
+.gdplay-choice-option-check{flex:0 0 22px;width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(236,228,211,.28);display:grid;place-items:center;color:transparent}
+.gdplay-choice-option.is-selected .gdplay-choice-option-check{
+  color:#17120e;border-color:var(--brass-2);background:var(--brass-2);font-size:12px;font-weight:900
+}
+.gdplay-choice-close{margin:4px 12px 12px;width:calc(100% - 24px)}
+/* Theme-aware accents: existing global theme variables automatically flow here. */
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -2989,6 +3038,7 @@ select optgroup {
       </div>
       <div class="inv-sort-row">
         <label for="inventorySort" class="section-sub" style="margin:0">Сортировка</label>
+        <div class="gdplay-select-wrap" data-select-id="inventorySort"></div>
         <select id="inventorySort" class="inv-sort" aria-label="Сортировка кубов">
           <option value="value-desc">Стоимость: сначала дорогие</option>
           <option value="value-asc">Стоимость: сначала дешёвые</option>
@@ -8179,3 +8229,96 @@ boot();
 })();
 </script>
 
+
+<div class="modal-overlay" id="gdplaySelectModal" aria-hidden="true">
+  <div class="gdplay-choice-modal" role="dialog" aria-modal="true" aria-labelledby="gdplayChoiceTitle">
+    <div class="gdplay-choice-head">
+      <div class="gdplay-choice-kicker">GDPLAY / ВЫБОР</div>
+      <div class="gdplay-choice-title" id="gdplayChoiceTitle">Выберите вариант</div>
+      <div class="gdplay-choice-sub" id="gdplayChoiceSub">Настройка интерфейса</div>
+    </div>
+    <div class="gdplay-choice-list" id="gdplayChoiceList"></div>
+    <button type="button" class="btn-ghost gdplay-choice-close" id="gdplayChoiceClose">Закрыть</button>
+  </div>
+</div>
+
+<script id="gdplay-custom-selects-js">
+(function(){
+  const modal=document.getElementById('gdplaySelectModal');
+  const list=document.getElementById('gdplayChoiceList');
+  const title=document.getElementById('gdplayChoiceTitle');
+  const sub=document.getElementById('gdplayChoiceSub');
+  const closeBtn=document.getElementById('gdplayChoiceClose');
+  let activeSelect=null;
+
+  function closeChoice(){
+    if(!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+    activeSelect=null;
+  }
+
+  function syncTrigger(select){
+    const wrap=document.querySelector('.gdplay-select-wrap[data-select-id="'+CSS.escape(select.id)+'"]');
+    if(!wrap) return;
+    const trigger=wrap.querySelector('.gdplay-select-trigger');
+    const opt=select.options[select.selectedIndex];
+    if(trigger) trigger.textContent=opt ? opt.textContent.trim() : 'Выберите вариант';
+  }
+
+  function openChoice(select){
+    if(!modal || !select) return;
+    activeSelect=select;
+    title.textContent=select.dataset.gdplayTitle || (select.id==='inventorySort' ? 'Сортировка кубов' : 'Выберите вариант');
+    sub.textContent=select.dataset.gdplaySub || 'Выберите вариант в стиле GDPLAY';
+    list.innerHTML='';
+    Array.from(select.options).forEach((opt)=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='gdplay-choice-option'+(opt.selected?' is-selected':'');
+      b.innerHTML='<span>'+String(opt.textContent||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span><span class="gdplay-choice-option-check">✓</span>';
+      b.addEventListener('click',()=>{
+        select.value=opt.value;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        syncTrigger(select);
+        closeChoice();
+      });
+      list.appendChild(b);
+    });
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+  }
+
+  function initSelect(select){
+    if(!select || select.dataset.gdplayCustomised==='1') return;
+    select.dataset.gdplayCustomised='1';
+    select.classList.add('gdplay-select-native-hidden');
+    let wrap=document.querySelector('.gdplay-select-wrap[data-select-id="'+CSS.escape(select.id)+'"]');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.className='gdplay-select-wrap';
+      wrap.dataset.selectId=select.id;
+      select.parentNode.insertBefore(wrap,select);
+    }
+    const trigger=document.createElement('button');
+    trigger.type='button';
+    trigger.className='gdplay-select-trigger';
+    trigger.setAttribute('aria-haspopup','dialog');
+    trigger.setAttribute('aria-controls','gdplaySelectModal');
+    trigger.addEventListener('click',()=>openChoice(select));
+    wrap.appendChild(trigger);
+    syncTrigger(select);
+    select.addEventListener('change',()=>syncTrigger(select));
+  }
+
+  function initAll(){
+    document.querySelectorAll('select').forEach(initSelect);
+  }
+
+  closeBtn?.addEventListener('click',closeChoice);
+  modal?.addEventListener('click',(e)=>{ if(e.target===modal) closeChoice(); });
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeChoice(); });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initAll);
+  else initAll();
+})();
+</script>
