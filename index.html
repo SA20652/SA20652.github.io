@@ -1745,6 +1745,7 @@ window.lockUpgradeResult=function(result,angle){
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{transform:scale(1.10);opacity:1;box-shadow:0 0 16px rgba(227,184,114,.16);}
 #spinModal .reel-line{width:3px;box-shadow:0 0 12px rgba(227,184,114,.75);}
 @media(max-width:430px){#spinModal .wheel-item{width:100px;min-width:100px;}}
+#spinModal .spin-result{animation:resultPopLite .32s ease-out;} @keyframes resultPopLite{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 </style>
 
 <style id="gdplay-multi-open-v7">
@@ -5250,30 +5251,16 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
 
-function spinWheelIn(container,dial,items,wonIndex,onNearStop=null){
+function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?500:2200;
+  const duration=reduced?650:4200;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{
-    requestAnimationFrame(()=>{
-      dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;
-      dial.style.transform=`translate3d(-${offset}px,0,0)`;
-    });
-    const revealAt=Math.max(0,Math.floor(duration*0.92));
-    if(typeof onNearStop==='function') setTimeout(()=>{ try{ onNearStop(); }catch(_){} },revealAt);
-    setTimeout(()=>{
-      dial.style.transition='none';
-      dial.style.transform=`translate3d(-${offset}px,0,0)`;
-      dial.classList.remove('is-spinning');
-      dial.classList.add('is-stopped');
-      resolve();
-    },duration+20);
-  });
+  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},260);},duration+40);});
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -5306,6 +5293,7 @@ function showSpinResult(item, isSecret){
     ${isSecret ? '<div style="margin-top:8px;font-size:11px;color:var(--brass-2)">✨ Ты нашёл тайную комнату хранилища</div>' : ''}`;
   box.classList.remove('hidden');
   document.getElementById('spinCloseBtn').classList.remove('hidden');
+  spawnConfetti(document.querySelector('.spin-modal'), m.color);
 }
 
 let vaultSoundAt = 0;
@@ -5480,7 +5468,7 @@ async function openCaseBatch(c, qty, useKey=false){
       buildWheelIn(dial,c.items,wonIndex,won.value,won);
       rows.push({row,dial,wonIndex});
     }
-    multiRow.classList.remove('reel-opening');
+    multiRow.classList.remove('reel-opening'); void multiRow.offsetWidth; multiRow.classList.add('reel-opening');
     if(pill) pill.textContent=`${qty} КРУТЯТСЯ`;
     const revealBatch=()=>{
       multiResult.classList.remove('hidden');
@@ -5499,12 +5487,7 @@ async function openCaseBatch(c, qty, useKey=false){
     if(wonIndex<0) wonIndex=0;
     buildWheel(c.items,wonIndex,won.value,won);
     wheelWrap.classList.remove('reel-opening');
-    await spinWheelIn(wheelWrap,document.getElementById('wheelDial'),c.items,wonIndex,()=>{
-      // Reveal the authoritative reward just before the reel fully settles.
-      // The final stop still completes normally; the player simply does not
-      // wait through a dead frame after the result is visually obvious.
-      showSpinResult(won,isSecret);
-    });
+    await spinWheelIn(wheelWrap,document.getElementById('wheelDial'),c.items,wonIndex);
     if(pill) pill.textContent='ГОТОВО';
   }
 
@@ -5610,7 +5593,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   buildWheel(c.items, wonIndex, won.value, won);
   const dial = document.getElementById('wheelDial');
   const wheelWrap = document.getElementById('wheelWrap');
-  if(wheelWrap) wheelWrap.classList.remove('reel-opening');
+  if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
   if(dial) dial.style.opacity='1';
   openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
@@ -7772,13 +7755,15 @@ boot();
 
 <style id="gdplay-safe-reward-animation">
 #casesList .rad-drop{transform-origin:center;will-change:transform,opacity,filter;}
-#casesList .rad-drop.reward-switch{animation:none!important;}
+#casesList .rad-drop.reward-switch{animation:rewardSwitchIn .58s cubic-bezier(.16,1,.3,1);}
 @keyframes rewardSwitchIn{0%{opacity:0;transform:translateY(10px) scale(.88) rotateX(-18deg);filter:blur(4px)}45%{opacity:1;transform:translateY(-3px) scale(1.04) rotateX(5deg);filter:blur(0)}75%{transform:translateY(1px) scale(.99)}100%{transform:translateY(0) scale(1) rotateX(0)}}
-#casesList .rad-drop.reward-switch:after{display:none!important;}
+#casesList .rad-drop.reward-switch:after{content:"";position:absolute;inset:-2px;border-radius:inherit;background:linear-gradient(100deg,transparent 15%,rgba(255,255,255,.18) 48%,transparent 78%);transform:translateX(-120%);animation:rewardShine .55s ease-out;pointer-events:none;}
 @keyframes rewardShine{to{transform:translateX(120%)}}
-#spinModal .wheel-wrap.reel-opening{animation:none!important;}
+#spinModal .wheel-wrap.reel-opening{animation:safeOpenGlow .7s ease-out;}
 #spinModal .spin-modal{transition:box-shadow .45s ease,transform .45s ease;}
 @keyframes safeOpenGlow{0%{transform:scale(.94);box-shadow:0 0 0 rgba(255,220,150,0)}45%{transform:scale(1.012);box-shadow:0 0 55px rgba(226,184,109,.28)}100%{transform:scale(1);box-shadow:0 30px 80px rgba(0,0,0,.65)}}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{animation:rewardWinner .72s cubic-bezier(.16,1,.3,1);}
+@keyframes rewardWinner{0%{transform:scale(.82);filter:brightness(1.8) drop-shadow(0 0 0 transparent);opacity:.5}55%{transform:scale(1.14);filter:brightness(1.35) drop-shadow(0 0 24px rgba(255,220,150,.7));opacity:1}100%{transform:scale(1.08);filter:brightness(1) drop-shadow(0 0 12px rgba(255,220,150,.28))}}
 </style>
 
 <style id="gdplay-case-price-right">
