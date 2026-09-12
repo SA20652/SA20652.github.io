@@ -542,7 +542,9 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .menu-item{display:flex;width:100%;min-height:44px;box-sizing:border-box;padding:11px 12px;align-items:center;text-align:left;background:transparent;border:0;color:var(--paper);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;position:relative;z-index:1;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 .menu-item:hover{background:var(--bg-3);}
 .menu-item:active{background:var(--bg-3);transform:none;}
-.menu-panel{pointer-events:auto;isolation:isolate;box-sizing:border-box;width:220px;overflow:hidden;}
+.menu-panel{pointer-events:auto;isolation:isolate;box-sizing:border-box;width:220px;max-width:calc(100vw - 24px);overflow:hidden;}
+.notification-modal{width:min(460px,calc(100vw - 24px));max-width:460px;box-sizing:border-box;margin:0 auto;}
+@media(max-width:380px){.menu-panel{width:min(220px,calc(100vw - 20px));right:0}.notification-modal{width:calc(100vw - 16px);}}
 
 /* Profile personalization */
 .profile-avatar-wrap{position:relative;width:86px;height:86px;display:flex;align-items:center;justify-content:center;}
@@ -5215,6 +5217,25 @@ try{
   }
 }catch(e){}
 
+// Visual loops use requestAnimationFrame, so browsers automatically render at
+// the device's native refresh rate (including 90/120/144 Hz when available).
+// We never cap the UI to 60 FPS or run a competing 60 FPS timer.
+(function enableHighRefreshUI(){
+  try{
+    let frames=0,start=performance.now();
+    const probe=(now)=>{
+      frames++;
+      if(now-start>=220){
+        const hz=Math.round((frames*1000)/(now-start));
+        document.documentElement.dataset.displayHz=String(Math.max(60,Math.min(240,hz)));
+        return;
+      }
+      requestAnimationFrame(probe);
+    };
+    requestAnimationFrame(probe);
+  }catch(_){}
+})();
+
 const REEL_ITEM_HEIGHT = 86;
 const REEL_ITEM_WIDTH = 104;
 const REEL_LENGTH = 28;
@@ -5229,7 +5250,7 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
 
-function spinWheelIn(container,dial,items,wonIndex){
+function spinWheelIn(container,dial,items,wonIndex,onNearStop=null){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -5243,6 +5264,8 @@ function spinWheelIn(container,dial,items,wonIndex){
       dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;
       dial.style.transform=`translate3d(-${offset}px,0,0)`;
     });
+    const revealAt=Math.max(0,Math.floor(duration*0.92));
+    if(typeof onNearStop==='function') setTimeout(()=>{ try{ onNearStop(); }catch(_){} },revealAt);
     setTimeout(()=>{
       dial.style.transition='none';
       dial.style.transform=`translate3d(-${offset}px,0,0)`;
@@ -5459,7 +5482,14 @@ async function openCaseBatch(c, qty, useKey=false){
     }
     multiRow.classList.remove('reel-opening');
     if(pill) pill.textContent=`${qty} КРУТЯТСЯ`;
-    await Promise.all(rows.map(r=>spinWheelIn(r.row,r.dial,c.items,r.wonIndex)));
+    const revealBatch=()=>{
+      multiResult.classList.remove('hidden');
+      multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
+      const nearTotal=wins.reduce((sum,w)=>sum+Math.max(0,Number(w.value)||0),0);
+      if(resultBox){resultBox.classList.remove('hidden');resultBox.innerHTML='<div class="spin-final-label">Награды готовы</div><div class="spin-result-value">Итого: '+nearTotal.toLocaleString('ru-RU')+' орбов</div>';}
+      if(closeBtn) closeBtn.classList.remove('hidden');
+    };
+    await Promise.all(rows.map(r=>spinWheelIn(r.row,r.dial,c.items,r.wonIndex,revealBatch)));
     if(pill) pill.textContent='ГОТОВО';
   }else{
     const won=wins[0];
@@ -5469,7 +5499,12 @@ async function openCaseBatch(c, qty, useKey=false){
     if(wonIndex<0) wonIndex=0;
     buildWheel(c.items,wonIndex,won.value,won);
     wheelWrap.classList.remove('reel-opening');
-    await spinWheelIn(wheelWrap,document.getElementById('wheelDial'),c.items,wonIndex);
+    await spinWheelIn(wheelWrap,document.getElementById('wheelDial'),c.items,wonIndex,()=>{
+      // Reveal the authoritative reward just before the reel fully settles.
+      // The final stop still completes normally; the player simply does not
+      // wait through a dead frame after the result is visually obvious.
+      showSpinResult(won,isSecret);
+    });
     if(pill) pill.textContent='ГОТОВО';
   }
 
