@@ -7542,6 +7542,15 @@ window.addEventListener('unhandledrejection', e=>{
 
 window.apiFetch = apiFetch;
 
+// Keep the server-side presence fresh while the app is open.
+let gdPresenceTimer = null;
+async function refreshPresence(){
+  try { await apiFetch('/api/presence',{}); } catch(e) {}
+}
+setTimeout(refreshPresence, 1500);
+gdPresenceTimer = setInterval(refreshPresence, 30000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refreshPresence(); });
+
 boot();
 
 })();
