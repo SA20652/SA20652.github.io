@@ -5281,6 +5281,54 @@ function runSecretReveal(){
 
 let caseUiDirty=false;
 
+function spawnConfetti(container, color){
+  // Lightweight, self-contained celebration effect for case rewards.
+  // The old UI called this helper but the function was missing, which caused
+  // "spawnConfetti is not defined" exactly when the player pressed "Забрать"
+  // after receiving a reward.
+  if(!container) return;
+  try{
+    const host=document.createElement('div');
+    host.className='spin-confetti';
+    host.setAttribute('aria-hidden','true');
+    Object.assign(host.style,{
+      position:'absolute',inset:'0',overflow:'hidden',pointerEvents:'none',
+      zIndex:'20'
+    });
+    const rect=container.getBoundingClientRect();
+    const palette=[color||'#e6a72e','#ffffff','#9a9a9a','#4f8fe6','#a855e6'];
+    const count=28;
+    for(let i=0;i<count;i++){
+      const piece=document.createElement('i');
+      const size=4+Math.random()*5;
+      const x=20+Math.random()*60;
+      const dx=(Math.random()-.5)*220;
+      const delay=Math.random()*140;
+      const duration=650+Math.random()*750;
+      Object.assign(piece.style,{
+        position:'absolute',left:x+'%',top:'22%',width:size+'px',height:(size*1.7)+'px',
+        background:palette[i%palette.length],borderRadius:'2px',opacity:'0',
+        transform:`translate3d(0,0,0) rotate(${Math.random()*180}deg)`,
+        animation:`gdplayConfettiFall ${duration}ms cubic-bezier(.2,.8,.3,1) ${delay}ms forwards`,
+        '--dx':dx+'px'
+      });
+      host.appendChild(piece);
+    }
+    container.style.position=container.style.position||'relative';
+    container.appendChild(host);
+    setTimeout(()=>host.remove(),1700);
+  }catch(_){
+    // Celebration is cosmetic; never let it break case collection.
+  }
+}
+
+if(!document.getElementById('gdplay-confetti-style')){
+  const style=document.createElement('style');
+  style.id='gdplay-confetti-style';
+  style.textContent=`@keyframes gdplayConfettiFall{0%{opacity:0;transform:translate3d(0,0,0) rotate(0deg)}12%{opacity:1}100%{opacity:0;transform:translate3d(var(--dx),170px,0) rotate(420deg)}}`;
+  document.head.appendChild(style);
+}
+
 function showSpinResult(item, isSecret){
   const m = RARITY_META[item.rarity];
   const box = document.getElementById('spinResult');
