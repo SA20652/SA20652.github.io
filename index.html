@@ -3639,7 +3639,7 @@ function normalizeAllCubeValues(){
 // ===== STATE =====
 let currentUser = null;
 let data = null;
-let dailyState = {nextAt:0, availableAt:0, streak:0, claims:0, reward:1000, premium:false, loaded:false, available:false, waiting:false, completed:false};
+let dailyState = {nextAt:0, availableAt:0, streak:0, claims:0, reward:1000, premium:false, loaded:false, available:false, completed:false};
 let dailyStatusInFlight = false;
 const LOW_POWER_DEVICE = (Number(navigator.hardwareConcurrency||8)<=4) || (Number(navigator.deviceMemory||8)<=4);
 if(LOW_POWER_DEVICE) document.documentElement.classList.add('low-power');
@@ -5280,6 +5280,54 @@ function runSecretReveal(){
 
 
 let caseUiDirty=false;
+
+function spawnConfetti(container, color){
+  // Lightweight, self-contained celebration effect for case rewards.
+  // The old UI called this helper but the function was missing, which caused
+  // "spawnConfetti is not defined" exactly when the player pressed "Забрать"
+  // after receiving a reward.
+  if(!container) return;
+  try{
+    const host=document.createElement('div');
+    host.className='spin-confetti';
+    host.setAttribute('aria-hidden','true');
+    Object.assign(host.style,{
+      position:'absolute',inset:'0',overflow:'hidden',pointerEvents:'none',
+      zIndex:'20'
+    });
+    const rect=container.getBoundingClientRect();
+    const palette=[color||'#e6a72e','#ffffff','#9a9a9a','#4f8fe6','#a855e6'];
+    const count=28;
+    for(let i=0;i<count;i++){
+      const piece=document.createElement('i');
+      const size=4+Math.random()*5;
+      const x=20+Math.random()*60;
+      const dx=(Math.random()-.5)*220;
+      const delay=Math.random()*140;
+      const duration=650+Math.random()*750;
+      Object.assign(piece.style,{
+        position:'absolute',left:x+'%',top:'22%',width:size+'px',height:(size*1.7)+'px',
+        background:palette[i%palette.length],borderRadius:'2px',opacity:'0',
+        transform:`translate3d(0,0,0) rotate(${Math.random()*180}deg)`,
+        animation:`gdplayConfettiFall ${duration}ms cubic-bezier(.2,.8,.3,1) ${delay}ms forwards`,
+        '--dx':dx+'px'
+      });
+      host.appendChild(piece);
+    }
+    container.style.position=container.style.position||'relative';
+    container.appendChild(host);
+    setTimeout(()=>host.remove(),1700);
+  }catch(_){
+    // Celebration is cosmetic; never let it break case collection.
+  }
+}
+
+if(!document.getElementById('gdplay-confetti-style')){
+  const style=document.createElement('style');
+  style.id='gdplay-confetti-style';
+  style.textContent=`@keyframes gdplayConfettiFall{0%{opacity:0;transform:translate3d(0,0,0) rotate(0deg)}12%{opacity:1}100%{opacity:0;transform:translate3d(var(--dx),170px,0) rotate(420deg)}}`;
+  document.head.appendChild(style);
+}
 
 function showSpinResult(item, isSecret){
   const m = RARITY_META[item.rarity];
@@ -6956,12 +7004,11 @@ function renderProfile(){
   }
   const streak=Number(dailyState.streak||0);
   const nextAt=Number(dailyState.nextAt||0);
-  const waiting=!!dailyState.waiting && streak<14;
   const can=!!dailyState.available && streak<14 && Date.now()<nextAt;
   const nextReward=Number(dailyState.reward||0);
   document.getElementById('dailyDesc').textContent=streak>=14?'Серия 14/14 завершена':'Награда: '+nextReward.toLocaleString('ru-RU')+' 💰';
   document.getElementById('dailyBtn').disabled=!can;
-  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=14) timer.textContent='Все 14 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else if(waiting){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else timer.textContent='Награда недоступна'; }
+  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=14) timer.textContent='Все 14 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else timer.textContent='Награда недоступна'; }
   const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/14';
   const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/14*100)+'%';
   if(nextAt && Date.now()>=nextAt && !dailyStatusInFlight) loadDailyStatus();
@@ -6976,7 +7023,7 @@ async function loadDailyStatus(){
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
-    dailyState.nextAt=Number(j.available?j.expires_at:(j.available_at||j.next_daily)||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.waiting=!!j.waiting; dailyState.completed=!!j.completed; dailyState.loaded=true;
+    dailyState.nextAt=Number(j.expires_at||j.next_daily||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
     data.dailyStreak=dailyState.streak;
     data.lastDaily=Number(j.last_daily||data.lastDaily||0);
     updateDailyUI();
@@ -6987,13 +7034,11 @@ function updateDailyUI(){
   if(!data)return;
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
   const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
-  const nextAt=Number(dailyState.nextAt||0),availableAt=Number(dailyState.availableAt||0);
-  const waiting=!!dailyState.waiting && streak<14;
-  const can=!!dailyState.available && streak<14 && Date.now()<nextAt;
+  const nextAt=Number(dailyState.nextAt||0),can=!nextAt||Date.now()>=nextAt;
   const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующая награда: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn)btn.disabled=!can;
-  const timer=document.getElementById('dailyTimer');if(timer){if(can){const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}else if(waiting){const left=Math.max(0,availableAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}else timer.textContent='Награда недоступна';}}
+  const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Следующая награда доступна сейчас';else{const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}}
   const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/14';
   const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/14*100)+'%';
 }
@@ -7006,7 +7051,7 @@ async function claimDaily(){
   try{
     const j=await apiFetch('/api/daily',{});
     data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
-    dailyState.nextAt=Number(j.expires_at||j.next_daily||0);dailyState.availableAt=Number(j.available_at||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=false;dailyState.waiting=dailyState.streak<14&&!!dailyState.nextAt;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
+    dailyState.nextAt=Number(j.expires_at||j.next_daily||0);dailyState.availableAt=Number(j.available_at||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=dailyState.streak<14&&!!dailyState.nextAt;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
     persistLocal();updateBalanceUI();renderProfile();
     const msg=dailyState.streak>=14?' 🔥 14/14 — максимум':' 🔥 Забрано '+dailyState.streak+'/14';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');

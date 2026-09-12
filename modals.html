@@ -1005,10 +1005,12 @@ async function boot(){
   const startupLoaderLogo=document.getElementById('startupLoaderLogo');
   const firstLaunch=storageGet(RELEASE_KEY)!=='1';
 
-  // Логотип берём из уже встроенного логотипа GDPLAY — без запроса к серверу.
+  // Для загрузки используем УЖЕ ВСТРОЕННУЮ в страницу картинку куба.
+  // Ничего внешнего не загружаем: берём тот же src, который используется
+  // на releaseScreen, поэтому куб гарантированно доступен до запуска API.
   try{
-    const sourceLogo=document.querySelector('.auth-logo img');
-    if(startupLoaderLogo && sourceLogo?.src) startupLoaderLogo.src=sourceLogo.src;
+    const sourceCube=document.querySelector('#releaseScreen .release-logo');
+    if(startupLoaderLogo && sourceCube?.src) startupLoaderLogo.src=sourceCube.src;
   }catch(e){}
 
   // Серверная инициализация запускается параллельно: локальная заставка
