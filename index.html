@@ -7034,7 +7034,7 @@ function updateDailyUI(){
   if(!data)return;
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
   const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
-  const nextAt=Number(dailyState.nextAt||0),can=!nextAt||Date.now()>=nextAt;
+  const nextAt=Number(dailyState.nextAt||0),can=!!dailyState.available && dailyState.streak<14 && (!nextAt || Date.now()<nextAt);
   const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующая награда: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn)btn.disabled=!can;
