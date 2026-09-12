@@ -2674,7 +2674,7 @@ select optgroup {
 .case-icon{display:flex;align-items:center;justify-content:center;overflow:hidden;}
 </style><style id="case-images-css">
 .case-icon-image{width:100%;height:100%;object-fit:contain;display:block;background:transparent;border:0;user-select:none;-webkit-user-drag:none;}
-#casesList .rad-case-art{background:transparent!important;box-shadow:none!important;}
+#casesList .rad-case-art{background:transparent!important;box-shadow:none!important;font-size:0!important;}
 #casesList .rad-case-art-glow{pointer-events:none;}
 #casesList .rad-case-art span{display:flex;width:100%;height:100%;align-items:center;justify-content:center;}
 #casesList .rad-case-art span .case-icon-image{width:100%;height:100%;object-fit:contain;}
@@ -5139,7 +5139,7 @@ let CASE_IMAGES = {};
 let caseImagesPromise = null;
 function caseImage(caseId, alt=''){
   const src=CASE_IMAGES[String(caseId)] || '';
-  return src ? `<img src="${src}" class="case-icon-image" alt="${String(alt).replace(/"/g,'&quot;')}" draggable="false">` : '';
+  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" onerror="this.style.display='none'">` : '';
 }
 function ensureCaseImages(){
   if(Object.keys(CASE_IMAGES).length) return Promise.resolve();
