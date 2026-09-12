@@ -2672,6 +2672,14 @@ select optgroup {
 .bot-case-icon .case-icon-image{width:100%;height:100%;object-fit:contain;}
 .spin-case-icon .case-icon-image{width:100%;height:100%;object-fit:contain;}
 .case-icon{display:flex;align-items:center;justify-content:center;overflow:hidden;}
+</style><style id="case-images-css">
+.case-icon-image{width:100%;height:100%;object-fit:contain;display:block;background:transparent;border:0;user-select:none;-webkit-user-drag:none;}
+#casesList .rad-case-art{background:transparent!important;box-shadow:none!important;}
+#casesList .rad-case-art-glow{pointer-events:none;}
+#casesList .rad-case-art span{display:flex;width:100%;height:100%;align-items:center;justify-content:center;}
+#casesList .rad-case-art span .case-icon-image{width:100%;height:100%;object-fit:contain;}
+#spinModal .spin-case-icon{background:transparent!important;box-shadow:none!important;}
+#spinModal .spin-case-icon .case-icon-image{width:100%;height:100%;object-fit:contain;}
 </style></head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -3418,9 +3426,9 @@ const AUTH_TOKEN_KEY = 'gdplay_auth_token_v1';
 const MANUAL_AUTH_KEY = 'gdplay_manual_auth_v1';
 const UPGRADE_FAST_KEY = 'gdplay_upgrade_fast_v1';
 const KEY_CATALOG = [
-  {id:'rust-key', name:'Ключ латунного сейфа', rarity:'common', value:120, icon:'<img src="/assets/vault.webp" class="case-icon-image" alt="Хранилище OG">'},
+  {id:'rust-key', name:'Ключ латунного сейфа', rarity:'common', value:120, icon:''},
   {id:'brass-key', name:'Ключ латунного сейфа', rarity:'rare', value:650, icon:'🔑'},
-  {id:'obsidian-key', name:'Ключ чёрного сейфа', rarity:'epic', value:2800, icon:'<img src="/assets/vault.webp" class="case-icon-image" alt="Хранилище OG">'},
+  {id:'obsidian-key', name:'Ключ чёрного сейфа', rarity:'epic', value:2800, icon:''},
   {id:'vault-key', name:'Ключ хранилища сейфа', rarity:'legendary', value:12000, icon:'🔐'},
   {id:'master-key', name:'Мастер-ключ', rarity:'mythic', value:65000, icon:'🔑'}
 ];
@@ -3475,7 +3483,7 @@ const RARITY_META = {
 
 // ===== CASES С НОВЫМИ ЦЕНАМИ КУБОВ =====
 const CASES = [
-  {id:"brass",name:"Латунный сейф",price:500,icon:'<img src="/assets/brass.webp" class="case-icon-image" alt="Латунный сейф">',items:[
+  {id:"brass",name:"Латунный сейф",price:500,icon:'',items:[
     {name:"BrianTheBurger",rarity:"common",value:240,chance:22.0},
     {name:"Surv",rarity:"common",value:300,chance:23.54},
     {name:"Knobbelboy",rarity:"rare",value:450,chance:29.51},
@@ -3485,7 +3493,7 @@ const CASES = [
     {name:"Denni",rarity:"divine",value:4500,chance:3.6432},
     {name:"Ч",rarity:"rare",value:1000,chance:1.0}
   ]},
-  {id:"obsidian",name:"Чёрный сейф",price:2500,icon:'<img src="/assets/obsidian.png" class="case-icon-image" alt="Чёрный сейф">',items:[
+  {id:"obsidian",name:"Чёрный сейф",price:2500,icon:'',items:[
     {name:"Dorami",rarity:"common",value:1000,chance:20.92},
     {name:"KrmaL",rarity:"common",value:1375,chance:22.52},
     {name:"Cursed",rarity:"rare",value:1875,chance:29.49},
@@ -3494,7 +3502,7 @@ const CASES = [
     {name:"FunnyGame",rarity:"mythic",value:8500,chance:5.05},
     {name:"Viprin",rarity:"divine",value:18750,chance:3.56}
   ]},
-  {id:"gilded",name:"Позолоченный сейф",price:6000,icon:'<img src="/assets/gilded.png" class="case-icon-image" alt="Позолоченный сейф">',items:[
+  {id:"gilded",name:"Позолоченный сейф",price:6000,icon:'',items:[
     {name:"Michigun",rarity:"common",value:2400,chance:19.86},
     {name:"Zobros",rarity:"common",value:3300,chance:21.54},
     {name:"EVW",rarity:"rare",value:4500,chance:29.43},
@@ -3503,7 +3511,7 @@ const CASES = [
     {name:"GuitarHeroStyles",rarity:"mythic",value:20400,chance:4.95},
     {name:"GMDani",rarity:"divine",value:45000,chance:3.43}
   ]},
-  {id:"demon",name:"Demon-сейф",price:12000,icon:'<img src="/assets/demon.png" class="case-icon-image" alt="Demon-сейф">',items:[
+  {id:"demon",name:"Demon-сейф",price:12000,icon:'',items:[
     {name:"Luqualizer",rarity:"common",value:4800,chance:18.83},
     {name:"Hinds",rarity:"common",value:6600,chance:20.56},
     {name:"Partition",rarity:"rare",value:9000,chance:29.3},
@@ -3512,7 +3520,7 @@ const CASES = [
     {name:"Diamond",rarity:"mythic",value:40800,chance:4.85},
     {name:"A6",rarity:"divine",value:90000,chance:3.32}
   ]},
-  {id:"creator",name:"Creator-сейф",price:22000,icon:'<img src="/assets/creator.png" class="case-icon-image" alt="Creator-сейф">',items:[
+  {id:"creator",name:"Creator-сейф",price:22000,icon:'',items:[
     {name:"Wooshi",rarity:"common",value:8800,chance:17.83},
     {name:"RG",rarity:"common",value:12100,chance:19.61},
     {name:"Crisis",rarity:"rare",value:16500,chance:29.13},
@@ -3521,7 +3529,7 @@ const CASES = [
     {name:"SandStorm",rarity:"mythic",value:74800,chance:4.76},
     {name:"SpirteX",rarity:"divine",value:165000,chance:3.2}
   ]},
-  {id:"legend",name:"Легендарный сейф",price:40000,icon:'<img src="/assets/legend.png" class="case-icon-image" alt="Легендарный сейф">',items:[
+  {id:"legend",name:"Легендарный сейф",price:40000,icon:'',items:[
     {name:"Mycrafted",rarity:"common",value:16000,chance:16.83},
     {name:"Dolphy",rarity:"common",value:22000,chance:18.68},
     {name:"Crazen",rarity:"rare",value:30000,chance:28.91},
@@ -3531,7 +3539,7 @@ const CASES = [
     {name:"MindCap",rarity:"divine",value:300000,chance:3.0591},
     {name:"MrKotovskyu",rarity:"divine",value:500000,chance:1.0}
   ]},
-  {id:"extreme",name:"Extreme-сейф",price:75000,icon:'<img src="/assets/extreme.png" class="case-icon-image" alt="Extreme-сейф">',items:[
+  {id:"extreme",name:"Extreme-сейф",price:75000,icon:'',items:[
     {name:"LDMike",rarity:"common",value:30000,chance:15.88},
     {name:"Vortrox",rarity:"common",value:41250,chance:17.76},
     {name:"Temp",rarity:"rare",value:56250,chance:28.64},
@@ -3540,7 +3548,7 @@ const CASES = [
     {name:"Vernam",rarity:"mythic",value:255000,chance:4.58},
     {name:"Jenkins",rarity:"divine",value:562500,chance:2.98}
   ]},
-  {id:"vault",name:"Хранилище OG",price:130000,icon:'<img src="/assets/vault.webp" class="case-icon-image" alt="Хранилище OG">',items:[
+  {id:"vault",name:"Хранилище OG",price:130000,icon:'',items:[
     {name:"Nautilus",rarity:"common",value:52000,chance:14.95},
     {name:"Cersia",rarity:"common",value:71500,chance:16.87},
     {name:"Rafer",rarity:"rare",value:97500,chance:28.3},
@@ -3549,7 +3557,7 @@ const CASES = [
     {name:"Sea",rarity:"mythic",value:442000,chance:4.5},
     {name:"SoulsTRK",rarity:"divine",value:975000,chance:2.87}
   ]},
-  {id:"master",name:"Master-сейф",price:220000,icon:'<img src="/assets/master.webp" class="case-icon-image" alt="Master-сейф">',items:[
+  {id:"master",name:"Master-сейф",price:220000,icon:'',items:[
     {name:"Sailent",rarity:"common",value:88000,chance:14.04},
     {name:"AerialShard",rarity:"common",value:121000,chance:16.0},
     {name:"No ob",rarity:"rare",value:165000,chance:27.92},
@@ -3558,7 +3566,7 @@ const CASES = [
     {name:"GToast",rarity:"mythic",value:748000,chance:4.41},
     {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77}
   ]},
-  {id:"icon",name:"Иконический сейф",price:380000,icon:'<img src="/assets/icon.webp" class="case-icon-image" alt="Иконический сейф">',items:[
+  {id:"icon",name:"Иконический сейф",price:380000,icon:'',items:[
     {name:"Superkobster",rarity:"common",value:152000,chance:13.16},
     {name:"nng122",rarity:"common",value:209000,chance:15.14},
     {name:"Netermind",rarity:"rare",value:285000,chance:27.48},
@@ -3568,7 +3576,7 @@ const CASES = [
     {name:"ItzGet",rarity:"mythic",value:1300000,chance:1.0},
     {name:"workfornft",rarity:"divine",value:2850000,chance:2.67}
   ]},
-  {id:"hall",name:"Зал славы GD",price:650000,icon:'<img src="/assets/hall.png" class="case-icon-image" alt="Зал славы GD">',items:[
+  {id:"hall",name:"Зал славы GD",price:650000,icon:'',items:[
     {name:"Riot",rarity:"common",value:260000,chance:12.32},
     {name:"Zoink",rarity:"common",value:357500,chance:14.3},
     {name:"Doggie",rarity:"rare",value:487500,chance:26.9},
@@ -4187,6 +4195,7 @@ async function showApp(skipServer=false){
   normalizeGameState();
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
+  await ensureCaseImages();
   renderAll();
   refreshGlobalTechBreak();
   if(!skipServer) registerWithServer();
@@ -5126,6 +5135,29 @@ function startCasePreviewAnimation(){
   },2000);
 }
 
+let CASE_IMAGES = {};
+let caseImagesPromise = null;
+function caseImage(caseId, alt=''){
+  const src=CASE_IMAGES[String(caseId)] || '';
+  return src ? `<img src="${src}" class="case-icon-image" alt="${String(alt).replace(/"/g,'&quot;')}" draggable="false">` : '';
+}
+function ensureCaseImages(){
+  if(Object.keys(CASE_IMAGES).length) return Promise.resolve();
+  if(caseImagesPromise) return caseImagesPromise;
+  caseImagesPromise=new Promise((resolve)=>{
+    const finish=(images)=>{ if(images&&typeof images==='object') CASE_IMAGES=images; resolve(); };
+    window.addEventListener('message',function onMessage(e){
+      if(e.origin!==location.origin || e.data?.type!=='gdplay-case-images') return;
+      window.removeEventListener('message',onMessage); finish(e.data.images);
+    });
+    const iframe=document.createElement('iframe');
+    iframe.src='case_images.html'; iframe.title=''; iframe.setAttribute('aria-hidden','true');
+    iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
+    iframe.onload=()=>{ try{ finish(iframe.contentWindow.CASE_IMAGES); }catch(e){} };
+    document.body.appendChild(iframe);
+  });
+  return caseImagesPromise;
+}
 function renderCases(){
   const renderVersion = ++casesRenderVersion;
   const el=document.getElementById('casesList');
@@ -5146,7 +5178,7 @@ function renderCases(){
     }).join('');
     return `<article class="rad-case-card" data-case-id="${c.id}">
       
-      <div class="rad-case-art"><div class="rad-case-art-glow"></div><span>${c.icon}</span></div>
+      <div class="rad-case-art"><div class="rad-case-art-glow"></div><span>${caseImage(c.id,c.name)}</span></div>
       <div class="rad-case-main">
         <div class="rad-case-top"><div><div class="rad-case-label">CASE / ${c.id.toUpperCase()}</div><h3>${c.name}</h3></div><div class="rad-price case-price-shift">${Number(c.price).toLocaleString('ru-RU')}<small>💰</small></div></div>
         <div class="rad-case-stats"><span>${c.items.length} наград</span><span>${rarityCount} редких</span><span>шанс зависит от дропа</span></div>
@@ -5492,7 +5524,7 @@ async function openCaseBatch(c, qty, useKey=false){
   closeBtn.classList.add('hidden');
   const crack=document.getElementById('vaultCrack'); if(crack) crack.style.display='none';
   if(title) title.textContent=`${c.name} · ${qty} кейса`;
-  if(icon) icon.textContent=c.icon;
+  if(icon) icon.innerHTML=caseImage(c.id,c.name);
   if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
   if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие сейфа';
   if(pill) pill.textContent='КРУТИМ';
@@ -5663,7 +5695,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(wonIndex < 0) wonIndex = 0;
 
   document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
-  const spinIcon=document.getElementById('spinCaseIcon'); if(spinIcon) spinIcon.innerHTML=c.icon;
+  const spinIcon=document.getElementById('spinCaseIcon'); if(spinIcon) spinIcon.innerHTML=caseImage(c.id,c.name);
   const spinPrice=document.getElementById('spinCasePrice'); if(spinPrice) spinPrice.textContent=`${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinSub=document.getElementById('spinCaseSub'); if(spinSub) spinSub.textContent=`${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinPill=document.getElementById('spinStatusPill'); if(spinPill) spinPill.textContent='КРУТИМ';
