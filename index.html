@@ -2680,7 +2680,23 @@ select optgroup {
 #casesList .rad-case-art span .case-icon-image{width:100%;height:100%;object-fit:contain;}
 #spinModal .spin-case-icon{background:transparent!important;box-shadow:none!important;}
 #spinModal .spin-case-icon .case-icon-image{width:100%;height:100%;object-fit:contain;}
-</style></head>
+</style>
+<style id="case-images-no-zoom">
+#casesList .rad-case-art span,
+#casesList .rad-case-art .case-icon-image,
+#casesList .rad-case-card:hover .rad-case-art span,
+#casesList .rad-case-card:active .rad-case-art span{
+  transform:none!important;
+  transition:none!important;
+}
+#casesList .rad-case-art .case-icon-image{
+  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;display:block!important;
+  pointer-events:none!important;user-select:none!important;-webkit-user-drag:none!important;
+}
+#casesList .rad-case-art{touch-action:manipulation!important;}
+</style>
+</head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
     <img id="startupLoaderLogo" class="startup-loader-logo" alt="GDPLAY" decoding="async" fetchpriority="high">
@@ -5138,23 +5154,34 @@ function startCasePreviewAnimation(){
 let CASE_IMAGES = {};
 let caseImagesPromise = null;
 function caseImage(caseId, alt=''){
-  const src=CASE_IMAGES[String(caseId)] || '';
-  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" onerror="this.style.display='none'">` : '';
+  const aliases={legend:'legendary',icon:'iconic'};
+  const key=String(caseId);
+  const src=CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || '';
+  return src ? `<img src=\"${src}\" class=\"case-icon-image\" alt=\"\" draggable=\"false\" loading=\"eager\" onerror=\"this.style.display='none'\">` : '';
 }
 function ensureCaseImages(){
   if(Object.keys(CASE_IMAGES).length) return Promise.resolve();
   if(caseImagesPromise) return caseImagesPromise;
   caseImagesPromise=new Promise((resolve)=>{
-    const finish=(images)=>{ if(images&&typeof images==='object') CASE_IMAGES=images; resolve(); };
+    let done=false;
+    const finish=(images)=>{ if(done) return; if(images&&typeof images==='object'&&Object.keys(images).length){CASE_IMAGES=images; done=true; resolve();} };
+    // Most reliable path: load the dedicated HTML and read its embedded image map.
+    fetch('case_images.html?v=4',{cache:'no-store'}).then(r=>r.text()).then(html=>{
+      const doc=new DOMParser().parseFromString(html,'text/html');
+      const images={}; doc.querySelectorAll('[data-case-id]').forEach(i=>{ if(i.src) images[i.dataset.caseId]=i.src; });
+      finish(images);
+    }).catch(()=>{});
+    // Fallback for hosts where fetch is unavailable.
     window.addEventListener('message',function onMessage(e){
-      if(e.origin!==location.origin || e.data?.type!=='gdplay-case-images') return;
+      if(e.data?.type!=='gdplay-case-images') return;
       window.removeEventListener('message',onMessage); finish(e.data.images);
     });
     const iframe=document.createElement('iframe');
-    iframe.src='case_images.html'; iframe.title=''; iframe.setAttribute('aria-hidden','true');
+    iframe.src='case_images.html?v=4'; iframe.title=''; iframe.setAttribute('aria-hidden','true');
     iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
     iframe.onload=()=>{ try{ finish(iframe.contentWindow.CASE_IMAGES); }catch(e){} };
     document.body.appendChild(iframe);
+    setTimeout(()=>{ if(!done){ CASE_IMAGES={}; resolve(); } },4000);
   });
   return caseImagesPromise;
 }
