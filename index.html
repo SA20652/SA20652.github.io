@@ -7324,8 +7324,10 @@ window.addEventListener('message',e=>{
 });
 
 
+let techBreakCheckInFlight=false;
 async function refreshGlobalTechBreak(){
-  if(!currentUser || !data) return;
+  if(!currentUser || !data || techBreakCheckInFlight) return;
+  techBreakCheckInFlight=true;
   try{
     const j=await apiFetch('/api/me',{});
     if(j?.user) applyServerState(j.user);
@@ -7333,8 +7335,11 @@ async function refreshGlobalTechBreak(){
     updateAdminTechBreakPromoButton(!!j?.global_tech_break?.enabled);
     if(j?.global_tech_break?.enabled && !j?.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
   }catch(e){}
+  finally{ techBreakCheckInFlight=false; }
 }
-setInterval(refreshGlobalTechBreak, 30000);
+// Проверяем состояние глобального тех. перерыва каждые 5 секунд,
+// чтобы включение/завершение перерыва быстро отображалось у всех игроков.
+setInterval(refreshGlobalTechBreak, 5000);
 setInterval(()=>{ if(document.hidden) return; if(data) renderBuffs(); }, 30000);
 setInterval(()=>{ if(document.hidden) return; if(data){ updateDailyUI(); if(dailyState.loaded && dailyState.nextAt && Date.now()>=dailyState.nextAt && !dailyStatusInFlight) loadDailyStatus(); } }, 1000);
 
