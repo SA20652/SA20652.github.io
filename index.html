@@ -3549,7 +3549,100 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .market-orb-svg{color:#d9a253!important;background:transparent!important;border:0!important;box-shadow:none!important}
 .market-orb-svg .nav-supplied-icon{width:38px!important;height:38px!important;display:block;fill:currentColor;stroke:currentColor;color:currentColor}
 .nav-icon .nav-supplied-icon:hover,.nav-icon .nav-supplied-icon:active,.top-tab-icon .nav-supplied-icon:hover,.top-tab-icon .nav-supplied-icon:active{transform:none!important}
-</style><style id="cases-active-no-fill">nav .nav-btn.active[data-tab="cases"]{background:transparent!important;background-image:none!important;border:0!important;border-color:transparent!important;box-shadow:none!important;outline:0!important;} nav .nav-btn[data-tab="cases"]{box-shadow:none!important;}</style></head>
+</style><style id="cases-active-no-fill">nav .nav-btn.active[data-tab="cases"]{background:transparent!important;background-image:none!important;border:0!important;border-color:transparent!important;box-shadow:none!important;outline:0!important;} nav .nav-btn[data-tab="cases"]{box-shadow:none!important;}</style>
+<style id="gdplay-nav-current-fix">
+/* Актуальная верхняя навигация: Cases / Shop / Orb Rush / Mines / Top */
+nav .nav-btn{
+  position:relative!important;
+  min-height:43px!important;
+  border:1px solid transparent!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  color:var(--muted)!important;
+  transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease!important;
+}
+nav .nav-btn .nav-icon{
+  width:22px!important;height:22px!important;margin:0 auto 3px!important;
+  color:#e0ad58!important;background:transparent!important;border:0!important;box-shadow:none!important;
+}
+nav .nav-btn .nav-icon svg{
+  width:22px!important;height:22px!important;display:block!important;
+  color:currentColor!important;fill:none;stroke:currentColor;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+  vector-effect:non-scaling-stroke!important;filter:drop-shadow(0 0 4px rgba(224,173,88,.18))!important;
+}
+/* Активный пункт: одинаковая золотая подсветка для всех, включая Кейсы */
+nav .nav-btn.active{
+  background:linear-gradient(145deg,rgba(201,151,77,.18),rgba(201,151,77,.06))!important;
+  border-color:rgba(201,151,77,.38)!important;
+  color:#e3b872!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 0 10px rgba(201,151,77,.05)!important;
+}
+nav .nav-btn.active .nav-icon{color:#e3b872!important;}
+nav .nav-btn.active .nav-icon svg{stroke:#e3b872!important;filter:drop-shadow(0 0 5px rgba(224,173,88,.28))!important;}
+/* Кейсы больше не теряют рамку/заливку при выборе */
+nav .nav-btn[data-tab="cases"],
+nav .nav-btn[data-tab="cases"].active,
+nav .nav-btn[data-tab="cases"]:hover,
+nav .nav-btn[data-tab="cases"]:focus,
+nav .nav-btn[data-tab="cases"]:focus-visible{
+  background:transparent!important;
+  border:1px solid transparent!important;
+  box-shadow:none!important;
+}
+nav .nav-btn[data-tab="cases"].active{
+  background:linear-gradient(145deg,rgba(201,151,77,.18),rgba(201,151,77,.06))!important;
+  border-color:rgba(201,151,77,.38)!important;
+  color:#e3b872!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 0 10px rgba(201,151,77,.05)!important;
+}
+nav .nav-btn[data-tab="cases"] .nav-icon svg{
+  fill:currentColor!important;stroke:none!important;
+}
+/* Орб-Рывок: видимая золотая обводка исходного SVG */
+nav .nav-btn[data-tab="plinko"] .nav-icon svg{
+  width:22px!important;height:22px!important;
+  fill:none!important;
+  stroke:#e0ad58!important;
+  stroke-width:2.15!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+  filter:drop-shadow(0 0 5px rgba(224,173,88,.32))!important;
+}
+nav .nav-btn[data-tab="plinko"] .nav-icon svg *{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:2.15!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+nav .nav-btn[data-tab="plinko"].active .nav-icon svg,
+nav .nav-btn[data-tab="plinko"].active .nav-icon svg *{
+  stroke:#f0c878!important;stroke-width:2.25!important;
+}
+/* Магазин и Мины — актуальные SVG из hueta_svg.zip, без старых эффектов */
+nav .nav-btn[data-tab="market"] .nav-icon svg,
+nav .nav-btn[data-tab="mines"] .nav-icon svg{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:1.8!important;
+  filter:drop-shadow(0 0 4px rgba(224,173,88,.22))!important;
+}
+nav .nav-btn[data-tab="market"] .nav-icon svg *,
+nav .nav-btn[data-tab="mines"] .nav-icon svg *{
+  stroke:#e0ad58!important;stroke-width:1.8!important;
+}
+nav .nav-btn[data-tab="market"].active .nav-icon svg,
+nav .nav-btn[data-tab="mines"].active .nav-icon svg,
+nav .nav-btn[data-tab="market"].active .nav-icon svg *,
+nav .nav-btn[data-tab="mines"].active .nav-icon svg *{
+  stroke:#e3b872!important;
+}
+/* Топ — актуальная золотая иконка */
+nav .nav-btn[data-tab="top"] .nav-icon svg{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:1.9!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+  filter:drop-shadow(0 0 4px rgba(224,173,88,.22))!important;
+}
+nav .nav-btn[data-tab="top"].active .nav-icon svg{stroke:#e3b872!important;stroke-width:2.05!important;}
+nav .nav-btn:hover .nav-icon,nav .nav-btn:active .nav-icon,nav .nav-btn:focus .nav-icon{transform:none!important;}
+nav .nav-btn:hover,nav .nav-btn:active{transform:none!important;}
+</style>
+</head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
     <img id="startupLoaderLogo" class="startup-loader-logo" alt="GDPLAY" decoding="async" fetchpriority="high">
