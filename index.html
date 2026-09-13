@@ -2794,73 +2794,61 @@ nav .nav-btn[data-tab="plinko"]{border:0!important;border-color:transparent!impo
 nav .nav-btn[data-tab="plinko"] .nav-icon{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;}
 nav .nav-btn[data-tab="plinko"] .nav-icon svg{width:22px!important;height:22px!important;fill:#e0ad58!important;stroke:none!important;stroke-width:0!important;filter:none!important;}
 nav .nav-btn[data-tab="plinko"] .nav-icon svg *{fill:#e0ad58!important;stroke:none!important;stroke-width:0!important;}
+</style><style id="cases-active-no-fill">nav .nav-btn.active[data-tab="cases"]{background:transparent!important;background-image:none!important;border:0!important;border-color:transparent!important;box-shadow:none!important;outline:0!important;} nav .nav-btn[data-tab="cases"]{box-shadow:none!important;}</style>
+<style id="gdplay-cases-tab-custom">
+/* Только верхняя вкладка "Кейсы" — отдельный стиль */
+nav .nav-btn[data-tab="cases"],
+nav .nav-btn[data-tab="cases"].active,
+nav .nav-btn[data-tab="cases"]:hover,
+nav .nav-btn[data-tab="cases"]:focus,
+nav .nav-btn[data-tab="cases"]:focus-visible,
+nav .nav-btn[data-tab="cases"]:active {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+nav .nav-btn[data-tab="cases"] {
+  color: #e0ad58 !important;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+}
+nav .nav-btn[data-tab="cases"] .nav-icon,
+nav .nav-btn[data-tab="cases"] .nav-icon svg,
+nav .nav-btn[data-tab="cases"] .nav-icon svg * {
+  background: transparent !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+nav .nav-btn[data-tab="cases"] .nav-icon {
+  width: 26px !important;
+  height: 26px !important;
+  margin: 0 auto 4px !important;
+  color: #e0ad58 !important;
+  transform: none !important;
+}
+nav .nav-btn[data-tab="cases"] .nav-icon svg {
+  width: 26px !important;
+  height: 26px !important;
+  fill: none !important;
+  stroke: #e0ad58 !important;
+  stroke-width: 1.6 !important;
+  filter: drop-shadow(0 0 4px rgba(224,173,88,.16)) !important;
+}
+nav .nav-btn[data-tab="cases"] .nav-icon svg * {
+  stroke: #e0ad58 !important;
+  stroke-width: 1.6 !important;
+}
+nav .nav-btn[data-tab="cases"] span {
+  color: #e0ad58 !important;
+}
 </style>
-
-<style id="cases-nav-redesign">
-/* GDplay — полностью новый вид вкладки «Кейсы» */
-nav .nav-btn[data-tab="cases"]{
-  position:relative!important;
-  background:transparent!important;
-  background-image:none!important;
-  border:0!important;
-  outline:0!important;
-  box-shadow:none!important;
-  transform:none!important;
-  overflow:visible!important;
-  color:#e3b872!important;
-  -webkit-tap-highlight-color:transparent!important;
-  transition:none!important;
-}
-nav .nav-btn[data-tab="cases"]::before,
-nav .nav-btn[data-tab="cases"]::after{
-  content:none!important;
-  display:none!important;
-}
-nav .nav-btn[data-tab="cases"] .nav-icon{
-  width:46px!important;height:46px!important;
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  margin:0 auto 6px!important;
-  padding:0!important;
-  background:transparent!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-}
-nav .nav-btn[data-tab="cases"] .cases-custom-icon{
-  width:38px!important;height:38px!important;
-  display:block!important;
-  fill:none!important;
-  stroke:currentColor!important;
-  stroke-width:1.65!important;
-  stroke-linecap:round!important;
-  stroke-linejoin:round!important;
-  filter:drop-shadow(0 0 7px rgba(227,184,114,.16));
-  transform:none!important;
-  transition:none!important;
-}
-nav .nav-btn[data-tab="cases"]:hover .cases-custom-icon,
-nav .nav-btn[data-tab="cases"]:active .cases-custom-icon,
-nav .nav-btn[data-tab="cases"]:focus .cases-custom-icon,
-nav .nav-btn[data-tab="cases"]:focus-visible .cases-custom-icon{
-  transform:none!important;
-  scale:1!important;
-}
-nav .nav-btn[data-tab="cases"].active{
-  background:transparent!important;
-  box-shadow:none!important;
-  border:0!important;
-}
-nav .nav-btn[data-tab="cases"].active::after{
-  content:""!important;
-  display:block!important;
-  position:absolute!important;
-  left:22%!important;right:22%!important;bottom:1px!important;
-  height:2px!important;
-  border-radius:99px!important;
-  background:#dcae61!important;
-  box-shadow:0 0 10px rgba(220,174,97,.22)!important;
-}
-</style></head>
+</head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
     <img id="startupLoaderLogo" class="startup-loader-logo" alt="GDPLAY" decoding="async" fetchpriority="high">
@@ -3071,7 +3059,7 @@ nav .nav-btn[data-tab="cases"].active::after{
     </header>
 
     <nav>
-      <button class="nav-btn active" data-tab="cases"><span class="nav-icon"><svg class="nav-supplied-icon cases-custom-icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 18.5 24 9l16 9.5-16 9L8 18.5Z"/><path d="M8 18.5V36l16 9 16-9V18.5"/><path d="m8 25 16 9 16-9"/><path d="M18 22.5 24 26l6-3.5"/><path d="M19 13.5h10L24 17z"/></svg></span>Кейсы</button>
+      <button class="nav-btn active" data-tab="cases"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m15.66 7-.91-2.68L8.62.85a1.28 1.28 0 0 0-1.24 0L1.25 4.32.34 7a1.24 1.24 0 0 0 .58 1.5l.33.18V11a1.25 1.25 0 0 0 .63 1l5.5 3.11a1.28 1.28 0 0 0 1.24 0l5.5-3.11a1.25 1.25 0 0 0 .63-1V8.68l.33-.18a1.24 1.24 0 0 0 .58-1.5zM10 9.87l-.48-1.28L14 6.13l.44 1.28zM8 1.94 13.46 5 8 8 2.54 5zM1.52 7.41 2 6.13l4.48 2.46L6 9.87zm1 1.95 4.25 2.32.62-1.84v3.87L2.5 11zM13.5 11l-4.88 2.71V9.84l.63 1.84 4.25-2.32z"/></svg></span>Кейсы</button>
       <button class="nav-btn" data-tab="inventory"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 50.8 50.8" xmlns="http://www.w3.org/2000/svg" xml:space="preserve"><path d="m22.093 20.77 2.646 2.646-2.646 2.646-2.646-2.646z"/><path d="M5.82 43.127h10.055l-5.08-10.054z"/><path d="M15.705 43.656h24.029"/><path d="m28.046 14.817 2.646 2.646-2.646 2.645-2.646-2.645zm6.35 4.101 2.646 2.646-10.848 10.848-2.646-2.646z"/><path d="M28.707 7.673 44.98 24.077 28.707 40.481 12.435 24.077Z"/></svg></span>Кубы</button>
       <button class="nav-btn" data-tab="market"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M22 22H2" stroke-width="1.5" stroke-linecap="round"/>
@@ -3080,7 +3068,226 @@ nav .nav-btn[data-tab="cases"].active::after{
 <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke-width="1.5" stroke-linejoin="round"/>
 <path d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke-width="1.5" stroke-linecap="round"/>
 </svg></span>Магазин</button>
-      <button class="nav-btn" data-tab="battles"><span class="nav-icon"><svg class="nav-supplied-icon cases-custom-icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 18.5 24 9l16 9.5-16 9L8 18.5Z"/><path d="M8 18.5V36l16 9 16-9V18.5"/><path d="m8 25 16 9 16-9"/><path d="M18 22.5 24 26l6-3.5"/><path d="M19 13.5h10L24 17z"/></svg></span>Кейсы</button>
+      <button class="nav-btn" data-tab="battles"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10 0H0V10H10V0ZM3 4C3.55228 4 4 3.55228 4 3C4 2.44772 3.55228 2 3 2C2.44772 2 2 2.44772 2 3C2 3.55228 2.44772 4 3 4ZM8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6.44772 6 7 6C7.55228 6 8 6.44772 8 7Z"/>
+<path d="M6 16V12H12V6H16V16H6Z"/>
+</svg></span>Батлы</button>
+      <button class="nav-btn" data-tab="plinko"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>rocket</title>
+    <g id="Page-1" stroke-width="1" fill-rule="evenodd">
+        <g id="icon" transform="translate(42.666667, 64.000000)">
+            <path d="M405.333333,1.42108547e-14 C396.316305,122.794806 364.316305,211.683695 309.333333,266.666667 C299.582265,276.417735 288.905446,285.33185 277.302879,293.409011 L277.302464,341.234872 L213.302464,405.234872 L174.248,336.891 L68.525,231.157 L7.10542736e-15,192 L64,128 L112.079613,128.000404 C120.083859,116.387258 128.94621,105.720457 138.666667,96 C193.649638,41.0170286 282.538527,9.01702859 405.333333,1.42108547e-14 Z M357.333333,47.9786667 L348.203556,49.3631108 C266.32942,62.2476147 206.763982,88.2424635 168.836556,126.169889 C146.004433,149.002012 128.637057,178.732412 116.876114,215.881246 L116.096,218.389333 L187.584,289.877333 L191.120585,288.76541 C224.531258,277.548675 251.975141,261.807487 273.818948,241.632769 L279.163444,236.496777 C317.09087,198.569351 343.085719,139.003914 355.970222,57.1297769 L357.333333,47.9786667 Z M75.9901363,269.368015 L30.7353023,314.622849 L0.565412939,284.452959 L45.8202469,239.198125 L75.9901363,269.368015 Z M121.24497,314.622849 L45.8202469,390.047572 L15.6503576,359.877683 L91.0750809,284.452959 L121.24497,314.622849 Z M136.329915,329.707793 L166.499804,359.877683 L121.24497,405.132517 L91.0750809,374.962627 L136.329915,329.707793 Z M245.333333,128 C263.006445,128 277.333333,142.326888 277.333333,160 C277.333333,177.673112 263.006445,192 245.333333,192 C227.660221,192 213.333333,177.673112 213.333333,160 C213.333333,142.326888 227.660221,128 245.333333,128 Z" id="Combined-Shape">
+
+</path>
+        </g>
+    </g>
+</svg></span>Орб-Рывок</button>
+      <button class="nav-btn" data-tab="mines"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.9569 1.45706L14.539 2.87495L13.1248 1.45706L14.5427 0.0428467L15.9569 1.45706Z"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.707 5.707L13.123 4.29101L14.5354 5.70706L15.9532 4.28917L14.539 2.87495L13.123 4.28733L11.7106 2.87495L10.2928 4.29279L9 3L7.74293 4.25707C7.19135 4.08989 6.60617 4 6 4C2.68629 4 0 6.68629 0 10C0 13.3137 2.68629 16 6 16C9.31371 16 12 13.3137 12 10C12 9.39383 11.9101 8.80865 11.7429 8.25707L13 7L11.707 5.707ZM6 8C4.89543 8 4 8.89543 4 10H2C2 7.79086 3.79086 6 6 6V8Z"/>
+<path d="M11.7107 0.0428467L13.1248 1.45706L11.707 2.87495L10.2928 1.45706L11.7107 0.0428467Z"/>
+</svg></span>Мины</button>
+      <button class="nav-btn" data-tab="top"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12v4a6 6 0 0 1-12 0zM9 19h6M12 15v4M4 6v2a4 4 0 0 0 4 4M20 6v2a4 4 0 0 1-4 4"/></svg></span>Топ</button>
+      <button class="nav-btn" data-tab="vault"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v6M9 12h6"/></svg></span>Сейф</button>
+    </nav>
+
+    <!-- CASES -->
+    <div class="page active" id="page-cases">
+      <div class="section-title">Сейфы хранилища</div>
+      <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
+      <div class="channel-bonus-card" id="channelBonusCard"><div class="channel-bonus-icon">📢</div><div class="channel-bonus-copy"><div class="channel-bonus-title">GDplay · +1000 💰 за подписку</div><div class="channel-bonus-sub">Подпишись на канал и забери бонус.</div></div><div class="channel-bonus-actions"><button type="button" class="btn" id="channelSubscribeBtn">Подписаться</button></div><button type="button" class="channel-bonus-close" id="channelBonusClose" aria-label="Скрыть">×</button></div>
+      <div id="casesList"></div>
+      <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div style="margin-top:8px"><button type="button" class="btn-ghost" id="adminTechBreakPromoBtn" style="display:none;width:100%">🛠️ Тех. перерыв</button></div><div id="promoMessage" class="promo-message"></div></div>
+    </div>
+
+    <!-- BATTLES -->
+    <div class="page" id="page-battles">
+      <div class="section-title" style="margin-top:24px">Батлы с кубиком</div>
+      <div class="section-sub">Создавай игру, выбирай ставку и жди соперников.</div>
+      <div class="battle-form">
+        <div class="battle-row">
+          <div><label>Ставка</label><input id="battleStake" type="number" min="1" step="1" value="100"></div>
+          <div><label>Игроков</label><select id="battlePlayers"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+        </div>
+        <label>Условие победы</label>
+        <select id="battleMode"><option value="high">У кого больше число</option><option value="random">Рандом</option></select>
+        <button class="btn" id="createBattleBtn" style="width:100%">Создать батл</button>
+      </div>
+      <div id="battlesList"></div>
+    </div>
+
+    <!-- BOMBER -->
+    <div class="page" id="page-bomber">
+      <div class="section-title">Мины</div>
+      <div class="section-sub">25 клеток · 4 💣 · чем дальше, тем выше коэффициент.</div>
+      <div id="bomberGame"></div>
+    </div>
+
+    <!-- ORB RUSH -->
+    <div class="page" id="page-plinko">
+      <div class="rush-head">
+        <div>
+          <div class="section-title" style="margin-bottom:3px">Орб-Рывок</div>
+          <div class="section-sub" style="margin:0">Коэффициент растёт плавно до ×7.50. Забирай выигрыш в любой момент.</div>
+        </div>
+      </div>
+      <div class="rush-card">
+        <div class="limit-box" id="rushLimitBox" style="display:none">🚀 <b>Лимит Орб-Рывка</b><br><span>🎯 Осталось попыток: <b id="rushAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="rushLimitTimer">6ч 00м</b></span></div>
+        <div class="rush-chart" id="rushChart" aria-label="График Орб-Рывка">
+          <div class="rush-grid"></div>
+          <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs><linearGradient id="rushFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e3b872"/><stop offset="100%" stop-color="#c9974d" stop-opacity="0"/></linearGradient></defs>
+            <polygon class="rush-area" id="rushArea" points="6,92 6,92 94,92"></polygon>
+            <polyline class="rush-line" id="rushLine" points="6,92 6,92"></polyline>
+            <ellipse class="rush-dot" id="rushDot" cx="6" cy="92" rx="1.9" ry="2.35"></ellipse>
+          </svg>
+          <div class="rush-mult active" id="rushMultiplier">x1.00</div>
+        </div>
+        <div class="rush-status" id="rushStatus">Выбери ставку и запускай игру</div>
+        <div class="rush-result" id="rushResult"></div>
+        <div class="rush-bet-row">
+          <button class="rush-step" data-rush-bet="-10">−10</button>
+          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="1000" aria-label="Ставка орбов">
+          <button class="rush-step" data-rush-bet="10">+10</button>
+        </div>
+        <div class="rush-presets">
+          <button class="btn-ghost rush-preset" data-rush-preset="1">1</button>
+          <button class="btn-ghost rush-preset" data-rush-preset="10">10</button>
+          <button class="btn-ghost rush-preset" data-rush-preset="25">25</button>
+          <button class="btn-ghost rush-preset" data-rush-preset="100">100</button>
+          <button class="btn-ghost rush-preset" data-rush-preset="1000">1000</button>
+        </div>
+        <div class="rush-actions">
+          <button class="btn" id="rushStartBtn">Начать</button>
+          <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
+        </div>
+        <div class="rush-note">Ставка списывается с баланса орбов. Выигрыш возвращается по коэффициенту.</div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="page" id="page-inventory">
+      <div class="section-title">Твои кубы</div>
+      <div class="inv-search-wrap">
+        <input id="inventorySearch" class="inv-search" type="search" autocomplete="off" placeholder="Поиск кубов…" aria-label="Поиск кубов в инвентаре">
+      </div>
+      <div class="inv-sort-row">
+        <label for="inventorySort" class="section-sub" style="margin:0">Сортировка</label>
+        <div class="gdplay-select-wrap" data-select-id="inventorySort"></div>
+        <select id="inventorySort" class="inv-sort" aria-label="Сортировка кубов">
+          <option value="value-desc">Стоимость: сначала дорогие</option>
+          <option value="value-asc">Стоимость: сначала дешёвые</option>
+          <option value="rarity-desc">Редкость: сначала редкие</option>
+          <option value="rarity-asc">Редкость: сначала обычные</option>
+          <option value="name-asc">Название: А → Я</option>
+          <option value="name-desc">Название: Я → А</option>
+          <option value="count-desc">Количество: больше → меньше</option>
+          <option value="count-asc">Количество: меньше → больше</option>
+        </select>
+      </div>
+      <div class="inv-toolbar">
+        <div class="inv-toolbar-icon">💼</div>
+        <div class="inv-toolbar-info">
+          <span class="inv-toolbar-label">Итого в инвентаре</span>
+          <span class="inv-total mono"><span id="invTotalValue">0</span> 💰</span>
+        </div>
+        <button class="btn-sell-all" id="sellAllBtn">Продать всё</button>
+      </div>
+      <div id="inventoryList"></div>
+    </div>
+
+    <!-- MARKET -->
+    <div class="page" id="page-market">
+      <div class="market-hero">
+        <div class="market-hero-top">
+          <div>
+            <div class="market-kicker">GDPLAY · MARKET</div>
+            <div class="market-title">Магазин игроков</div>
+            <div class="market-subtitle">Покупай редкие кубы у игроков или выставляй свои.</div>
+          </div>
+          <div class="market-orb market-orb-svg"><svg class="nav-supplied-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 22H2" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M20 22V11" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M4 22V11" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke-width="1.5" stroke-linecap="round"/>
+</svg></div>
+        </div>
+        <div class="market-hero-stats">
+          <div><span>Баланс</span><b id="marketBalance">0 💰</b></div>
+          <div><span>Объявлений</span><b id="marketCount">0</b></div>
+          <div class="market-premium-stat"><span>Premium</span><b id="marketPremiumStatus">—</b></div>
+        </div>
+      </div>
+      <div class="market-premium-bonus" id="marketPremiumBonus">⭐ <b>Premium-бонус</b><span>от 5 000 💰 за покупку</span><button type="button" class="market-premium-bonus-close" id="marketPremiumBonusClose" aria-label="Скрыть Premium-бонус">×</button></div>
+      <div class="market-form">
+  <input id="marketSearch" type="search" placeholder="Поиск по названию или продавцу..." autocomplete="off">
+</div>
+      <div class="market-list-head"><span>Витрина</span><span id="marketFilterLabel">Все товары</span></div>
+      <div id="marketList"></div>
+    </div>
+
+
+    <!-- MINES -->
+    <div class="page" id="page-mines">
+      <div class="mines-hero">
+        <div>
+          <div class="mines-kicker">GDPLAY · MINES</div>
+          <div class="section-title" style="margin:3px 0 4px">Мины</div>
+          <div class="section-sub" style="margin:0">6 секторов · 6 скрытых клеток · забирай выигрыш после каждого безопасного сектора.</div>
+        </div>
+        <div class="mines-orb mines-orb-svg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="5.2" fill="currentColor" opacity=".16"/><circle cx="12" cy="13" r="5.2"/><path d="M12 7.8V4"/><path d="M12 22v-3.8"/><path d="M6.8 13H3"/><path d="M21 13h-3.8"/><path d="M8.3 9.3 5.6 6.6"/><path d="m18.4 19.4-2.7-2.7"/><path d="m15.7 9.3 2.7-2.7"/><path d="m5.6 19.4 2.7-2.7"/><path d="M15.5 4.5 17 2.5"/><path d="M8.5 4.5 7 2.5"/></g></svg></div>
+      </div>
+
+      <div class="mines-card">
+        <div class="limit-box" id="minesLimitBox" style="display:none"><span class="inline-mine-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="5.2" fill="currentColor" opacity=".16"/><circle cx="12" cy="13" r="5.2"/><path d="M12 7.8V4"/><path d="M12 22v-3.8"/><path d="M6.8 13H3"/><path d="M21 13h-3.8"/><path d="M8.3 9.3 5.6 6.6"/><path d="m18.4 19.4-2.7-2.7"/><path d="m15.7 9.3 2.7-2.7"/><path d="m5.6 19.4 2.7-2.7"/><path d="M15.5 4.5 17 2.5"/><path d="M8.5 4.5 7 2.5"/></g></svg></span> <b>Лимит Мин</b><br><span>🎯 Осталось попыток: <b id="minesAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="minesLimitTimer">6ч 00м</b></span></div>
+        <div class="mines-stats">
+          <div><span>Ставка</span><b id="minesBetStat">1 000 💰</b></div>
+          <div><span>Сектор</span><b id="minesSectorStat">1 / 6</b></div>
+          <div><span>Мины</span><b id="minesCountStat">1</b></div>
+          <div><span>Множитель</span><b id="minesMultiplierStat">×1.30</b></div>
+          <div class="mines-win-stat"><span>Возможный выигрыш</span><b id="minesWinStat">1 300 💰</b></div>
+        </div>
+
+        <div class="mines-sector-track" id="minesSectorTrack"></div>
+
+        <div class="mines-grid" id="minesGrid" aria-label="Поле Мины"></div>
+
+        <div class="mines-message" id="minesMessage">Выбери ставку и нажми «Играть».</div>
+
+        <div class="mines-bet-row">
+          <button class="mines-step" data-mines-bet="-100">−100</button>
+          <input id="minesBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="1000" aria-label="Ставка в орбах">
+          <button class="mines-step" data-mines-bet="100">+100</button>
+        </div>
+        <div class="mines-presets">
+          <button class="btn-ghost mines-preset" data-mines-preset="100">100</button>
+          <button class="btn-ghost mines-preset" data-mines-preset="500">500</button>
+          <button class="btn-ghost mines-preset" data-mines-preset="1000">1 000</button>
+          <button class="btn-ghost mines-preset" data-mines-preset="5000">5 000</button>
+          <button class="btn-ghost mines-preset" data-mines-preset="10000">10 000</button>
+        </div>
+
+        <div class="mines-actions">
+          <button class="btn" id="minesStartBtn">Играть</button>
+          <button class="btn-ghost" id="minesCashoutBtn" disabled>Забрать 0 💰</button>
+          <button class="btn-ghost" id="minesContinueBtn" disabled>Продолжить</button>
+        </div>
+        <div class="mines-note">Ставка списывается из баланса орбов. Мины генерируются сервером и остаются скрытыми до выбора клетки.</div>
+      </div>
+
+      <div class="mines-rules">
+        <div class="section-title">Сектора</div>
+        <div class="mines-rules-grid" id="minesRulesGrid"></div>
+      </div>
+    </div>
+
+    <!-- TOP -->
+    <div class="page" id="page-top">
+      <div class="section-title">Топ хранителей</div>
+      <div class="section-sub">Рейтинг всех аккаунтов сервера — аккаунт остаётся в топе даже после выхода</div>
+      <div class="top-tabs" id="topTabs">
+        <button type="button" class="top-tab active" data-action="top-sort" data-top-sort="cases"><span class="top-tab-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m15.66 7-.91-2.68L8.62.85a1.28 1.28 0 0 0-1.24 0L1.25 4.32.34 7a1.24 1.24 0 0 0 .58 1.5l.33.18V11a1.25 1.25 0 0 0 .63 1l5.5 3.11a1.28 1.28 0 0 0 1.24 0l5.5-3.11a1.25 1.25 0 0 0 .63-1V8.68l.33-.18a1.24 1.24 0 0 0 .58-1.5zM10 9.87l-.48-1.28L14 6.13l.44 1.28zM8 1.94 13.46 5 8 8 2.54 5zM1.52 7.41 2 6.13l4.48 2.46L6 9.87zm1 1.95 4.25 2.32.62-1.84v3.87L2.5 11zM13.5 11l-4.88 2.71V9.84l.63 1.84 4.25-2.32z"/></svg></span>Кейсы</button>
         <button type="button" class="top-tab" data-action="top-sort" data-top-sort="balance"><span class="top-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16l-1 11H5z"/><path d="M6 9 8 4h8l2 5M9 13v3M15 13v3"/></svg></span>Валюта</button>
         <button type="button" class="top-tab" data-action="top-sort" data-top-sort="winnings"><span class="top-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 4 15 15M19 4 4 19M6 6l3-3 2 2-3 3M18 18l3 3-3 3-3-3z"/></svg></span>Батлы</button>
       </div>
