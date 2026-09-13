@@ -7155,7 +7155,7 @@ async function loadDailyStatus(){
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
-    dailyState.nextAt=Number(j.expires_at||j.next_daily||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
+    dailyState.nextAt=Number((j.waiting ? j.next_daily : (j.expires_at||j.next_daily))||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
     data.dailyStreak=dailyState.streak;
     data.lastDaily=Number(j.last_daily||data.lastDaily||0);
     updateDailyUI();

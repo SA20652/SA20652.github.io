@@ -3758,7 +3758,7 @@ async function loadDailyStatus(){
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
-    dailyState.nextAt=Number(j.expires_at||j.next_daily||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
+    dailyState.nextAt=Number((j.waiting ? j.next_daily : (j.expires_at||j.next_daily))||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
     data.dailyStreak=dailyState.streak;
     data.lastDaily=Number(j.last_daily||data.lastDaily||0);
     updateDailyUI();
@@ -3786,7 +3786,7 @@ async function claimDaily(){
   try{
     const j=await apiFetch('/api/daily',{});
     data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
-    dailyState.nextAt=Number(j.expires_at||j.next_daily||0);dailyState.availableAt=Number(j.available_at||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=dailyState.streak<14&&!!dailyState.nextAt;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
+    dailyState.nextAt=Number((j.waiting ? j.next_daily : (j.expires_at||j.next_daily))||0);dailyState.availableAt=Number(j.available_at||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=dailyState.streak<14&&!!dailyState.nextAt;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
     persistLocal();updateBalanceUI();renderProfile();
     const msg=dailyState.streak>=14?' 🔥 14/14 — максимум':' 🔥 Забрано '+dailyState.streak+'/14';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
