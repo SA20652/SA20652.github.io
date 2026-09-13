@@ -3748,6 +3748,30 @@ nav .nav-btn[data-tab="inventory"] .nav-icon svg{
   height:30px!important;
 }
 </style>
+
+<style id="cubes-nav-icon-size-fix">
+/* Только иконка «Кубы»: увеличиваем размер, не меняя сам SVG */
+nav .nav-btn[data-tab="inventory"] .nav-icon,
+nav .nav-btn[data-tab="inventory"] .nav-icon svg{
+  width:28px!important;
+  height:28px!important;
+}
+</style>
+
+<style id="top-cases-nav-icon-fix">
+/* Иконка «Кейсы» в Топе — тот же SVG, что и в верхней навигации */
+.top-tab[data-top-sort="cases"] .top-tab-icon,
+.top-tab[data-top-sort="cases"] .top-tab-icon svg{
+  width:22px!important;
+  height:22px!important;
+}
+.top-tab[data-top-sort="cases"] .top-tab-icon svg{
+  display:block!important;
+  fill:currentColor!important;
+  stroke:currentColor!important;
+  color:#d9a253!important;
+}
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
