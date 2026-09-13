@@ -552,3 +552,37 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:36px!impor
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg{width:26px!important;height:26px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 </style>
+
+<style id="gdplay-user-request-v6-case-currency">
+/* V6: Верхняя «Кейсы» использует БУКВАЛЬНО SVG из «Топ → Кейсы».
+   В «Топ → Валюта» увеличена только иконка валюты. */
+nav .nav-btn[data-tab="cases"] .nav-icon{
+  width:24px!important;height:24px!important;flex:0 0 24px!important;
+  margin:0 auto 3px!important;
+}
+nav .nav-btn[data-tab="cases"] .nav-icon svg{
+  width:24px!important;height:24px!important;display:block!important;
+  fill:currentColor!important;stroke:none!important;
+  filter:drop-shadow(0 0 4px rgba(224,173,88,.18))!important;
+}
+nav .nav-btn.active[data-tab="cases"] .nav-icon svg{
+  fill:#e3b872!important;stroke:none!important;
+}
+/* Убираем старое правило outline-only для этого конкретного SVG. */
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{
+  fill:currentColor!important;stroke:none!important;
+}
+/* Валюта в Топе — заметно крупнее. */
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon{
+  width:30px!important;height:30px!important;flex:0 0 30px!important;
+}
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon .nav-supplied-icon{
+  width:30px!important;height:30px!important;max-width:none!important;max-height:none!important;
+  display:block!important;fill:currentColor!important;stroke:currentColor!important;
+}
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg *{
+  fill:currentColor!important;stroke:currentColor!important;
+}
+</style>
