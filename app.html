@@ -586,3 +586,60 @@ nav .nav-btn.active[data-tab="cases"] .nav-icon svg{
   fill:currentColor!important;stroke:currentColor!important;
 }
 </style>
+
+<style id="gdplay-icon-final-v7">
+/* V7: верхняя навигация оставляет залитые Кейсы. В «Топе» Кейсы и Валюта — контурные. */
+nav .nav-btn[data-tab="cases"] .nav-icon svg,
+nav .nav-btn[data-tab="cases"] .nav-icon svg *{
+  fill:currentColor!important; stroke:none!important;
+}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon{
+  display:flex!important; align-items:center!important; justify-content:center!important;
+}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon .nav-supplied-icon{
+  fill:none!important; stroke:currentColor!important; stroke-width:1.7!important;
+  stroke-linecap:round!important; stroke-linejoin:round!important;
+}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg *,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon *,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon .nav-supplied-icon *{
+  fill:none!important; stroke:currentColor!important; stroke-width:1.7!important;
+  stroke-linecap:round!important; stroke-linejoin:round!important;
+}
+/* Размеры: Кейсы в Топе крупнее, Валюта ещё крупнее. */
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{
+  width:28px!important; height:28px!important; flex:0 0 28px!important;
+}
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon .nav-supplied-icon{
+  width:32px!important; height:32px!important; flex:0 0 32px!important;
+}
+</style>
+
+<style id="gdplay-icon-final-v8">
+/* V8: все иконки контурные. Никакой заливки в верхней навигации и в Топе. */
+nav .nav-btn[data-tab="cases"] .nav-icon svg,
+nav .nav-btn[data-tab="cases"] .nav-icon svg *{
+  fill:none!important; stroke:currentColor!important; stroke-width:1.7!important;
+  stroke-linecap:round!important; stroke-linejoin:round!important;
+}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon *,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon svg *,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon .nav-supplied-icon,
+#page-top .top-tab[data-top-sort="balance"] .top-tab-icon .nav-supplied-icon *{
+  fill:none!important; stroke:currentColor!important; stroke-width:1.7!important;
+  stroke-linecap:round!important; stroke-linejoin:round!important;
+}
+</style>
