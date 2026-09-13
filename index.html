@@ -3642,6 +3642,99 @@ nav .nav-btn[data-tab="top"].active .nav-icon svg{stroke:#e3b872!important;strok
 nav .nav-btn:hover .nav-icon,nav .nav-btn:active .nav-icon,nav .nav-btn:focus .nav-icon{transform:none!important;}
 nav .nav-btn:hover,nav .nav-btn:active{transform:none!important;}
 </style>
+<style id="gdplay-final-nav-profile-fix">
+/* FINAL NAVIGATION / PROFILE FIX */
+html,body{width:100%;max-width:100%;overflow-x:hidden!important;overscroll-behavior-x:none!important;}
+body{margin:0!important;}
+.app-shell{width:100%!important;max-width:520px!important;min-width:0!important;overflow-x:clip!important;}
+.page{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:clip!important;}
+#page-profile{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:clip!important;box-sizing:border-box!important;}
+#page-profile>*{max-width:100%!important;min-width:0!important;box-sizing:border-box!important;}
+#page-profile:before{left:0!important;right:0!important;}
+#page-profile .profile-head:after{right:-35px!important;}
+
+/* Every selected top navigation item keeps the same gold outline */
+nav .nav-btn,
+nav .nav-btn[data-tab="cases"]{
+  border:1px solid transparent!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+nav .nav-btn.active,
+nav .nav-btn[data-tab="cases"].active{
+  background:linear-gradient(145deg,rgba(201,151,77,.18),rgba(201,151,77,.06))!important;
+  border:1px solid rgba(201,151,77,.42)!important;
+  color:#e3b872!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 0 10px rgba(201,151,77,.06)!important;
+}
+nav .nav-btn.active .nav-icon{color:#e3b872!important;}
+
+/* Cases: clear, slightly stronger outlined icon */
+nav .nav-btn[data-tab="cases"] .nav-icon svg{
+  width:23px!important;height:23px!important;
+  fill:currentColor!important;stroke:none!important;
+  filter:drop-shadow(0 0 4px rgba(224,173,88,.20))!important;
+}
+nav .nav-btn[data-tab="cases"].active .nav-icon svg{filter:drop-shadow(0 0 6px rgba(240,200,120,.28))!important;}
+
+/* Cubes: a little larger in the top navigation */
+nav .nav-btn[data-tab="inventory"] .nav-icon,
+nav .nav-btn[data-tab="inventory"] .nav-icon svg{
+  width:25px!important;height:25px!important;
+}
+nav .nav-btn[data-tab="inventory"] .nav-icon svg{
+  fill:currentColor!important;stroke:none!important;
+}
+
+/* Orb Rush: visible but not over-heavy outline */
+nav .nav-btn[data-tab="plinko"] .nav-icon svg,
+nav .nav-btn[data-tab="plinko"] .nav-icon svg *{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:2.35!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+nav .nav-btn[data-tab="plinko"].active .nav-icon svg,
+nav .nav-btn[data-tab="plinko"].active .nav-icon svg *{stroke:#f0c878!important;stroke-width:2.5!important;}
+
+/* Mines: reduce the previous overly thick outline */
+nav .nav-btn[data-tab="mines"] .nav-icon svg,
+nav .nav-btn[data-tab="mines"] .nav-icon svg *{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:1.35!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+nav .nav-btn[data-tab="mines"].active .nav-icon svg,
+nav .nav-btn[data-tab="mines"].active .nav-icon svg *{stroke:#e3b872!important;stroke-width:1.5!important;}
+
+/* Shop: current clean outlined SVG */
+nav .nav-btn[data-tab="market"] .nav-icon svg,
+nav .nav-btn[data-tab="market"] .nav-icon svg *{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:1.55!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+nav .nav-btn[data-tab="market"].active .nav-icon svg,
+nav .nav-btn[data-tab="market"].active .nav-icon svg *{stroke:#e3b872!important;stroke-width:1.7!important;}
+
+/* Top icon: current trophy treatment */
+nav .nav-btn[data-tab="top"] .nav-icon svg,
+nav .nav-btn[data-tab="top"] .nav-icon svg *{
+  fill:none!important;stroke:#e0ad58!important;stroke-width:1.8!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+nav .nav-btn[data-tab="top"].active .nav-icon svg,
+nav .nav-btn[data-tab="top"].active .nav-icon svg *{stroke:#e3b872!important;stroke-width:2!important;}
+
+/* Current Top page tabs: consistent icons and active gold outline */
+.top-tab{display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;min-width:0!important;}
+.top-tab-icon{width:19px!important;height:19px!important;flex:0 0 19px!important;color:#d9a253!important;}
+.top-tab-icon svg{width:19px!important;height:19px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+.top-tab.active{background:linear-gradient(145deg,rgba(201,151,77,.20),rgba(201,151,77,.06))!important;border:1px solid rgba(201,151,77,.42)!important;color:#e3b872!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 0 10px rgba(201,151,77,.05)!important;}
+.top-tab.active .top-tab-icon{color:#e3b872!important;}
+.top-tab.active .top-tab-icon svg{stroke:#e3b872!important;stroke-width:1.9!important;}
+
+@media(max-width:430px){
+  #page-profile .profile-head{margin-left:0!important;margin-right:0!important;width:100%!important;}
+  #page-profile .profile-stats,#page-profile .profile-customize,#page-profile .profile-premium-open{max-width:100%!important;}
+}
+</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -4076,8 +4169,8 @@ nav .nav-btn:hover,nav .nav-btn:active{transform:none!important;}
       <div class="section-sub">Рейтинг всех аккаунтов сервера — аккаунт остаётся в топе даже после выхода</div>
       <div class="top-tabs" id="topTabs">
         <button type="button" class="top-tab active" data-action="top-sort" data-top-sort="cases"><span class="top-tab-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m15.66 7-.91-2.68L8.62.85a1.28 1.28 0 0 0-1.24 0L1.25 4.32.34 7a1.24 1.24 0 0 0 .58 1.5l.33.18V11a1.25 1.25 0 0 0 .63 1l5.5 3.11a1.28 1.28 0 0 0 1.24 0l5.5-3.11a1.25 1.25 0 0 0 .63-1V8.68l.33-.18a1.24 1.24 0 0 0 .58-1.5zM10 9.87l-.48-1.28L14 6.13l.44 1.28zM8 1.94 13.46 5 8 8 2.54 5zM1.52 7.41 2 6.13l4.48 2.46L6 9.87zm1 1.95 4.25 2.32.62-1.84v3.87L2.5 11zM13.5 11l-4.88 2.71V9.84l.63 1.84 4.25-2.32z"/></svg></span>Кейсы</button>
-        <button type="button" class="top-tab" data-action="top-sort" data-top-sort="balance"><span class="top-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16l-1 11H5z"/><path d="M6 9 8 4h8l2 5M9 13v3M15 13v3"/></svg></span>Валюта</button>
-        <button type="button" class="top-tab" data-action="top-sort" data-top-sort="winnings"><span class="top-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 4 15 15M19 4 4 19M6 6l3-3 2 2-3 3M18 18l3 3-3 3-3-3z"/></svg></span>Батлы</button>
+        <button type="button" class="top-tab" data-action="top-sort" data-top-sort="balance"><span class="top-tab-icon"><svg class="nav-supplied-icon" viewBox="0 0 50.8 50.8" xmlns="http://www.w3.org/2000/svg"><path d="m22.093 20.77 2.646 2.646-2.646 2.646-2.646-2.646z"/><path d="M5.82 43.127h10.055l-5.08-10.054z"/><path d="M15.705 43.656h24.029"/><path d="m28.046 14.817 2.646 2.646-2.646-2.645-2.646 2.645zm6.35 4.101 2.646 2.646-10.848 10.848-2.646-2.646z"/><path d="M28.707 7.673 44.98 24.077 28.707 40.481 12.435 24.077Z"/></svg></span>Валюта</button>
+        <button type="button" class="top-tab" data-action="top-sort" data-top-sort="winnings"><span class="top-tab-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 0H0V10H10V0ZM3 4C3.55228 4 4 3.55228 4 3C4 2.44772 3.55228 2 3 2C2.44772 2 2 2.44772 2 3C2 3.55228 2.44772 4 3 4ZM8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6 6 7 6C7.55228 6 8 6.44772 8 7Z"/><path d="M6 16V12H12V6H16V16H6Z"/></svg></span>Батлы</button>
       </div>
       <div id="leaderboardList"></div>
     </div>
