@@ -6884,7 +6884,7 @@ function renderInventory(){
            <span class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</span>
          </button>`
       : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
-    const header = `<div class="inv-item" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
+    const header = `<div class="inv-item" data-rarity="${String(c.rarity||'common').toLowerCase()}" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
       ${headerNameHtml}</div>
       ${isStack ? '' : cubeLockButton(c,indices[0])}
@@ -6894,7 +6894,7 @@ function renderInventory(){
     if(!isStack || !expanded) return header;
     const rows = indices.map((idx,n)=>{
       const it=data.cubes[idx]||c;
-      return `<div class="inv-item inv-subitem" style="--item-color:${m.color}" data-cube-index="${idx}">
+      return `<div class="inv-item inv-subitem" data-rarity="${String(it.rarity||c.rarity||'common').toLowerCase()}" style="--item-color:${m.color}" data-cube-index="${idx}">
         <div class="inv-item-info"><div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div></div>
         ${cubeLockButton(it,idx)}
         <div class="inv-actions">${cubeItemActions(it,idx)}</div>
@@ -9257,3 +9257,19 @@ boot();
   else initAll();
 })();
 </script>
+
+
+<style id="gdplay-user-final-nav-cubes-rarity">
+nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:19px!important;height:19px!important;display:block!important;fill:none!important;stroke:#d9a253!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon *{fill:none!important;stroke:#d9a253!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+nav .nav-btn[data-tab="inventory"].active .nav-icon .nav-supplied-icon,nav .nav-btn[data-tab="inventory"].active .nav-icon .nav-supplied-icon *{stroke:#e3b872!important;stroke-width:1.9!important}
+nav .nav-btn[data-tab="plinko"] .nav-icon .nav-supplied-icon{width:22px!important;height:22px!important;display:block!important;fill:#d9a253!important;stroke:#d9a253!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important;filter:drop-shadow(0 0 5px rgba(224,173,88,.32))!important}
+nav .nav-btn[data-tab="plinko"] .nav-icon .nav-supplied-icon *{fill:#d9a253!important;stroke:#d9a253!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+nav .nav-btn[data-tab="plinko"].active .nav-icon .nav-supplied-icon,nav .nav-btn[data-tab="plinko"].active .nav-icon .nav-supplied-icon *{fill:#f0c878!important;stroke:#f0c878!important;stroke-width:2.35!important}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{width:19px!important;height:19px!important;display:block!important;fill:none!important;stroke:#d9a253!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon *{fill:none!important;stroke:#d9a253!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+#page-top .top-tab[data-top-sort="cases"].active .top-tab-icon .nav-supplied-icon,#page-top .top-tab[data-top-sort="cases"].active .top-tab-icon .nav-supplied-icon *{stroke:#e3b872!important;stroke-width:1.9!important}
+.inv-item[data-rarity="common"],.inv-subitem[data-rarity="common"]{--item-color:#9a9a9a!important}.inv-item[data-rarity="rare"],.inv-subitem[data-rarity="rare"]{--item-color:#4f8fe6!important}.inv-item[data-rarity="epic"],.inv-subitem[data-rarity="epic"]{--item-color:#a855e6!important}.inv-item[data-rarity="legendary"],.inv-subitem[data-rarity="legendary"]{--item-color:#e6a72e!important}.inv-item[data-rarity="mythic"],.inv-subitem[data-rarity="mythic"]{--item-color:#d3323f!important}.inv-item[data-rarity="divine"],.inv-subitem[data-rarity="divine"]{--item-color:#ec5fc4!important}.inv-item[data-rarity="emerald"],.inv-subitem[data-rarity="emerald"]{--item-color:#2ecc71!important}
+.cube-visual .mini-face{border-color:rgba(255,255,255,.42)!important}.cube-visual .mini-face.front{background:linear-gradient(145deg,color-mix(in srgb,var(--item-color,#d9a253) 88%,white),color-mix(in srgb,var(--item-color,#d9a253) 58%,black))!important}.cube-visual .mini-face.right{background:linear-gradient(145deg,color-mix(in srgb,var(--item-color,#d9a253) 68%,white),color-mix(in srgb,var(--item-color,#d9a253) 40%,black))!important}.cube-visual .mini-face.top{background:linear-gradient(145deg,color-mix(in srgb,var(--item-color,#d9a253) 96%,white),color-mix(in srgb,var(--item-color,#d9a253) 72%,black))!important}
+</style>
+
