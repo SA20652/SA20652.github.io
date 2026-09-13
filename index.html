@@ -9312,3 +9312,32 @@ nav .nav-btn[data-tab="plinko"].active .nav-icon .nav-supplied-icon,nav .nav-btn
 .cube-visual .mini-face{border-color:rgba(255,255,255,.42)!important}.cube-visual .mini-face.front{background:linear-gradient(145deg,color-mix(in srgb,var(--item-color,#d9a253) 88%,white),color-mix(in srgb,var(--item-color,#d9a253) 58%,black))!important}.cube-visual .mini-face.right{background:linear-gradient(145deg,color-mix(in srgb,var(--item-color,#d9a253) 68%,white),color-mix(in srgb,var(--item-color,#d9a253) 40%,black))!important}.cube-visual .mini-face.top{background:linear-gradient(145deg,color-mix(in srgb,var(--item-color,#d9a253) 96%,white),color-mix(in srgb,var(--item-color,#d9a253) 72%,black))!important}
 </style>
 
+
+<style id="gdplay-cubes-strong-final">
+/* Сильное увеличение иконки КУБЫ — только размер, SVG/данные не меняются. */
+nav .nav-btn[data-tab="inventory"] .nav-icon{
+  width:46px!important; height:46px!important;
+  margin:0 auto 2px!important;
+}
+nav .nav-btn[data-tab="inventory"] .nav-icon svg,
+nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{
+  width:46px!important; height:46px!important;
+  max-width:none!important; max-height:none!important;
+}
+nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon,
+nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon *{
+  fill:none!important; stroke:#d9a253!important;
+}
+nav .nav-btn[data-tab="inventory"].active .nav-icon .nav-supplied-icon,
+nav .nav-btn[data-tab="inventory"].active .nav-icon .nav-supplied-icon *{
+  stroke:#e3b872!important;
+}
+/* В Топе иконка Кейсов — та же форма SVG, что в верхней навигации. */
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon{
+  width:32px!important; height:32px!important; flex:0 0 32px!important;
+}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg,
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{
+  width:32px!important; height:32px!important; max-width:none!important; max-height:none!important;
+}
+</style>
