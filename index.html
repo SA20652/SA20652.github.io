@@ -3736,40 +3736,42 @@ nav .nav-btn[data-tab="top"].active .nav-icon svg *{stroke:#e3b872!important;str
 }
 </style>
 
-<style id="gdplay-cubes-nav-size-fix">
-/* Только увеличиваем иконку «Кубы» в верхней навигации — саму коллекцию/кубы не меняем. */
+<style id="gdplay-final-nav-top-icon-fix">
+/* Финальный UI-фикс: размер иконки «Кубы» в верхней навигации.
+   Меняем только CSS-размер SVG, саму иконку/кубы/данные не трогаем. */
 nav .nav-btn[data-tab="inventory"] .nav-icon{
   width:30px!important;
   height:30px!important;
-  margin:0 auto 1px!important;
+  margin:0 auto 3px!important;
 }
+nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon,
 nav .nav-btn[data-tab="inventory"] .nav-icon svg{
   width:30px!important;
   height:30px!important;
 }
-</style>
 
-<style id="cubes-nav-icon-size-fix">
-/* Только иконка «Кубы»: увеличиваем размер, не меняя сам SVG */
-nav .nav-btn[data-tab="inventory"] .nav-icon,
-nav .nav-btn[data-tab="inventory"] .nav-icon svg{
+/* В «Топ → Кейсы» используется тот же SVG, что и в верхней навигации «Кейсы». */
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon{
   width:28px!important;
   height:28px!important;
+  flex:0 0 28px!important;
 }
-</style>
-
-<style id="top-cases-nav-icon-fix">
-/* Иконка «Кейсы» в Топе — тот же SVG, что и в верхней навигации */
-.top-tab[data-top-sort="cases"] .top-tab-icon,
-.top-tab[data-top-sort="cases"] .top-tab-icon svg{
-  width:22px!important;
-  height:22px!important;
-}
-.top-tab[data-top-sort="cases"] .top-tab-icon svg{
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg{
+  width:28px!important;
+  height:28px!important;
   display:block!important;
-  fill:currentColor!important;
+  fill:none!important;
   stroke:currentColor!important;
-  color:#d9a253!important;
+  stroke-width:1.7!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+#page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.7!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
 }
 </style>
 </head>
@@ -8205,7 +8207,7 @@ function renderProfile(){
 }
 
 async function loadDailyStatus(){
-  if(dailyStatusInFlight||!currentUser||(!tgInitData()&&!storageGet(AUTH_TOKEN_KEY))) return;
+  if(dailyStatusInFlight||!currentUser||!tgInitData()) return;
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
@@ -8214,19 +8216,7 @@ async function loadDailyStatus(){
     data.lastDaily=Number(j.last_daily||data.lastDaily||0);
     updateDailyUI();
     if(j.reset) showToast('⚠️ Бонус сброшен — награда не была забрана за 12 часов','error');
-  }catch(e){
-    /* Не оставляем профиль в вечном состоянии «Проверяем…»: при временной
-       ошибке сети используем сохранённый lastDaily как локальный fallback. */
-    const last=Number(data?.lastDaily||0);
-    if(last>0){
-      const next=last+12*60*60*1000;
-      dailyState.nextAt=next;
-      dailyState.available=Date.now()>=last && Date.now()<next;
-      dailyState.streak=Number(data?.dailyStreak||0);
-      dailyState.loaded=true;
-      updateDailyUI();
-    }
-  }finally{dailyStatusInFlight=false;}
+  }catch(e){}finally{dailyStatusInFlight=false;}
 }
 function updateDailyUI(){
   if(!data)return;
@@ -8236,7 +8226,7 @@ function updateDailyUI(){
   const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующая награда: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn){btn.disabled=!can;btn.classList.toggle('disabled',!can);btn.setAttribute('aria-disabled',String(!can));}
-  const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Бонус доступен — забери его в течение 12 часов';else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}else if(streak>=14)timer.textContent='Все 14 наград получены';else timer.textContent='Награда недоступна';}
+  const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Бонус доступен — забери его в течение 12 часов';else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}else timer.textContent='Проверяем доступность награды…';}
   const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/14';
   const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/14*100)+'%';
 }
