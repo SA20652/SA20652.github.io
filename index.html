@@ -5142,8 +5142,24 @@ function hideTechBreak(){
 }
 
 function updateAdminTechBreakPromoButton(enabled){
-  const buttons=[document.getElementById('adminTechBreakPromoBtn'),document.getElementById('adminTechBreakPanelBtn')].filter(Boolean);
-  buttons.forEach(b=>{ if(!window.isAdmin){b.style.display='none';return;} b.style.display='inline-flex'; b.textContent=enabled?'Снять тех. перерыв':'Тех. перерыв'; b.classList.toggle('danger-admin',!!enabled); b.dataset.active=enabled?'1':'0'; });
+  const mainButtons=[document.getElementById('adminTechBreakPromoBtn'),document.getElementById('adminTechBreakPanelBtn')].filter(Boolean);
+  const reasonBtn=document.getElementById('adminTechBreakReasonBtn');
+  const clearBtn=document.getElementById('adminTechBreakClearBtn');
+  mainButtons.forEach(b=>{ if(!window.isAdmin){b.style.display='none';return;} b.style.display='inline-flex'; b.textContent=enabled?'Тех. перерыв активен':'Тех. перерыв'; b.classList.toggle('danger-admin',!!enabled); b.dataset.active=enabled?'1':'0'; });
+  if(reasonBtn){ reasonBtn.style.display=window.isAdmin && enabled?'inline-flex':'none'; }
+  if(clearBtn){ clearBtn.style.display=window.isAdmin && enabled?'inline-flex':'none'; }
+}
+
+async function adminChangeGlobalTechBreakReason(){
+  askReason('🛠️ Изменить причину тех. перерыва','Новая причина будет сразу показана всем игрокам.', '', async reason=>{
+    try{
+      const j=await apiFetch('/api/admin/tech-break',{action:'enable',reason});
+      updateAdminTechBreakPromoButton(true);
+      window.__gdplayTechBreakReason=reason;
+      if(j?.global_tech_break?.enabled && !window.isAdmin) showTechBreak(j.global_tech_break.reason);
+      showToast('✅ Причина тех. перерыва изменена','success');
+    }catch(e){showToast('❌ '+(e.message||'Ошибка'),'error');}
+  });
 }
 
 async function adminGlobalTechBreakToggle(){
@@ -8501,7 +8517,9 @@ function handleButton(button, e){
   if(button.matches('.rush-preset')){ setRushBet(Number(button.dataset.rushPreset||10)); return; }
   if(button.id==='rushStartBtn'){ startRush(); return; }
   if(button.id==='rushCashoutBtn'){ cashoutRush(); return; }
-  if(button.id==='adminTechBreakPanelBtn'){ const active=button.dataset.active==='1'; if(active) adminGlobalTechBreakToggle(); else adminTechBreak(tgUserId()); return; }
+  if(button.id==='adminTechBreakPanelBtn'){ const active=button.dataset.active==='1'; if(active) adminChangeGlobalTechBreakReason(); else adminTechBreak(tgUserId()); return; }
+  if(button.id==='adminTechBreakReasonBtn'){ adminChangeGlobalTechBreakReason(); return; }
+  if(button.id==='adminTechBreakClearBtn'){ adminGlobalTechBreakToggle(); return; }
   if(button.id==='adminTechBreakPromoBtn'){ adminGlobalTechBreakToggle(); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
