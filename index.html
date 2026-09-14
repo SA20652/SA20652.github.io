@@ -5784,8 +5784,6 @@ async function loadAdminUsers(search){
         <div class="admin-user-actions">
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="500">+500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
-          <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-1">-1 💰</button>
-          <button type="button" class="btn-ghost" data-action="admin-remove-cube" data-uid="${u.user_id}">-1 куб</button>
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
@@ -5900,9 +5898,9 @@ async function adminGrantCube(uid){
     accept.onclick=null; cancel.onclick=null;
     const name = document.getElementById('adminCubeName').value.trim() || 'Подарок от админа';
     const rarity = document.getElementById('adminCubeRarity').value;
-    let value = Math.max(0, parseInt(document.getElementById('adminCubeValue').value||'0', 10)||0);
+    let value = parseInt(document.getElementById('adminCubeValue').value||'0', 10); if(!Number.isFinite(value)) value=0;
     const known=[]; CASES.forEach(c=>c.items.forEach(it=>{if(it.name===name && it.rarity===rarity) known.push(Number(it.value));}));
-    if(known.length) value=known[0];
+    if(known.length && value >= 0) value=known[0];
     closeModal('adminCubeModal');
     try{
       await apiFetch('/api/admin/cube', {user_id: Number(uid), name, rarity, value});
