@@ -3966,7 +3966,7 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
     <h3>Выдать куб</h3><p>Игрок: <b id="adminCubeUid"></b></p>
     <input id="adminCubeName" placeholder="Название">
     <select id="adminCubeRarity" style="width:100%;margin-top:7px"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпохальный</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option><option value="divine">Божественный</option><option value="emerald">Изумрудный</option></select>
-    <input id="adminCubeValue" type="number" placeholder="Стоимость (можно -1)" style="margin-top:7px">
+    <input id="adminCubeValue" type="number" min="0" placeholder="Стоимость" style="margin-top:7px">
     <div class="input-modal-actions"><button id="adminCubeCancel" class="btn-ghost" type="button">Отмена</button><button id="adminCubeAccept" class="btn" type="button">Выдать</button></div>
   </div>
 </div>
@@ -5784,6 +5784,8 @@ async function loadAdminUsers(search){
         <div class="admin-user-actions">
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="500">+500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
+          <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-1">-1 💰</button>
+          <button type="button" class="btn-ghost" data-action="admin-remove-cube" data-uid="${u.user_id}">-1 куб</button>
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
@@ -5898,9 +5900,9 @@ async function adminGrantCube(uid){
     accept.onclick=null; cancel.onclick=null;
     const name = document.getElementById('adminCubeName').value.trim() || 'Подарок от админа';
     const rarity = document.getElementById('adminCubeRarity').value;
-    const rawValue = document.getElementById('adminCubeValue').value.trim();
-    const value = rawValue === '' ? 0 : Number.parseInt(rawValue, 10);
-    if (!Number.isInteger(value)) { showToast('❌ Укажи корректную стоимость куба','error'); return; }
+    let value = Math.max(0, parseInt(document.getElementById('adminCubeValue').value||'0', 10)||0);
+    const known=[]; CASES.forEach(c=>c.items.forEach(it=>{if(it.name===name && it.rarity===rarity) known.push(Number(it.value));}));
+    if(known.length) value=known[0];
     closeModal('adminCubeModal');
     try{
       await apiFetch('/api/admin/cube', {user_id: Number(uid), name, rarity, value});
