@@ -6230,13 +6230,17 @@ setInterval(updateGameLimits,7500);
     if(!token && !tgInitData()) return;
     running=true;
     try{
-      await apiFetch('/api/me', {});
+      await apiFetch('/api/presence', {});
     }catch(e){}
     finally{running=false;}
   }
   setTimeout(beat, 1000);
   setInterval(beat, 20000);
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') beat(); });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') beat();
+    else { try { apiFetch('/api/presence',{online:false}); } catch(e){} }
+  });
+  window.addEventListener('pagehide',()=>{ try { apiFetch('/api/presence',{online:false}); } catch(e){} });
 })();
 
 
