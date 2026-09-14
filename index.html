@@ -5073,12 +5073,31 @@ async function loadAdminUI(){
     if(!html) return false;
     const wrap = document.createElement('div');
     wrap.innerHTML = html;
+    // <script> tags set via innerHTML never execute (browser spec), so pull them
+    // out before moving nodes into the live DOM and re-create them manually —
+    // this is what actually runs refreshAdminStats()/button handlers/etc.
+    // Without this, the whole admin_fragment.html script (online counter,
+    // notification/IP-ban/promo buttons, and the delete-recent-users button)
+    // is silently dead code.
+    const scripts = Array.from(wrap.querySelectorAll('script'));
+    scripts.forEach(el=>el.remove());
     const menuItem = wrap.querySelector('#adminMenuBtn');
     if(menuItem){ menuItem.classList.add('admin-dynamic-menu'); menu.insertBefore(menuItem, document.getElementById('menuLogout') || null); }
     const page = wrap.querySelector('#page-admin');
     if(page){ page.classList.add('admin-dynamic-page'); root.appendChild(page); }
     wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>{ el.classList.add('admin-dynamic-modal'); root.appendChild(el); });
     window.adminUIReady = !!(menu.querySelector('#adminMenuBtn') && root.querySelector('#page-admin'));
+    if(window.adminUIReady && !window.__adminFragmentScriptsRan){
+      // Run once: admin_fragment.html's own script re-attaches its listeners
+      // via $('id')?.addEventListener each time it runs, and its setInterval
+      // for refreshAdminStats should not be duplicated on repeat loadAdminUI() calls.
+      window.__adminFragmentScriptsRan = true;
+      scripts.forEach(old=>{
+        const s = document.createElement('script');
+        if(old.src) s.src = old.src; else s.textContent = old.textContent;
+        document.body.appendChild(s);
+      });
+    }
     if(window.adminUIReady){
       // The fragment is injected after the initial /api/me call, so apply the
       // current state to the newly created tech-break button as well.
