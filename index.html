@@ -458,7 +458,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .market-info{flex:1;min-width:0;}
 .market-name{font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .market-seller{font-size:10px;color:var(--muted);margin-top:2px;}
-.market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:12px;font-weight:700;margin-top:3px;}
+.market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:12px;font-weight:700;margin-top:3px;} .market-real-price{font-family:inherit;color:var(--muted,#8f8f8f);font-size:10px;font-weight:600;margin-top:3px;}
 .market-buy{padding:8px 10px;font-size:11px;}
 .market-remove{padding:8px 10px;font-size:11px;color:var(--danger);border-color:rgba(193,85,79,.35);white-space:nowrap;}
 .market-form{display:flex;gap:7px;margin:8px 0 14px;}
@@ -602,7 +602,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .public-market-card{display:flex;align-items:center;gap:9px;background:var(--bg-3);border:1px solid var(--line);border-radius:11px;padding:9px;margin-bottom:7px;text-align:left;}
 .public-market-info{flex:1;min-width:0;}
 .public-market-name{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.public-market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:11.5px;font-weight:700;margin-top:3px;}
+.public-market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:11.5px;font-weight:700;margin-top:3px;} .public-market-real-price{font-family:inherit;color:var(--muted,#8f8f8f);font-size:10px;font-weight:600;margin-top:3px;}
 .public-market-buy{padding:7px 10px;font-size:11px;white-space:nowrap;}
 .public-profile-modal{max-height:88vh;overflow:auto;text-align:left;}
 .public-profile-head{display:flex;align-items:center;gap:12px;background:var(--bg-3);border:1px solid var(--line);border-radius:14px;padding:12px;}
@@ -3190,7 +3190,7 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .market-info{flex:1;min-width:0;}
 .market-name{font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .market-seller{font-size:10px;color:var(--muted);margin-top:2px;}
-.market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:12px;font-weight:700;margin-top:3px;}
+.market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:12px;font-weight:700;margin-top:3px;} .market-real-price{font-family:inherit;color:var(--muted,#8f8f8f);font-size:10px;font-weight:600;margin-top:3px;}
 .market-buy{padding:8px 10px;font-size:11px;}
 .market-remove{padding:8px 10px;font-size:11px;color:var(--danger);border-color:rgba(193,85,79,.35);white-space:nowrap;}
 .market-form{display:flex;gap:7px;margin:8px 0 14px;}
@@ -3334,7 +3334,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .public-market-card{display:flex;align-items:center;gap:9px;background:var(--bg-3);border:1px solid var(--line);border-radius:11px;padding:9px;margin-bottom:7px;text-align:left;}
 .public-market-info{flex:1;min-width:0;}
 .public-market-name{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.public-market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:11.5px;font-weight:700;margin-top:3px;}
+.public-market-price{font-family:'IBM Plex Mono',monospace;color:var(--brass-2);font-size:11.5px;font-weight:700;margin-top:3px;} .public-market-real-price{font-family:inherit;color:var(--muted,#8f8f8f);font-size:10px;font-weight:600;margin-top:3px;}
 .public-market-buy{padding:7px 10px;font-size:11px;white-space:nowrap;}
 .public-profile-modal{max-height:88vh;overflow:auto;text-align:left;}
 .public-profile-head{display:flex;align-items:center;gap:12px;background:var(--bg-3);border:1px solid var(--line);border-radius:14px;padding:12px;}
@@ -7149,7 +7149,7 @@ function renderMarketItems(){
       (sellerUid !== '' && currentUid !== '' && sellerUid === currentUid) ||
       String(x.owner_username||'').trim() === currentName;
     const premiumTag = isPremiumActive() && Number(x.price||0)>=5000 ? `<span class="market-premium-tag">+BONUS</span>` : '';
-    return `<div class="market-card ${isKey?'key-item':''}" style="--item-color:${m.color};border-left-color:${m.color}"><span class="inv-icon" style="color:${m.color}">${icon}</span><div class="market-info"><div class="market-name">${name}${premiumTag}</div><div class="market-seller">${isKey?'🗝️ Ключ · ':''}Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}</div></div>${mine?`<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>`:`<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
+    return `<div class="market-card ${isKey?'key-item':''}" style="--item-color:${m.color};border-left-color:${m.color}"><span class="inv-icon" style="color:${m.color}">${icon}</span><div class="market-info"><div class="market-name">${name}${premiumTag}</div><div class="market-seller">${isKey?'🗝️ Ключ · ':''}Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}<div class="market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div></div></div>${mine?`<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>`:`<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
   }).join('');
 }
 
@@ -8027,7 +8027,7 @@ async function openPublicProfile(userId, seed={}){
       <span class="inv-icon" style="color:${m.color};font-size:22px">${icon}</span>
       <div class="public-market-info">
         <div class="public-market-name">${name}</div>
-        <div class="public-market-price">💰 ${formatPrice(x.price)}</div>
+        <div class="public-market-price">💰 ${formatPrice(x.price)}<div class="public-market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div></div>
       </div>
       ${canBuy?`<button type="button" class="btn public-market-buy" data-action="market-buy" data-market-buy="${x.id}" ${Number(data.balance||0)<Number(x.price||0)?'disabled':''}>Купить</button>`:''}
     </div>`;
