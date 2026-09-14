@@ -2651,7 +2651,7 @@ function renderMarketItems(){
       (sellerUid !== '' && currentUid !== '' && sellerUid === currentUid) ||
       String(x.owner_username||'').trim() === currentName;
     const premiumTag = isPremiumActive() && Number(x.price||0)>=5000 ? `<span class="market-premium-tag">+BONUS</span>` : '';
-    return `<div class="market-card ${isKey?'key-item':''}" style="--item-color:${m.color};border-left-color:${m.color}"><span class="inv-icon" style="color:${m.color}">${icon}</span><div class="market-info"><div class="market-name">${name}${premiumTag}</div><div class="market-seller">${isKey?'🗝️ Ключ · ':''}Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}</div></div>${mine?`<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>`:`<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
+    return `<div class="market-card ${isKey?'key-item':''}" style="--item-color:${m.color};border-left-color:${m.color}"><span class="inv-icon" style="color:${m.color}">${icon}</span><div class="market-info"><div class="market-name">${name}${premiumTag}</div><div class="market-seller">${isKey?'🗝️ Ключ · ':''}Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}</div>${!isKey && x.cube_value != null ? `<div class="market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div>` : ''}</div>${mine?`<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>`:`<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
   }).join('');
 }
 
@@ -3529,7 +3529,7 @@ async function openPublicProfile(userId, seed={}){
       <span class="inv-icon" style="color:${m.color};font-size:22px">${icon}</span>
       <div class="public-market-info">
         <div class="public-market-name">${name}</div>
-        <div class="public-market-price">💰 ${formatPrice(x.price)}</div>
+        <div class="public-market-price">💰 ${formatPrice(x.price)}</div>${!isKey && x.cube_value != null ? `<div class="public-market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div>` : ''}
       </div>
       ${canBuy?`<button type="button" class="btn public-market-buy" data-action="market-buy" data-market-buy="${x.id}" ${Number(data.balance||0)<Number(x.price||0)?'disabled':''}>Купить</button>`:''}
     </div>`;
