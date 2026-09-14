@@ -3896,6 +3896,10 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
     <button id="adminAccountPasswordBtn" class="btn" style="width:100%;margin-top:7px">Изменить пароль</button>
     <input id="adminAccountBalance" type="number" placeholder="Баланс" style="margin-top:7px">
     <button id="adminAccountBalanceBtn" class="btn" style="width:100%;margin-top:7px">Установить баланс</button>
+    <input id="adminAccountVault" type="number" min="0" placeholder="Сейф" style="margin-top:7px">
+    <button id="adminAccountVaultBtn" class="btn" style="width:100%;margin-top:7px">🏦 Установить сейф</button>
+    <input id="adminAccountCases" type="number" min="0" placeholder="Кейсы в топе" style="margin-top:7px">
+    <button id="adminAccountCasesBtn" class="btn" style="width:100%;margin-top:7px">📦 Установить кейсы в топе</button>
     <input id="adminAccountLevel" type="number" placeholder="Уровень" style="margin-top:7px">
     <button id="adminAccountLevelBtn" class="btn" style="width:100%;margin-top:7px">Установить уровень</button>
     <div class="admin-avatar-row">
@@ -4260,7 +4264,7 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
       </div>
       <div class="profile-stats">
         <div class="pstat"><b id="statCases">0</b><span>кейсов открыто</span></div>
-        <div class="pstat"><b id="statCubes">0</b><span>кубов в инвентаре</span></div>
+        <div class="pstat"><b id="statCubes">0/50</b><span>кубов в инвентаре</span></div>
         <div class="pstat"><b id="statBattles">0</b><span>батлов</span></div>
         <div class="pstat"><b id="statWins">0</b><span>побед</span></div>
       </div>
@@ -4446,7 +4450,7 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub" id="premiumModalSub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>10</b> игр в «Орб-Рывке» каждые 6 часов</span></div><div class="premium-perk">💣 <span><b>10</b> игр в «Минах» каждые 6 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">🎒 <span><b>100</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="section-sub" style="margin-top:12px">Выберите срок Premium</div><div class="premium-duration" id="premiumSelfDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Выбрано</span><span class="premium-price-value" id="premiumSelfPrice">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
+<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub" id="premiumModalSub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>20</b> игр в «Орб-Рывке» каждые 6 часов</span></div><div class="premium-perk">💣 <span><b>20</b> игр в «Минах» каждые 6 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">🎒 <span><b>200</b> слотов инвентаря вместо 50</span></div><div class="premium-perk">⚡ <span>Ускоренное открытие кейсов</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="section-sub" style="margin-top:12px">Выберите срок Premium</div><div class="premium-duration" id="premiumSelfDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Выбрано</span><span class="premium-price-value" id="premiumSelfPrice">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="premiumGiftModal"><div class="premium-modal-card premium-gift-card"><div class="premium-modal-top"><div class="premium-modal-star">🎁</div><div><div class="premium-modal-title">Подарить Premium</div><div class="premium-modal-sub">Выберите игрока — поиск по нику, ID или Telegram username</div></div></div><div class="premium-gift-search"><input id="premiumGiftSearch" class="input" type="search" placeholder="Ник, @username или ID"><button type="button" class="btn-ghost" id="premiumGiftSearchBtn">Найти</button></div><div id="premiumGiftSelected" class="premium-gift-selected">Игрок не выбран</div><div id="premiumGiftResults" class="premium-gift-results"><div class="premium-gift-empty">Введите запрос для поиска игроков</div></div><div class="section-sub" style="margin-top:12px">Выберите срок подарка</div><div class="premium-duration" id="premiumGiftDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Подарок</span><span class="premium-price-value" id="premiumGiftPrice">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action premium-gift-pay" id="premiumGiftPayBtn" disabled>Подарить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumGiftCloseBtn">Назад</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
@@ -5774,12 +5778,14 @@ async function loadAdminUsers(search){
       return `
       <div class="admin-user">
         <div class="admin-user-head">
-          <div><b>${u.username||'Без имени'}</b><span class="admin-badges">${premiumActive?' ⭐':''}${creatorActive?' 🛠️':''}${testerActive?' 🧪':''}${customStatusHtml}</span><br><span style="color:var(--muted);font-size:11px">ID ${u.user_id} · 💰${Number(u.balance||0).toLocaleString('ru-RU')} · кубов ${u.cube_count||0}${u.tech_break_enabled?' · 🛠️ Тех. перерыв':''}</span></div>
+          <div><b>${u.username||'Без имени'}</b><span class="admin-badges">${premiumActive?' ⭐':''}${creatorActive?' 🛠️':''}${testerActive?' 🧪':''}${customStatusHtml}</span><br><span style="color:var(--muted);font-size:11px">ID ${u.user_id} · 💰${Number(u.balance||0).toLocaleString('ru-RU')} · 🏦${Number(u.vault_balance||0).toLocaleString('ru-RU')} · 📦${Number(u.cases_opened||0).toLocaleString('ru-RU')} · кубов ${u.cube_count||0}${u.tech_break_enabled?' · 🛠️ Тех. перерыв':''}</span></div>
           <div style="font-size:11px;color:${u.banned?'var(--danger)':'var(--success)'}">${u.banned?'Забанен':(u.shadow_banned?'Теневой бан':'Активен')}</div>
         </div>
         <div class="admin-user-actions">
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="500">+500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
+          <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-1">-1 💰</button>
+          <button type="button" class="btn-ghost" data-action="admin-remove-cube" data-uid="${u.user_id}">-1 куб</button>
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
@@ -5819,6 +5825,8 @@ function openAdminAccount(uid){
   document.getElementById('adminAccountNick').value=u?.username||'';
   document.getElementById('adminAccountPassword').value='';
   document.getElementById('adminAccountBalance').value=u?.balance??'';
+  document.getElementById('adminAccountVault').value=u?.vault_balance??'';
+  document.getElementById('adminAccountCases').value=u?.cases_opened??'';
   document.getElementById('adminAccountLevel').value=u?.level??'';
   const avatarPreview=document.getElementById('adminAccountAvatarPreview');
   const avatarFile=document.getElementById('adminAccountAvatarFile');
@@ -5836,6 +5844,8 @@ function openAdminAccount(uid){
   once('adminAccount2faBtn', async()=>{ const enabled=!!u?.two_factor_enabled; if(await tgConfirm(enabled?'Отключить 2FA и сбросить незавершённые коды?':'Включить 2FA для этого аккаунта?')) await adminAccountAction(uid,'2fa',{enabled:!enabled}); });
   once('adminAccountSessionsBtn', async()=>{ if(await tgConfirm('Завершить все активные сессии этого аккаунта?')) await adminAccountAction(uid,'sessions'); });
   once('adminAccountBalanceBtn', async()=>{await adminAccountAction(uid,'balance',{value:Number(document.getElementById('adminAccountBalance').value||0)});});
+  once('adminAccountVaultBtn', async()=>{await adminAccountAction(uid,'vault',{value:Number(document.getElementById('adminAccountVault').value||0)});});
+  once('adminAccountCasesBtn', async()=>{await adminAccountAction(uid,'cases',{value:Number(document.getElementById('adminAccountCases').value||0)});});
   once('adminAccountLevelBtn', async()=>{await adminAccountAction(uid,'level',{value:Number(document.getElementById('adminAccountLevel').value||0)});});
   once('adminAccountAvatarClear', async()=>{
     if(await tgConfirm('Убрать фотографию профиля у этого аккаунта?')){
@@ -6067,6 +6077,10 @@ async function adminPremium(uid){
   });
 }
 
+async function adminRemoveCube(uid){
+  try{ await apiFetch('/api/admin/remove-cube',{user_id:Number(uid)}); showToast('🧊 Куб удалён','success'); loadAdminUsers(document.getElementById('adminSearch')?.value||''); }
+  catch(e){ showToast('❌ '+e.message,'error'); }
+}
 async function adminMoney(uid, amount){
   try{
     await apiFetch('/api/admin/money', {user_id: Number(uid), amount: Number(amount)});
@@ -8211,7 +8225,7 @@ function renderProfile(){
   document.getElementById('profileRank').textContent=rankForBalance(data.balance);
   document.getElementById('profileBalance').textContent=data.balance.toLocaleString('ru-RU');
   document.getElementById('statCases').textContent=data.cases_opened||0;
-  document.getElementById('statCubes').textContent=data.cubes.length;
+  document.getElementById('statCubes').textContent=`${data.cubes.length}/${Number(data.cube_slots||50)}`;
   document.getElementById('statBattles').textContent=data.battles||0;
   document.getElementById('statWins').textContent=data.wins||0;
   if(!dailyState.loaded){
