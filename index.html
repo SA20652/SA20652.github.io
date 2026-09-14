@@ -4426,18 +4426,11 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 </div>
 
 
-<div class="modal-overlay" id="clickerModal">
-  <div class="input-modal clicker-modal">
-    <h3>💰 Монетный кликер</h3>
-    <div class="clicker-balance">
-      <div class="clicker-balance-value"><span id="clickerCoinsValue">0</span> 💰</div>
-      <div class="clicker-sub">+1 монета за честный клик · награда подтверждается сервером</div>
-    </div>
-    <button type="button" class="clicker-orb" id="clickerOrb" aria-label="Кликнуть">💰</button>
-    <div class="clicker-progress"><div id="clickerProgressFill"></div></div>
-    <div class="clicker-status" id="clickerStatus">Нажимай в нормальном темпе — слишком частые клики блокируются.</div>
+<div class="modal-overlay" id="coinPurchaseModal">
+  <div class="input-modal">
+    <h3>⭐ Купить монеты за Stars</h3>
+    <div class="section-sub" style="margin-bottom:12px">Выберите пакет монет</div>
     <div class="coin-pack-section">
-      <div class="coin-pack-title">⭐ Купить монеты за Stars</div>
       <div class="coin-pack-list" id="coinPackList">
         <button type="button" class="coin-pack-btn" data-coin-stars="5"><span class="coin-pack-coins">8 000 💰</span><span class="coin-pack-price">5 ⭐</span></button>
         <button type="button" class="coin-pack-btn" data-coin-stars="10"><span class="coin-pack-coins">20 000 💰</span><span class="coin-pack-price">10 ⭐</span></button>
@@ -4448,7 +4441,7 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
         <button type="button" class="coin-pack-btn" data-coin-stars="500"><span class="coin-pack-coins">2 240 000 💰</span><span class="coin-pack-price">500 ⭐</span></button>
       </div>
     </div>
-    <button type="button" class="btn-ghost" id="clickerCloseBtn" style="width:100%;margin-top:14px">Закрыть</button>
+    <button type="button" class="btn-ghost" id="coinPurchaseCloseBtn" style="width:100%;margin-top:14px">Закрыть</button>
   </div>
 </div>
 
@@ -6598,22 +6591,12 @@ function maybeDropKey(casePrice){
 }
 
 
-// ===== COIN CLICKER =====
-// +1 монета за каждый подтверждённый клик. 2 минуты активности (паузы до 10с
-// не сбрасывают сессию) -> бан кликера на 1 час. Дневной лимит 4000 монет.
-const CLICKER_REWARD = 1;
-let clickerOpen=false, clickerInFlight=0, clickerLocalCoins=0;
-function clickerSetStatus(text,error=false){const el=document.getElementById('clickerStatus');if(el){el.textContent=text;el.style.color=error?'var(--danger)':'var(--muted)';}}
-function clickerRender(){const el=document.getElementById('clickerCoinsValue');if(el)el.textContent=Number(clickerLocalCoins||0).toLocaleString('ru-RU');}
-function openClicker(){if(!data)return;clickerOpen=true;clickerLocalCoins=0;clickerInFlight=0;clickerRender();clickerSetStatus('За клик +1 💰. Лимит кликера — 4 000 монет в день.');openModal('clickerModal');}
-function closeClicker(){clickerOpen=false;closeModal('clickerModal');}
-function clickerFloatReward(){const orb=document.getElementById('clickerOrb');if(!orb)return;const r=orb.getBoundingClientRect(),el=document.createElement('div');el.className='clicker-float';el.textContent='+1 💰';el.style.left=(r.left+r.width/2-18)+'px';el.style.top=(r.top+18)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),500);}
-async function clickerClaim(e){if(!data)return;clickerInFlight++;clickerLocalCoins+=CLICKER_REWARD;clickerRender();clickerFloatReward();updateBalanceUI();const requestId=(crypto?.randomUUID?crypto.randomUUID():`click-${Date.now()}-${Math.random().toString(36).slice(2)}`);try{const j=await apiFetch('/api/clicker/claim',{request_id:requestId});if(j&&Number.isFinite(Number(j.balance)))data.balance=Number(j.balance);clickerSetStatus(Number(j.daily_earned)>=4000?'Достигнут дневной лимит кликера: 4 000 монет.':'Зачислено +1 монета.');persistLocal();updateBalanceUI();}catch(e){clickerLocalCoins=Math.max(0,clickerLocalCoins-CLICKER_REWARD);clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);}finally{clickerInFlight=Math.max(0,clickerInFlight-1);clickerRender();}}
-document.getElementById('clickerOrb')?.addEventListener('pointerdown',e=>{e.preventDefault();clickerClaim(e);});
-document.getElementById('balancePlusBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openClicker();});
-document.getElementById('referralCopyBtn')?.addEventListener('click',copyReferralLink);
-document.getElementById('referralShareBtn')?.addEventListener('click',shareReferralLink);
-document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicker);async function startCoinPayment(stars, btn){
+// ===== ПОКУПКА МОНЕТ ЗА TELEGRAM STARS =====
+function openCoinPurchase(){if(!data)return;openModal('coinPurchaseModal');}
+function closeCoinPurchase(){closeModal('coinPurchaseModal');}
+document.getElementById('balancePlusBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCoinPurchase();});
+document.getElementById('coinPurchaseCloseBtn')?.addEventListener('click',closeCoinPurchase);
+async function startCoinPayment(stars, btn){
   try{
     if(!window.Telegram?.WebApp?.openInvoice) throw new Error('Оплата доступна только внутри Telegram');
     if(btn){btn.disabled=true;btn.dataset.oldText=btn.innerHTML;btn.innerHTML='<span>Создаём счёт…</span>'}
@@ -6621,7 +6604,7 @@ document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicke
     if(!j.invoice || typeof j.invoice!=='string') throw new Error('Не удалось создать счёт');
     Telegram.WebApp.openInvoice(j.invoice,(status)=>{
       if(status==='paid'){
-        closeModal('clickerModal');
+        closeCoinPurchase();
         showToast('💰 Монеты зачислены','success');
         setTimeout(()=>loadMe(),350);
       }else if(status==='failed') showToast('❌ Оплата не прошла','error');
@@ -6635,7 +6618,6 @@ document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicke
   }
 }
 document.querySelectorAll('[data-coin-stars]').forEach(btn=>btn.addEventListener('click',()=>startCoinPayment(btn.dataset.coinStars,btn)));
-
 
 async function openCase(caseId, useKey=false){
   if(spinning) return;
