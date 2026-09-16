@@ -5009,11 +5009,11 @@ function applyServerState(u){
   }
   if(typeof u.daily_streak === 'number' && u.daily_streak !== Number(data.dailyStreak || 0)){ data.dailyStreak = Number(u.daily_streak || 0); changed = true; }
   if(typeof u.battle_winnings === 'number' && u.battle_winnings !== data.battle_winnings){ data.battle_winnings = u.battle_winnings; changed = true; }
-  if(typeof u.battles_played === 'number' && u.battles_played !== Number(data.battles||0)){ data.battles = u.battles_played; changed = true; }
-  if(typeof u.total_wins === 'number' && u.total_wins !== Number(data.wins||0)){ data.wins = u.total_wins; changed = true; }
-  if(typeof u.total_losses === 'number' && u.total_losses !== Number(data.losses||0)){ data.losses = u.total_losses; changed = true; }
-  if(typeof u.total_spins === 'number' && u.total_spins !== Number(data.spins||0)){ data.spins = u.total_spins; changed = true; }
-  if(typeof u.biggest_win === 'number' && u.biggest_win !== Number(data.biggestWin||0)){ data.biggestWin = u.biggest_win; changed = true; }
+  if(typeof u.battles_played === 'number' && u.battles_played !== data.battles){ data.battles = u.battles_played; changed = true; }
+  if(typeof u.total_wins === 'number' && u.total_wins !== data.wins){ data.wins = u.total_wins; changed = true; }
+  if(typeof u.total_losses === 'number' && u.total_losses !== data.losses){ data.losses = u.total_losses; changed = true; }
+  if(typeof u.total_spins === 'number' && u.total_spins !== data.spins){ data.spins = u.total_spins; changed = true; }
+  if(typeof u.biggest_win === 'number' && u.biggest_win !== data.biggestWin){ data.biggestWin = u.biggest_win; changed = true; }
   if(typeof u.vault_balance === 'number' && u.vault_balance !== data.vault_balance){ data.vault_balance = u.vault_balance; changed = true; }
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
@@ -5201,35 +5201,33 @@ function showModerationNotice(notice){
 }
 
 async function registerWithServer(){
-  if(!tgInitData()) return false;
+  if(!tgInitData()) return;
   try{
     const j = await apiFetch('/api/me', {});
-    if(!j || !j.user) throw new Error('Сервер не вернул профиль игрока');
     if(j.moderation_notice) showModerationNotice(j.moderation_notice);
     window.isAdmin = !!j.is_admin;
     updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
     if(window.isAdmin) await loadAdminUI();
-    // ВАЖНО: при входе сервер является единственным источником истины.
-    // Никогда не отправляем локальные стартовые данные (1000/0/[]) обратно
-    // на сервер во время первичной авторизации.
-    applyServerState(j.user);
-    if(j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
-    if(j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
-    if(j.user.vip !== undefined){ data.vip = !!j.user.vip; }
-    if(j.user.is_vip !== undefined){ data.isVip = !!j.user.is_vip; }
-    if(j.user.creator_badge !== undefined){ data.creatorBadge = !!j.user.creator_badge; }
-    if(j.user.custom_status !== undefined){ data.customStatus = j.user.custom_status || null; }
-    data.profileFrame = String(j.user.profile_frame || data.profileFrame || 'default');
-    data.profileNameStyle = String(j.user.profile_name_style || data.profileNameStyle || 'default');
-    data.serverSynced = true;
-    persistLocal();
+    if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
+    if(j.user && j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
+    if(j.user && j.user.vip !== undefined){ data.vip = !!j.user.vip; }
+    if(j.user && j.user.is_vip !== undefined){ data.isVip = !!j.user.is_vip; }
+    if(j.user && j.user.creator_badge !== undefined){ data.creatorBadge = !!j.user.creator_badge; }
+    if(j.user && j.user.custom_status !== undefined){ data.customStatus = j.user.custom_status || null; }
+    // Restore saved profile frame/name color before any legacy migration sync.
+    if(j.user) applyServerState(j.user);
     if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
-    renderProfile();
-    return true;
-  }catch(e){
-    console.error('me error', e);
-    return false;
-  }
+    // При автоматическом входе Telegram сервер является источником истины.
+    // Не отправляем локальные данные обратно на сервер: старый кэш мог содержать
+    // стартовые 1000 монет/нулевые показатели и перезаписать реальный прогресс.
+    if(j.user){
+      data.profileFrame = String(j.user.profile_frame || data.profileFrame || 'default');
+      data.profileNameStyle = String(j.user.profile_name_style || data.profileNameStyle || 'default');
+      data.serverSynced = true;
+      persistLocal();
+    }
+  }catch(e){ console.error('me error', e); }
+  renderProfile();
 }
 
 function persistLocal(){
@@ -5333,7 +5331,9 @@ function serverUserToGame(u,fallbackName){
     username:u?.display_name||u?.username||fallbackName, balance:Number(u?.balance||0), cubes,
     cases_opened:Number(u?.cases_opened||0), lastDaily:u?.daily_claimed?Date.parse(u.daily_claimed):0, dailyStreak:Number(u?.daily_streak||0),
     avatar:u?.avatar||'', buffs:Array.isArray(u?.buffs)?u.buffs:[], bestDrops:Array.isArray(u?.best_drops)?u.best_drops:[],
-    battles:Number(u?.battles_played||0),wins:Number(u?.total_wins||0),losses:Number(u?.total_losses||0),spins:Number(u?.total_spins||0),biggestWin:Number(u?.biggest_win||0),battle_winnings:Number(u?.battle_winnings||0),vault_balance:Number(u?.vault_balance||0),
+    battles:Number(u?.battles_played||0), wins:Number(u?.total_wins||0), battle_winnings:Number(u?.battle_winnings||0),
+    spins:Number(u?.total_spins||0), losses:Number(u?.total_losses||0), biggestWin:Number(u?.biggest_win||0),
+    vault_balance:Number(u?.vault_balance||0),
     creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
@@ -5364,19 +5364,14 @@ async function showApp(skipServer=false){
   normalizeGameState();
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
-  await ensureCaseImages();
-  if(!skipServer){
-    const ok = await registerWithServer();
-    if(!ok){
-      document.getElementById('authScreen').style.display='flex';
-      document.getElementById('appScreen').style.display='none';
-      showAuthError('Не удалось получить данные игрока с сервера. Данные не были изменены.');
-      return false;
-    }
+  if(!skipServer && tgInitData()){
+    // Сначала забираем серверный профиль, потом рисуем интерфейс.
+    // Это исключает показ/сохранение локального нового аккаунта поверх старого.
+    await registerWithServer();
   }
+  await ensureCaseImages();
   renderAll();
   refreshGlobalTechBreak();
-  return true;
 }
 
 async function boot(){
@@ -5397,12 +5392,10 @@ async function boot(){
   // никогда не ждёт ответа сервера и заканчивается по своему таймеру.
   const serverBoot=Promise.resolve().then(()=>bootSafe()).catch(e=>{
     console.error('GDPLAY boot error:', e);
-    // Никогда не создаём локальный профиль 1000/0/[] при ошибке сервера:
-    // такой fallback мог заменить реальные данные игрока.
-    currentUser=null;
-    data=null;
-    showAuth();
-    showAuthError('Не удалось загрузить данные с сервера. Попробуй открыть игру ещё раз.');
+    // Не создаём здесь пустой локальный профиль: при ошибке авторизации это
+    // могло визуально превратить существующий аккаунт в новый с 1000 монетами.
+    currentUser=null; data=null; showAuth();
+    showAuthError('Не удалось загрузить профиль с сервера. Обнови приложение и попробуй ещё раз.');
   });
 
   if(firstLaunch){
