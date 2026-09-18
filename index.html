@@ -5461,6 +5461,15 @@ async function preloadProfileImages(user){
   }catch(e){}
 }
 
+async function loadServerCases(){
+  try{
+    const j=await apiFetch('/api/cases',{});
+    if(Array.isArray(j?.cases) && j.cases.length){
+      CASES.splice(0,CASES.length,...j.cases.map(c=>({...c,items:Array.isArray(c.items)?c.items.map(x=>({...x})):[]})));
+    }
+  }catch(e){ console.debug('case catalog sync skipped',e); }
+}
+
 async function showApp(skipServer=false){
   removeContractsUI();
   normalizeGameState();
@@ -5471,6 +5480,8 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
+  // Sync the server catalog before the first case render, so admin-added cubes are visible immediately.
+  await loadServerCases().catch(()=>{});
   // Image decoding starts immediately but does not block first paint.
   await ensureCaseImages().catch(()=>{});
   preloadProfileImages(data).catch(()=>{});
@@ -6931,6 +6942,19 @@ async function prepareCaseImageForOpen(caseId){
   }catch(_){}
 }
 
+function prepareFreshWheelForCase(c){
+  const dial=document.getElementById('wheelDial');
+  if(!dial || !c || !Array.isArray(c.items) || !c.items.length) return;
+  // Never let the previous case's reel remain visible while the new server result is loading.
+  try{ dial.getAnimations?.().forEach(a=>a.cancel()); }catch(_){}
+  dial.classList.remove('is-spinning','is-stopped');
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
+  dial.style.opacity='1';
+  const provisional=Math.floor(Math.random()*c.items.length);
+  buildWheel(c.items, provisional, c.items[provisional]?.value, c.items[provisional]);
+}
+
 async function openCaseBatch(c, qty, useKey=false){
   if(spinning) return;
   spinning = true;
@@ -6969,7 +6993,8 @@ async function openCaseBatch(c, qty, useKey=false){
   if(pill) pill.textContent='КРУТИМ';
   await prepareCaseImageForOpen(c.id);
   if(icon) icon.innerHTML=caseImage(c.id,c.name);
-  // Open only after the correct image is ready; no emoji/previous case flash.
+  prepareFreshWheelForCase(c);
+  // Open only after the correct image and fresh case reel are ready.
   openModal('spinModal');
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try{
@@ -7098,6 +7123,8 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(prePill) prePill.textContent = 'КРУТИМ';
   await prepareCaseImageForOpen(c.id);
   if(preIcon) preIcon.innerHTML = caseImage(c.id,c.name);
+  prepareFreshWheelForCase(c);
+  // The modal now contains the NEW case's reel before the API result arrives.
   openModal('spinModal');
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try{
