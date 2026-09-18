@@ -6993,10 +6993,8 @@ async function openCaseBatch(c, qty, useKey=false){
   if(pill) pill.textContent='КРУТИМ';
   await prepareCaseImageForOpen(c.id);
   if(icon) icon.innerHTML=caseImage(c.id,c.name);
-  prepareFreshWheelForCase(c);
-  // Open only after the correct image and fresh case reel are ready.
-  openModal('spinModal');
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  // Keep the old reel hidden until the server has returned the new case's
+  // rewards. This prevents a previous case from flashing in the modal.
   try{
     if(tgInitData()){
       const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -7046,6 +7044,9 @@ async function openCaseBatch(c, qty, useKey=false){
       buildWheelIn(dial,c.items,wonIndex,won.value,won);
       rows.push({row,dial,wonIndex});
     }
+    // Every visible reel is already built from the new case before the modal paints.
+    openModal('spinModal');
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     multiRow.classList.remove('reel-opening'); void multiRow.offsetWidth; multiRow.classList.add('reel-opening');
     if(pill) pill.textContent=`${qty} КРУТЯТСЯ`;
     const revealBatch=()=>{
@@ -7123,10 +7124,8 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(prePill) prePill.textContent = 'КРУТИМ';
   await prepareCaseImageForOpen(c.id);
   if(preIcon) preIcon.innerHTML = caseImage(c.id,c.name);
-  prepareFreshWheelForCase(c);
-  // The modal now contains the NEW case's reel before the API result arrives.
-  openModal('spinModal');
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  // Do not show the old/provisional reel. First get the authoritative result,
+  // then build the reel from THIS case and only then paint the opening modal.
   try{
     if(tgInitData()){
       // The authoritative result is requested BEFORE the animation is built.
@@ -7191,7 +7190,10 @@ async function openCaseOnce(c, seq, total, useKey=false){
   const spinPrice=document.getElementById('spinCasePrice'); if(spinPrice) spinPrice.textContent=`${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinSub=document.getElementById('spinCaseSub'); if(spinSub) spinSub.textContent=`${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
   const spinPill=document.getElementById('spinStatusPill'); if(spinPill) spinPill.textContent='КРУТИМ';
+  // Build the exact new-case reel before the modal becomes visible.
   buildWheel(c.items, wonIndex, won.value, won);
+  openModal('spinModal');
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const dial = document.getElementById('wheelDial');
   const wheelWrap = document.getElementById('wheelWrap');
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
