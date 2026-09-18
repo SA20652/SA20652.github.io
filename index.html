@@ -6681,33 +6681,43 @@ function spinWheelIn(container,dial,items,wonIndex){
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const duration=reduced?500:2850;
-  const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
-  const containerCenter=container.clientWidth/2;
-  const offset=Math.max(0,targetCenter-containerCenter);
+  try{ dial.getAnimations?.().forEach(a=>a.cancel()); }catch(e){}
   dial.classList.add('is-spinning'); dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
-    let done=false;
+    let finished=false;
+    let offset=0;
     const finish=()=>{
-      if(done) return; done=true;
-      dial.removeEventListener('transitionend',onTransitionEnd);
-      clearTimeout(safety);
+      if(finished) return; finished=true;
+      try{ dial.getAnimations?.().forEach(a=>a.cancel()); }catch(e){}
       dial.style.transition='none';
       dial.style.transform=`translate3d(-${offset}px,0,0)`;
       dial.classList.remove('is-spinning');
       dial.classList.add('is-stopped');
       resolve();
     };
-    const onTransitionEnd=e=>{ if(e.propertyName==='transform') finish(); };
-    dial.addEventListener('transitionend',onTransitionEnd);
-    const safety=setTimeout(finish,duration+120);
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;
-        dial.style.transform=`translate3d(-${offset}px,0,0)`;
-      });
-    });
-    // transitionend normally resolves immediately at the real stop point.
-    // The timeout is only a safety net for browsers/WebViews that skip the event.
+    const start=()=>{
+      const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
+      const containerWidth=container.getBoundingClientRect().width || container.clientWidth || 0;
+      offset=Math.max(0,targetCenter-containerWidth/2);
+      dial.style.transition='none';
+      dial.style.transform='translate3d(0,0,0)';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(finished) return;
+        try{
+          const anim=dial.animate(
+            [{transform:'translate3d(0,0,0)'},{transform:`translate3d(-${offset}px,0,0)`}],
+            {duration,easing:'cubic-bezier(.08,.76,.12,1)',fill:'forwards'}
+          );
+          anim.finished.then(finish).catch(finish);
+        }catch(e){
+          dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;
+          dial.style.transform=`translate3d(-${offset}px,0,0)`;
+          setTimeout(finish,duration+80);
+        }
+      }));
+    };
+    requestAnimationFrame(start);
+    setTimeout(()=>{if(!finished) finish();},duration+180);
   });
 }
 
