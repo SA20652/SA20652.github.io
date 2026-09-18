@@ -4500,7 +4500,7 @@ body{overflow-x:hidden;}
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
     <div class="spin-topbar">
-      <div class="spin-case-icon" id="spinCaseIcon">🗝️</div>
+      <div class="spin-case-icon" id="spinCaseIcon"></div>
       <div class="spin-case-heading">
         <div class="spin-case-kicker">GDPLAY CASE · ОТКРЫТИЕ</div>
         <h3 id="spinCaseTitle">Кейс</h3>
@@ -6668,9 +6668,39 @@ const REEL_LENGTH = 22;
 const REEL_TARGET_POS = 16;
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
-  const target=authoritativeDrop?{...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)}:{...(items[wonIndex]||{}),value:Math.floor(Number(wonValue??items[wonIndex]?.value??0)||0)};
+  const pool=Array.isArray(items)?items.filter(Boolean):[];
+  if(!dial || !pool.length) return;
+  const target=authoritativeDrop?{...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)}:{...(pool[wonIndex]||{}),value:Math.floor(Number(wonValue??pool[wonIndex]?.value??0)||0)};
+  const targetKey=`${String(target.name||'')}|${String(target.rarity||'')}|${Number(target.value||0)}`;
+  const previousStartKey=dial.dataset.lastStartRewardKey||'';
+  const pickDifferent=(avoidKey, used)=>{
+    const candidates=pool.filter(it=>{
+      const k=`${String(it.name||'')}|${String(it.rarity||'')}|${Number(it.value||0)}`;
+      return k!==avoidKey && !used.has(k);
+    });
+    const source=candidates.length?candidates:pool.filter(it=>{
+      const k=`${String(it.name||'')}|${String(it.rarity||'')}|${Number(it.value||0)}`;
+      return k!==avoidKey;
+    });
+    return (source.length?source:pool)[Math.floor(Math.random()*(source.length?source.length:pool.length))];
+  };
   const strip=[];
-  for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS?target:items[Math.floor(Math.random()*items.length)]);
+  const usedStart=new Set();
+  // Do not begin the next reel on the reward that was just shown.
+  // Keep the first few visible cards varied when the catalog allows it.
+  for(let i=0;i<REEL_LENGTH;i++){
+    if(i===REEL_TARGET_POS){ strip.push(target); continue; }
+    let item;
+    if(i<4 && previousStartKey){
+      item=pickDifferent(previousStartKey, usedStart);
+    }else{
+      item=pool[Math.floor(Math.random()*pool.length)];
+    }
+    const k=`${String(item.name||'')}|${String(item.rarity||'')}|${Number(item.value||0)}`;
+    if(i<4) usedStart.add(k);
+    strip.push(item);
+  }
+  dial.dataset.lastStartRewardKey=targetKey;
   dial.classList.remove('is-spinning','is-stopped');
   dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}><span>${m.icon}</span><b style="color:${m.color}">${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
@@ -6885,6 +6915,22 @@ async function openCase(caseId, useKey=false){
   }
 }
 
+async function prepareCaseImageForOpen(caseId){
+  // The opening modal must never paint the previous/placeholder icon first.
+  // Wait only for the selected case image, then open the modal.
+  try{
+    await ensureCaseImages();
+    const src=CASE_IMAGES[String(caseId)] || '';
+    if(!src) return;
+    const img=new Image();
+    img.decoding='sync';
+    img.src=src;
+    if(img.complete && img.naturalWidth) return;
+    if(img.decode) await img.decode().catch(()=>{});
+    else await new Promise(resolve=>{img.onload=img.onerror=resolve;});
+  }catch(_){}
+}
+
 async function openCaseBatch(c, qty, useKey=false){
   if(spinning) return;
   spinning = true;
@@ -6915,8 +6961,15 @@ async function openCaseBatch(c, qty, useKey=false){
   if(pill) pill.textContent='КРУТИМ';
 
   const wins=[];
-  // Показываем окно до сетевого запроса: первый кадр отрисовывается сразу после нажатия.
-  // Тяжёлое построение рулетки выполняется только после получения результата и отдельного кадра.
+  // Prepare the selected case image BEFORE the modal becomes visible.
+  if(title) title.textContent=`${c.name} · ${qty} кейса`;
+  if(icon) icon.innerHTML=caseImage(c.id,c.name);
+  if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
+  if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие кейса';
+  if(pill) pill.textContent='КРУТИМ';
+  await prepareCaseImageForOpen(c.id);
+  if(icon) icon.innerHTML=caseImage(c.id,c.name);
+  // Open only after the correct image is ready; no emoji/previous case flash.
   openModal('spinModal');
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try{
@@ -7031,7 +7084,20 @@ async function openCaseOnce(c, seq, total, useKey=false){
   document.getElementById('vaultCrack').style.display = 'none';
 
   let won;
-  // Окно открываем немедленно, чтобы нажатие не блокировалось запросом/созданием DOM.
+  // Prepare the selected case image before showing the modal.
+  // This prevents the previous case or placeholder emoji from flashing.
+  const preTitle=document.getElementById('spinCaseTitle');
+  const preIcon=document.getElementById('spinCaseIcon');
+  const prePrice=document.getElementById('spinCasePrice');
+  const preSub=document.getElementById('spinCaseSub');
+  const prePill=document.getElementById('spinStatusPill');
+  if(preTitle) preTitle.textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
+  if(preIcon) preIcon.innerHTML = caseImage(c.id,c.name);
+  if(prePrice) prePrice.textContent = `${Number(c.price).toLocaleString('ru-RU')} 💰`;
+  if(preSub) preSub.textContent = `${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
+  if(prePill) prePill.textContent = 'КРУТИМ';
+  await prepareCaseImageForOpen(c.id);
+  if(preIcon) preIcon.innerHTML = caseImage(c.id,c.name);
   openModal('spinModal');
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try{
