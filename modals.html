@@ -2033,13 +2033,70 @@ const REEL_ITEM_WIDTH = 104;
 const REEL_LENGTH = 28;
 const REEL_TARGET_POS = 21;
 
+const REEL_TEMPLATE_CACHE = new WeakMap();
+
+function reelItemMarkup(it, isTarget=false){
+  const m=RARITY_META[it?.rarity]||RARITY_META.common;
+  const v=Math.floor(Number(it?.value||0));
+  return `<div class="wheel-item" ${isTarget?'data-reel-target="1"':''}><span>${m.icon}</span><b style="color:${m.color}">${it?.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`;
+}
+
+function getReelTemplate(c){
+  const key=Array.isArray(c?.items)?c.items:null;
+  if(!key) return null;
+  let cached=REEL_TEMPLATE_CACHE.get(key);
+  if(cached) return cached;
+  const items=Array.isArray(c?.items)?c.items:[];
+  if(!items.length) return null;
+  const holder=document.createElement('div');
+  const frag=document.createDocumentFragment();
+  for(let i=0;i<REEL_LENGTH;i++){
+    const item=items[Math.floor(Math.random()*items.length)];
+    const wrap=document.createElement('div');
+    wrap.innerHTML=reelItemMarkup(item,i===REEL_TARGET_POS);
+    frag.appendChild(wrap.firstElementChild);
+  }
+  holder.appendChild(frag);
+  cached=holder;
+  REEL_TEMPLATE_CACHE.set(key,cached);
+  return cached;
+}
+
+function prepareCaseReelTemplates(cases){
+  if(!Array.isArray(cases)) return;
+  const run=()=>{
+    for(const c of cases){
+      if(Array.isArray(c?.items) && !REEL_TEMPLATE_CACHE.has(c.items)) getReelTemplate(c);
+    }
+  };
+  if(typeof requestIdleCallback==='function') requestIdleCallback(run,{timeout:1200});
+  else setTimeout(run,120);
+}
+
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
   const target=authoritativeDrop?{...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)}:{...(items[wonIndex]||{}),value:Math.floor(Number(wonValue??items[wonIndex]?.value??0)||0)};
-  const strip=[];
-  for(let i=0;i<REEL_LENGTH;i++) strip.push(i===REEL_TARGET_POS?target:items[Math.floor(Math.random()*items.length)]);
+  const c={id:target.source_case_id||'',items};
+  const template=getReelTemplate(c);
   dial.classList.remove('is-spinning','is-stopped');
-  dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}><span>${m.icon}</span><b style="color:${m.color}">${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
-  dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
+  if(template){
+    const clone=template.cloneNode(true);
+    dial.replaceChildren(...clone.childNodes);
+  }else{
+    const frag=document.createDocumentFragment();
+    for(let i=0;i<REEL_LENGTH;i++){
+      const el=document.createElement('div');
+      el.className='wheel-item';
+      if(i===REEL_TARGET_POS) el.dataset.reelTarget='1';
+      const item=i===REEL_TARGET_POS?target:items[Math.floor(Math.random()*items.length)];
+      el.innerHTML=reelItemMarkup(item,false).replace(/^<div[^>]*>|<\/div>$/g,'');
+      frag.appendChild(el);
+    }
+    dial.replaceChildren(frag);
+  }
+  const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
+  if(targetEl) targetEl.innerHTML=reelItemMarkup(target,false).replace(/^<div[^>]*>|<\/div>$/g,'');
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
 }
 
 function spinWheelIn(container,dial,items,wonIndex){
@@ -2047,8 +2104,9 @@ function spinWheelIn(container,dial,items,wonIndex){
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const duration=reduced?500:2850;
-  const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
-  const containerCenter=container.clientWidth/2;
+  const itemWidth = targetEl.offsetWidth || (container.classList.contains('wheel-multi-row') ? 92 : REEL_ITEM_WIDTH);
+  const containerCenter = container.clientWidth / 2;
+  const targetCenter = (REEL_TARGET_POS * itemWidth) + (itemWidth / 2);
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning'); dial.classList.remove('is-stopped');
   return new Promise(resolve=>{
@@ -2203,6 +2261,8 @@ async function openCase(caseId, useKey=false){
     await openCaseBatch(c, qty, false);
   }
 }
+
+prepareCaseReelTemplates(CASES);
 
 async function openCaseBatch(c, qty, useKey=false){
   if(spinning) return;
