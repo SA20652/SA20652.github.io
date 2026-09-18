@@ -5399,6 +5399,24 @@ function removeContractsUI(){
   document.querySelectorAll('[data-tab="contracts"], #page-contracts, [data-menu-tab="contracts"]').forEach(el=>el.remove());
 }
 
+async function preloadProfileImages(user){
+  try{
+    const urls=new Set();
+    const own=String(user?.avatar||'').trim(); if(own) urls.add(own);
+    // Fetch all three leaderboard views in parallel once at startup so switching
+    // between Top tabs/profile never causes a burst of avatar requests.
+    const sorts=['cases','balance','winnings'];
+    const results=await Promise.allSettled(sorts.map(sort_by=>apiFetch('/api/leaderboard',{sort_by})));
+    for(const r of results){
+      if(r.status!=='fulfilled') continue;
+      for(const row of (r.value?.leaderboard||[])){ const a=String(row.avatar||'').trim(); if(a) urls.add(a); }
+    }
+    await Promise.all(Array.from(urls).map(src=>new Promise(resolve=>{
+      const img=new Image(); img.decoding='async'; img.onload=img.onerror=()=>resolve(); img.src=src;
+    })));
+  }catch(e){}
+}
+
 async function showApp(skipServer=false){
   removeContractsUI();
   normalizeGameState();
@@ -5409,9 +5427,26 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
-  await ensureCaseImages();
+  await Promise.allSettled([ensureCaseImages(), preloadProfileImages(data)]);
   renderAll();
   refreshGlobalTechBreak();
+}
+
+function handleTelegramStartApp(){
+  try{
+    const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
+    if(!raw) return;
+    if(raw==='play'){ switchTab('cases'); return; }
+    if(raw.startsWith('case_')){
+      const cid=raw.slice(5);
+      switchTab('cases');
+      requestAnimationFrame(()=>{
+        const el=document.querySelector(`[data-case-id=\"${CSS.escape(cid)}\"]`);
+        const btn=el?.querySelector('[data-action=\"open-case\"]');
+        if(btn) btn.click();
+      });
+    }
+  }catch(e){}
 }
 
 async function boot(){
@@ -5514,7 +5549,8 @@ async function bootSafe(){
         window.isAdmin = !!j.is_admin;
       updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
-        showApp();
+        await showApp();
+        handleTelegramStartApp();
         return;
       }
     }catch(e){
@@ -5567,7 +5603,8 @@ async function bootSafe(){
       if(tgAvatar) data.avatar = tgAvatar;
       window.isAdmin = !!j.is_admin;
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
-      showApp();
+      await showApp();
+      handleTelegramStartApp();
       return;
     }
     throw lastError || new Error('Не удалось получить Telegram-профиль');
@@ -7971,7 +8008,7 @@ async function renderLeaderboard(sortBy='cases'){
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item ${r.key===myId?'me':''}">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
-        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="lazy" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
+        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
           <div class="lb-user name-${String(r.profile_name_style||'default').toLowerCase()}" ${r.text_color?`style="color:${String(r.text_color).replace(/"/g,'&quot;')};"`:''}>${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
@@ -8119,7 +8156,7 @@ async function openPublicProfile(userId, seed={}){
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2">
       <div class="profile-avatar-wrap public-profile-avatar-wrap">
-        <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="lazy" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
+        <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
         ${publicFrameHtml}
       </div>
       <div class="profile-head-info">
@@ -8687,6 +8724,13 @@ async function refreshGlobalTechBreak(){
   }catch(e){}
   finally{ techBreakCheckInFlight=false; }
 }
+// В фоне Telegram/WebView не тратим кадры на тяжёлые эффекты и принудительно
+// останавливаем CSS-анимации декоративных элементов. При возврате они продолжаются.
+(function(){
+  const applyBg=()=>document.documentElement.classList.toggle('gdplay-backgrounded',document.hidden);
+  document.addEventListener('visibilitychange',applyBg,{passive:true}); applyBg();
+})();
+
 // Проверяем состояние глобального тех. перерыва каждые 5 секунд,
 // чтобы включение/завершение перерыва быстро отображалось у всех игроков.
 setInterval(()=>{ if(!document.hidden) refreshGlobalTechBreak(); }, 15000);
@@ -9602,4 +9646,9 @@ nav .nav-btn[data-tab="cases"] .nav-icon svg *{
   white-space:nowrap !important;
   align-self:flex-start !important;
 }
+</style>
+
+<style id="gdplay-background-performance">
+html.gdplay-backgrounded *,html.gdplay-backgrounded *::before,html.gdplay-backgrounded *::after{animation-play-state:paused!important;transition:none!important}
+html.gdplay-backgrounded canvas{visibility:hidden!important}
 </style>
