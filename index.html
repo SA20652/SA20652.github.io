@@ -3786,47 +3786,43 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{width:22px!important;height:22px!important;max-width:none!important;max-height:none!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 </style>
-
-<style id="gdplay-ui-polish-v9">
-/* Global polish — preserves the existing gold palette and all functional selectors. */
-:root{--ui-ease:cubic-bezier(.22,1,.36,1);--ui-border:rgba(236,228,211,.10);--ui-glow:rgba(201,151,77,.12)}
-body{background:radial-gradient(circle at 12% -8%,rgba(201,151,77,.09),transparent 34%),radial-gradient(circle at 100% 12%,rgba(63,138,112,.055),transparent 30%),var(--bg);}
-.app-shell{padding-top:10px;}
-header{position:sticky!important;top:calc(env(safe-area-inset-top) + 6px);z-index:900;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:color-mix(in srgb,var(--bg) 86%,transparent)!important;border:1px solid var(--ui-border)!important;box-shadow:0 14px 35px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.035)!important;border-radius:20px!important;padding:9px 10px!important;}
-.brand-name{letter-spacing:.3px}.brand-sub{opacity:.72}
-.balance-chip{box-shadow:inset 0 1px rgba(255,255,255,.035),0 7px 18px rgba(0,0,0,.16);border-color:rgba(201,151,77,.18)!important;}
-.menu-btn,.icon-btn{border-radius:12px!important;transition:transform .2s var(--ui-ease),border-color .2s,background .2s!important;}
-.menu-btn:hover,.icon-btn:hover{transform:translateY(-1px);border-color:rgba(201,151,77,.28)!important;background:rgba(201,151,77,.07)!important;}
-.page{padding-top:8px;}
-.section-title{font-size:17px;letter-spacing:.1px;margin-top:8px;}
-.section-sub{line-height:1.45;}
-.card,.daily-card,.tip-card,.settings-row,.battle-card,.battle-form,.profile-head,.profile-customize,.market-card{border-color:var(--ui-border)!important;box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.025)!important;transition:transform .28s var(--ui-ease),box-shadow .28s ease,border-color .28s ease!important;}
-.card:hover,.daily-card:hover,.tip-card:hover,.settings-row:hover,.battle-card:hover,.market-card:hover{transform:translateY(-2px);border-color:rgba(201,151,77,.20)!important;box-shadow:0 17px 36px rgba(0,0,0,.27),0 0 0 1px rgba(201,151,77,.035)!important;}
-.btn,.btn-ghost,.top-tab,.nav-btn,.profile-style-btn,.market-buy,.market-remove{transition:transform .18s var(--ui-ease),filter .18s,box-shadow .18s,border-color .18s!important;}
-.btn:hover{filter:brightness(1.055);box-shadow:0 8px 20px rgba(201,151,77,.14);}
-.btn-ghost:hover,.top-tab:hover,.profile-style-btn:hover{border-color:rgba(201,151,77,.28)!important;background:rgba(201,151,77,.055)!important;}
-.nav-btn{border-radius:14px!important;}
-.nav-btn.active{box-shadow:inset 0 0 0 1px rgba(201,151,77,.09),0 7px 18px rgba(0,0,0,.14);}
-.profile-head{position:relative;overflow:hidden;}
-.profile-head:after{content:"";position:absolute;inset:auto -15% -65% 35%;height:130px;background:radial-gradient(circle,rgba(201,151,77,.10),transparent 65%);pointer-events:none;}
-.profile-stats{gap:9px!important;}
-.profile-stat,.stat-card{border-radius:13px!important;border-color:rgba(236,228,211,.075)!important;box-shadow:inset 0 1px rgba(255,255,255,.025)!important;}
-.market-card{border-radius:16px!important;padding:11px!important;}
-.settings-row{border-radius:15px!important;min-height:56px;}
-.top-tabs{padding:4px;border-radius:15px;background:rgba(0,0,0,.12);border:1px solid rgba(236,228,211,.055);}
-.top-tab{border:0!important;border-radius:11px!important;}
-.top-tab.active{box-shadow:0 5px 15px rgba(0,0,0,.18),inset 0 0 0 1px rgba(201,151,77,.12);}
-.modal-overlay{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
-.modal-overlay>.modal,.modal-overlay>.menu-modal,.modal-overlay>.profile-modal,.modal-overlay>.twofa-modal{box-shadow:0 28px 75px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.035)!important;}
-input,select,textarea{transition:border-color .2s,box-shadow .2s,background .2s!important;}
-input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(201,151,77,.08)!important;}
-#toastBox .toast{box-shadow:0 12px 30px rgba(0,0,0,.32)!important;border:1px solid rgba(236,228,211,.08)!important;}
-@media(max-width:480px){
- .app-shell{padding-left:10px;padding-right:10px;}
- header{top:calc(env(safe-area-inset-top) + 4px);border-radius:18px!important;}
- .section-title{font-size:16px;}
-}
-@media(prefers-reduced-motion:reduce){header,.card,.daily-card,.tip-card,.settings-row,.battle-card,.market-card,.btn,.btn-ghost,.top-tab,.nav-btn{transition:none!important;}}
+<style id="gdplay-case-preload-fix">
+#spinModal .wheel-dial.case-pre-spinning{animation:gdplayPreSpin 1.15s linear infinite!important;will-change:transform}
+#spinModal .wheel-dial.case-pre-spinning .wheel-item{opacity:.92!important}
+@keyframes gdplayPreSpin{from{transform:translate3d(0,0,0)}to{transform:translate3d(-980px,0,0)}}
+@media(prefers-reduced-motion:reduce){#spinModal .wheel-dial.case-pre-spinning{animation:none!important}}
+</style>
+<style id="gdplay-layout-redesign-v10">
+:root{--ui-radius:20px;--ui-shadow:0 18px 48px rgba(0,0,0,.24)}
+.app-shell{max-width:1080px!important;margin:0 auto!important;padding-left:14px!important;padding-right:14px!important}
+.page{animation:pageIn .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page>.section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:18px 2px 7px!important}
+.card,.daily-card,.tip-card,.battle-card,.battle-form,.profile-head,.profile-customize,.market-card,.settings-row,.stat-card{border-radius:var(--ui-radius)!important;box-shadow:var(--ui-shadow)!important}
+#page-profile .profile-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;padding:20px!important}
+#page-profile .profile-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+#page-profile .profile-stat{min-height:76px;padding:13px!important;display:flex;flex-direction:column;justify-content:center}
+#page-top .top-tabs{display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px}
+#page-top .top-list{display:grid!important;gap:10px}
+#page-top .top-row{display:grid!important;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:12px;border-radius:18px!important;padding:12px 14px!important}
+#page-market #marketList{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+#page-market .market-card{min-height:150px!important;display:flex!important;flex-direction:column;justify-content:space-between;padding:15px!important}
+#page-inventory #inventoryGrid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px!important}
+#page-inventory .inventory-item{min-height:128px!important;border-radius:18px!important;padding:12px!important}
+#page-battles .battle-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+#page-battles .battle-card{min-height:150px!important;padding:15px!important}
+#page-settings .settings-row{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 15px!important}
+#page-admin .admin-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+#page-admin .admin-card{border-radius:18px!important;padding:14px!important}
+header{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
+.nav{display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:6px!important;padding:7px!important;border-radius:22px!important}
+.nav-btn{min-height:48px!important;border-radius:15px!important;display:flex!important;align-items:center;justify-content:center;gap:7px}
+.modal-overlay{padding:12px!important}
+.modal-overlay>.modal,.modal-overlay>.menu-modal,.modal-overlay>.profile-modal,.modal-overlay>.twofa-modal{border-radius:26px!important;max-width:min(620px,100%)!important}
+.btn,.btn-ghost,.market-buy,.market-remove,.profile-style-btn{min-height:42px!important;border-radius:13px!important}
+input,select,textarea{border-radius:13px!important;min-height:42px}
+@media(max-width:760px){#page-profile .profile-head{grid-template-columns:1fr;text-align:center}#page-profile .profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}#page-market #marketList,#page-battles .battle-list,#page-admin .admin-grid{grid-template-columns:1fr!important}#page-inventory #inventoryGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px!important}}
+@media(max-width:430px){#page-inventory #inventoryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
@@ -6562,6 +6558,21 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
 
+function startCasePreSpin(dial){
+  if(!dial) return;
+  dial.classList.add('case-pre-spinning');
+  dial.classList.remove('is-stopped');
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
+}
+function stopCasePreSpin(dial){
+  if(!dial) return;
+  dial.classList.remove('case-pre-spinning');
+  dial.style.animation='none';
+  dial.style.transition='none';
+  dial.style.transform='translate3d(0,0,0)';
+}
+
 function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
@@ -6766,14 +6777,26 @@ async function openCaseBatch(c, qty, useKey=false){
   if(icon) icon.innerHTML=caseImage(c.id,c.name);
   if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
   if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие сейфа';
-  if(pill) pill.textContent='ПОДГОТОВКА';
+  if(pill) pill.textContent='КРУТИМ';
 
-  // Show the modal before the API round-trip so the first frame is immediate.
+  // Start visual feedback immediately; the server still remains authoritative.
   openModal('spinModal');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    const host=qty>1?multiRow:wheelWrap;
-    if(host){host.classList.remove('reel-opening');void host.offsetWidth;host.classList.add('reel-opening');}
-  }));
+  if(qty>1){
+    for(let i=0;i<qty;i++){
+      const row=document.createElement('div'); row.className='multi-reel';
+      row.innerHTML='<div class="multi-reel-mask"><div class="wheel-dial case-pre-dial"></div></div><div class="multi-line"></div>';
+      multiRow.appendChild(row);
+      const d=row.querySelector('.wheel-dial');
+      const previewIndex=Math.floor(Math.random()*Math.max(1,c.items.length));
+      buildWheelIn(d,c.items,previewIndex,Number(c.items[previewIndex]?.value||0),null);
+      startCasePreSpin(d);
+    }
+  }else{
+    const d=document.getElementById('wheelDial');
+    const previewIndex=Math.floor(Math.random()*Math.max(1,c.items.length));
+    buildWheel(c.items,previewIndex,Number(c.items[previewIndex]?.value||0),null);
+    startCasePreSpin(d);
+  }
 
   const wins=[];
   try{
@@ -6804,6 +6827,13 @@ async function openCaseBatch(c, qty, useKey=false){
     document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false); return;
   }
 
+  openModal('spinModal');
+
+  if(qty>1){
+    multiRow.querySelectorAll('.wheel-dial').forEach(stopCasePreSpin);
+  }else{
+    stopCasePreSpin(document.getElementById('wheelDial'));
+  }
 
   // Для 2x/3x все рулетки создаются заранее и запускаются ОДНОВРЕМЕННО.
   // Никаких последовательных прокруток и повторного layout между наградами.
@@ -6881,18 +6911,14 @@ async function openCaseOnce(c, seq, total, useKey=false){
   document.getElementById('wheelWrap').style.display = 'block';
   document.getElementById('vaultCrack').style.display = 'none';
 
-  // Open the modal immediately. The server roll still happens first for the
-  // authoritative result, but the user no longer waits on the network before
-  // seeing the opening UI. This removes the occasional "first-open" hitch.
-  const earlyTitle=document.getElementById('spinCaseTitle');
-  const earlyPill=document.getElementById('spinStatusPill');
-  if(earlyTitle) earlyTitle.textContent=total>1 ? `${c.name} (${seq}/${total})` : c.name;
-  if(earlyPill) earlyPill.textContent='ПОДГОТОВКА';
+  // Start visual feedback immediately; the server result is still authoritative.
   openModal('spinModal');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    const wrap=document.getElementById('wheelWrap');
-    if(wrap){wrap.classList.remove('reel-opening');void wrap.offsetWidth;wrap.classList.add('reel-opening');}
-  }));
+  const preDial=document.getElementById('wheelDial');
+  if(preDial){
+    const previewIndex=Math.floor(Math.random()*Math.max(1,c.items.length));
+    buildWheel(c.items,previewIndex,Number(c.items[previewIndex]?.value||0),null);
+    startCasePreSpin(preDial);
+  }
 
   let won;
   try{
@@ -6954,6 +6980,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   // authoritative server item is still passed separately to buildWheel().
   if(wonIndex < 0) wonIndex = 0;
 
+  stopCasePreSpin(document.getElementById('wheelDial'));
   document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
   const spinIcon=document.getElementById('spinCaseIcon'); if(spinIcon) spinIcon.innerHTML=caseImage(c.id,c.name);
   const spinPrice=document.getElementById('spinCasePrice'); if(spinPrice) spinPrice.textContent=`${Number(c.price).toLocaleString('ru-RU')} 💰`;
@@ -6965,7 +6992,6 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
   if(dial) dial.style.opacity='1';
   await spinWheel(dial, c.items, wonIndex);
-  await new Promise(resolve=>setTimeout(resolve,300));
   playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
   // Show exactly the same authoritative value that was stored on the server.
