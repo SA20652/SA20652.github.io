@@ -4471,8 +4471,8 @@ body.app-hidden *{scroll-behavior:auto!important;}
     <div class="spin-topbar">
       <div class="spin-case-icon" id="spinCaseIcon">🗝️</div>
       <div class="spin-case-heading">
-        <div class="spin-case-kicker">GDPLAY VAULT · ОТКРЫТИЕ</div>
-        <h3 id="spinCaseTitle">Сейф</h3>
+        <div class="spin-case-kicker">GDPLAY CASE · ОТКРЫТИЕ</div>
+        <h3 id="spinCaseTitle">Кейс</h3>
         <div class="spin-case-price" id="spinCasePrice">— 💰</div>
       </div>
       <div class="spin-status-pill" id="spinStatusPill">ГОТОВ</div>
@@ -5442,12 +5442,14 @@ async function showApp(skipServer=false){
     await registerWithServer();
   }
   // Image decoding starts immediately but does not block first paint.
-  ensureCaseImages().catch(()=>{});
+  await ensureCaseImages().catch(()=>{});
   preloadProfileImages(data).catch(()=>{});
   renderAll();
   refreshGlobalTechBreak();
 }
 
+let pendingTelegramCaseId='';
+let telegramCaseAutoOpened=false;
 function handleTelegramStartApp(){
   try{
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
@@ -5456,14 +5458,15 @@ function handleTelegramStartApp(){
       try{ cid=new URLSearchParams(window.location.search||'').get('case')||''; }catch(_){}
     }
     cid=String(cid).trim();
-    if(!cid) return;
+    if(!cid || telegramCaseAutoOpened) return;
+    pendingTelegramCaseId=cid;
+    telegramCaseAutoOpened=true;
     switchTab('cases');
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const el=document.querySelector(`[data-case-id=\"${CSS.escape(cid)}\"]`);
-      const btn=el?.querySelector('[data-action=\"open-case\"]');
-      if(btn && !btn.disabled) btn.click();
+      const c=CASES.find(x=>String(x.id)===cid);
+      if(c) openCase(c.id,false).catch(err=>showToast('❌ '+(err.message||'Не удалось открыть кейс'),'error'));
     }));
-  }catch(e){}
+  }catch(e){ console.warn('case start param:',e); }
 }
 
 async function boot(){
@@ -5472,7 +5475,7 @@ async function boot(){
   const releaseProgressFill=document.getElementById('releaseProgressFill');
   const startupLoader=document.getElementById('startupLoader');
   const startupLoaderLogo=document.getElementById('startupLoaderLogo');
-  const firstLaunch=storageGet(RELEASE_KEY)!=='1';
+  const firstLaunch=false;
 
   // Логотип берём из уже встроенного логотипа GDPLAY — без запроса к серверу.
   try{
@@ -5499,7 +5502,7 @@ async function boot(){
       void releaseProgressFill.offsetWidth;
       releaseProgressFill.classList.add('run');
     }
-    await new Promise(resolve=>setTimeout(resolve,5000));
+    await new Promise(resolve=>setTimeout(resolve,650));
     storageSet(RELEASE_KEY,'1');
     if(releaseScreen){
       releaseScreen.classList.add('leaving');
@@ -5508,8 +5511,8 @@ async function boot(){
     return serverBoot;
   }
 
-  // Все последующие запуски: ровно 4 секунды локальной загрузки.
-  await new Promise(resolve=>setTimeout(resolve,4000));
+  // Не держим пользователя на искусственной загрузке: короткий стабильный splash.
+  await new Promise(resolve=>setTimeout(resolve,650));
   if(startupLoader) startupLoader.classList.add('hide');
   return serverBoot;
 }
@@ -6440,12 +6443,15 @@ function ensureCaseImages(){
       const re=/<img\s+data-case-id="([^"]+)"[^>]*\ssrc="([^"]+)"/g;
       let m;
       while((m=re.exec(html))) images[m[1]]=m[2];
-      // Decode every case image once during startup so opening the Cases tab
-      // never causes image-decoding work on the animation frame.
+      // Make the catalog available immediately. The images themselves are
+      // decoded in the background so the first paint is not blocked.
       CASE_IMAGES=images;
-      Promise.all(Object.values(images).map(src=>new Promise(resolve=>{
+      finish(images);
+      const decodeAll=()=>Promise.all(Object.values(images).map(src=>new Promise(resolve=>{
         const img=new Image(); img.decoding='async'; img.onload=img.onerror=()=>resolve(); img.src=src;
-      }))).then(()=>finish(images),()=>finish(images));
+      }))).catch(()=>{});
+      if(window.requestIdleCallback) requestIdleCallback(decodeAll,{timeout:900});
+      else setTimeout(decodeAll,40);
     }).catch(()=>{
       // Rare WebView fallback: only create the iframe after fetch failed, so
       // normal launches never download the 2 MB catalog twice.
@@ -6797,7 +6803,7 @@ async function openCase(caseId, useKey=false){
   if(!c) return;
   const qty = Math.max(1, Math.min(3, caseOpenQty[caseId]||1));
   if(useKey && qty !== 1){
-    showToast('❌ Ключ открывает только один сейф за раз','error');
+    showToast('❌ Ключ открывает только один кейс за раз','error');
     return;
   }
   if(!useKey && (!Number.isFinite(Number(data.balance)) || Number(data.balance) < Number(c.price)*qty)){
@@ -7134,7 +7140,7 @@ function renderInventory(){
       </div>`;
     }).join('');
     return header + `<div class="inv-stack-list">${rows}</div>`;
-  }).join('') : (inventoryQuery ? '<div class="empty-state">По запросу ничего не найдено.</div>' : '<div class="empty-state">Кубов пока нет.<br>Открой сейф или получи куб.</div>');
+  }).join('') : (inventoryQuery ? '<div class="empty-state">По запросу ничего не найдено.</div>' : '<div class="empty-state">Кубов пока нет.<br>Открой кейс или получи куб.</div>');
 }
 
 async function openCaseWithKeyStack(keyId){
@@ -7143,9 +7149,9 @@ async function openCaseWithKeyStack(keyId){
   if(!key){ showToast('❌ Ключ не найден','error'); return; }
   const keyIdValue=keyCatalogId(key);
   const caseId = ({'rust-key':'brass','brass-key':'brass','obsidian-key':'obsidian','vault-key':'vault','master-key':'master'})[keyIdValue] || '';
-  if(!caseId){ showToast('❌ Для этого ключа не найден сейф','error'); return; }
+  if(!caseId){ showToast('❌ Для этого ключа не найден кейс','error'); return; }
   const c=CASES.find(x=>x.id===caseId);
-  if(!c){ showToast('❌ Для этого ключа не найден сейф','error'); return; }
+  if(!c){ showToast('❌ Для этого ключа не найден кейс','error'); return; }
   if(Number(key.stack_count||1)<3){ showToast('❌ Нужно 3 одинаковых ключа','error'); return; }
   await openCaseBatch(c,3,true);
 }
@@ -9690,4 +9696,54 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 #spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{animation:none!important;transform:scale(1.04)!important;filter:none!important;}
 #spinModal .wheel-wrap.reel-opening{animation:none!important;}
 #spinModal .spin-result{contain:layout paint;will-change:auto;}
+</style>
+
+<style id="gdplay-v8-case-stability">
+/* Stable Telegram WebView case modal: never inherit page scroll position. */
+#spinModal{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-height:100svh!important;
+  padding:12px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#spinModal.open{display:flex!important;}
+#spinModal .spin-modal{
+  position:relative!important;
+  margin:auto!important;
+  transform:none!important;
+  width:min(94vw,380px)!important;
+  max-height:calc(100dvh - 24px)!important;
+  overflow:hidden!important;
+  contain:layout paint style!important;
+}
+#spinModal .wheel-wrap,#spinModal .wheel-dial,#spinModal .wheel-item{
+  contain:layout paint!important;
+}
+#spinModal .wheel-dial.is-spinning .wheel-item{animation:none!important;}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{animation:none!important;filter:none!important;transform:scale(1.03)!important;}
+#spinModal .spin-result{contain:layout paint style!important;transform:none!important;animation:none!important;}
+#spinModal .spin-result-icon{filter:none!important;animation:none!important;}
+
+/* Case images are real images, not emoji fallbacks. */
+#casesList .rad-case-art .case-icon-image,
+#spinModal .spin-case-icon .case-icon-image{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;
+}
+#casesList .rad-case-art > span{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;}
+
+@media(max-height:600px){
+  #spinModal .spin-modal{max-height:calc(100dvh - 12px)!important;padding:10px!important;}
+  #spinModal .wheel-wrap{height:150px!important;margin-bottom:8px!important;}
+  #spinModal .spin-subline{margin:7px 2px!important;}
+}
 </style>
