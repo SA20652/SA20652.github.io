@@ -6281,7 +6281,7 @@ async function updateGameLimits(){
     if(mEl) mEl.textContent=`${Math.max(0,(m.max||5)-(m.used||0))} / ${m.max||5}`;
   }catch(e){}
 }
-setInterval(updateGameLimits,15000);
+setInterval(()=>{ if(!document.hidden) updateGameLimits(); }, 30000);
 
 // Keep the server-side online presence alive even when Telegram initData is
 // temporarily unavailable. The saved auth session is sufficient for /api/me.
@@ -6298,7 +6298,7 @@ setInterval(updateGameLimits,15000);
     finally{running=false;}
   }
   setTimeout(beat, 1000);
-  setInterval(beat, 30000);
+  setInterval(()=>{ if(!document.hidden) beat(); }, 45000);
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='visible') beat();
     else { try { apiFetch('/api/presence',{online:false}); } catch(e){} }
@@ -6557,12 +6557,35 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?650:4200;
+  const duration=reduced?500:2850;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
-  dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},260);},duration+40);});
+  dial.classList.add('is-spinning'); dial.classList.remove('is-stopped');
+  return new Promise(resolve=>{
+    let done=false;
+    const finish=()=>{
+      if(done) return; done=true;
+      dial.removeEventListener('transitionend',onTransitionEnd);
+      clearTimeout(safety);
+      dial.style.transition='none';
+      dial.style.transform=`translate3d(-${offset}px,0,0)`;
+      dial.classList.remove('is-spinning');
+      dial.classList.add('is-stopped');
+      resolve();
+    };
+    const onTransitionEnd=e=>{ if(e.propertyName==='transform') finish(); };
+    dial.addEventListener('transitionend',onTransitionEnd);
+    const safety=setTimeout(finish,duration+120);
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;
+        dial.style.transform=`translate3d(-${offset}px,0,0)`;
+      });
+    });
+    // transitionend normally resolves immediately at the real stop point.
+    // The timeout is only a safety net for browsers/WebViews that skip the event.
+  });
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -8666,7 +8689,7 @@ async function refreshGlobalTechBreak(){
 }
 // Проверяем состояние глобального тех. перерыва каждые 5 секунд,
 // чтобы включение/завершение перерыва быстро отображалось у всех игроков.
-setInterval(refreshGlobalTechBreak, 5000);
+setInterval(()=>{ if(!document.hidden) refreshGlobalTechBreak(); }, 15000);
 setInterval(()=>{ if(document.hidden) return; if(data) renderBuffs(); }, 30000);
 setInterval(()=>{ if(document.hidden) return; if(data){ updateDailyUI(); if(dailyState.loaded && dailyState.nextAt && Date.now()>=dailyState.nextAt && !dailyStatusInFlight) loadDailyStatus(); } }, 1000);
 
@@ -8803,7 +8826,7 @@ document.getElementById('rushBet')?.addEventListener('input',function(){
 document.getElementById('rushBet')?.addEventListener('blur',function(){ setRushBet(this.value || 1); });
 
 function persistDevice(){ if(currentUser && data){ try{ persistLocal(); }catch(e){ console.error(e); } } }
-setInterval(persistDevice,20000);
+setInterval(()=>{ if(!document.hidden) persistDevice(); }, 30000);
 let currentTab = 'cases';
 // Центр уведомлений доступен из меню. Старые дублирующиеся элементы удаляем,
 // но оставляем основной #menuNotificationsBtn.

@@ -1854,7 +1854,7 @@ async function updateGameLimits(){
     if(mEl) mEl.textContent=`${Math.max(0,(m.max||5)-(m.used||0))} / ${m.max||5}`;
   }catch(e){}
 }
-setInterval(updateGameLimits,15000);
+setInterval(()=>{ if(!document.hidden) updateGameLimits(); }, 30000);
 
 async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
 async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier||rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');}finally{rushBusy=false;}}
@@ -2046,14 +2046,35 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  // Faster reveal: keep the same reel and easing, but remove the long idle
-  // feeling after the winning item reaches the pointer.
-  const duration=reduced?550:3400;
+  const duration=reduced?500:2850;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
-  dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 140ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-4)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},110);},duration+20);});
+  dial.classList.add('is-spinning'); dial.classList.remove('is-stopped');
+  return new Promise(resolve=>{
+    let done=false;
+    const finish=()=>{
+      if(done) return; done=true;
+      dial.removeEventListener('transitionend',onTransitionEnd);
+      clearTimeout(safety);
+      dial.style.transition='none';
+      dial.style.transform=`translate3d(-${offset}px,0,0)`;
+      dial.classList.remove('is-spinning');
+      dial.classList.add('is-stopped');
+      resolve();
+    };
+    const onTransitionEnd=e=>{ if(e.propertyName==='transform') finish(); };
+    dial.addEventListener('transitionend',onTransitionEnd);
+    const safety=setTimeout(finish,duration+120);
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;
+        dial.style.transform=`translate3d(-${offset}px,0,0)`;
+      });
+    });
+    // transitionend normally resolves immediately at the real stop point.
+    // The timeout is only a safety net for browsers/WebViews that skip the event.
+  });
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -4234,7 +4255,7 @@ document.getElementById('rushBet')?.addEventListener('input',function(){
 document.getElementById('rushBet')?.addEventListener('blur',function(){ setRushBet(this.value || 1); });
 
 function persistDevice(){ if(currentUser && data){ try{ persistLocal(); }catch(e){ console.error(e); } } }
-setInterval(persistDevice,20000);
+setInterval(()=>{ if(!document.hidden) persistDevice(); }, 30000);
 let currentTab = 'cases';
 // Центр уведомлений доступен из меню. Старые дублирующиеся элементы удаляем,
 // но оставляем основной #menuNotificationsBtn.
