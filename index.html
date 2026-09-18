@@ -3786,6 +3786,148 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{width:22px!important;height:22px!important;max-width:none!important;max-height:none!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 </style>
+
+<style id="gdplay-complete-ui-redesign-v1">
+/* GDPLAY UI REWORK — visual-only layer. No JS, IDs, handlers or gameplay rules changed. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  --bg:#070a12!important; --bg-2:#0d1220!important; --bg-3:#12192a!important;
+  --line:rgba(148,163,184,.13)!important;
+  --paper:#f4f7fb!important; --muted:#91a0b6!important; --muted-2:#607089!important;
+  --brass:#7c5cff!important; --brass-2:#a995ff!important; --brass-dim:#4e3ba9!important;
+  --emerald:#24d6a3!important; --crimson:#ff4d78!important;
+  --danger:#ff5d72!important; --success:#31d49a!important;
+  --shadow:0 20px 55px rgba(0,0,0,.38)!important; --radius:22px!important;
+}
+*{scrollbar-width:thin;scrollbar-color:#2a3650 transparent}
+html{background:#070a12!important}
+body{
+  background:
+    radial-gradient(700px 420px at 8% -5%,rgba(124,92,255,.18),transparent 62%),
+    radial-gradient(600px 420px at 95% 0%,rgba(36,214,163,.11),transparent 60%),
+    linear-gradient(180deg,#070a12 0%,#090d17 48%,#060911 100%)!important;
+  color:var(--paper)!important;
+  font-family:'Manrope',Inter,sans-serif!important;
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 70%)}
+button,input,select,textarea{font-family:'Manrope',Inter,sans-serif!important}
+
+/* App shell / header */
+.app-shell{background:transparent!important}
+header,.header,.top-header,.app-header{background:rgba(7,10,18,.76)!important;border-color:var(--line)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.brand-name{font-family:'Space Grotesk',sans-serif!important;font-weight:700!important;letter-spacing:.08em!important}
+.brand-mark{border-radius:14px!important;background:linear-gradient(135deg,#7c5cff,#24d6a3)!important;box-shadow:0 10px 30px rgba(124,92,255,.25)!important}
+.header-right{gap:10px!important}
+.balance-chip{background:rgba(18,25,42,.82)!important;border:1px solid var(--line)!important;border-radius:16px!important;box-shadow:0 8px 30px rgba(0,0,0,.2)!important}
+.balance-plus-btn{border-radius:12px!important;background:rgba(124,92,255,.14)!important;border:1px solid rgba(124,92,255,.3)!important}
+.menu-btn{width:44px!important;height:44px!important;border-radius:14px!important;background:#101728!important;border:1px solid var(--line)!important}
+.menu-panel{background:rgba(12,17,29,.96)!important;border:1px solid rgba(148,163,184,.16)!important;border-radius:20px!important;box-shadow:var(--shadow)!important;backdrop-filter:blur(20px)}
+.menu-item{border-radius:14px!important;color:#dbe4f2!important}.menu-item:hover{background:rgba(124,92,255,.1)!important}
+
+/* Bottom navigation */
+nav{background:rgba(7,10,18,.88)!important;border:1px solid rgba(148,163,184,.12)!important;border-radius:24px 24px 0 0!important;box-shadow:0 -18px 45px rgba(0,0,0,.28)!important;backdrop-filter:blur(22px)!important}
+nav .nav-btn{color:#64748b!important;border-radius:18px!important;transition:.2s ease!important}
+nav .nav-btn.active{color:#fff!important;background:linear-gradient(135deg,rgba(124,92,255,.2),rgba(36,214,163,.08))!important;box-shadow:inset 0 0 0 1px rgba(124,92,255,.18)!important}
+nav .nav-btn.active:after{background:linear-gradient(90deg,#7c5cff,#24d6a3)!important;border-radius:999px!important}
+nav .nav-icon{filter:none!important}
+
+/* Pages and section headers */
+.page{animation:gdFade .28s ease both}
+@keyframes gdFade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.section-title,.market-title,.mines-kicker,.market-kicker{font-family:'Space Grotesk',sans-serif!important;letter-spacing:-.02em!important}
+.section-title{font-weight:700!important}
+.section-sub,.desc,.market-subtitle,.mines-note,.auth-hint{color:#8493aa!important}
+
+/* Universal cards */
+.admin-card,.battle-card,.daily-card,.buff-card,.market-card,.mines-card,.case-pity,.channel-bonus-card,.coin-pack-section,.best-drops,.inv-item,.release-card,.auth-card,.startup-loader-card{
+  background:linear-gradient(145deg,rgba(18,25,42,.92),rgba(10,15,26,.92))!important;
+  border:1px solid rgba(148,163,184,.13)!important;
+  border-radius:22px!important;
+  box-shadow:0 18px 50px rgba(0,0,0,.24)!important;
+}
+.admin-card:hover,.battle-card:hover,.market-card:hover,.buff-card:hover,.inv-item:hover{border-color:rgba(124,92,255,.28)!important;transform:translateY(-1px)}
+.btn,.btn-main,.btn-sell,.btn-ghost,.public-market-buy,.market-buy,.premium-buy-action{
+  border-radius:14px!important;min-height:44px!important;font-weight:800!important;letter-spacing:.01em!important;
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease!important;
+}
+.btn-main,.premium-buy-action{background:linear-gradient(135deg,#7c5cff,#6250d8)!important;border:0!important;box-shadow:0 12px 30px rgba(124,92,255,.23)!important;color:#fff!important}
+.btn-main:hover,.premium-buy-action:hover,.btn:hover{transform:translateY(-1px)!important}
+.btn-ghost{background:rgba(255,255,255,.035)!important;border:1px solid rgba(148,163,184,.15)!important;color:#dce5f2!important}
+.btn-danger,.danger-admin{border-color:rgba(255,93,114,.35)!important;color:#ff9cac!important;background:rgba(255,93,114,.07)!important}
+
+/* Inputs */
+.input,.admin-input,.auth-form input,.input-modal input,.input-modal textarea,.market-form input,.battle-form input{
+  background:#090f1c!important;border:1px solid rgba(148,163,184,.15)!important;color:#f4f7fb!important;border-radius:14px!important;min-height:46px!important;outline:none!important;
+}
+.input:focus,.admin-input:focus,.auth-form input:focus,.input-modal input:focus,.input-modal textarea:focus{border-color:rgba(124,92,255,.65)!important;box-shadow:0 0 0 4px rgba(124,92,255,.10)!important}
+
+/* Auth / release */
+.auth-card,.release-card,.startup-loader-card{background:linear-gradient(145deg,rgba(16,22,37,.96),rgba(7,11,20,.96))!important;border-radius:28px!important}
+.auth-logo,.release-logo{filter:drop-shadow(0 12px 28px rgba(124,92,255,.22))}
+.auth-tag{background:rgba(124,92,255,.1)!important;border-color:rgba(124,92,255,.24)!important;color:#b8adff!important;border-radius:999px!important}
+.auth-tabs{background:#090f1b!important;border:1px solid var(--line)!important;border-radius:14px!important;padding:4px!important}
+.auth-tab{border-radius:10px!important;color:#718098!important}.auth-tab.active{background:#171f34!important;color:#fff!important;box-shadow:0 6px 18px rgba(0,0,0,.2)!important}
+
+/* Inventory / market */
+.inv-toolbar,.inv-sort-row,.inv-search-wrap,.market-hero,.market-list-head{background:rgba(12,18,31,.72)!important;border-color:var(--line)!important;border-radius:18px!important}
+.inv-search,.inv-sort{border-radius:14px!important}
+.market-price,.best-drop-value,.inv-value,.lb-score{font-family:'Space Grotesk',monospace!important}
+.market-premium-tag,.market-premium-bonus,.premium-buy-action{border-radius:12px!important}
+
+/* Top / leaderboard */
+.top-tab{background:rgba(12,18,31,.65)!important;border:1px solid var(--line)!important;border-radius:16px!important;color:#78879e!important}
+.top-tab.active{background:linear-gradient(135deg,rgba(124,92,255,.16),rgba(36,214,163,.06))!important;color:#fff!important;border-color:rgba(124,92,255,.32)!important}
+.lb-item{background:linear-gradient(145deg,rgba(17,24,40,.88),rgba(9,14,24,.88))!important;border:1px solid rgba(148,163,184,.11)!important;border-radius:18px!important}
+.lb-item.me{border-color:rgba(124,92,255,.5)!important;box-shadow:0 0 0 1px rgba(124,92,255,.12),0 16px 36px rgba(124,92,255,.09)!important}
+.lb-rank{font-family:'Space Grotesk',sans-serif!important;font-weight:700!important}
+.lb-avatar{border-radius:15px!important}
+
+/* Profile */
+.profile-card,.profile-header,.profile-section,.profile-stat,.profile-edit-card{background:linear-gradient(145deg,rgba(18,25,42,.92),rgba(10,15,26,.92))!important;border:1px solid var(--line)!important;border-radius:22px!important}
+.profile-edit{border-radius:14px!important}
+
+/* Battles / mines */
+.battle-top,.battle-meta,.battle-prize,.battle-row,.mines-stats,.mines-actions,.mines-rules-grid,.mines-bet-row{background:rgba(9,15,27,.72)!important;border-color:var(--line)!important;border-radius:18px!important}
+.mines-hero{background:radial-gradient(circle at 50% 10%,rgba(124,92,255,.16),transparent 55%),rgba(11,17,29,.8)!important;border:1px solid var(--line)!important;border-radius:24px!important}
+.mines-grid{filter:drop-shadow(0 22px 40px rgba(0,0,0,.25))}
+
+/* Modals */
+.modal-overlay{background:rgba(2,5,11,.72)!important;backdrop-filter:blur(9px)!important}
+.input-modal,.gdplay-choice-modal,.premium-modal,.share-modal .modal-content{background:linear-gradient(145deg,#121a2c,#0a101c)!important;border:1px solid rgba(148,163,184,.17)!important;border-radius:24px!important;box-shadow:0 28px 80px rgba(0,0,0,.5)!important}
+.gdplay-choice-option-check{border-color:rgba(124,92,255,.35)!important}
+
+/* Notifications */
+.notification-item{background:linear-gradient(145deg,rgba(18,25,42,.9),rgba(10,15,26,.9))!important;border:1px solid var(--line)!important;border-radius:18px!important}
+.notification-item.new{border-color:rgba(124,92,255,.3)!important;background:linear-gradient(145deg,rgba(124,92,255,.10),rgba(18,25,42,.9))!important}
+.notification-badge{background:#7c5cff!important;color:#fff!important;border-radius:999px!important}
+
+/* Case opening — keep dimensions/JS untouched, only skin */
+.case-pity-fill,.daily-streak-fill{background:linear-gradient(90deg,#7c5cff,#24d6a3)!important}
+.case-qty-btn{background:#0c1321!important;border:1px solid var(--line)!important;border-radius:12px!important;color:#8290a7!important}
+.case-qty-btn.active{background:rgba(124,92,255,.15)!important;border-color:rgba(124,92,255,.45)!important;color:#fff!important}
+
+/* Admin */
+.admin-grid{gap:14px!important}.admin-search{background:rgba(9,15,27,.8)!important;border:1px solid var(--line)!important;border-radius:18px!important;padding:10px!important}
+.admin-user{background:rgba(12,18,31,.72)!important;border:1px solid var(--line)!important;border-radius:18px!important}
+.admin-log{color:#a7b3c6!important}
+
+/* Premium */
+.premium-buy-action,.premium-gift-pay{background:linear-gradient(135deg,#7c5cff,#24bfa0)!important;box-shadow:0 14px 35px rgba(36,214,163,.15),0 8px 25px rgba(124,92,255,.18)!important}
+
+/* Tables, badges, pills */
+.badge,.lb-badge,.market-kicker,.mines-kicker,.auth-tag{border-radius:999px!important}
+
+/* Mobile polish */
+@media (max-width:720px){
+  body{font-size:14px!important}
+  .app-shell{padding-left:10px!important;padding-right:10px!important}
+  .admin-card,.battle-card,.daily-card,.buff-card,.market-card,.mines-card,.inv-item{border-radius:18px!important}
+  nav{left:8px!important;right:8px!important;bottom:8px!important;border-radius:22px!important}
+  .header-right{gap:6px!important}.balance-chip{border-radius:14px!important}
+  .section-title{font-size:25px!important}
+}
+</style>
+
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -4842,7 +4984,47 @@ function normalizeGameState(){
 }
 
 function tgInitData(){
-  try{return (window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData)||'';}catch(e){return '';}
+  // Different Telegram clients/WebViews expose launch data differently.
+  // Official Telegram normally fills Telegram.WebApp.initData, while some
+  // alternative clients can leave that property empty but keep the original
+  // tgWebAppData in the URL (hash or query string). Never trust the user/id
+  // fields from the URL here: we only pass the signed initData string to the
+  // server, which performs the real Telegram signature validation.
+  try{
+    const official=(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData)||'';
+    if(official) return official;
+  }catch(e){}
+
+  const readParam=(raw)=>{
+    try{
+      if(!raw) return '';
+      const text=String(raw).replace(/^#/,'').replace(/^\?/,'');
+      const params=new URLSearchParams(text);
+      return params.get('tgWebAppData')||params.get('tgWebAppData%')||'';
+    }catch(e){ return ''; }
+  };
+
+  try{
+    const fromHash=readParam(window.location?.hash||'');
+    if(fromHash) return fromHash;
+  }catch(e){}
+  try{
+    const fromSearch=readParam(window.location?.search||'');
+    if(fromSearch) return fromSearch;
+  }catch(e){}
+
+  // A few WebViews expose the launch URL through document.referrer. This is
+  // still only a source for the signed tgWebAppData value; the backend verifies it.
+  try{
+    const ref=String(document.referrer||'');
+    if(ref){
+      const q=ref.indexOf('?');
+      const h=ref.indexOf('#');
+      if(q>=0){ const v=readParam(ref.slice(q)); if(v) return v; }
+      if(h>=0){ const v=readParam(ref.slice(h)); if(v) return v; }
+    }
+  }catch(e){}
+  return '';
 }
 function tgUserId(){
   try{return window.Telegram.WebApp.initDataUnsafe.user.id;}catch(e){return null;}
@@ -5422,7 +5604,7 @@ async function boot(){
   return serverBoot;
 }
 
-async function waitForTelegramInitData(timeoutMs=4000){
+async function waitForTelegramInitData(timeoutMs=12000){
   // Telegram WebApp иногда отдаёт initData не в тот же момент, когда загружается DOM.
   // Ждём его немного, чтобы автоматический вход не падал после перезахода/перезагрузки.
   const started=Date.now();
@@ -5446,7 +5628,7 @@ async function bootSafe(){
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
   // а имя и фото берутся непосредственно из Telegram. Формы входа/регистрации
   // остаются в DOM и доступны для ручного входа в другой аккаунт.
-  const initData = await waitForTelegramInitData(5000);
+  const initData = await waitForTelegramInitData(12000);
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
 
@@ -5459,7 +5641,7 @@ async function bootSafe(){
   // Если есть сохранённая серверная сессия — пытаемся восстановить её.
   // При любой ошибке просто возвращаем обычный экран входа, не оставляя
   // пользователя на пустом/зависшем экране.
-  if(token && savedSession){
+  if(token){
     try{
       const j = await apiFetch('/api/me', {});
       if(j && j.user){
@@ -5488,7 +5670,13 @@ async function bootSafe(){
   // Для нового входа серверу нужна криптографически проверяемая initData.
   // Если Telegram её не передал, не показываем ложную ошибку для уже
   // авторизованного пользователя — выше сессия уже была проверена.
-  if(!initData){
+  let telegramInitData = initData || tgInitData();
+  if(!telegramInitData){
+    // One last recovery pass. This specifically covers rare Telegram WebView
+    // races where initData appears only after the first page lifecycle tick.
+    telegramInitData = await waitForTelegramInitData(12000);
+  }
+  if(!telegramInitData){
     currentUser = null;
     data = null;
     showAuth();
