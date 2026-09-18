@@ -3786,12 +3786,7 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{width:22px!important;height:22px!important;max-width:none!important;max-height:none!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 </style>
-<style id="gdplay-case-preload-fix">
-#spinModal .wheel-dial.case-pre-spinning{animation:gdplayPreSpin 1.15s linear infinite!important;will-change:transform}
-#spinModal .wheel-dial.case-pre-spinning .wheel-item{opacity:.92!important}
-@keyframes gdplayPreSpin{from{transform:translate3d(0,0,0)}to{transform:translate3d(-980px,0,0)}}
-@media(prefers-reduced-motion:reduce){#spinModal .wheel-dial.case-pre-spinning{animation:none!important}}
-</style>
+
 <style id="gdplay-layout-redesign-v10">
 :root{--ui-radius:20px;--ui-shadow:0 18px 48px rgba(0,0,0,.24)}
 .app-shell{max-width:1080px!important;margin:0 auto!important;padding-left:14px!important;padding-right:14px!important}
@@ -6558,31 +6553,16 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
 
-function startCasePreSpin(dial){
-  if(!dial) return;
-  dial.classList.add('case-pre-spinning');
-  dial.classList.remove('is-stopped');
-  dial.style.transition='none';
-  dial.style.transform='translate3d(0,0,0)';
-}
-function stopCasePreSpin(dial){
-  if(!dial) return;
-  dial.classList.remove('case-pre-spinning');
-  dial.style.animation='none';
-  dial.style.transition='none';
-  dial.style.transform='translate3d(0,0,0)';
-}
-
 function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?650:4200;
+  const duration=reduced?650:3000;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},260);},duration+40);});
+  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 90ms cubic-bezier(.2,1.1,.4,1)';dial.style.transform=`translate3d(-${offset}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},90);},duration);});
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -6789,13 +6769,11 @@ async function openCaseBatch(c, qty, useKey=false){
       const d=row.querySelector('.wheel-dial');
       const previewIndex=Math.floor(Math.random()*Math.max(1,c.items.length));
       buildWheelIn(d,c.items,previewIndex,Number(c.items[previewIndex]?.value||0),null);
-      startCasePreSpin(d);
     }
   }else{
     const d=document.getElementById('wheelDial');
     const previewIndex=Math.floor(Math.random()*Math.max(1,c.items.length));
     buildWheel(c.items,previewIndex,Number(c.items[previewIndex]?.value||0),null);
-    startCasePreSpin(d);
   }
 
   const wins=[];
@@ -6828,12 +6806,6 @@ async function openCaseBatch(c, qty, useKey=false){
   }
 
   openModal('spinModal');
-
-  if(qty>1){
-    multiRow.querySelectorAll('.wheel-dial').forEach(stopCasePreSpin);
-  }else{
-    stopCasePreSpin(document.getElementById('wheelDial'));
-  }
 
   // Для 2x/3x все рулетки создаются заранее и запускаются ОДНОВРЕМЕННО.
   // Никаких последовательных прокруток и повторного layout между наградами.
@@ -6913,42 +6885,45 @@ async function openCaseOnce(c, seq, total, useKey=false){
 
   // Start visual feedback immediately; the server result is still authoritative.
   openModal('spinModal');
-  const preDial=document.getElementById('wheelDial');
-  if(preDial){
-    const previewIndex=Math.floor(Math.random()*Math.max(1,c.items.length));
-    buildWheel(c.items,previewIndex,Number(c.items[previewIndex]?.value||0),null);
-    startCasePreSpin(preDial);
-  }
-
   let won;
+  let serverPromise = null;
   try{
     if(tgInitData()){
-      // The authoritative result is requested BEFORE the animation is built.
-      // This guarantees that the wheel, result card and credited cube all
-      // refer to exactly the same server-selected item/value.
+      // Start the authoritative request immediately and let the reel animate
+      // while the network/database work happens in the background. This keeps
+      // the UI responsive without trusting the browser for the reward.
       const requestId = (crypto?.randomUUID ? crypto.randomUUID() : `open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-      const j = await apiFetch('/api/cube/open', {case_id: c.id, use_key: !!useKey, request_id: requestId});
-      if(!j.drop) throw new Error('Сервер не вернул результат кейса');
-      won = {
-        name: j.drop.name,
-        rarity: j.drop.rarity,
-        value: Number(j.drop.value)||0,
-        source_case_id: j.drop.case_id
-      };
-      data.balance = Number(j.balance)||0;
-      if(Array.isArray(j.cubes)) applyServerCubes(j.cubes, [{...won}]);
-      if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
-      if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
-      data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
-      if(j.case_pity && typeof j.case_pity==='object') data.casePity={...j.case_pity};
-      if(j.farm_action && typeof handleFarmAction === 'function') handleFarmAction(j.farm_action);
+      serverPromise = apiFetch('/api/cube/open', {case_id: c.id, use_key: !!useKey, request_id: requestId});
     }else{
-      won = rollCaseItemWithPity(c);
-      normalizeCubeValue(won);
-      won.value = Math.floor(Number(won.value || 0));
-      if(!useKey) data.balance -= c.price;
-      data.cubes.push({...won, source_case_id:c.id});
-      data.cases_opened = (data.cases_opened||0)+1;
+      serverPromise = Promise.resolve(null);
+    }
+
+    // No artificial preload spin: the authoritative request starts immediately.
+    if(serverPromise) {
+      const j = await serverPromise;
+      if(j && !j.drop) throw new Error('Сервер не вернул результат кейса');
+      if(j){
+        won = {
+          name: j.drop.name,
+          rarity: j.drop.rarity,
+          value: Number(j.drop.value)||0,
+          source_case_id: j.drop.case_id
+        };
+        data.balance = Number(j.balance)||0;
+        if(Array.isArray(j.cubes)) applyServerCubes(j.cubes, [{...won}]);
+        if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
+        if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
+        data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
+        if(j.case_pity && typeof j.case_pity==='object') data.casePity={...j.case_pity};
+        if(j.farm_action && typeof handleFarmAction === 'function') handleFarmAction(j.farm_action);
+      }else{
+        won = rollCaseItemWithPity(c);
+        normalizeCubeValue(won);
+        won.value = Math.floor(Number(won.value || 0));
+        if(!useKey) data.balance -= c.price;
+        data.cubes.push({...won, source_case_id:c.id});
+        data.cases_opened = (data.cases_opened||0)+1;
+      }
     }
     persistLocal();
     updateBalanceUI();
@@ -6980,7 +6955,6 @@ async function openCaseOnce(c, seq, total, useKey=false){
   // authoritative server item is still passed separately to buildWheel().
   if(wonIndex < 0) wonIndex = 0;
 
-  stopCasePreSpin(document.getElementById('wheelDial'));
   document.getElementById('spinCaseTitle').textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
   const spinIcon=document.getElementById('spinCaseIcon'); if(spinIcon) spinIcon.innerHTML=caseImage(c.id,c.name);
   const spinPrice=document.getElementById('spinCasePrice'); if(spinPrice) spinPrice.textContent=`${Number(c.price).toLocaleString('ru-RU')} 💰`;
@@ -6992,6 +6966,9 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
   if(dial) dial.style.opacity='1';
   await spinWheel(dial, c.items, wonIndex);
+  // The reel is fully stopped now. Keep the requested 300ms reveal pause
+  // and do not add any extra network/database wait after the animation.
+  await new Promise(resolve=>setTimeout(resolve,300));
   playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
   // Show exactly the same authoritative value that was stored on the server.
@@ -9002,7 +8979,7 @@ boot();
 /* ===== CASE OPENING: no repeating sheen / no mid-animation restart ===== */
 #spinModal .reel-sheen{display:none!important;animation:none!important;}
 #spinModal .reel-glow{animation:none!important;}
-#spinModal .wheel-dial{transition:transform 2.9s cubic-bezier(.12,.72,.12,1)!important;}
+#spinModal .wheel-dial{transition:none!important;}
 
 /* Keep inactive screens cheap. */
 .page:not(.active) #casesList,.page:not(.active) #recentDropsList{content-visibility:auto;contain-intrinsic-size:1px 500px;}
