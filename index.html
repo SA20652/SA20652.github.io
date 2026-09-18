@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>GDPLAY</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============ TOKENS ============ */
 :root{
@@ -3784,229 +3786,6 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{width:22px!important;height:22px!important;max-width:none!important;max-height:none!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 </style>
-
-<style id="gdplay-complete-ui-redesign-v1">
-/* GDPLAY UI REWORK — visual-only layer. No JS, IDs, handlers or gameplay rules changed. */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
-:root{
-  --bg:#070a12!important; --bg-2:#0d1220!important; --bg-3:#12192a!important;
-  --line:rgba(148,163,184,.13)!important;
-  --paper:#f4f7fb!important; --muted:#91a0b6!important; --muted-2:#607089!important;
-  --brass:#7c5cff!important; --brass-2:#a995ff!important; --brass-dim:#4e3ba9!important;
-  --emerald:#24d6a3!important; --crimson:#ff4d78!important;
-  --danger:#ff5d72!important; --success:#31d49a!important;
-  --shadow:0 20px 55px rgba(0,0,0,.38)!important; --radius:22px!important;
-}
-*{scrollbar-width:thin;scrollbar-color:#2a3650 transparent}
-html{background:#070a12!important}
-body{
-  background:
-    radial-gradient(700px 420px at 8% -5%,rgba(124,92,255,.18),transparent 62%),
-    radial-gradient(600px 420px at 95% 0%,rgba(36,214,163,.11),transparent 60%),
-    linear-gradient(180deg,#070a12 0%,#090d17 48%,#060911 100%)!important;
-  color:var(--paper)!important;
-  font-family:'Manrope',Inter,sans-serif!important;
-}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 70%)}
-button,input,select,textarea{font-family:'Manrope',Inter,sans-serif!important}
-
-/* App shell / header */
-.app-shell{background:transparent!important}
-header,.header,.top-header,.app-header{background:rgba(7,10,18,.76)!important;border-color:var(--line)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.brand-name{font-family:'Space Grotesk',sans-serif!important;font-weight:700!important;letter-spacing:.08em!important}
-.brand-mark{border-radius:14px!important;background:linear-gradient(135deg,#7c5cff,#24d6a3)!important;box-shadow:0 10px 30px rgba(124,92,255,.25)!important}
-.header-right{gap:10px!important}
-.balance-chip{background:rgba(18,25,42,.82)!important;border:1px solid var(--line)!important;border-radius:16px!important;box-shadow:0 8px 30px rgba(0,0,0,.2)!important}
-.balance-plus-btn{border-radius:12px!important;background:rgba(124,92,255,.14)!important;border:1px solid rgba(124,92,255,.3)!important}
-.menu-btn{width:44px!important;height:44px!important;border-radius:14px!important;background:#101728!important;border:1px solid var(--line)!important}
-.menu-panel{background:rgba(12,17,29,.96)!important;border:1px solid rgba(148,163,184,.16)!important;border-radius:20px!important;box-shadow:var(--shadow)!important;backdrop-filter:blur(20px)}
-.menu-item{border-radius:14px!important;color:#dbe4f2!important}.menu-item:hover{background:rgba(124,92,255,.1)!important}
-
-/* Bottom navigation */
-nav{background:rgba(7,10,18,.88)!important;border:1px solid rgba(148,163,184,.12)!important;border-radius:24px 24px 0 0!important;box-shadow:0 -18px 45px rgba(0,0,0,.28)!important;backdrop-filter:blur(22px)!important}
-nav .nav-btn{color:#64748b!important;border-radius:18px!important;transition:.2s ease!important}
-nav .nav-btn.active{color:#fff!important;background:linear-gradient(135deg,rgba(124,92,255,.2),rgba(36,214,163,.08))!important;box-shadow:inset 0 0 0 1px rgba(124,92,255,.18)!important}
-nav .nav-btn.active:after{background:linear-gradient(90deg,#7c5cff,#24d6a3)!important;border-radius:999px!important}
-nav .nav-icon{filter:none!important}
-
-/* Pages and section headers */
-.page{animation:gdFade .28s ease both}
-@keyframes gdFade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.section-title,.market-title,.mines-kicker,.market-kicker{font-family:'Space Grotesk',sans-serif!important;letter-spacing:-.02em!important}
-.section-title{font-weight:700!important}
-.section-sub,.desc,.market-subtitle,.mines-note,.auth-hint{color:#8493aa!important}
-
-/* Universal cards */
-.admin-card,.battle-card,.daily-card,.buff-card,.market-card,.mines-card,.case-pity,.channel-bonus-card,.coin-pack-section,.best-drops,.inv-item,.release-card,.auth-card,.startup-loader-card{
-  background:linear-gradient(145deg,rgba(18,25,42,.92),rgba(10,15,26,.92))!important;
-  border:1px solid rgba(148,163,184,.13)!important;
-  border-radius:22px!important;
-  box-shadow:0 18px 50px rgba(0,0,0,.24)!important;
-}
-.admin-card:hover,.battle-card:hover,.market-card:hover,.buff-card:hover,.inv-item:hover{border-color:rgba(124,92,255,.28)!important;transform:translateY(-1px)}
-.btn,.btn-main,.btn-sell,.btn-ghost,.public-market-buy,.market-buy,.premium-buy-action{
-  border-radius:14px!important;min-height:44px!important;font-weight:800!important;letter-spacing:.01em!important;
-  transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease!important;
-}
-.btn-main,.premium-buy-action{background:linear-gradient(135deg,#7c5cff,#6250d8)!important;border:0!important;box-shadow:0 12px 30px rgba(124,92,255,.23)!important;color:#fff!important}
-.btn-main:hover,.premium-buy-action:hover,.btn:hover{transform:translateY(-1px)!important}
-.btn-ghost{background:rgba(255,255,255,.035)!important;border:1px solid rgba(148,163,184,.15)!important;color:#dce5f2!important}
-.btn-danger,.danger-admin{border-color:rgba(255,93,114,.35)!important;color:#ff9cac!important;background:rgba(255,93,114,.07)!important}
-
-/* Inputs */
-.input,.admin-input,.auth-form input,.input-modal input,.input-modal textarea,.market-form input,.battle-form input{
-  background:#090f1c!important;border:1px solid rgba(148,163,184,.15)!important;color:#f4f7fb!important;border-radius:14px!important;min-height:46px!important;outline:none!important;
-}
-.input:focus,.admin-input:focus,.auth-form input:focus,.input-modal input:focus,.input-modal textarea:focus{border-color:rgba(124,92,255,.65)!important;box-shadow:0 0 0 4px rgba(124,92,255,.10)!important}
-
-/* Auth / release */
-.auth-card,.release-card,.startup-loader-card{background:linear-gradient(145deg,rgba(16,22,37,.96),rgba(7,11,20,.96))!important;border-radius:28px!important}
-.auth-logo,.release-logo{filter:drop-shadow(0 12px 28px rgba(124,92,255,.22))}
-.auth-tag{background:rgba(124,92,255,.1)!important;border-color:rgba(124,92,255,.24)!important;color:#b8adff!important;border-radius:999px!important}
-.auth-tabs{background:#090f1b!important;border:1px solid var(--line)!important;border-radius:14px!important;padding:4px!important}
-.auth-tab{border-radius:10px!important;color:#718098!important}.auth-tab.active{background:#171f34!important;color:#fff!important;box-shadow:0 6px 18px rgba(0,0,0,.2)!important}
-
-/* Inventory / market */
-.inv-toolbar,.inv-sort-row,.inv-search-wrap,.market-hero,.market-list-head{background:rgba(12,18,31,.72)!important;border-color:var(--line)!important;border-radius:18px!important}
-.inv-search,.inv-sort{border-radius:14px!important}
-.market-price,.best-drop-value,.inv-value,.lb-score{font-family:'Space Grotesk',monospace!important}
-.market-premium-tag,.market-premium-bonus,.premium-buy-action{border-radius:12px!important}
-
-/* Top / leaderboard */
-.top-tab{background:rgba(12,18,31,.65)!important;border:1px solid var(--line)!important;border-radius:16px!important;color:#78879e!important}
-.top-tab.active{background:linear-gradient(135deg,rgba(124,92,255,.16),rgba(36,214,163,.06))!important;color:#fff!important;border-color:rgba(124,92,255,.32)!important}
-.lb-item{background:linear-gradient(145deg,rgba(17,24,40,.88),rgba(9,14,24,.88))!important;border:1px solid rgba(148,163,184,.11)!important;border-radius:18px!important}
-.lb-item.me{border-color:rgba(124,92,255,.5)!important;box-shadow:0 0 0 1px rgba(124,92,255,.12),0 16px 36px rgba(124,92,255,.09)!important}
-.lb-rank{font-family:'Space Grotesk',sans-serif!important;font-weight:700!important}
-.lb-avatar{border-radius:15px!important}
-
-/* Profile */
-.profile-card,.profile-header,.profile-section,.profile-stat,.profile-edit-card{background:linear-gradient(145deg,rgba(18,25,42,.92),rgba(10,15,26,.92))!important;border:1px solid var(--line)!important;border-radius:22px!important}
-.profile-edit{border-radius:14px!important}
-
-/* Battles / mines */
-.battle-top,.battle-meta,.battle-prize,.battle-row,.mines-stats,.mines-actions,.mines-rules-grid,.mines-bet-row{background:rgba(9,15,27,.72)!important;border-color:var(--line)!important;border-radius:18px!important}
-.mines-hero{background:radial-gradient(circle at 50% 10%,rgba(124,92,255,.16),transparent 55%),rgba(11,17,29,.8)!important;border:1px solid var(--line)!important;border-radius:24px!important}
-.mines-grid{filter:drop-shadow(0 22px 40px rgba(0,0,0,.25))}
-
-/* Modals */
-.modal-overlay{background:rgba(2,5,11,.72)!important;backdrop-filter:blur(9px)!important}
-.input-modal,.gdplay-choice-modal,.premium-modal,.share-modal .modal-content{background:linear-gradient(145deg,#121a2c,#0a101c)!important;border:1px solid rgba(148,163,184,.17)!important;border-radius:24px!important;box-shadow:0 28px 80px rgba(0,0,0,.5)!important}
-.gdplay-choice-option-check{border-color:rgba(124,92,255,.35)!important}
-
-/* Notifications */
-.notification-item{background:linear-gradient(145deg,rgba(18,25,42,.9),rgba(10,15,26,.9))!important;border:1px solid var(--line)!important;border-radius:18px!important}
-.notification-item.new{border-color:rgba(124,92,255,.3)!important;background:linear-gradient(145deg,rgba(124,92,255,.10),rgba(18,25,42,.9))!important}
-.notification-badge{background:#7c5cff!important;color:#fff!important;border-radius:999px!important}
-
-/* Case opening — keep dimensions/JS untouched, only skin */
-.case-pity-fill,.daily-streak-fill{background:linear-gradient(90deg,#7c5cff,#24d6a3)!important}
-.case-qty-btn{background:#0c1321!important;border:1px solid var(--line)!important;border-radius:12px!important;color:#8290a7!important}
-.case-qty-btn.active{background:rgba(124,92,255,.15)!important;border-color:rgba(124,92,255,.45)!important;color:#fff!important}
-
-/* Admin */
-.admin-grid{gap:14px!important}.admin-search{background:rgba(9,15,27,.8)!important;border:1px solid var(--line)!important;border-radius:18px!important;padding:10px!important}
-.admin-user{background:rgba(12,18,31,.72)!important;border:1px solid var(--line)!important;border-radius:18px!important}
-.admin-log{color:#a7b3c6!important}
-
-/* Premium */
-.premium-buy-action,.premium-gift-pay{background:linear-gradient(135deg,#7c5cff,#24bfa0)!important;box-shadow:0 14px 35px rgba(36,214,163,.15),0 8px 25px rgba(124,92,255,.18)!important}
-
-/* Tables, badges, pills */
-.badge,.lb-badge,.market-kicker,.mines-kicker,.auth-tag{border-radius:999px!important}
-
-/* Mobile polish */
-@media (max-width:720px){
-  body{font-size:14px!important}
-  .app-shell{padding-left:10px!important;padding-right:10px!important}
-  .admin-card,.battle-card,.daily-card,.buff-card,.market-card,.mines-card,.inv-item{border-radius:18px!important}
-  nav{left:8px!important;right:8px!important;bottom:8px!important;border-radius:22px!important}
-  .header-right{gap:6px!important}.balance-chip{border-radius:14px!important}
-  .section-title{font-size:25px!important}
-}
-</style>
-
-
-<style id="gdplay-telegram-dark-ui-v3">
-/* GDPLAY — Telegram Dark UI v3. Visual-only redesign. JS hooks/IDs are intentionally untouched. */
-:root{
- --tg-bg:#212121;--tg-bg2:#181818;--tg-panel:#2b2b2b;--tg-panel2:#303030;--tg-line:rgba(255,255,255,.075);
- --tg-text:#f5f5f5;--tg-muted:#a9a9a9;--tg-blue:#3390ec;--tg-blue2:#2a7dcc;--tg-green:#4fae67;--tg-red:#e05b5b;
- --tg-shadow:0 8px 28px rgba(0,0,0,.28);--tg-radius:13px;
-}
-*{box-sizing:border-box}
-html,body{background:var(--tg-bg)!important;color:var(--tg-text)!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}
-body{background:var(--tg-bg)!important}
-h1,h2,h3,.display,.brand-name,.auth-logo,.section-title{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}
-.app-shell{max-width:560px!important;margin:0 auto!important;padding:0 0 calc(82px + env(safe-area-inset-bottom))!important}
-/* top app bar */
-header{position:sticky!important;top:0!important;z-index:1000!important;margin:0!important;border:0!important;border-bottom:1px solid var(--tg-line)!important;border-radius:0!important;background:rgba(33,33,33,.96)!important;box-shadow:none!important;backdrop-filter:blur(18px)!important;padding:8px 12px!important;min-height:58px!important}
-.brand{gap:9px!important}.brand-mark{width:40px!important;height:40px!important;border-radius:50%!important;border:0!important;box-shadow:none!important;background:var(--tg-panel)!important}
-.brand-name{font-size:17px!important;font-weight:700!important;letter-spacing:0!important}.header-right{gap:6px!important}
-.balance-chip{height:36px!important;padding:0 10px!important;border:0!important;border-radius:18px!important;background:var(--tg-panel)!important;color:var(--tg-text)!important;font-size:11px!important;box-shadow:none!important}
-.icon-btn,.menu-btn{width:36px!important;height:36px!important;border:0!important;border-radius:50%!important;background:transparent!important;color:var(--tg-text)!important;box-shadow:none!important}
-.icon-btn:hover,.menu-btn:hover,.menu-btn:active{background:rgba(255,255,255,.08)!important}
-.menu-panel{top:46px!important;right:4px!important;background:#303030!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px!important;box-shadow:var(--tg-shadow)!important;padding:5px!important}
-.menu-item{border-radius:9px!important;color:var(--tg-text)!important;background:transparent!important}.menu-item:hover{background:rgba(255,255,255,.08)!important}
-/* bottom tab bar: completely different navigation model */
-nav{position:fixed!important;left:50%!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;top:auto!important;transform:translateX(-50%)!important;width:min(540px,calc(100vw - 16px))!important;z-index:1200!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:2px!important;margin:0!important;padding:5px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:17px!important;background:rgba(43,43,43,.97)!important;box-shadow:0 10px 35px rgba(0,0,0,.4)!important;backdrop-filter:blur(20px)!important}
-.nav-btn{min-height:50px!important;border:0!important;border-radius:12px!important;background:transparent!important;color:#999!important;font-size:10px!important;font-weight:600!important;padding:6px 3px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important}
-.nav-btn span{font-size:20px!important;margin:0!important;line-height:20px!important}.nav-btn.active{background:rgba(51,144,236,.16)!important;color:#55aaf5!important;border:0!important;box-shadow:none!important}
-.page{min-height:calc(100dvh - 58px)!important;padding:14px 12px 24px!important;animation:none!important}.section-title{font-size:21px!important;font-weight:700!important;margin:8px 0 12px!important}.section-sub{color:var(--tg-muted)!important}
-/* universal Telegram-like surfaces */
-.card,.panel,.box,.section-card,.profile-card,.stat-card,.balance-card,.promo-card,.tip-card,.recent-drop,.bot-case-card,.battle-row,.market-item,.shop-item,.inventory-item,.reward-card,.setting-row,.admin-card{
- background:var(--tg-panel)!important;border:0!important;border-radius:var(--tg-radius)!important;box-shadow:none!important;color:var(--tg-text)!important
-}
-button.btn{background:var(--tg-blue)!important;color:#fff!important;border:0!important;border-radius:10px!important;box-shadow:none!important;font-weight:650!important}
-button.btn:hover{background:#3d9bf3!important}.btn-ghost,.ghost-btn{background:var(--tg-panel2)!important;color:var(--tg-text)!important;border:0!important;border-radius:10px!important}
-.btn-danger{color:#ff7272!important}
-input,select,textarea{background:#181818!important;border:1px solid rgba(255,255,255,.08)!important;color:var(--tg-text)!important;border-radius:10px!important;outline:none!important}
-input:focus,select:focus,textarea:focus{border-color:rgba(51,144,236,.7)!important;box-shadow:0 0 0 2px rgba(51,144,236,.12)!important}
-/* home/profile */
-.profile-header,.user-card,.hero-card{background:linear-gradient(180deg,#303030,#292929)!important;border:0!important;border-radius:16px!important;box-shadow:none!important}
-.avatar,.profile-avatar,.user-avatar{border-radius:50%!important}
-.stat-grid,.stats-grid{gap:6px!important}.stat-grid>* ,.stats-grid>*{background:#303030!important;border:0!important;border-radius:11px!important}
-/* cases: list-first mobile game store */
-#casesList{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-.bot-case-card{min-height:205px!important;border-radius:15px!important;background:#2b2b2b!important;position:relative!important;overflow:hidden!important}
-.bot-case-card:hover{background:#303030!important;transform:none!important}
-.bot-case-card .case-image,.bot-case-card img{border-radius:11px!important}
-@media(max-width:380px){#casesList{grid-template-columns:1fr!important}}
-/* lists and rows */
-.battle-row,.market-item,.shop-item,.inventory-item,.drop-item,.setting-row{min-height:52px!important;padding:9px 10px!important;border-bottom:1px solid rgba(255,255,255,.045)!important;background:transparent!important;border-radius:0!important}
-.battle-row:first-child,.market-item:first-child,.shop-item:first-child{border-radius:12px 12px 0 0!important}.battle-row:last-child,.market-item:last-child,.shop-item:last-child{border-radius:0 0 12px 12px!important;border-bottom:0!important}
-/* top / segmented controls */
-.top-tabs,.tabs,.filter-row,.sort-row{background:#181818!important;border:0!important;border-radius:11px!important;padding:3px!important;gap:3px!important}
-.top-tab,.tab-btn,.filter-btn{border:0!important;border-radius:9px!important;background:transparent!important;color:#999!important}
-.top-tab.active,.tab-btn.active,.filter-btn.active{background:#303030!important;color:var(--tg-blue)!important;box-shadow:none!important}
-/* modals */
-.modal-overlay{background:rgba(0,0,0,.58)!important;backdrop-filter:blur(3px)!important}
-.modal,.twofa-modal,.notification-modal,.confirm-modal,.sheet,.dialog{background:#2b2b2b!important;border:0!important;border-radius:18px!important;box-shadow:0 16px 55px rgba(0,0,0,.55)!important;color:var(--tg-text)!important}
-.modal-header{border-bottom:1px solid var(--tg-line)!important}.modal-close{border:0!important;background:transparent!important;color:#aaa!important}
-/* auth: new centered Telegram-style login */
-#authScreen{background:var(--tg-bg)!important;padding:20px!important}
-.auth-card{max-width:390px!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:18px!important}
-.auth-card::before{display:none!important}.auth-logo{font-size:30px!important;font-weight:750!important}.auth-logo img{width:54px!important;height:54px!important;border-radius:50%!important}
-.auth-tag{color:var(--tg-muted)!important}.auth-tabs{background:#181818!important;border:0!important;border-radius:12px!important;padding:3px!important}.auth-tab{border-radius:9px!important;color:#999!important}.auth-tab.active{background:var(--tg-blue)!important;color:#fff!important}
-.auth-form input{background:#181818!important;border:1px solid rgba(255,255,255,.08)!important}.auth-form .btn{border-radius:10px!important}
-/* special game controls */
-.wheel,.wheel-wrap,.mines-board,.upgrade-panel,.battle-panel,.game-panel{background:#292929!important;border:0!important;border-radius:15px!important;box-shadow:none!important}
-.wheel-item,.mine-cell,.upgrade-cell{background:#303030!important;border:1px solid rgba(255,255,255,.05)!important}
-/* notifications / badges */
-.badge,.tag,.status-chip{border:0!important;border-radius:999px!important;background:#3a3a3a!important;color:#ddd!important}
-/* remove decorative old luxury look */
-body::before,body::after{display:none!important}.page::before,.page::after{display:none!important}
-/* scrollbar like Telegram */
-::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#555;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
-/* maintenance */
-.maintenance-card{background:#2b2b2b!important;border:0!important;border-radius:18px!important;box-shadow:none!important}
-/* admin stays functional, but visually becomes a Telegram settings sheet */
-#page-admin .section-title{font-size:22px!important}.menu-item,#adminMenuBtn{font-family:inherit!important}
-/* responsive */
-@media(max-width:600px){header{padding-left:10px!important;padding-right:10px!important}.page{padding-left:10px!important;padding-right:10px!important}.section-title{font-size:20px!important}}
-@media(min-width:601px){body{background:#181818!important}.app-shell{background:#212121!important;min-height:100dvh!important;box-shadow:0 0 50px rgba(0,0,0,.25)}}
-
-</style>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -5063,45 +4842,19 @@ function normalizeGameState(){
 }
 
 function tgInitData(){
-  // Different Telegram clients/WebViews expose launch data differently.
-  // Official Telegram normally fills Telegram.WebApp.initData, while some
-  // alternative clients can leave that property empty but keep the original
-  // tgWebAppData in the URL (hash or query string). Never trust the user/id
-  // fields from the URL here: we only pass the signed initData string to the
-  // server, which performs the real Telegram signature validation.
+  // Telegram WebView can expose initData a little later than the page itself.
+  // Prefer the official WebApp value, but also recover the raw tgWebAppData
+  // from the launch URL as a fallback during that short initialization window.
   try{
     const official=(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData)||'';
     if(official) return official;
   }catch(e){}
-
-  const readParam=(raw)=>{
-    try{
-      if(!raw) return '';
-      const text=String(raw).replace(/^#/,'').replace(/^\?/,'');
-      const params=new URLSearchParams(text);
-      return params.get('tgWebAppData')||params.get('tgWebAppData%')||'';
-    }catch(e){ return ''; }
-  };
-
   try{
-    const fromHash=readParam(window.location?.hash||'');
-    if(fromHash) return fromHash;
-  }catch(e){}
-  try{
-    const fromSearch=readParam(window.location?.search||'');
-    if(fromSearch) return fromSearch;
-  }catch(e){}
-
-  // A few WebViews expose the launch URL through document.referrer. This is
-  // still only a source for the signed tgWebAppData value; the backend verifies it.
-  try{
-    const ref=String(document.referrer||'');
-    if(ref){
-      const q=ref.indexOf('?');
-      const h=ref.indexOf('#');
-      if(q>=0){ const v=readParam(ref.slice(q)); if(v) return v; }
-      if(h>=0){ const v=readParam(ref.slice(h)); if(v) return v; }
-    }
+    const hashes=String(window.location?.hash||'');
+    const raw=hashes.startsWith('#')?hashes.slice(1):hashes;
+    const params=new URLSearchParams(raw);
+    const webAppData=params.get('tgWebAppData');
+    if(webAppData) return webAppData;
   }catch(e){}
   return '';
 }
