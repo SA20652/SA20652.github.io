@@ -750,7 +750,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 }
 
 /* ===== LOCAL STARTUP LOADER ===== */
-#startupLoader{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;}
+#startupLoader{position:fixed;left:0;top:0;width:100%;height:100%;min-height:100vh;min-height:100dvh;z-index:2147483646;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;transform:translate3d(0,0,0);contain:strict;isolation:isolate;overflow:hidden;}
 #startupLoader.hide{opacity:0;visibility:hidden;pointer-events:none;}
 .startup-loader-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px;}
 .startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:0!important;box-shadow:none!important;outline:0!important;animation:startupLogoPulse 1.8s ease-in-out infinite;transform:translateZ(0);backface-visibility:hidden;}
@@ -3482,7 +3482,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 }
 
 /* ===== LOCAL STARTUP LOADER ===== */
-#startupLoader{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;}
+#startupLoader{position:fixed;left:0;top:0;width:100%;height:100%;min-height:100vh;min-height:100dvh;z-index:2147483646;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;transform:translate3d(0,0,0);contain:strict;isolation:isolate;overflow:hidden;}
 #startupLoader.hide{opacity:0;visibility:hidden;pointer-events:none;}
 .startup-loader-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px;}
 .startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:0!important;box-shadow:none!important;outline:0!important;animation:startupLogoPulse 1.8s ease-in-out infinite;transform:translateZ(0);backface-visibility:hidden;}
@@ -4549,7 +4549,6 @@ try{
   if(window.Telegram && window.Telegram.WebApp){
     const tw=window.Telegram.WebApp;
     try{tw.ready();}catch(e){}
-    try{tw.expand();}catch(e){}
     try{tw.disableVerticalSwipes?.();}catch(e){}
   }
 }catch(e){}
@@ -5450,25 +5449,45 @@ async function showApp(skipServer=false){
 
 let pendingTelegramCaseId='';
 let telegramCaseAutoOpened=false;
+const TELEGRAM_CASE_CONSUMED_KEY='gdplay_telegram_case_consumed_v2';
 function handleTelegramStartApp(){
   try{
+    if(telegramCaseAutoOpened) return;
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
     let cid=raw.startsWith('case_') ? raw.slice(5) : '';
+    let source='startapp';
     if(!cid){
-      try{ cid=new URLSearchParams(window.location.search||'').get('case')||''; }catch(_){}
+      try{ cid=new URLSearchParams(window.location.search||'').get('case')||''; source='query'; }catch(_){ }
     }
     cid=String(cid).trim();
-    if(!cid || telegramCaseAutoOpened) return;
+    if(!cid) return;
+
+    const c=CASES.find(x=>String(x.id)===cid);
+    if(!c) return;
+
+    // A WebApp URL can keep ?case=... (or start_param) when the same page is
+    // reloaded. Consume it once per Mini App session so refreshes cannot reopen
+    // the same case indefinitely. A new launch from the bot gets a new session.
+    let consumed='';
+    try{ consumed=String(sessionStorage.getItem(TELEGRAM_CASE_CONSUMED_KEY)||''); }catch(_){ }
+    const token=`${source}:${cid}`;
+    if(consumed===token) return;
+    try{ sessionStorage.setItem(TELEGRAM_CASE_CONSUMED_KEY,token); }catch(_){ }
+
+    // Remove the visible query immediately; this also prevents browser/WebView
+    // history from carrying a stale case parameter into subsequent reloads.
+    if(source==='query'){
+      try{ history.replaceState(history.state,'',window.location.pathname+window.location.hash); }catch(_){ }
+    }
+
     pendingTelegramCaseId=cid;
     telegramCaseAutoOpened=true;
     switchTab('cases');
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const c=CASES.find(x=>String(x.id)===cid);
-      if(c) openCase(c.id,false).catch(err=>showToast('❌ '+(err.message||'Не удалось открыть кейс'),'error'));
+      openCase(c.id,false).catch(err=>showToast('❌ '+(err.message||'Не удалось открыть кейс'),'error'));
     }));
   }catch(e){ console.warn('case start param:',e); }
 }
-
 async function boot(){
   const RELEASE_KEY='gdplay_release_screen_v1';
   const releaseScreen=document.getElementById('releaseScreen');
@@ -5502,7 +5521,7 @@ async function boot(){
       void releaseProgressFill.offsetWidth;
       releaseProgressFill.classList.add('run');
     }
-    await new Promise(resolve=>setTimeout(resolve,650));
+    await new Promise(resolve=>setTimeout(resolve,5000));
     storageSet(RELEASE_KEY,'1');
     if(releaseScreen){
       releaseScreen.classList.add('leaving');
@@ -5511,9 +5530,14 @@ async function boot(){
     return serverBoot;
   }
 
-  // Не держим пользователя на искусственной загрузке: короткий стабильный splash.
-  await new Promise(resolve=>setTimeout(resolve,650));
+  // Сохраняем полноценную загрузку: прогресс идёт все 4 секунды, а Telegram
+  // не меняет viewport во время splash. Это предотвращает прыжок заставки вниз.
+  await new Promise(resolve=>setTimeout(resolve,4000));
   if(startupLoader) startupLoader.classList.add('hide');
+  try{
+    const tw=window.Telegram?.WebApp;
+    if(tw){ try{tw.expand();}catch(e){} try{tw.disableVerticalSwipes?.();}catch(e){} }
+  }catch(e){}
   return serverBoot;
 }
 
@@ -5526,7 +5550,6 @@ async function waitForTelegramInitData(timeoutMs=12000){
       if(window.Telegram?.WebApp){
         const tw=window.Telegram.WebApp;
         try{tw.ready();}catch(e){}
-        try{tw.expand();}catch(e){}
         if(tw.initData) return tw.initData;
       }
     }catch(e){}
