@@ -6905,6 +6905,10 @@ async function openCaseBatch(c, qty, useKey=false){
   if(pill) pill.textContent='КРУТИМ';
 
   const wins=[];
+  // Показываем окно до сетевого запроса: первый кадр отрисовывается сразу после нажатия.
+  // Тяжёлое построение рулетки выполняется только после получения результата и отдельного кадра.
+  openModal('spinModal');
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try{
     if(tgInitData()){
       const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -6933,8 +6937,10 @@ async function openCaseBatch(c, qty, useKey=false){
     document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false); return;
   }
 
-  openModal('spinModal');
-
+  // Отдаём браузеру кадр после ответа сервера, прежде чем создавать рулетки.
+  // Это исключает длинный main-thread task непосредственно после нажатия.
+  await new Promise(resolve => requestAnimationFrame(resolve));
+  await new Promise(resolve => requestAnimationFrame(resolve));
   // Для 2x/3x все рулетки создаются заранее и запускаются ОДНОВРЕМЕННО.
   // Никаких последовательных прокруток и повторного layout между наградами.
   if(qty>1){
@@ -6969,6 +6975,7 @@ async function openCaseBatch(c, qty, useKey=false){
     if(wonIndex<0) wonIndex=c.items.findIndex(it=>String(it.name)===String(won.name));
     if(wonIndex<0) wonIndex=c.items.findIndex(it=>String(it.rarity||'')===String(won.rarity||''));
     if(wonIndex<0) wonIndex=0;
+    await new Promise(resolve => requestAnimationFrame(resolve));
     buildWheel(c.items,wonIndex,won.value,won);
     wheelWrap.classList.remove('reel-opening');
     await spinWheelIn(wheelWrap,document.getElementById('wheelDial'),c.items,wonIndex);
@@ -7014,6 +7021,9 @@ async function openCaseOnce(c, seq, total, useKey=false){
   document.getElementById('vaultCrack').style.display = 'none';
 
   let won;
+  // Окно открываем немедленно, чтобы нажатие не блокировалось запросом/созданием DOM.
+  openModal('spinModal');
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try{
     if(tgInitData()){
       // The authoritative result is requested BEFORE the animation is built.
@@ -7083,7 +7093,6 @@ async function openCaseOnce(c, seq, total, useKey=false){
   const wheelWrap = document.getElementById('wheelWrap');
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
   if(dial) dial.style.opacity='1';
-  openModal('spinModal');
   await spinWheel(dial, c.items, wonIndex);
   playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
