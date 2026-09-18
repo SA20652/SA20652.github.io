@@ -3786,6 +3786,20 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon .nav-supplied-icon{width:22px!important;height:22px!important;max-width:none!important;max-height:none!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 #page-top .top-tab[data-top-sort="cases"] .top-tab-icon svg *{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
 </style>
+<style id="gdplay-performance-v6">
+html{contain:layout style;}
+.page:not(.active){content-visibility:auto;contain-intrinsic-size:700px;}
+img{content-visibility:auto;}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+body.app-hidden .case-preview-animation,body.app-hidden .spin-confetti{display:none!important;}
+body.app-hidden *{scroll-behavior:auto!important;}
+</style>
+<script>
+(function(){
+  const sync=()=>document.body.classList.toggle('app-hidden',document.hidden);
+  document.addEventListener('visibilitychange',sync,{passive:true}); sync();
+})();
+</script>
 </head>
 <body><div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
@@ -4036,7 +4050,7 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
     <!-- CASES -->
     <div class="page active" id="page-cases">
       <div class="section-title">Сейфы хранилища</div>
-      <div class="section-sub">Открывай сейфы и получай кубы разной редкости</div>
+      <div class="section-sub">Открывай кейсы и получай кубы разной редкости</div>
       <div class="channel-bonus-card" id="channelBonusCard"><div class="channel-bonus-icon">📢</div><div class="channel-bonus-copy"><div class="channel-bonus-title">GDplay · +1000 💰 за подписку</div><div class="channel-bonus-sub">Подпишись на канал и забери бонус.</div></div><div class="channel-bonus-actions"><button type="button" class="btn" id="channelSubscribeBtn">Подписаться</button></div><button type="button" class="channel-bonus-close" id="channelBonusClose" aria-label="Скрыть">×</button></div>
       <div id="casesList"></div>
       <div class="promo-card"><div class="section-title" style="margin-top:18px">Промокод</div><div class="section-sub">Активируй код и получи монеты или VIP.</div><div class="promo-row"><input id="promoInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите промокод"><button class="btn" id="promoRedeemBtn">Активировать</button></div><div style="margin-top:8px"><button type="button" class="btn-ghost" id="adminTechBreakPromoBtn" style="display:none;width:100%">🛠️ Тех. перерыв</button></div><div id="promoMessage" class="promo-message"></div></div>
@@ -4551,9 +4565,9 @@ const AUTH_TOKEN_KEY = 'gdplay_auth_token_v1';
 const MANUAL_AUTH_KEY = 'gdplay_manual_auth_v1';
 const UPGRADE_FAST_KEY = 'gdplay_upgrade_fast_v1';
 const KEY_CATALOG = [
-  {id:'rust-key', name:'Ключ латунного сейфа', rarity:'common', value:120, icon:''},
-  {id:'brass-key', name:'Ключ латунного сейфа', rarity:'rare', value:650, icon:'🔑'},
-  {id:'obsidian-key', name:'Ключ чёрного сейфа', rarity:'epic', value:2800, icon:''},
+  {id:'rust-key', name:'Ключ латунного кейса', rarity:'common', value:120, icon:''},
+  {id:'brass-key', name:'Ключ латунного кейса', rarity:'rare', value:650, icon:'🔑'},
+  {id:'obsidian-key', name:'Ключ чёрного кейса', rarity:'epic', value:2800, icon:''},
   {id:'vault-key', name:'Ключ хранилища сейфа', rarity:'legendary', value:12000, icon:'🔐'},
   {id:'master-key', name:'Мастер-ключ', rarity:'mythic', value:65000, icon:'🔑'}
 ];
@@ -4608,7 +4622,7 @@ const RARITY_META = {
 
 // ===== CASES С НОВЫМИ ЦЕНАМИ КУБОВ =====
 const CASES = [
-  {id:"brass",name:"Латунный сейф",price:500,icon:'',items:[
+  {id:"brass",name:"Латунный кейс",price:500,icon:'',items:[
     {name:"BrianTheBurger",rarity:"common",value:240,chance:22.0},
     {name:"Surv",rarity:"common",value:300,chance:23.54},
     {name:"Knobbelboy",rarity:"rare",value:450,chance:29.51},
@@ -4618,7 +4632,7 @@ const CASES = [
     {name:"Denni",rarity:"divine",value:4500,chance:3.6432},
     {name:"Ч",rarity:"rare",value:1000,chance:1.0}
   ]},
-  {id:"obsidian",name:"Чёрный сейф",price:2500,icon:'',items:[
+  {id:"obsidian",name:"Чёрный кейс",price:2500,icon:'',items:[
     {name:"Dorami",rarity:"common",value:1000,chance:20.92},
     {name:"KrmaL",rarity:"common",value:1375,chance:22.52},
     {name:"Cursed",rarity:"rare",value:1875,chance:29.49},
@@ -4627,7 +4641,7 @@ const CASES = [
     {name:"FunnyGame",rarity:"mythic",value:8500,chance:5.05},
     {name:"Viprin",rarity:"divine",value:18750,chance:3.56}
   ]},
-  {id:"gilded",name:"Позолоченный сейф",price:6000,icon:'',items:[
+  {id:"gilded",name:"Позолоченный кейс",price:6000,icon:'',items:[
     {name:"Michigun",rarity:"common",value:2400,chance:19.86},
     {name:"Zobros",rarity:"common",value:3300,chance:21.54},
     {name:"EVW",rarity:"rare",value:4500,chance:29.43},
@@ -4636,7 +4650,7 @@ const CASES = [
     {name:"GuitarHeroStyles",rarity:"mythic",value:20400,chance:4.95},
     {name:"GMDani",rarity:"divine",value:45000,chance:3.43}
   ]},
-  {id:"demon",name:"Demon-сейф",price:12000,icon:'',items:[
+  {id:"demon",name:"Demon-кейс",price:12000,icon:'',items:[
     {name:"Luqualizer",rarity:"common",value:4800,chance:18.83},
     {name:"Hinds",rarity:"common",value:6600,chance:20.56},
     {name:"Partition",rarity:"rare",value:9000,chance:29.3},
@@ -4645,7 +4659,7 @@ const CASES = [
     {name:"Diamond",rarity:"mythic",value:40800,chance:4.85},
     {name:"A6",rarity:"divine",value:90000,chance:3.32}
   ]},
-  {id:"creator",name:"Creator-сейф",price:22000,icon:'',items:[
+  {id:"creator",name:"Creator-кейс",price:22000,icon:'',items:[
     {name:"Wooshi",rarity:"common",value:8800,chance:17.83},
     {name:"RG",rarity:"common",value:12100,chance:19.61},
     {name:"Crisis",rarity:"rare",value:16500,chance:29.13},
@@ -4654,7 +4668,7 @@ const CASES = [
     {name:"SandStorm",rarity:"mythic",value:74800,chance:4.76},
     {name:"SpirteX",rarity:"divine",value:165000,chance:3.2}
   ]},
-  {id:"legend",name:"Легендарный сейф",price:40000,icon:'',items:[
+  {id:"legend",name:"Легендарный кейс",price:40000,icon:'',items:[
     {name:"Mycrafted",rarity:"common",value:16000,chance:16.83},
     {name:"Dolphy",rarity:"common",value:22000,chance:18.68},
     {name:"Crazen",rarity:"rare",value:30000,chance:28.91},
@@ -4664,7 +4678,7 @@ const CASES = [
     {name:"MindCap",rarity:"divine",value:300000,chance:3.0591},
     {name:"MrKotovskyu",rarity:"divine",value:500000,chance:1.0}
   ]},
-  {id:"extreme",name:"Extreme-сейф",price:75000,icon:'',items:[
+  {id:"extreme",name:"Extreme-кейс",price:75000,icon:'',items:[
     {name:"LDMike",rarity:"common",value:30000,chance:15.88},
     {name:"Vortrox",rarity:"common",value:41250,chance:17.76},
     {name:"Temp",rarity:"rare",value:56250,chance:28.64},
@@ -4682,7 +4696,7 @@ const CASES = [
     {name:"Sea",rarity:"mythic",value:442000,chance:4.5},
     {name:"SoulsTRK",rarity:"divine",value:975000,chance:2.87}
   ]},
-  {id:"master",name:"Master-сейф",price:220000,icon:'',items:[
+  {id:"master",name:"Master-кейс",price:220000,icon:'',items:[
     {name:"Sailent",rarity:"common",value:88000,chance:14.04},
     {name:"AerialShard",rarity:"common",value:121000,chance:16.0},
     {name:"No ob",rarity:"rare",value:165000,chance:27.92},
@@ -4691,7 +4705,7 @@ const CASES = [
     {name:"GToast",rarity:"mythic",value:748000,chance:4.41},
     {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77}
   ]},
-  {id:"icon",name:"Иконический сейф",price:380000,icon:'',items:[
+  {id:"icon",name:"Иконический кейс",price:380000,icon:'',items:[
     {name:"Superkobster",rarity:"common",value:152000,chance:13.16},
     {name:"nng122",rarity:"common",value:209000,chance:15.14},
     {name:"Netermind",rarity:"rare",value:285000,chance:27.48},
@@ -5066,7 +5080,7 @@ function applyServerState(u){
     u.notifications.forEach(n=>{
       const msg=typeof n==='string' ? n : (n?.message||n?.text||'');
       const lower=String(msg).toLowerCase();
-      const caseNoise=['кейс','дроп','выпал','открыт сейф','открытие сейфа','открытие кейса','получен куб','получена награда из кейса'];
+      const caseNoise=['кейс','дроп','выпал','открыт кейс','открытие кейса','открытие кейса','получен куб','получена награда из кейса'];
       if(!msg || caseNoise.some(k=>lower.includes(k))) return;
       const id=String(n?.id||n?.notification_id||msg+'|'+(n?.created_at||n?.time||''));
       const tomb=loadNotificationTombstones();
@@ -5427,7 +5441,9 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
-  await Promise.allSettled([ensureCaseImages(), preloadProfileImages(data)]);
+  // Image decoding starts immediately but does not block first paint.
+  ensureCaseImages().catch(()=>{});
+  preloadProfileImages(data).catch(()=>{});
   renderAll();
   refreshGlobalTechBreak();
 }
@@ -5435,17 +5451,18 @@ async function showApp(skipServer=false){
 function handleTelegramStartApp(){
   try{
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
-    if(!raw) return;
-    if(raw==='play'){ switchTab('cases'); return; }
-    if(raw.startsWith('case_')){
-      const cid=raw.slice(5);
-      switchTab('cases');
-      requestAnimationFrame(()=>{
-        const el=document.querySelector(`[data-case-id=\"${CSS.escape(cid)}\"]`);
-        const btn=el?.querySelector('[data-action=\"open-case\"]');
-        if(btn) btn.click();
-      });
+    let cid=raw.startsWith('case_') ? raw.slice(5) : '';
+    if(!cid){
+      try{ cid=new URLSearchParams(window.location.search||'').get('case')||''; }catch(_){}
     }
+    cid=String(cid).trim();
+    if(!cid) return;
+    switchTab('cases');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const el=document.querySelector(`[data-case-id=\"${CSS.escape(cid)}\"]`);
+      const btn=el?.querySelector('[data-action=\"open-case\"]');
+      if(btn && !btn.disabled) btn.click();
+    }));
   }catch(e){}
 }
 
@@ -5686,7 +5703,7 @@ function showPromoSecretPhoto(code='2026SAMERGERMANCRUT'){
 }
 
 const NOTIFICATIONS_KEY='gdplay_notifications_v1';
-function loadNotifications(){try{const a=JSON.parse(storageGet(NOTIFICATIONS_KEY))||[]; const bad=['кейс','дроп','выпал','открыт сейф','открытие сейфа','открытие кейса','получен куб','получена награда из кейса','ежедневный бонус','ежедневку','ежедневная награда','доступно с vip-статусом','доступно с vip статусом']; const clean=a.filter(x=>!bad.some(k=>String(x?.message||'').toLowerCase().includes(k))); if(clean.length!==a.length) storageSet(NOTIFICATIONS_KEY,JSON.stringify(clean.slice(0,40))); return clean;}catch(e){return[];}}
+function loadNotifications(){try{const a=JSON.parse(storageGet(NOTIFICATIONS_KEY))||[]; const bad=['кейс','дроп','выпал','открыт кейс','открытие кейса','открытие кейса','получен куб','получена награда из кейса','ежедневный бонус','ежедневку','ежедневная награда','доступно с vip-статусом','доступно с vip статусом']; const clean=a.filter(x=>!bad.some(k=>String(x?.message||'').toLowerCase().includes(k))); if(clean.length!==a.length) storageSet(NOTIFICATIONS_KEY,JSON.stringify(clean.slice(0,40))); return clean;}catch(e){return[];}}
 function saveNotifications(list){storageSet(NOTIFICATIONS_KEY,JSON.stringify(list.slice(0,40)));}
 const NOTIFICATIONS_TOMBSTONES_KEY='gdplay_notifications_deleted_v2';
 function loadNotificationTombstones(){try{return new Set(JSON.parse(storageGet(NOTIFICATIONS_TOMBSTONES_KEY)||'[]').map(String));}catch(e){return new Set();}}
@@ -5718,9 +5735,9 @@ function addNotification(message){
   const m=String(message).toLowerCase();
   // Кейсовые действия никогда не попадают в центр уведомлений.
   const noise=[
-    'кейс','куб','дроп','открыт сейф','открытие сейфа','открытие кейса',
+    'кейс','куб','дроп','открыт кейс','открытие кейса','открытие кейса',
     'награда забрана','крут','крутим','готово ·','дополнительно найден ключ',
-    'нужно ещё','не хватает монет','открыть сейф','выпал','получен куб','получена награда из кейса','премиум-кейс открыт','premium-кейс открыт','открыли кейс','открыл кейс',
+    'нужно ещё','не хватает монет','открыть кейс','выпал','получен куб','получена награда из кейса','премиум-кейс открыт','premium-кейс открыт','открыли кейс','открыл кейс',
     'ежедневный бонус','ежедневку','ежедневная награда','доступно с vip-статусом','доступно с vip статусом'
   ];
   if(noise.some(x=>m.includes(x))) return;
@@ -6390,9 +6407,10 @@ function renderCasePreviewDrop(c){
 function startCasePreviewAnimation(){
   clearInterval(casePreviewTimer); casePreviewStep=0;
   casePreviewTimer=setInterval(()=>{
+    if(document.hidden || !document.getElementById('page-cases')?.classList.contains('active')) return;
     casePreviewStep=(casePreviewStep+1)%3;
     CASES.forEach(renderCasePreviewDrop);
-  },2000);
+  },2200);
 }
 
 let CASE_IMAGES = {};
@@ -6422,7 +6440,12 @@ function ensureCaseImages(){
       const re=/<img\s+data-case-id="([^"]+)"[^>]*\ssrc="([^"]+)"/g;
       let m;
       while((m=re.exec(html))) images[m[1]]=m[2];
-      finish(images);
+      // Decode every case image once during startup so opening the Cases tab
+      // never causes image-decoding work on the animation frame.
+      CASE_IMAGES=images;
+      Promise.all(Object.values(images).map(src=>new Promise(resolve=>{
+        const img=new Image(); img.decoding='async'; img.onload=img.onerror=()=>resolve(); img.src=src;
+      }))).then(()=>finish(images),()=>finish(images));
     }).catch(()=>{
       // Rare WebView fallback: only create the iframe after fetch failed, so
       // normal launches never download the 2 MB catalog twice.
@@ -6578,8 +6601,8 @@ try{
 
 const REEL_ITEM_HEIGHT = 86;
 const REEL_ITEM_WIDTH = 104;
-const REEL_LENGTH = 28;
-const REEL_TARGET_POS = 21;
+const REEL_LENGTH = 22;
+const REEL_TARGET_POS = 16;
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
   const target=authoritativeDrop?{...authoritativeDrop,value:Math.floor(Number(authoritativeDrop.value)||0)}:{...(items[wonIndex]||{}),value:Math.floor(Number(wonValue??items[wonIndex]?.value??0)||0)};
@@ -6703,7 +6726,6 @@ function showSpinResult(item, isSecret){
     ${isSecret ? '<div style="margin-top:8px;font-size:11px;color:var(--brass-2)">✨ Ты нашёл тайную комнату хранилища</div>' : ''}`;
   box.classList.remove('hidden');
   document.getElementById('spinCloseBtn').classList.remove('hidden');
-  spawnConfetti(document.querySelector('.spin-modal'), m.color);
 }
 
 let vaultSoundAt = 0;
@@ -6816,7 +6838,7 @@ async function openCaseBatch(c, qty, useKey=false){
   if(title) title.textContent=`${c.name} · ${qty} кейса`;
   if(icon) icon.innerHTML=caseImage(c.id,c.name);
   if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
-  if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие сейфа';
+  if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие кейса';
   if(pill) pill.textContent='КРУТИМ';
 
   const wins=[];
@@ -6905,8 +6927,12 @@ async function openCaseBatch(c, qty, useKey=false){
     closeModal('spinModal'); wheelWrap.classList.remove('reel-opening'); if(multiRow){multiRow.classList.remove('reel-opening');multiRow.style.display='none';multiRow.innerHTML='';}
     multiResult.classList.add('hidden'); multiResult.innerHTML=''; if(caseUiDirty){ renderInventory(); renderCases(); caseUiDirty=false; } updateBalanceUI(); closeBtn.onclick=null;
   };
-  wins.forEach(won=>{pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});recordBestDrop(won);});
-  persistLocal(); caseUiDirty=true; spinning=false; document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
+  const batchBookkeeping=()=>{
+    wins.forEach(won=>{pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});recordBestDrop(won);});
+    persistLocal();
+  };
+  if(window.requestIdleCallback) requestIdleCallback(batchBookkeeping,{timeout:700}); else setTimeout(batchBookkeeping,120);
+  caseUiDirty=true; spinning=false; document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
 }
 async function openCaseOnce(c, seq, total, useKey=false){
   spinning = true;
@@ -7001,9 +7027,14 @@ async function openCaseOnce(c, seq, total, useKey=false){
   // Show exactly the same authoritative value that was stored on the server.
   showSpinResult(won, isSecret);
   const spinPillDone=document.getElementById('spinStatusPill'); if(spinPillDone) spinPillDone.textContent='ГОТОВО';
-  pushDrop({ username:data.username, item:won.name, rarity:won.rarity, value:won.value, time:Date.now() });
-  recordBestDrop(won);
-  persistLocal();
+  // Keep the first result frame cheap: persistence/history work runs after
+  // the reward card has painted, so the Telegram WebView does not stutter.
+  const finishBookkeeping=()=>{
+    pushDrop({ username:data.username, item:won.name, rarity:won.rarity, value:won.value, time:Date.now() });
+    recordBestDrop(won);
+    persistLocal();
+  };
+  if(window.requestIdleCallback) requestIdleCallback(finishBookkeeping,{timeout:700}); else setTimeout(finishBookkeeping,120);
 
   // Do not rebuild the large cases/inventory DOM while the result is being
   // painted. The reward modal is the only visible UI at this point; defer the
@@ -8320,7 +8351,7 @@ function shareReferralLink(){
 function renderProfile(){
   loadReferralStats();
   const avatar=document.getElementById('profileAvatar');
-  if(data.avatar){avatar.innerHTML=`<img src="${data.avatar}" alt="Аватар" loading="lazy" decoding="async">`;}else avatar.textContent=(data.username||'?')[0].toUpperCase();
+  if(data.avatar){avatar.innerHTML=`<img src="${data.avatar}" alt="Аватар" loading="eager" decoding="async">`;}else avatar.textContent=(data.username||'?')[0].toUpperCase();
   const isPremium = data.premiumUntil && new Date(data.premiumUntil).getTime() > Date.now();
   document.getElementById('profileName').textContent=data.username;
   const badges=document.getElementById('profileBadges');
@@ -9651,4 +9682,12 @@ nav .nav-btn[data-tab="cases"] .nav-icon svg *{
 <style id="gdplay-background-performance">
 html.gdplay-backgrounded *,html.gdplay-backgrounded *::before,html.gdplay-backgrounded *::after{animation-play-state:paused!important;transition:none!important}
 html.gdplay-backgrounded canvas{visibility:hidden!important}
+</style>
+
+<style id="gdplay-case-result-no-stutter-v7">
+/* Keep the final reward frame cheap on Telegram WebView/low-end devices. */
+#spinModal .spin-modal,#spinModal .wheel-wrap,#spinModal .spin-result{transition:none!important;animation:none!important;}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{animation:none!important;transform:scale(1.04)!important;filter:none!important;}
+#spinModal .wheel-wrap.reel-opening{animation:none!important;}
+#spinModal .spin-result{contain:layout paint;will-change:auto;}
 </style>
