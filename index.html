@@ -6680,7 +6680,7 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?500:2200;
+  const duration=reduced?500:2850;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
@@ -7094,13 +7094,10 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); void wheelWrap.offsetWidth; wheelWrap.classList.add('reel-opening'); }
   if(dial) dial.style.opacity='1';
   await spinWheel(dial, c.items, wonIndex);
+  playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
-  // Show the reward before starting any audio work, so the first reward frame
-  // is rendered without a WebView hitch.
+  // Show exactly the same authoritative value that was stored on the server.
   showSpinResult(won, isSecret);
-  requestAnimationFrame(()=>{
-    playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
-  });
   const spinPillDone=document.getElementById('spinStatusPill'); if(spinPillDone) spinPillDone.textContent='ГОТОВО';
   // Keep the first result frame cheap: persistence/history work runs after
   // the reward card has painted, so the Telegram WebView does not stutter.
