@@ -1854,7 +1854,7 @@ async function updateGameLimits(){
     if(mEl) mEl.textContent=`${Math.max(0,(m.max||5)-(m.used||0))} / ${m.max||5}`;
   }catch(e){}
 }
-setInterval(updateGameLimits,7500);
+setInterval(updateGameLimits,15000);
 
 async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
 async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier||rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');}finally{rushBusy=false;}}
@@ -2046,12 +2046,14 @@ function spinWheelIn(container,dial,items,wonIndex){
   const targetEl=dial.querySelector('.wheel-item[data-reel-target="1"]');
   if(!targetEl) return Promise.reject(new Error('Целевой элемент рулетки не найден'));
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const duration=reduced?650:4200;
+  // Faster reveal: keep the same reel and easing, but remove the long idle
+  // feeling after the winning item reaches the pointer.
+  const duration=reduced?550:3400;
   const targetCenter=targetEl.offsetLeft+targetEl.offsetWidth/2;
   const containerCenter=container.clientWidth/2;
   const offset=Math.max(0,targetCenter-containerCenter);
   dial.classList.add('is-spinning');dial.classList.remove('is-stopped');
-  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 240ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-5)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},260);},duration+40);});
+  return new Promise(resolve=>{requestAnimationFrame(()=>{dial.style.transition=`transform ${duration}ms cubic-bezier(.08,.76,.12,1)`;dial.style.transform=`translate3d(-${offset}px,0,0)`;});setTimeout(()=>{dial.style.transition='transform 140ms cubic-bezier(.2,1.35,.4,1)';dial.style.transform=`translate3d(-${Math.max(0,offset-4)}px,0,0)`;setTimeout(()=>{dial.style.transition='none';dial.style.transform=`translate3d(-${offset}px,0,0)`;dial.classList.remove('is-spinning');dial.classList.add('is-stopped');resolve();},110);},duration+20);});
 }
 
 function spinWheel(dial,items,wonIndex){return spinWheelIn(document.getElementById('wheelWrap'),dial,items,wonIndex);}
@@ -4243,7 +4245,7 @@ removeDuplicateNotificationMenuItems();
 updateNotificationBadge();
 
 setInterval(()=>{
-  if(!currentUser) return;
+  if(!currentUser || document.hidden) return;
   // Опрашиваем только то, что реально видно на экране — меньше запросов, быстрее отклик
   if(currentTab==='battles') renderBattles();
   if(currentTab==='plinko') renderPlinko();
@@ -4251,7 +4253,7 @@ setInterval(()=>{
   if(currentTab==='cases') renderRecentDrops();
   refreshFromServer();
   syncServerNotifications();
-},10000);
+},15000);
 window.addEventListener('pagehide',persistDevice);
 window.addEventListener('beforeunload',persistDevice);
 
@@ -4307,11 +4309,6 @@ boot();
 <style id="hide-legacy-key-ui">
 .key-item,.key-badge,[data-key],.upgrade-key,.required-key,.key-requirement{display:none!important;}
 </style>
-<script>
-(function(){
- const oldText=(document.body.innerHTML||'');
-})();
-</script>
 
 <style id="case-performance-final">
 /* Case roulette performance pass: preserve visuals, reduce compositor/layout work. */
@@ -4328,7 +4325,7 @@ boot();
 <style id="case-small-spin-blur">
 /* Very light blur during case roulette: keeps motion smooth without the old heavy blur. */
 #spinModal .wheel-dial.is-spinning{
-  filter:blur(.7px);
+  filter:blur(.35px);
 }
 #spinModal .wheel-dial.is-stopped{
   filter:none;
@@ -4520,10 +4517,6 @@ boot();
 })();
 </script>
 
-<style id="gdplay-case-price-right">
-#casesList .rad-case-top{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:10px!important;}
-#casesList .rad-case-top>div:last-child{margin-left:auto!important;flex:0 0 auto!important;text-align:right!important;position:relative!important;left:24px!important;}
-</style>
 
 
 <style id="gdplay-safe-reward-animation">
