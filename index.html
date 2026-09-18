@@ -750,7 +750,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 }
 
 /* ===== LOCAL STARTUP LOADER ===== */
-#startupLoader{position:fixed;left:0;top:0;width:100%;height:100%;min-height:100vh;min-height:100dvh;z-index:2147483646;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;transform:translate3d(0,0,0);contain:strict;isolation:isolate;overflow:hidden;}
+#startupLoader{position:fixed;inset:0;width:100vw;height:var(--gdplay-startup-height,100vh);min-height:0;max-height:none;z-index:2147483646;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;box-sizing:border-box;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;transform:translate3d(0,0,0);contain:strict;isolation:isolate;overflow:hidden;}
 #startupLoader.hide{opacity:0;visibility:hidden;pointer-events:none;}
 .startup-loader-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px;}
 .startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:0!important;box-shadow:none!important;outline:0!important;animation:startupLogoPulse 1.8s ease-in-out infinite;transform:translateZ(0);backface-visibility:hidden;}
@@ -3801,7 +3801,8 @@ body.app-hidden *{scroll-behavior:auto!important;}
 })();
 </script>
 </head>
-<body><div id="startupLoader" aria-hidden="false">
+<body><script>(function(){try{var h=window.innerHeight||document.documentElement.clientHeight||0;if(h>0)document.documentElement.style.setProperty('--gdplay-startup-height',h+'px');}catch(e){}})();</script>
+<div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
     <img id="startupLoaderLogo" class="startup-loader-logo" alt="GDPLAY" decoding="async" fetchpriority="high">
     <div class="startup-loader-brand">GD<span>PLAY</span></div>
@@ -5530,10 +5531,13 @@ async function boot(){
     return serverBoot;
   }
 
-  // Сохраняем полноценную загрузку: прогресс идёт все 4 секунды, а Telegram
-  // не меняет viewport во время splash. Это предотвращает прыжок заставки вниз.
+  // Прогресс идёт все 4 секунды. Высота splash фиксирована в момент первого
+  // кадра, поэтому изменение Telegram viewport больше не может сдвинуть его.
   await new Promise(resolve=>setTimeout(resolve,4000));
   if(startupLoader) startupLoader.classList.add('hide');
+  // Не расширяем Telegram WebView одновременно с исчезновением splash:
+  // именно это давало визуальный рывок/сдвиг в нижнюю часть экрана.
+  await new Promise(resolve=>setTimeout(resolve,620));
   try{
     const tw=window.Telegram?.WebApp;
     if(tw){ try{tw.expand();}catch(e){} try{tw.disableVerticalSwipes?.();}catch(e){} }
