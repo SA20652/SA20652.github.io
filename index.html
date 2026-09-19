@@ -1973,7 +1973,7 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .pstat span{font-size:10px;color:var(--muted);margin-top:2px;display:block;}
 
 .daily-card{
-  position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;
+  position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
   background:linear-gradient(145deg,rgba(63,138,112,.15),rgba(63,138,112,.04)),#1a1511;
   border:1px solid rgba(63,138,112,.32);border-radius:18px;padding:14px 16px;margin-bottom:12px;
   box-shadow:0 8px 22px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025);
@@ -2003,6 +2003,39 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   background:linear-gradient(145deg,rgba(201,151,77,.10),rgba(201,151,77,.03));
   border:1px solid rgba(201,151,77,.22);
   box-shadow:0 6px 14px rgba(0,0,0,.14);
+}
+</style>
+<style id="gdplay-bonus-layout-fix">
+/* Bonus layout: timer always stays on its own line; claim button hugs the right edge. */
+.cases-bonus-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  column-gap:12px!important;
+  padding:14px 12px 14px 15px!important;
+}
+.cases-bonus-card > div:first-child{min-width:0!important;width:100%!important;}
+.cases-bonus-card .daily-timer{
+  display:block!important;
+  width:max-content!important;
+  max-width:100%!important;
+  min-height:15px!important;
+  margin-top:5px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  box-sizing:border-box!important;
+}
+.cases-bonus-card #dailyBtn{
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  align-self:center!important;
+  margin:0!important;
+  flex-shrink:0!important;
+}
+@media (max-width:420px){
+  .cases-bonus-card{column-gap:10px!important;padding-right:10px!important;}
 }
 </style>
 <style id="gdplay-bonus-and-referrals">
