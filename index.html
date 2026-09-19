@@ -8747,12 +8747,28 @@ async function loadReferralStats(force=false){
     referralLoadedAt=Date.now(); referralLinkValue=String(j.link||'');
     const link=document.getElementById('referralLink'); if(link) link.textContent=referralLinkValue||'Ссылка временно недоступна';
     const count=document.getElementById('referralCount'); if(count) count.textContent=Number(j.count||0).toLocaleString('ru-RU');
+    // Prepare the Telegram share in the background while the referral card is visible.
+    // This removes the long wait from the actual Share button press.
+    warmupReferralShare();
     const earned=document.getElementById('referralEarned'); if(earned) earned.textContent=Number(j.earned||0).toLocaleString('ru-RU');
     const daily=document.getElementById('referralDaily'); if(daily) daily.textContent=`${Number(j.daily_count||0)}/${Number(j.daily_limit||5)}`;
     renderReferralPeople(j.people||[]);
   }catch(e){ const link=document.getElementById('referralLink'); if(link) link.textContent='Не удалось загрузить ссылку'; }
 }
-const REFERRAL_SHARE_TEXT='Хочешь поиграть без настоящих денег и ты фанат Geometry Dash? Тебе сюда! Здесь ты можешь собирать кубы своих кумиров, сражаться в батлах и бороться за первое место в рейтинге!';
+const REFERRAL_SHARE_TEXT='Хочешь поиграть без настоящих денег и ты фанат Geometry Dash?\n\nТебе сюда!\n\nЗдесь ты можешь собирать кубы своих кумиров, сражаться в батлах и бороться за первое место в рейтинге!';
+let referralPreparedShareId='';
+let referralShareWarmupPromise=null;
+async function warmupReferralShare(){
+  if(referralPreparedShareId || referralShareWarmupPromise) return referralShareWarmupPromise;
+  referralShareWarmupPromise=(async()=>{
+    try{
+      const j=await apiFetch('/api/referrals/share',{});
+      referralPreparedShareId=String(j.id||'');
+    }catch(_e){}
+    finally{ referralShareWarmupPromise=null; }
+  })();
+  return referralShareWarmupPromise;
+}
 function getReferralShareText(){
   return `${REFERRAL_SHARE_TEXT}\n${referralLinkValue}`;
 }
@@ -8791,13 +8807,18 @@ async function shareReferralLink(){
     const tg=window.Telegram?.WebApp;
     // Новый Telegram: готовое сообщение с настоящей кнопкой «Играть».
     if(typeof tg?.shareMessage==='function'){
-      const j=await apiFetch('/api/referrals/share',{});
-      const msgId=String(j.id||'');
-      if(!msgId) throw new Error('Telegram не вернул сообщение для отправки');
+      if(!referralPreparedShareId) await warmupReferralShare();
+      const msgId=String(referralPreparedShareId||'');
+      if(!msgId){
+        const retry=await apiFetch('/api/referrals/share',{});
+        referralPreparedShareId=String(retry.id||'');
+      }
+      if(!referralPreparedShareId) throw new Error('Telegram не вернул сообщение для отправки');
+      const finalMsgId=referralPreparedShareId;
       await new Promise((resolve,reject)=>{
         let settled=false;
         const done=(sent)=>{ if(settled)return; settled=true; sent?resolve():reject(new Error('Отправка отменена')); };
-        try{ tg.shareMessage(msgId,done); }catch(e){ reject(e); }
+        try{ tg.shareMessage(finalMsgId,done); }catch(e){ reject(e); }
         setTimeout(()=>{ if(!settled){settled=true;resolve();} },15000);
       });
       showToast('Окно отправки открыто','success');
