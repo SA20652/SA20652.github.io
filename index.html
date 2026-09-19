@@ -5661,10 +5661,17 @@ async function preloadProfileImages(user){
     // Fetch all three leaderboard views in parallel once at startup so switching
     // between Top tabs/profile never causes a burst of avatar requests.
     const sorts=['cases','balance','winnings'];
-    const results=await Promise.allSettled(sorts.map(sort_by=>apiFetch('/api/leaderboard',{sort_by})));
-    for(const r of results){
+    const [leaderResults, referralResult] = await Promise.all([
+      Promise.allSettled(sorts.map(sort_by=>apiFetch('/api/leaderboard',{sort_by}))),
+      apiFetch('/api/referrals',{}).catch(()=>null)
+    ]);
+    for(const r of leaderResults){
       if(r.status!=='fulfilled') continue;
       for(const row of (r.value?.leaderboard||[])){ const a=String(row.avatar||'').trim(); if(a) urls.add(a); }
+    }
+    for(const person of (referralResult?.people||[])){
+      const a=String(person?.avatar||'').trim();
+      if(a) urls.add(a);
     }
     await Promise.all(Array.from(urls).map(src=>new Promise(resolve=>{
       const img=new Image(); img.decoding='async'; img.onload=img.onerror=()=>resolve(); img.src=src;
