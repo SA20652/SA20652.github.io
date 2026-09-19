@@ -3872,6 +3872,59 @@ body{overflow-x:hidden;}
 #startupLoader .startup-loader-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);will-change:auto;}
 #startupLoader.hide{pointer-events:none!important;}
 </style>
+
+<style id="gdplay-bonus-layout-final">
+/* Final mobile bonus layout: fixed right-side action, timer always on its own line. */
+.cases-bonus-card{
+  position:relative!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  padding:14px 178px 14px 15px!important;
+  min-height:116px!important;
+}
+.cases-bonus-card > div:first-child{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+}
+.cases-bonus-card #dailyBtn{
+  position:absolute!important;
+  z-index:2!important;
+  right:12px!important;
+  top:50%!important;
+  left:auto!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  width:150px!important;
+  min-width:150px!important;
+  max-width:150px!important;
+  height:54px!important;
+  margin:0!important;
+  padding:0 12px!important;
+  box-sizing:border-box!important;
+  flex:none!important;
+}
+.cases-bonus-card .daily-timer{
+  display:block!important;
+  width:fit-content!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  margin-top:5px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+@media (max-width:520px){
+  .cases-bonus-card{padding-right:154px!important;}
+  .cases-bonus-card #dailyBtn{right:10px!important;width:130px!important;min-width:130px!important;max-width:130px!important;height:50px!important;}
+}
+@media (max-width:390px){
+  .cases-bonus-card{padding-right:136px!important;padding-left:12px!important;}
+  .cases-bonus-card #dailyBtn{right:8px!important;width:116px!important;min-width:116px!important;max-width:116px!important;height:46px!important;font-size:12px!important;}
+}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
