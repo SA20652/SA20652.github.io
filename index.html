@@ -8224,6 +8224,15 @@ async function createBattle(){
 }
 
 async function joinBattle(id){
+  const joinBtn = document.querySelector(`[data-join-battle="${CSS.escape(String(id))}"]`);
+  const stake = Number(joinBtn?.dataset?.battleStake || 0);
+  const currentBalance = Number(data.balance || 0);
+  if(stake > currentBalance){
+    showToast('❌ Недостаточно монет для участия','error');
+    await renderBattles();
+    return;
+  }
+  if(joinBtn){ joinBtn.disabled = true; joinBtn.dataset.joining = '1'; }
   try{
     const j = await apiFetch('/api/mp/battles/join', {battle_id: id, username: data.username});
     data.balance = j.balance;
@@ -8250,6 +8259,11 @@ async function joinBattle(id){
     await renderBattles();
   }catch(e){
     showToast('❌ '+e.message,'error');
+    // Баланс мог измениться на другом устройстве/вкладке. Сразу обновляем
+    // список с сервера, чтобы кнопка участия стала актуальной.
+    try{ await renderBattles(); }catch(_){ }
+  }finally{
+    if(joinBtn) joinBtn.disabled = false;
   }
 }
 
@@ -8747,43 +8761,71 @@ async function copyReferralLink(){
   if(!referralLinkValue){showToast('Реферальная ссылка пока недоступна','error');return;}
   const text=getReferralShareText();
   try{
-    if(navigator.clipboard?.writeText){
-      await navigator.clipboard.writeText(text);
-    }else{
-      const ta=document.createElement('textarea');
-      ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    let copied=false;
+    if(navigator.clipboard && typeof navigator.clipboard.writeText==='function'){
+      try{ await navigator.clipboard.writeText(text); copied=true; }catch(_e){}
     }
+    if(!copied){
+      const ta=document.createElement('textarea');
+      ta.value=text;
+      ta.setAttribute('readonly','');
+      ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='0'; ta.style.opacity='0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+      try{ copied=!!document.execCommand('copy'); }catch(_e){}
+      ta.remove();
+    }
+    if(!copied) throw new Error('clipboard unavailable');
     showToast('Приглашение скопировано','success');
   }catch(e){
     showToast('Не удалось скопировать приглашение','error');
   }
 }
 async function shareReferralLink(){
+  if(window.__gdplayReferralShareBusy) return;
+  window.__gdplayReferralShareBusy=true;
+  const shareBtn=document.getElementById('referralShareBtn');
+  const oldText=shareBtn?.textContent;
+  if(shareBtn){shareBtn.disabled=true;shareBtn.textContent='Подготовка…';}
   try{
-    const j=await apiFetch('/api/referrals/share',{});
-    const msgId=String(j.id||'');
-    if(!msgId) throw new Error('Не удалось подготовить приглашение');
-
     const tg=window.Telegram?.WebApp;
+    // Новый Telegram: готовое сообщение с настоящей кнопкой «Играть».
     if(typeof tg?.shareMessage==='function'){
-      tg.shareMessage(msgId,(sent)=>{
-        if(sent) showToast('Приглашение отправлено','success');
+      const j=await apiFetch('/api/referrals/share',{});
+      const msgId=String(j.id||'');
+      if(!msgId) throw new Error('Telegram не вернул сообщение для отправки');
+      await new Promise((resolve,reject)=>{
+        let settled=false;
+        const done=(sent)=>{ if(settled)return; settled=true; sent?resolve():reject(new Error('Отправка отменена')); };
+        try{ tg.shareMessage(msgId,done); }catch(e){ reject(e); }
+        setTimeout(()=>{ if(!settled){settled=true;resolve();} },15000);
       });
+      showToast('Окно отправки открыто','success');
       return;
     }
 
-    // Старые версии Telegram не поддерживают PreparedInlineMessage.
-    // Для них сохраняем обычный share-link как запасной вариант.
+    // Запасной вариант для старых клиентов Telegram.
     if(!referralLinkValue) await loadReferralStats(true);
     if(!referralLinkValue) throw new Error('Реферальная ссылка пока недоступна');
     const shareUrl='https://t.me/share/url?url='+encodeURIComponent(referralLinkValue)+'&text='+encodeURIComponent(REFERRAL_SHARE_TEXT);
-    if(tg?.openTelegramLink) tg.openTelegramLink(shareUrl); else window.open(shareUrl,'_blank');
+    if(tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+    else window.open(shareUrl,'_blank','noopener,noreferrer');
     showToast('Окно отправки открыто','success');
   }catch(e){
-    showToast(e.message||'Не удалось подготовить приглашение','error');
+    if(e?.message!=='Отправка отменена') showToast(e.message||'Не удалось открыть отправку','error');
+  }finally{
+    if(shareBtn){shareBtn.disabled=false;shareBtn.textContent=oldText||'Поделиться';}
+    window.__gdplayReferralShareBusy=false;
   }
 }
+
+// Кнопки находятся в index.html, поэтому обработчик должен быть здесь, а не только в старом modals.html.
+document.addEventListener('click',(e)=>{
+  const copy=e.target?.closest?.('#referralCopyBtn');
+  const share=e.target?.closest?.('#referralShareBtn');
+  if(copy){e.preventDefault();e.stopPropagation();copyReferralLink();return;}
+  if(share){e.preventDefault();e.stopPropagation();shareReferralLink();return;}
+},{passive:false});
 
 function renderProfile(){
   loadReferralStats();
