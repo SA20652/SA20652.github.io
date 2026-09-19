@@ -4958,7 +4958,7 @@ async function apiFetch(path, payload={}, _retry=false){
   payload = {...payload, ...(initData ? {initData} : {})};
   if(authToken) payload.authToken = authToken;
 
-  if(path.startsWith('/api/admin/') && path !== '/api/admin/session' && path !== '/api/admin/tech-break'){
+  if(path.startsWith('/api/admin/') && path !== '/api/admin/session'){
     let adminSession = storageGet(ADMIN_SESSION_KEY);
     if(!adminSession){
       let sessionError=null;
