@@ -2005,6 +2005,30 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
   box-shadow:0 6px 14px rgba(0,0,0,.14);
 }
 </style>
+<style id="gdplay-bonus-and-referrals">
+/* Daily bonus: GDPLAY dark/gold style, never the old blue/emerald card. */
+.cases-bonus-card{position:relative!important;overflow:hidden!important;padding:14px 44px 14px 15px!important;background:linear-gradient(145deg,rgba(201,151,77,.12),rgba(255,255,255,.018) 58%,rgba(13,11,9,.92))!important;border:1px solid rgba(201,151,77,.68)!important;box-shadow:0 10px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.035)!important;}
+.cases-bonus-card::before{content:"";position:absolute;inset:auto -40px -55px auto;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(201,151,77,.16),transparent 68%);pointer-events:none;}
+.cases-bonus-card .title{color:var(--brass-2)!important;font-size:15px!important;font-weight:800!important;}
+.cases-bonus-card .desc{font-size:11px!important;}
+.daily-bonus-close{position:absolute;right:9px;top:8px;width:26px;height:26px;border:1px solid rgba(201,151,77,.22);border-radius:8px;background:rgba(0,0,0,.16);color:var(--muted);font-size:18px;line-height:22px;padding:0;cursor:pointer;z-index:3;transition:transform .16s ease,color .16s ease,border-color .16s ease;}
+.daily-bonus-close:hover{color:var(--paper);border-color:rgba(201,151,77,.55);transform:scale(1.05);}
+.daily-bonus-hidden{display:none!important;}
+.referral-people-title{margin-top:12px;font-size:10px;font-weight:800;color:var(--paper);}
+.referral-people{display:grid;gap:6px;margin-top:7px;max-height:210px;overflow:auto;}
+.referral-person{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055);min-width:0;}
+.referral-person-avatar{width:28px;height:28px;flex:0 0 28px;border-radius:9px;object-fit:cover;background:#1b1713;border:1px solid rgba(201,151,77,.14);display:grid;place-items:center;font-size:12px;}
+.referral-person-main{min-width:0;flex:1;}.referral-person-name{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.referral-person-meta{margin-top:2px;font-size:8.5px;color:var(--muted);}.referral-person-status{font-size:8px;font-weight:800;color:var(--brass-2);}
+.referral-empty{padding:9px;border-radius:10px;background:rgba(255,255,255,.018);border:1px dashed rgba(255,255,255,.07);font-size:9px;color:var(--muted);text-align:center;}
+/* Optimized case opening entrance: transform/opacity only, GPU-friendly. */
+#spinModal.case-opening-entrance .spin-modal{animation:gdCaseModalIn .34s cubic-bezier(.22,1,.36,1) both;}
+#spinModal.case-opening-entrance .spin-case-icon{animation:gdCaseIconIn .52s cubic-bezier(.16,1.25,.35,1) .03s both;box-shadow:inset 0 0 18px rgba(0,0,0,.25),0 0 0 rgba(201,151,77,0);}
+#spinModal.case-opening-entrance .spin-case-icon img,#spinModal.case-opening-entrance .spin-case-icon svg{animation:gdCaseIconFloat .9s ease-in-out .12s both;}
+@keyframes gdCaseModalIn{from{opacity:.55;transform:translateY(10px) scale(.975)}to{opacity:1;transform:none}}
+@keyframes gdCaseIconIn{0%{transform:scale(.72) rotate(-7deg);opacity:.3}55%{transform:scale(1.08) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes gdCaseIconFloat{0%{transform:translateY(0) scale(.94)}45%{transform:translateY(-3px) scale(1.02)}100%{transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){#spinModal.case-opening-entrance .spin-modal,#spinModal.case-opening-entrance .spin-case-icon,#spinModal.case-opening-entrance .spin-case-icon img,#spinModal.case-opening-entrance .spin-case-icon svg{animation:none!important;}}
+</style>
 <style id="gdplay-premium-subscribe">
 .channel-bonus-card{position:relative;display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 38px 10px 11px;border:1px solid rgba(201,151,77,.18);border-radius:14px;background:linear-gradient(135deg,rgba(201,151,77,.08),rgba(255,255,255,.018));box-shadow:0 7px 18px rgba(0,0,0,.16);overflow:hidden;}
 .channel-bonus-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;background:rgba(201,151,77,.12);border:1px solid rgba(201,151,77,.18);font-size:17px;}
@@ -4080,9 +4104,10 @@ body{overflow-x:hidden;}
 
     <!-- CASES -->
     <div class="page active" id="page-cases">
-      <div class="daily-card cases-bonus-card" style="margin:0 0 12px">
+      <div class="daily-card cases-bonus-card" id="dailyBonusCard" style="margin:0 0 12px">
         <div style="min-width:0;flex:1"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div><div class="daily-timer" id="dailyTimer">Следующая награда доступна сейчас</div><div class="daily-streak"><div class="daily-streak-head"><span>🔥 Серия входов</span><b id="dailyStreakText">0/14</b></div><div class="daily-streak-bar"><div class="daily-streak-fill" id="dailyStreakFill"></div></div></div></div>
         <button class="btn" id="dailyBtn" style="margin-left:10px;flex-shrink:0">Забрать</button>
+        <button type="button" class="daily-bonus-close" id="dailyBonusClose" aria-label="Скрыть бонус">×</button>
       </div>
       <div class="section-title" style="font-size:19px">Кейсы хранилища</div>
       <div class="section-sub">Открывай кейсы и получай кубы разной редкости</div>
@@ -4347,7 +4372,7 @@ body{overflow-x:hidden;}
         </div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 6 часов · 💣 10 игр в «Минах» каждые 6 часов · x0.85 продажа · +10% удачи · 100 слотов · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
-      <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>7 500 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+7 500 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать</button><button type="button" class="btn" id="referralShareBtn">Поделиться</button></div></div>
+      <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>7 500 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+7 500 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div><div class="referral-stat"><b id="referralDaily">0/5</b><span>сегодня</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать</button><button type="button" class="btn" id="referralShareBtn">Поделиться</button></div><div class="referral-people-title">👤 Перешли по твоей ссылке</div><div class="referral-people" id="referralPeople"><div class="referral-empty">Пока никто не перешёл</div></div></div>
       <div class="tip-card"><div class="tip-title">💡 Совет хранителя</div><div class="tip-text" id="dailyTip">Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.</div></div>
       <div class="section-title" style="margin-top:15px">🏆 Лучшие дропы</div>
       <div id="profileBestDrops" class="best-drops"></div>
@@ -8502,6 +8527,18 @@ async function setProfileNameStyle(key){
 
 let referralLoadedAt=0;
 let referralLinkValue='';
+function renderReferralPeople(people){
+  const box=document.getElementById('referralPeople'); if(!box) return;
+  const rows=Array.isArray(people)?people:[];
+  if(!rows.length){box.innerHTML='<div class="referral-empty">Пока никто не перешёл</div>';return;}
+  box.innerHTML=rows.map(p=>{
+    const name=String(p.name||'Игрок').replace(/[<>]/g,'');
+    const status=String(p.status||'pending')==='active'?'Активирован':'Перешёл';
+    const avatar=String(p.avatar||'');
+    const avatarHtml=avatar?`<img class="referral-person-avatar" src="${avatar.replace(/"/g,'&quot;')}" alt="" loading="lazy">`:'<div class="referral-person-avatar">👤</div>';
+    return `<div class="referral-person">${avatarHtml}<div class="referral-person-main"><div class="referral-person-name">${name}</div><div class="referral-person-meta">${String(p.created_at||'').slice(0,16)}</div></div><span class="referral-person-status">${status}</span></div>`;
+  }).join('');
+}
 async function loadReferralStats(force=false){
   if(!data)return;
   if(!force && Date.now()-referralLoadedAt<60000)return;
@@ -8511,6 +8548,8 @@ async function loadReferralStats(force=false){
     const link=document.getElementById('referralLink'); if(link) link.textContent=referralLinkValue||'Ссылка временно недоступна';
     const count=document.getElementById('referralCount'); if(count) count.textContent=Number(j.count||0).toLocaleString('ru-RU');
     const earned=document.getElementById('referralEarned'); if(earned) earned.textContent=Number(j.earned||0).toLocaleString('ru-RU');
+    const daily=document.getElementById('referralDaily'); if(daily) daily.textContent=`${Number(j.daily_count||0)}/${Number(j.daily_limit||5)}`;
+    renderReferralPeople(j.people||[]);
   }catch(e){ const link=document.getElementById('referralLink'); if(link) link.textContent='Не удалось загрузить ссылку'; }
 }
 async function copyReferralLink(){
@@ -8580,6 +8619,20 @@ function renderProfile(){
   renderBuffs();
 }
 
+const DAILY_BONUS_HIDE_KEY='gdplay_daily_bonus_hidden_until_v1';
+function updateDailyBonusVisibility(){
+  const card=document.getElementById('dailyBonusCard'); if(!card) return;
+  const hiddenUntil=Number(storageGet(DAILY_BONUS_HIDE_KEY)||0);
+  const canShow=hiddenUntil<=Date.now();
+  card.classList.toggle('daily-bonus-hidden',!canShow);
+  if(!canShow) setTimeout(updateDailyBonusVisibility,Math.min(hiddenUntil-Date.now(),60000));
+}
+function hideDailyBonus(){
+  const next=Number(dailyState.nextAt||0);
+  const until=next>Date.now()?next:Date.now()+3600000;
+  storageSet(DAILY_BONUS_HIDE_KEY,String(until));
+  updateDailyBonusVisibility();
+}
 async function loadDailyStatus(){
   if(dailyStatusInFlight||!currentUser||!tgInitData()) return;
   dailyStatusInFlight=true;
@@ -8594,6 +8647,7 @@ async function loadDailyStatus(){
 }
 function updateDailyUI(){
   if(!data)return;
+  updateDailyBonusVisibility();
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
   const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
   const nextAt=Number(dailyState.nextAt||0),can=!!dailyState.available && dailyState.streak<14;

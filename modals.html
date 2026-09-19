@@ -2214,6 +2214,16 @@ async function openCase(caseId, useKey=false){
   }
 }
 
+function triggerCaseOpeningEntrance(){
+  const modal=document.getElementById('spinModal');
+  if(!modal) return;
+  modal.classList.remove('case-opening-entrance');
+  void modal.offsetWidth;
+  modal.classList.add('case-opening-entrance');
+  clearTimeout(window.__gdCaseEntranceTimer);
+  window.__gdCaseEntranceTimer=setTimeout(()=>modal.classList.remove('case-opening-entrance'),700);
+}
+
 async function openCaseBatch(c, qty, useKey=false){
   if(spinning) return;
   spinning = true;
@@ -2273,6 +2283,7 @@ async function openCaseBatch(c, qty, useKey=false){
   }
 
   openModal('spinModal');
+  triggerCaseOpeningEntrance();
 
   // Для 2x/3x все рулетки создаются заранее и запускаются ОДНОВРЕМЕННО.
   // Никаких последовательных прокруток и повторного layout между наградами.
@@ -2412,6 +2423,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   if(wheelWrap){ wheelWrap.classList.remove('reel-opening'); requestAnimationFrame(()=>wheelWrap.classList.add('reel-opening')); }
   if(dial) dial.style.opacity='1';
   openModal('spinModal');
+  triggerCaseOpeningEntrance();
   await spinWheel(dial, c.items, wonIndex);
   playBeep(won.rarity==='divine'||won.rarity==='mythic'||won.rarity==='emerald'?1180:840);
 
