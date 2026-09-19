@@ -1997,6 +1997,22 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 .settings-row .btn-ghost{position:relative;z-index:1;min-width:90px;text-align:center;}
 
 #page-settings .section-sub{font-size:12px;}
+.notification-settings-card{margin-top:10px;border:1px solid var(--line);border-radius:13px;background:var(--bg-2);overflow:hidden;}
+.notification-settings-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;background:transparent;border:0;color:var(--paper);cursor:pointer;text-align:left;}
+.notification-settings-head .left{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13.5px;}
+.notification-settings-chevron{font-size:14px;opacity:.72;transition:transform .2s ease;}
+.notification-settings-card.open .notification-settings-chevron{transform:rotate(180deg);}
+.notification-settings-list{display:none;border-top:1px solid var(--line);padding:6px 10px 9px;}
+.notification-settings-card.open .notification-settings-list{display:block;}
+.notification-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px;border-bottom:1px solid rgba(255,255,255,.045);}
+.notification-setting-row:last-child{border-bottom:0;}
+.notification-setting-name{font-size:12.5px;font-weight:600;line-height:1.25;}
+.notification-setting-switch{position:relative;flex:0 0 auto;width:42px;height:24px;border:0;border-radius:999px;background:var(--bg-3);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer;padding:0;transition:.18s ease;}
+.notification-setting-switch::after{content:"";position:absolute;top:4px;left:4px;width:16px;height:16px;border-radius:50%;background:#aaa;transition:.18s ease;}
+.notification-setting-switch.on{background:var(--brass-2);box-shadow:none;}
+.notification-setting-switch.on::after{left:22px;background:#171311;}
+.notification-settings-note{padding:8px 4px 2px;color:var(--muted);font-size:10.5px;line-height:1.35;}
+
 #page-settings .btn-ghost[id="manualAuthSettingsBtn"]{
   display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 14px;
   padding:13px;border-radius:14px;font-size:13px;font-weight:700;
@@ -4550,7 +4566,14 @@ body{overflow-x:hidden;}
 
       <div class="settings-row"><span class="label">Звуки</span><button class="btn-ghost" id="soundToggle">Включены</button></div>
       <div class="settings-row"><span class="label">Анимации</span><button class="btn-ghost" id="motionToggle">Включены</button></div>
-       <div class="settings-row settings-channel-row" id="settingsChannelBonusRow"><span class="label">📢 Бонус за подписку</span><button class="btn-ghost" id="settingsChannelBonusBtn">Показать</button></div>
+      <div class="notification-settings-card" id="notificationSettingsCard">
+        <button class="notification-settings-head" id="notificationSettingsToggle" type="button">
+          <span class="left"><span>🔔</span><span>Уведомления</span></span>
+          <span class="notification-settings-chevron">⌄</span>
+        </button>
+        <div class="notification-settings-list" id="notificationSettingsList"></div>
+      </div>
+       <div class="settings-row settings-channel-row" id="settingsChannelBonusRow"><span class="label">Бонус за подписку</span><button class="btn-ghost" id="settingsChannelBonusBtn">Показать</button></div>
       <div class="settings-row"><span class="label">Выйти из аккаунта</span><button class="btn-ghost btn-danger" id="logoutBtn">Выйти</button></div>
     </div>
   </div>
@@ -5607,7 +5630,7 @@ function serverUserToGame(u,fallbackName){
     battles:Number(u?.battles_played||0), wins:Number(u?.total_wins||0), battle_winnings:Number(u?.battle_winnings||0),
     spins:Number(u?.total_spins||0), losses:Number(u?.total_losses||0), biggestWin:Number(u?.biggest_win||0),
     vault_balance:Number(u?.vault_balance||0),
-    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
+    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, notificationSettings:u?.notification_settings&&typeof u.notification_settings==='object'?{...u.notification_settings}:null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
 
@@ -8863,12 +8886,63 @@ function updateSettingsUI(){
   if(sound) sound.textContent=getSetting('sound')?'Включены':'Выключены';
   if(motion) motion.textContent=getSetting('motion')?'Включены':'Выключены';
   document.body.classList.toggle('reduce-motion', !getSetting('motion'));
+  renderNotificationSettings();
 }
+const NOTIFICATION_SETTING_LABELS={
+  orbs_transfer:'Передача орбов',
+  shop_sale:'Продажа куба в магазине',
+  premium:'Premium и подарки',
+  purchases:'🛍 Покупки',
+  moderation:'Баны и ограничения',
+  tech_break:'Технические уведомления',
+  subscription_bonus:'Бонус за подписку',
+  admin:'Уведомления от администрации',
+  bonus:'Бонусы',
+  other:'Другие уведомления'
+};
+function notificationSettingEnabled(key){
+  if(!data) return true;
+  if(!data.notificationSettings || typeof data.notificationSettings!=='object') data.notificationSettings={};
+  return data.notificationSettings[key]!==false;
+}
+function renderNotificationSettings(){
+  const list=document.getElementById('notificationSettingsList'); if(!list) return;
+  list.innerHTML=Object.entries(NOTIFICATION_SETTING_LABELS).map(([key,label])=>`<div class="notification-setting-row"><span class="notification-setting-name">${escapeHtml(label)}</span><button type="button" class="notification-setting-switch ${notificationSettingEnabled(key)?'on':''}" data-notification-setting="${key}" aria-pressed="${notificationSettingEnabled(key)}"></button></div>`).join('')+`<div class="notification-settings-note">Настройки сохраняются на сервере и действуют только на уведомления из игры/бота. Ответы команд, включая /start, не отключаются.</div>`;
+  list.querySelectorAll('[data-notification-setting]').forEach(btn=>btn.addEventListener('click',()=>toggleNotificationSetting(btn.dataset.notificationSetting)));
+}
+async function toggleNotificationSetting(key){
+  if(!data) return;
+  if(!data.notificationSettings || typeof data.notificationSettings!=='object') data.notificationSettings={};
+  const next=!notificationSettingEnabled(key);
+  data.notificationSettings[key]=next;
+  renderNotificationSettings();
+  try{
+    const j=await apiFetch('/api/notifications/settings',{settings:data.notificationSettings});
+    data.notificationSettings=j.settings||data.notificationSettings;
+    renderNotificationSettings();
+  }catch(e){
+    data.notificationSettings[key]=!next;
+    renderNotificationSettings();
+    showToast('❌ '+(e.message||'Не удалось сохранить настройки уведомлений'),'error');
+  }
+}
+function initNotificationSettingsUI(){
+  const card=document.getElementById('notificationSettingsCard');
+  const toggle=document.getElementById('notificationSettingsToggle');
+  if(toggle && !toggle.dataset.bound){
+    toggle.dataset.bound='1';
+    toggle.addEventListener('click',()=>card?.classList.toggle('open'));
+  }
+  renderNotificationSettings();
+}
+
 function toggleSetting(name){
   if(!data.settings) data.settings={sound:true,motion:true};
   data.settings[name]=!getSetting(name);
   persistLocal(); updateSettingsUI();
 }
+
+initNotificationSettingsUI();
 
 document.getElementById('soundToggle')?.addEventListener('click', e=>{
   e.stopPropagation();
