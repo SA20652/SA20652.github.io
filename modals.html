@@ -2167,8 +2167,12 @@ function clickerFloatReward(){const orb=document.getElementById('clickerOrb');if
 async function clickerClaim(e){if(!data)return;clickerInFlight++;clickerLocalCoins+=CLICKER_REWARD;clickerRender();clickerFloatReward();updateBalanceUI();const requestId=(crypto?.randomUUID?crypto.randomUUID():`click-${Date.now()}-${Math.random().toString(36).slice(2)}`);try{const j=await apiFetch('/api/clicker/claim',{request_id:requestId});if(j&&Number.isFinite(Number(j.balance)))data.balance=Number(j.balance);clickerSetStatus(Number(j.daily_earned)>=4000?'Достигнут дневной лимит кликера: 4 000 монет.':'Зачислено +1 монета.');persistLocal();updateBalanceUI();}catch(e){clickerLocalCoins=Math.max(0,clickerLocalCoins-CLICKER_REWARD);clickerSetStatus('❌ '+(e.message||'Не удалось зачислить награду'),true);}finally{clickerInFlight=Math.max(0,clickerInFlight-1);clickerRender();}}
 document.getElementById('clickerOrb')?.addEventListener('pointerdown',e=>{e.preventDefault();clickerClaim(e);});
 document.getElementById('balancePlusBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openClicker();});
-document.getElementById('referralCopyBtn')?.addEventListener('click',copyReferralLink);
-document.getElementById('referralShareBtn')?.addEventListener('click',shareReferralLink);
+document.addEventListener('click',(e)=>{
+  const copy=e.target.closest?.('#referralCopyBtn');
+  const share=e.target.closest?.('#referralShareBtn');
+  if(copy){e.preventDefault();copyReferralLink();}
+  if(share){e.preventDefault();shareReferralLink();}
+},{passive:false});
 document.getElementById('clickerCloseBtn')?.addEventListener('click',closeClicker);async function startCoinPayment(stars, btn){
   try{
     if(!window.Telegram?.WebApp?.openInvoice) throw new Error('Оплата доступна только внутри Telegram');
@@ -3736,15 +3740,41 @@ async function loadReferralStats(force=false){
 }
 async function copyReferralLink(){
   if(!referralLinkValue) await loadReferralStats(true);
-  if(!referralLinkValue)return;
-  try{await navigator.clipboard.writeText(referralLinkValue);showToast('🔗 Реферальная ссылка скопирована','success');}
-  catch(e){window.prompt('Скопируй ссылку:',referralLinkValue);}
+  if(!referralLinkValue){showToast('Реферальная ссылка пока недоступна','error');return;}
+  try{
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(referralLinkValue);
+    }else{
+      const ta=document.createElement('textarea');
+      ta.value=referralLinkValue; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    showToast('Ссылка скопирована','success');
+  }catch(e){
+    showToast('Не удалось скопировать ссылку','error');
+  }
 }
-function shareReferralLink(){
-  if(!referralLinkValue){loadReferralStats(true).then(shareReferralLink);return;}
-  const text='🎮 Присоединяйся к GDPLAY!';
-  const url='https://t.me/share/url?url='+encodeURIComponent(referralLinkValue)+'&text='+encodeURIComponent(text);
-  try{ if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(url); else window.open(url,'_blank'); }catch(e){window.open(url,'_blank');}
+async function shareReferralLink(){
+  if(!referralLinkValue) await loadReferralStats(true);
+  if(!referralLinkValue){showToast('Реферальная ссылка пока недоступна','error');return;}
+  const shareUrl='https://t.me/share/url?url='+encodeURIComponent(referralLinkValue);
+  try{
+    if(navigator.share){
+      await navigator.share({url:referralLinkValue});
+      showToast('Ссылка готова к отправке','success');
+      return;
+    }
+    if(window.Telegram?.WebApp?.openTelegramLink){
+      window.Telegram.WebApp.openTelegramLink(shareUrl);
+    }else{
+      window.open(shareUrl,'_blank');
+    }
+    showToast('Окно отправки открыто','success');
+  }catch(e){
+    if(e?.name==='AbortError') return;
+    try{window.open(shareUrl,'_blank');showToast('Окно отправки открыто','success');}
+    catch(_){showToast('Не удалось открыть отправку','error');}
+  }
 }
 function renderProfile(){
   loadReferralStats();
