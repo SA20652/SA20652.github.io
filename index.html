@@ -8626,18 +8626,11 @@ function renderProfile(){
 const DAILY_BONUS_HIDE_KEY='gdplay_daily_bonus_hidden_until_v1';
 function updateDailyBonusVisibility(){
   const card=document.getElementById('dailyBonusCard'); if(!card) return;
-  const hiddenUntil=Number(storageGet(DAILY_BONUS_HIDE_KEY)||0);
-  const canShow=hiddenUntil<=Date.now();
-  card.classList.toggle('daily-bonus-hidden',!canShow);
-  if(!canShow) setTimeout(updateDailyBonusVisibility,Math.min(hiddenUntil-Date.now(),60000));
+  // The close button was removed, so the bonus should always remain visible.
+  // Clear the old hide flag left by previous versions so an already-hidden bonus returns.
+  storageRemove(DAILY_BONUS_HIDE_KEY);
+  card.classList.remove('daily-bonus-hidden');
 }
-function hideDailyBonus(){
-  const next=Number(dailyState.nextAt||0);
-  const until=next>Date.now()?next:Date.now()+3600000;
-  storageSet(DAILY_BONUS_HIDE_KEY,String(until));
-  updateDailyBonusVisibility();
-}
-document.getElementById('dailyBonusClose')?.addEventListener('click',hideDailyBonus);
 async function loadDailyStatus(){
   if(dailyStatusInFlight||!currentUser||!tgInitData()) return;
   dailyStatusInFlight=true;
