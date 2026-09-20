@@ -4016,8 +4016,16 @@ body{overflow-x:hidden;}
 
 
 <style id="gdplay-cube-icons-2d">
-.inv-cube-2d{width:58px;height:58px;object-fit:contain;display:block;filter:drop-shadow(0 0 7px rgba(255,255,255,.14));image-rendering:auto}
-.inv-cube-2d.inv-cube-2d-small{width:44px;height:44px}
+/* 2D cube icons: compact in inventory and consistent everywhere else. */
+.inv-cube-2d{width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;object-fit:contain;display:block;flex:0 0 34px;filter:drop-shadow(0 0 6px rgba(255,255,255,.13));image-rendering:auto}
+.inv-cube-2d.inv-cube-2d-small{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important;flex-basis:30px}
+.cube-icon-inline{width:26px;height:26px;object-fit:contain;display:inline-block;vertical-align:middle;flex:0 0 26px;filter:drop-shadow(0 0 5px rgba(255,255,255,.12))}
+.cube-icon-inline.small{width:22px;height:22px;flex-basis:22px}
+.rad-drop .cube-icon-inline{width:34px;height:34px;flex-basis:34px;grid-row:1 / span 2;align-self:center}
+.spin-result-cube-icon{width:76px;height:76px;object-fit:contain;display:block;margin:0 auto 6px;filter:drop-shadow(0 0 10px rgba(255,255,255,.16))}
+.wheel-cube-icon{width:44px;height:44px;object-fit:contain;display:block;margin:0 auto 2px;filter:drop-shadow(0 0 7px rgba(255,255,255,.13))}
+.spin-multi-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px}
+.best-drop-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px}
 </style>
 <script>
 (function(){
@@ -4035,6 +4043,12 @@ body{overflow-x:hidden;}
         var k=Object.keys(parsed).find(function(x){return x.toLowerCase()===s.toLowerCase();});
         return k ? parsed[k] : null;
       };
+      window.cubeIconMarkup=function(name, cls){
+        var src=window.getCubeIcon ? window.getCubeIcon(name) : null;
+        if(!src) return '';
+        var c=cls||'cube-icon-inline';
+        return '<img class="'+c+'" src="'+src+'" alt="" aria-hidden="true" draggable="false" loading="eager">';
+      };
       window.dispatchEvent(new CustomEvent('gdplay-cube-icons-ready'));
       if(typeof window.renderInventory==='function') window.renderInventory();
       return parsed;
@@ -4042,6 +4056,7 @@ body{overflow-x:hidden;}
     .catch(function(err){
       console.warn('GDPLAY 2D cube icons unavailable:',err);
       window.getCubeIcon=window.getCubeIcon||function(){return null;};
+      window.cubeIconMarkup=window.cubeIconMarkup||function(){return ''};
       return {};
     });
 })();
@@ -6713,7 +6728,7 @@ function renderCasePreviewDrop(c){
   const totalChance=(c.items||[]).reduce((sum,item)=>sum+Math.max(0,Number(item.chance)||0),0);
   const meta=RARITY_META[it.rarity]||RARITY_META.common;
   const chance=totalChance?(Number(it.chance)||0)/totalChance*100:0;
-  box.innerHTML=`<div class="rad-drop reward-switch" style="--drop:${meta.color}"><span class="rad-drop-icon">${meta.icon}</span><span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
+  box.innerHTML=`<div class="rad-drop reward-switch" style="--drop:${meta.color}">${window.cubeIconMarkup?.(it.name,'cube-icon-inline')||`<span class="rad-drop-icon">${meta.icon}</span>`}<span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
 }
 function startCasePreviewAnimation(){
   clearInterval(casePreviewTimer); casePreviewStep=0;
@@ -6953,7 +6968,7 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
   }
   dial.dataset.lastStartRewardKey=targetKey;
   dial.classList.remove('is-spinning','is-stopped');
-  dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}><span>${m.icon}</span><b style="color:${m.color}">${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
+  dial.innerHTML=strip.map((it,idx)=>{const m=RARITY_META[it.rarity]||RARITY_META.common;const v=Math.floor(Number(it.value||0));return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}>${window.cubeIconMarkup?.(it.name,'wheel-cube-icon')||`<span>${m.icon}</span>`}<b style="color:${m.color}">${it.name||'Награда'}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`}).join('');
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
 
@@ -7072,7 +7087,7 @@ function showSpinResult(item, isSecret){
   const m = RARITY_META[item.rarity];
   const box = document.getElementById('spinResult');
   box.innerHTML = `
-    <div class="spin-result-icon" style="color:${m.color}">${m.icon}</div>
+    ${window.cubeIconMarkup?.(item.name,'spin-result-cube-icon')||`<div class="spin-result-icon" style="color:${m.color}">${m.icon}</div>`}
     <div class="spin-result-name">${item.name}</div>
     <div class="spin-result-rarity" style="color:${m.color}">${isSecret ? 'Секретный предмет' : m.label}</div>
     <div class="spin-result-value">💰 ${item.value.toLocaleString('ru-RU')}</div>
@@ -7291,7 +7306,7 @@ async function openCaseBatch(c, qty, useKey=false){
     if(pill) pill.textContent=`${qty} КРУТЯТСЯ`;
     const revealBatch=()=>{
       multiResult.classList.remove('hidden');
-      multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
+      multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${window.cubeIconMarkup?.(w.name,'spin-multi-cube-icon')||m.icon}<b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
       const nearTotal=wins.reduce((sum,w)=>sum+Math.max(0,Number(w.value)||0),0);
       if(resultBox){resultBox.classList.remove('hidden');resultBox.innerHTML='<div class="spin-final-label">Награды готовы</div><div class="spin-result-value">Итого: '+nearTotal.toLocaleString('ru-RU')+' орбов</div>';}
       if(closeBtn) closeBtn.classList.remove('hidden');
@@ -7314,7 +7329,7 @@ async function openCaseBatch(c, qty, useKey=false){
   playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald')?1180:840);
   if(multiResult){
     multiResult.classList.remove('hidden');
-    multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${m.icon} <b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
+    multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${window.cubeIconMarkup?.(w.name,'spin-multi-cube-icon')||m.icon}<b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
   }
   const totalWonValue=wins.reduce((sum,w)=>sum+Math.max(0,Number(w.value)||0),0);
   if(resultBox){
@@ -8511,7 +8526,7 @@ function renderBestDrops(listEl, drops){
   if(!arr.length){listEl.innerHTML='<div class="empty-state">Лучших дропов пока нет.</div>';return;}
   listEl.innerHTML=arr.map(d=>{
     const m=RARITY_META[d.rarity]||RARITY_META.common;
-    return `<div class="best-drop" style="border-left:3px solid ${m.color}"><div class="best-drop-name" style="color:${m.color}">${m.icon} ${d.name}<div style="font-size:9px;color:var(--muted);font-weight:500">${m.label}</div></div><div class="best-drop-value">💰 ${Number(d.value||0).toLocaleString('ru-RU')}</div></div>`;
+    return `<div class="best-drop" style="border-left:3px solid ${m.color}"><div class="best-drop-name" style="color:${m.color}">${window.cubeIconMarkup?.(d.name,'best-drop-cube-icon')||m.icon} ${d.name}<div style="font-size:9px;color:var(--muted);font-weight:500">${m.label}</div></div><div class="best-drop-value">💰 ${Number(d.value||0).toLocaleString('ru-RU')}</div></div>`;
   }).join('');
 }
 function activeBuffs(){
@@ -10337,4 +10352,12 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   position:relative!important;
   top:4px!important;
 }
+</style>
+
+<style id="gdplay-2d-cube-sizing-final">
+.inv-item .cube-visual{width:36px!important;height:36px!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 36px!important;overflow:hidden!important}
+.inv-subitem .cube-visual{width:32px!important;height:32px!important;flex-basis:32px!important}
+.inv-item .cube-visual .inv-cube-2d{margin:auto!important}
+#casesList .rad-drop{align-items:center!important}
+#casesList .rad-drop .rad-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
