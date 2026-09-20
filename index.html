@@ -4029,14 +4029,14 @@ body{overflow-x:hidden;}
 <script>
 (function(){
   window.CUBE_ICONS = window.CUBE_ICONS || {};
-  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v3',{cache:'force-cache'})
+  window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
+  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v4',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
       if(!m) throw new Error('CUBE_ICONS not found');
       var parsed=JSON.parse(m[1]);
       window.CUBE_ICONS=parsed;
-      window.CUBE_ICON_PRELOADED={};
       window.getCubeIcon=function(name){
         var s=String(name||'');
         if(parsed[s]) return parsed[s];
@@ -4049,25 +4049,26 @@ body{overflow-x:hidden;}
         var c=cls||'cube-icon-inline';
         return '<img class="'+c+'" src="'+src+'" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">';
       };
-      /* Decode every data URI once at startup. DOM replacements then reuse already-decoded images. */
       var keys=Object.keys(parsed);
       return Promise.all(keys.map(function(k){
         return new Promise(function(resolve){
-          var img=new Image();
+          var img=window.CUBE_ICON_PRELOADED[k];
+          if(img && img.complete && img.naturalWidth) return resolve();
+          img=new Image();
           img.decoding='sync';
           img.onload=function(){window.CUBE_ICON_PRELOADED[k]=img;resolve();};
           img.onerror=function(){resolve();};
           img.src=parsed[k];
         });
       })).then(function(){
+        window.CUBE_ICONS_READY=true;
         window.dispatchEvent(new CustomEvent('gdplay-cube-icons-ready'));
-        if(typeof window.renderInventory==='function') window.renderInventory();
-        if(typeof window.renderCases==='function') window.renderCases();
         return parsed;
       });
     })
     .catch(function(err){
       console.warn('GDPLAY 2D cube icons unavailable:',err);
+      window.CUBE_ICONS_READY=false;
       window.getCubeIcon=window.getCubeIcon||function(){return null;};
       window.cubeIconMarkup=window.cubeIconMarkup||function(){return ''};
       return {};
@@ -4169,6 +4170,70 @@ body{overflow-x:hidden;}
   #upgradeModal .upgrade-cat-item{grid-template-columns:46px minmax(0,1fr) auto !important;column-gap:8px !important;min-height:64px !important;}
   #upgradeModal .upgrade-cat-cube{width:46px !important;height:46px !important;min-width:46px !important;}
   #upgradeModal .upgrade-cat-cube-icon{width:42px !important;height:42px !important;}
+}
+</style>
+<style id="gdplay-upgrade-no-gold-outline-final">
+/* Remove the decorative gold outline from upgrader cards/icons. */
+#upgradeModal .upgrade-compare-item:last-child{
+  border-color:var(--line)!important;
+  box-shadow:none!important;
+}
+#upgradeModal .upgrade-cat-cube{
+  border-color:var(--line)!important;
+  box-shadow:none!important;
+}
+</style>
+
+<style id="gdplay-stack-collapsed-compact-final">
+/* Collapsed stacks must fit their content and never reserve a blank lower area. */
+#inventoryList .inv-stack-header{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  min-height:0!important;
+  height:auto!important;
+  padding:8px 10px!important;
+  margin-bottom:6px!important;
+  box-sizing:border-box!important;
+}
+#inventoryList .inv-stack-header .inv-item-info{
+  display:flex!important;
+  align-items:center!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  width:auto!important;
+}
+#inventoryList .inv-stack-header .stack-toggle-btn{
+  min-width:0!important;
+}
+#inventoryList .inv-stack-header .inv-actions{
+  display:flex!important;
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:max-content!important;
+  margin-left:auto!important;
+  align-items:center!important;
+}
+#inventoryList .inv-stack-header .inv-value{
+  margin:0!important;
+}
+#inventoryList .inv-stack-list{
+  margin-bottom:6px!important;
+}
+</style>
+
+<style id="gdplay-assets-always-visible-final">
+/* Asset images are never hidden by a transient loading/error state. */
+.case-icon-image,
+.inv-cube-2d,
+.cube-icon-inline,
+.spin-result-cube-icon,
+.wheel-cube-icon,
+.spin-multi-cube-icon,
+.best-drop-cube-icon{
+  visibility:visible!important;
+  opacity:1!important;
 }
 </style>
 </head>
@@ -5846,8 +5911,13 @@ async function showApp(skipServer=false){
   }
   // Sync the server catalog before the first case render, so admin-added cubes are visible immediately.
   await loadServerCases().catch(()=>{});
-  // Image decoding starts immediately but does not block first paint.
-  await ensureCaseImages().catch(()=>{});
+  // Decode every embedded cube/case image before the first game render.
+  // Subsequent inventory/case/upgrader rerenders reuse the same data URIs and
+  // predecoded Image objects, so icons do not blink out in Telegram WebView.
+  await Promise.allSettled([
+    ensureCaseImages(),
+    window.cubeIconsReady || Promise.resolve()
+  ]);
   preloadProfileImages(data).catch(()=>{});
   renderAll();
   refreshGlobalTechBreak();
@@ -6849,25 +6919,40 @@ function startCasePreviewAnimation(){
 }
 
 let CASE_IMAGES = {};
+let CASE_IMAGE_PRELOADED = {};
 let caseImagesPromise = null;
 function caseImage(caseId, alt=''){
   const aliases={legend:'legendary',icon:'iconic'};
   const key=String(caseId);
   const src=CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || '';
-  return src ? `<img src=\"${src}\" class=\"case-icon-image\" alt=\"\" draggable=\"false\" loading=\"eager\" onerror=\"this.style.display='none'\">` : '';
+  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" loading="eager" decoding="sync">` : '';
 }
 function ensureCaseImages(){
-  if(Object.keys(CASE_IMAGES).length) return Promise.resolve();
+  if(Object.keys(CASE_IMAGES).length && Object.keys(CASE_IMAGE_PRELOADED).length >= Object.keys(CASE_IMAGES).length) return Promise.resolve();
   if(caseImagesPromise) return caseImagesPromise;
   caseImagesPromise=new Promise((resolve)=>{
     let done=false;
     const finish=(images)=>{
       if(done) return;
-      if(images&&typeof images==='object'&&Object.keys(images).length){CASE_IMAGES=images;done=true;resolve();}
+      if(images&&typeof images==='object'&&Object.keys(images).length){
+        CASE_IMAGES=images;
+        Promise.all(Object.entries(images).map(([key,src])=>new Promise(r=>{
+          const old=CASE_IMAGE_PRELOADED[key];
+          if(old && old.complete && old.naturalWidth) return r();
+          const img=new Image();
+          img.decoding='sync';
+          img.onload=function(){CASE_IMAGE_PRELOADED[key]=img;r();};
+          img.onerror=function(){r();};
+          img.src=src;
+        }))).finally(()=>{
+          done=true;
+          window.CASE_IMAGES_READY=true;
+          window.dispatchEvent(new CustomEvent('gdplay-case-images-ready'));
+          resolve();
+        });
+      }
     };
-    // The catalog is a static, versioned file. Read it once and extract the
-    // already-embedded data URIs without constructing a second DOM/iframe.
-    fetch('case_images.html?v=4',{cache:'force-cache'}).then(r=>{
+    fetch('case_images.html?v=5',{cache:'force-cache'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -6875,24 +6960,16 @@ function ensureCaseImages(){
       const re=/<img\s+data-case-id="([^"]+)"[^>]*\ssrc="([^"]+)"/g;
       let m;
       while((m=re.exec(html))) images[m[1]]=m[2];
-      // Make the catalog available immediately. The images themselves are
-      // decoded in the background so the first paint is not blocked.
-      CASE_IMAGES=images;
       finish(images);
-      const decodeAll=()=>Promise.all(Object.values(images).map(src=>new Promise(resolve=>{
-        const img=new Image(); img.decoding='async'; img.onload=img.onerror=()=>resolve(); img.src=src;
-      }))).catch(()=>{});
-      if(window.requestIdleCallback) requestIdleCallback(decodeAll,{timeout:900});
-      else setTimeout(decodeAll,40);
     }).catch(()=>{
-      // Rare WebView fallback: only create the iframe after fetch failed, so
-      // normal launches never download the 2 MB catalog twice.
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=4'; iframe.title=''; iframe.setAttribute('aria-hidden','true');
+      iframe.src='case_images.html?v=5';
+      iframe.title='';
+      iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
       iframe.onload=()=>{try{finish(iframe.contentWindow.CASE_IMAGES);}catch(e){}};
       document.body.appendChild(iframe);
-      setTimeout(()=>{if(!done){CASE_IMAGES={};resolve();iframe.remove();}},4000);
+      setTimeout(()=>{if(!done){CASE_IMAGES={};CASE_IMAGE_PRELOADED={};window.CASE_IMAGES_READY=false;resolve();iframe.remove();}},5000);
     });
   });
   return caseImagesPromise;
@@ -6913,7 +6990,8 @@ function renderCases(){
     const drops=topDrops.map(it=>{
       const m=RARITY_META[it.rarity]||RARITY_META.common;
       const chance=totalChance?(Number(it.chance)||0)/totalChance*100:0;
-      return `<div class="rad-drop" style="--drop:${m.color}"><span class="rad-drop-icon">${m.icon}</span><span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
+      const dropIcon=window.cubeIconMarkup?.(it.name,'cube-icon-inline')||`<span class="rad-drop-icon">${m.icon}</span>`;
+      return `<div class="rad-drop" style="--drop:${m.color}">${dropIcon}<span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
     }).join('');
     return `<article class="rad-case-card" data-case-id="${c.id}">
       
