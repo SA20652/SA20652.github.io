@@ -291,9 +291,9 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .stack-toggle-btn .inv-name{display:flex;align-items:center;gap:6px;}
 .stack-arrow{font-size:10px;opacity:.75;transition:transform .15s ease;}
 .stack-toggle-btn.expanded .stack-arrow{transform:rotate(180deg);}
-.inv-stack-list{margin:2px 0 9px 10px;padding-left:11px;border-left:2px solid var(--line);}
-.inv-subitem{margin-bottom:7px;padding:48px 11px 9px!important;}
-.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}.inv-subitem .inv-actions{align-self:flex-start;flex:0 0 auto;}
+.inv-stack-list{display:grid;gap:7px;margin:7px 0 10px 10px;padding:0 0 0 11px;border-left:2px solid var(--line);}
+.inv-subitem{margin:7px 0!important;padding:10px 11px!important;min-height:58px;box-sizing:border-box;} 
+.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}.inv-subitem .inv-actions{align-self:center;flex:1 1 100%;width:100%;}
 .inv-subid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass-2);opacity:.8;margin-left:4px;}
 .key-open-btn{margin-top:9px;width:100%;box-sizing:border-box;}
 .key-open-btn[disabled]{opacity:.5;}
@@ -3102,9 +3102,9 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .stack-toggle-btn .inv-name{display:flex;align-items:center;gap:6px;}
 .stack-arrow{font-size:10px;opacity:.75;transition:transform .15s ease;}
 .stack-toggle-btn.expanded .stack-arrow{transform:rotate(180deg);}
-.inv-stack-list{margin:2px 0 9px 10px;padding-left:11px;border-left:2px solid var(--line);}
-.inv-subitem{margin-bottom:7px;padding:48px 11px 9px!important;}
-.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}.inv-subitem .inv-actions{align-self:flex-start;flex:0 0 auto;}
+.inv-stack-list{display:grid;gap:7px;margin:7px 0 10px 10px;padding:0 0 0 11px;border-left:2px solid var(--line);}
+.inv-subitem{margin:7px 0!important;padding:10px 11px!important;min-height:58px;box-sizing:border-box;} 
+.inv-subitem .inv-name{font-size:12.5px;font-weight:500;}.inv-subitem .inv-actions{align-self:center;flex:1 1 100%;width:100%;}
 .inv-subid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass-2);opacity:.8;margin-left:4px;}
 .key-open-btn{margin-top:9px;width:100%;box-sizing:border-box;}
 .key-open-btn[disabled]{opacity:.5;}
@@ -4021,7 +4021,7 @@ body{overflow-x:hidden;}
 .inv-cube-2d.inv-cube-2d-small{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important;flex-basis:30px}
 .cube-icon-inline{width:26px;height:26px;object-fit:contain;display:inline-block;vertical-align:middle;flex:0 0 26px;filter:drop-shadow(0 0 5px rgba(255,255,255,.12))}
 .cube-icon-inline.small{width:22px;height:22px;flex-basis:22px}
-.rad-drop .cube-icon-inline{width:34px;height:34px;flex-basis:34px;grid-row:1 / span 2;align-self:center}
+.rad-drop .cube-icon-inline{width:34px;height:34px;flex:0 0 34px;grid-row:auto;align-self:center;justify-self:center}
 .spin-result-cube-icon{width:76px;height:76px;object-fit:contain;display:block;margin:0 auto 6px;filter:drop-shadow(0 0 10px rgba(255,255,255,.16))}
 .wheel-cube-icon{width:44px;height:44px;object-fit:contain;display:block;margin:0 auto 2px;filter:drop-shadow(0 0 7px rgba(255,255,255,.13))}
 .spin-multi-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px}
@@ -4030,13 +4030,14 @@ body{overflow-x:hidden;}
 <script>
 (function(){
   window.CUBE_ICONS = window.CUBE_ICONS || {};
-  window.cubeIconsReady = fetch('./cube_icons.html',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v3',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
       if(!m) throw new Error('CUBE_ICONS not found');
       var parsed=JSON.parse(m[1]);
       window.CUBE_ICONS=parsed;
+      window.CUBE_ICON_PRELOADED={};
       window.getCubeIcon=function(name){
         var s=String(name||'');
         if(parsed[s]) return parsed[s];
@@ -4047,11 +4048,24 @@ body{overflow-x:hidden;}
         var src=window.getCubeIcon ? window.getCubeIcon(name) : null;
         if(!src) return '';
         var c=cls||'cube-icon-inline';
-        return '<img class="'+c+'" src="'+src+'" alt="" aria-hidden="true" draggable="false" loading="eager">';
+        return '<img class="'+c+'" src="'+src+'" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">';
       };
-      window.dispatchEvent(new CustomEvent('gdplay-cube-icons-ready'));
-      if(typeof window.renderInventory==='function') window.renderInventory();
-      return parsed;
+      /* Decode every data URI once at startup. DOM replacements then reuse already-decoded images. */
+      var keys=Object.keys(parsed);
+      return Promise.all(keys.map(function(k){
+        return new Promise(function(resolve){
+          var img=new Image();
+          img.decoding='sync';
+          img.onload=function(){window.CUBE_ICON_PRELOADED[k]=img;resolve();};
+          img.onerror=function(){resolve();};
+          img.src=parsed[k];
+        });
+      })).then(function(){
+        window.dispatchEvent(new CustomEvent('gdplay-cube-icons-ready'));
+        if(typeof window.renderInventory==='function') window.renderInventory();
+        if(typeof window.renderCases==='function') window.renderCases();
+        return parsed;
+      });
     })
     .catch(function(err){
       console.warn('GDPLAY 2D cube icons unavailable:',err);
@@ -4062,6 +4076,26 @@ body{overflow-x:hidden;}
 })();
 </script>
 
+
+<style id="gdplay-2d-icons-persistent-fix">
+/* Keep stack rows separated instead of visually nesting/overlapping. */
+#inventoryList .inv-stack-list{display:grid!important;gap:8px!important;margin:8px 0 12px 10px!important;padding:0 0 0 11px!important;box-sizing:border-box!important;}
+#inventoryList .inv-stack-list>.inv-subitem{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px!important;margin:0!important;padding:10px 11px!important;min-height:58px!important;box-sizing:border-box!important;position:relative!important;overflow:hidden!important;}
+#inventoryList .inv-stack-list>.inv-subitem .inv-item-info{width:100%!important;min-width:0!important;flex:1 1 100%!important;}
+#inventoryList .inv-stack-list>.inv-subitem .inv-actions{width:100%!important;flex:1 1 100%!important;display:flex!important;flex-wrap:wrap!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;}
+#inventoryList .inv-stack-list>.inv-subitem .cube-visual{width:32px!important;height:32px!important;flex:0 0 32px!important;}
+#inventoryList .inv-stack-list>.inv-subitem .inv-cube-2d{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important;}
+
+/* Drop preview: icon gets its own column so name/chance never sit under it. */
+#casesList .rad-drop{display:grid!important;grid-template-columns:40px minmax(0,1fr) auto!important;grid-template-rows:1fr!important;align-items:center!important;column-gap:7px!important;overflow:hidden!important;}
+#casesList .rad-drop .cube-icon-inline{grid-column:1!important;grid-row:1!important;width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;justify-self:center!important;align-self:center!important;}
+#casesList .rad-drop .rad-drop-icon{grid-column:1!important;grid-row:1!important;justify-self:center!important;}
+#casesList .rad-drop .rad-drop-name{grid-column:2!important;grid-row:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
+#casesList .rad-drop>b{grid-column:3!important;grid-row:1!important;justify-self:end!important;white-space:nowrap!important;}
+
+/* 2D icon catalog: load and decode every icon eagerly; never use lazy loading. */
+.inv-cube-2d,.cube-icon-inline,.spin-result-cube-icon,.wheel-cube-icon,.spin-multi-cube-icon,.best-drop-cube-icon{loading:eager;}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -10358,6 +10392,8 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .inv-item .cube-visual{width:36px!important;height:36px!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 36px!important;overflow:hidden!important}
 .inv-subitem .cube-visual{width:32px!important;height:32px!important;flex-basis:32px!important}
 .inv-item .cube-visual .inv-cube-2d{margin:auto!important}
-#casesList .rad-drop{align-items:center!important}
-#casesList .rad-drop .rad-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#casesList .rad-drop{align-items:center!important;grid-template-columns:40px minmax(0,1fr) auto!important;column-gap:7px!important;position:relative!important;overflow:hidden!important;}
+#casesList .rad-drop .rad-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;grid-column:2!important;grid-row:1!important;}
+#casesList .rad-drop>b{grid-column:3!important;grid-row:1!important;justify-self:end!important;white-space:nowrap!important;}
+#casesList .rad-drop .cube-icon-inline{grid-column:1!important;grid-row:1!important;width:34px!important;height:34px!important;flex:0 0 34px!important;}
 </style>
