@@ -4014,6 +4014,39 @@ body{overflow-x:hidden;}
 }
 </style>
 
+
+<style id="gdplay-cube-icons-2d">
+.inv-cube-2d{width:58px;height:58px;object-fit:contain;display:block;filter:drop-shadow(0 0 7px rgba(255,255,255,.14));image-rendering:auto}
+.inv-cube-2d.inv-cube-2d-small{width:44px;height:44px}
+</style>
+<script>
+(function(){
+  window.CUBE_ICONS = window.CUBE_ICONS || {};
+  window.cubeIconsReady = fetch('./cube_icons.html',{cache:'force-cache'})
+    .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
+    .then(function(src){
+      var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
+      if(!m) throw new Error('CUBE_ICONS not found');
+      var parsed=JSON.parse(m[1]);
+      window.CUBE_ICONS=parsed;
+      window.getCubeIcon=function(name){
+        var s=String(name||'');
+        if(parsed[s]) return parsed[s];
+        var k=Object.keys(parsed).find(function(x){return x.toLowerCase()===s.toLowerCase();});
+        return k ? parsed[k] : null;
+      };
+      window.dispatchEvent(new CustomEvent('gdplay-cube-icons-ready'));
+      if(typeof window.renderInventory==='function') window.renderInventory();
+      return parsed;
+    })
+    .catch(function(err){
+      console.warn('GDPLAY 2D cube icons unavailable:',err);
+      window.getCubeIcon=window.getCubeIcon||function(){return null;};
+      return {};
+    });
+})();
+</script>
+
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -4889,7 +4922,6 @@ const CASES = [
     {name:"Juniper",rarity:"epic",value:7200,chance:11.33},
     {name:"Nexus",rarity:"legendary",value:9600,chance:9.46},
     {name:"GuitarHeroStyles",rarity:"mythic",value:20400,chance:4.95},
-    {name:"GMDani",rarity:"divine",value:45000,chance:3.43}
   ]},
   {id:"demon",name:"Demon-кейс",price:12000,icon:'',items:[
     {name:"Luqualizer",rarity:"common",value:4800,chance:18.83},
@@ -4920,7 +4952,6 @@ const CASES = [
     {name:"MrKotovskyu",rarity:"divine",value:500000,chance:1.0}
   ]},
   {id:"extreme",name:"Extreme-кейс",price:75000,icon:'',items:[
-    {name:"LDMike",rarity:"common",value:30000,chance:15.88},
     {name:"Vortrox",rarity:"common",value:41250,chance:17.76},
     {name:"Temp",rarity:"rare",value:56250,chance:28.64},
     {name:"Xanii",rarity:"epic",value:90000,chance:20.97},
@@ -4929,7 +4960,6 @@ const CASES = [
     {name:"Jenkins",rarity:"divine",value:562500,chance:2.98}
   ]},
   {id:"vault",name:"Хранилище OG",price:130000,icon:'',items:[
-    {name:"Nautilus",rarity:"common",value:52000,chance:14.95},
     {name:"Cersia",rarity:"common",value:71500,chance:16.87},
     {name:"Rafer",rarity:"rare",value:97500,chance:28.3},
     {name:"JonathanGD",rarity:"epic",value:156000,chance:23.39},
@@ -4939,7 +4969,6 @@ const CASES = [
   ]},
   {id:"master",name:"Master-кейс",price:220000,icon:'',items:[
     {name:"Sailent",rarity:"common",value:88000,chance:14.04},
-    {name:"AerialShard",rarity:"common",value:121000,chance:16.0},
     {name:"No ob",rarity:"rare",value:165000,chance:27.92},
     {name:"MoistenedEgg",rarity:"epic",value:264000,chance:25.8},
     {name:"thejshadow",rarity:"legendary",value:352000,chance:9.06},
@@ -7506,7 +7535,7 @@ function renderInventory(){
          </button>`
       : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
     const header = `<div class="inv-item" data-rarity="${String(c.rarity||'common').toLowerCase()}" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
-      <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
+      <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${(window.getCubeIcon?.(c.name)||window.CUBE_ICONS?.[c.name])?`<img class="inv-cube-2d" src="${window.getCubeIcon(c.name)}" alt="" loading="eager">`:`<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}</div>
       ${headerNameHtml}</div>
       ${isStack ? '' : cubeLockButton(c,indices[0])}
       <div class="inv-actions"><span class="inv-value">💰 ${Number(c.value).toLocaleString('ru-RU')}</span>
@@ -7516,7 +7545,7 @@ function renderInventory(){
     const rows = indices.map((idx,n)=>{
       const it=data.cubes[idx]||c;
       return `<div class="inv-item inv-subitem" data-rarity="${String(it.rarity||c.rarity||'common').toLowerCase()}" style="--item-color:${m.color}" data-cube-index="${idx}">
-        <div class="inv-item-info"><div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div></div>
+        <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${(window.getCubeIcon?.(it.name)||window.CUBE_ICONS?.[it.name])?`<img class="inv-cube-2d inv-cube-2d-small" src="${window.getCubeIcon(it.name)}" alt="" loading="eager">`:`<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}<div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div></div>
         ${cubeLockButton(it,idx)}
         <div class="inv-actions">${cubeItemActions(it,idx)}</div>
       </div>`;
