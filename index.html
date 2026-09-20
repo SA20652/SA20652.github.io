@@ -815,7 +815,6 @@ const PROMO_ATTASHA_IMAGE_DATA_URI = "data:image/webp;base64,UklGRr4uCwBXRUJQVlA
 .open-case-key-btn,.key-open-btn,.key-item,#keysInventoryList{display:none!important;}
 /* Freeze is always in its own top-right slot; action buttons stay underneath. */
 .inv-item[data-cube-index]{position:relative!important;padding-right:58px!important;}
-.inv-subitem{position:relative!important;padding-top:48px!important;}
 .inv-subitem .inv-actions{padding-right:0!important;justify-content:flex-start!important;}
 
 /* ============ POLISHED MOTION / AUDIO FEEDBACK ============ */
@@ -4080,7 +4079,6 @@ body{overflow-x:hidden;}
 <style id="gdplay-2d-icons-persistent-fix">
 /* Keep stack rows separated instead of visually nesting/overlapping. */
 #inventoryList .inv-stack-list{display:grid!important;gap:8px!important;margin:8px 0 12px 10px!important;padding:0 0 0 11px!important;box-sizing:border-box!important;}
-#inventoryList .inv-stack-list>.inv-subitem{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px!important;margin:0!important;padding:10px 11px!important;min-height:58px!important;box-sizing:border-box!important;position:relative!important;overflow:hidden!important;}
 #inventoryList .inv-stack-list>.inv-subitem .inv-item-info{width:100%!important;min-width:0!important;flex:1 1 100%!important;}
 #inventoryList .inv-stack-list>.inv-subitem .inv-actions{width:100%!important;flex:1 1 100%!important;display:flex!important;flex-wrap:wrap!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;}
 #inventoryList .inv-stack-list>.inv-subitem .cube-visual{width:32px!important;height:32px!important;flex:0 0 32px!important;}
@@ -4095,6 +4093,83 @@ body{overflow-x:hidden;}
 
 /* 2D icon catalog: load and decode every icon eagerly; never use lazy loading. */
 .inv-cube-2d,.cube-icon-inline,.spin-result-cube-icon,.wheel-cube-icon,.spin-multi-cube-icon,.best-drop-cube-icon{loading:eager;}
+</style>
+
+<style id="gdplay-upgrade-cube-icons-and-stack-fix">
+/* 2D cube visuals in upgrader: same compact footprint as the old left selector. */
+#upgradeModal .upgrade-cat-item{
+  grid-template-columns:46px minmax(0,1fr) auto !important;
+  column-gap:10px !important;
+  min-height:66px !important;
+  padding:8px 10px !important;
+  align-items:center !important;
+}
+#upgradeModal .upgrade-cat-item::before{display:none !important;content:none !important;}
+#upgradeModal .upgrade-cat-cube{
+  grid-column:1 !important;grid-row:1 !important;
+  width:46px !important;height:46px !important;min-width:46px !important;
+  border-radius:11px !important;border:1px solid rgba(201,151,77,.24) !important;
+  background:rgba(201,151,77,.07) !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  box-sizing:border-box !important;overflow:hidden !important;
+}
+#upgradeModal .upgrade-cat-cube-icon{
+  width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;
+  object-fit:contain !important;display:block !important;flex:0 0 42px !important;
+  image-rendering:auto !important;filter:drop-shadow(0 0 5px rgba(255,255,255,.12)) !important;
+}
+#upgradeModal .upgrade-cat-cube-fallback{font-size:22px;line-height:1;}
+#upgradeModal .upgrade-cat-item > div:first-of-type{grid-column:2 !important;min-width:0 !important;}
+#upgradeModal .upgrade-cat-item > div:last-of-type{grid-column:3 !important;}
+
+/* Stack: each child is an independent card; no absolute/top padding can make cards overlap. */
+#inventoryList .inv-stack-header{
+  min-height:60px !important;
+  margin-bottom:5px !important;
+  padding:8px 10px !important;
+  align-items:center !important;
+}
+#inventoryList .inv-stack-header .inv-item-info{min-width:0 !important;gap:8px !important;}
+#inventoryList .inv-stack-header .cube-visual{width:34px !important;height:34px !important;flex-basis:34px !important;}
+#inventoryList .inv-stack-header .inv-cube-2d{width:32px !important;height:32px !important;max-width:32px !important;max-height:32px !important;}
+#inventoryList .inv-stack-header .inv-actions{flex:0 0 auto !important;width:auto !important;margin-left:auto !important;}
+#inventoryList .inv-stack-header .inv-value{font-size:11.5px !important;white-space:nowrap !important;}
+#inventoryList .inv-stack-list{
+  display:flex !important;flex-direction:column !important;gap:6px !important;
+  margin:4px 0 8px 8px !important;padding:0 0 0 9px !important;
+  border-left:2px solid color-mix(in srgb,var(--item-color,var(--brass)) 30%,var(--line)) !important;
+}
+#inventoryList .inv-stack-list > .inv-subitem{
+  position:relative !important;top:auto !important;left:auto !important;transform:none !important;
+  display:grid !important;grid-template-columns:34px minmax(0,1fr) auto !important;
+  grid-template-rows:auto auto !important;column-gap:8px !important;row-gap:5px !important;
+  width:100% !important;min-height:0 !important;height:auto !important;
+  margin:0 !important;padding:8px 9px !important;
+  box-sizing:border-box !important;overflow:visible !important;
+}
+#inventoryList .inv-stack-list > .inv-subitem .inv-item-info{
+  grid-column:1 / 3 !important;grid-row:1 !important;display:flex !important;align-items:center !important;
+  min-width:0 !important;width:auto !important;flex:none !important;gap:8px !important;
+}
+#inventoryList .inv-stack-list > .inv-subitem .cube-visual{width:34px !important;height:34px !important;flex:0 0 34px !important;}
+#inventoryList .inv-stack-list > .inv-subitem .inv-cube-2d{width:30px !important;height:30px !important;max-width:30px !important;max-height:30px !important;}
+#inventoryList .inv-stack-list > .inv-subitem .inv-sub-info{min-width:0 !important;overflow:hidden !important;}
+#inventoryList .inv-stack-list > .inv-subitem .inv-name{white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;}
+#inventoryList .inv-stack-list > .inv-subitem .cube-lock-btn{grid-column:3 !important;grid-row:1 !important;position:static !important;margin:0 !important;align-self:center !important;}
+#inventoryList .inv-stack-list > .inv-subitem .inv-actions{
+  grid-column:1 / 4 !important;grid-row:2 !important;width:100% !important;
+  display:flex !important;flex-wrap:wrap !important;align-items:center !important;justify-content:flex-start !important;
+  gap:6px !important;margin:0 !important;padding:0 !important;
+}
+#inventoryList .inv-stack-list > .inv-subitem .inv-actions .inv-value{margin-right:2px !important;}
+
+/* The collapsed stack must not reserve the expanded list's vertical space. */
+#inventoryList .inv-stack-header + .inv-stack-list{display:flex !important;}
+@media(max-width:430px){
+  #upgradeModal .upgrade-cat-item{grid-template-columns:46px minmax(0,1fr) auto !important;column-gap:8px !important;min-height:64px !important;}
+  #upgradeModal .upgrade-cat-cube{width:46px !important;height:46px !important;min-width:46px !important;}
+  #upgradeModal .upgrade-cat-cube-icon{width:42px !important;height:42px !important;}
+}
 </style>
 </head>
 <body>
@@ -7583,7 +7658,7 @@ function renderInventory(){
            <span class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</span>
          </button>`
       : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
-    const header = `<div class="inv-item" data-rarity="${String(c.rarity||'common').toLowerCase()}" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
+    const header = `<div class="inv-item ${isStack?'inv-stack-header':''}" data-rarity="${String(c.rarity||'common').toLowerCase()}" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${(window.getCubeIcon?.(c.name)||window.CUBE_ICONS?.[c.name])?`<img class="inv-cube-2d" src="${window.getCubeIcon(c.name)}" alt="" loading="eager">`:`<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}</div>
       ${headerNameHtml}</div>
       ${isStack ? '' : cubeLockButton(c,indices[0])}
@@ -7593,10 +7668,11 @@ function renderInventory(){
     if(!isStack || !expanded) return header;
     const rows = indices.map((idx,n)=>{
       const it=data.cubes[idx]||c;
+      const subIcon=(window.cubeIconMarkup ? window.cubeIconMarkup(it.name,'inv-cube-2d inv-cube-2d-small') : '');
       return `<div class="inv-item inv-subitem" data-rarity="${String(it.rarity||c.rarity||'common').toLowerCase()}" style="--item-color:${m.color}" data-cube-index="${idx}">
-        <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${(window.getCubeIcon?.(it.name)||window.CUBE_ICONS?.[it.name])?`<img class="inv-cube-2d inv-cube-2d-small" src="${window.getCubeIcon(it.name)}" alt="" loading="eager">`:`<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}<div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div></div>
+        <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${subIcon || `<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}</div><div class="inv-sub-info"><div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div></div>
         ${cubeLockButton(it,idx)}
-        <div class="inv-actions">${cubeItemActions(it,idx)}</div>
+        <div class="inv-actions"><span class="inv-value">💰 ${Number(it.value||0).toLocaleString('ru-RU')}</span>${cubeItemActions(it,idx)}</div>
       </div>`;
     }).join('');
     return header + `<div class="inv-stack-list">${rows}</div>`;
@@ -7928,8 +8004,11 @@ function renderUpgradeCatalog(filter){
   box.innerHTML=list.map(it=>{
     const m=RARITY_META[it.rarity]||RARITY_META.common;
     const chance=Math.max(0, Math.min(95, (Number(source.value||0)/Number(it.value||1))*100));
+    const iconHtml=(window.cubeIconMarkup ? window.cubeIconMarkup(it.name,'upgrade-cat-cube-icon') : '');
+    const visual=iconHtml || `<span class="upgrade-cat-cube-fallback">${it.icon||m.icon||'◆'}</span>`;
     return `<button type="button" class="upgrade-cat-item" data-action="pick-upgrade-target" data-kind="${it.kind}" data-name="${it.name}" data-rarity="${it.rarity}" data-value="${it.value}" data-key-id="${it.id||''}">
-      <div><div class="upgrade-cat-name" style="color:${m.color}">${it.icon||m.icon||'◆'} ${it.name}</div><div class="upgrade-cat-value">${it.kind==='key'?'Ключ · ':''}${m.label}</div></div>
+      <span class="upgrade-cat-cube">${visual}</span>
+      <div><div class="upgrade-cat-name" style="color:${m.color}">${it.name}</div><div class="upgrade-cat-value">${it.kind==='key'?'Ключ · ':''}${m.label}</div></div>
       <div class="upgrade-cat-value">💰${Number(it.value).toLocaleString('ru-RU')} · ${chance.toFixed(0)}%</div>
     </button>`;
   }).join('');
