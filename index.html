@@ -4037,6 +4037,9 @@ body{overflow-x:hidden;}
       if(!m) throw new Error('CUBE_ICONS not found');
       var parsed=JSON.parse(m[1]);
       window.CUBE_ICONS=parsed;
+      // The catalog calls this cube "squezzy", while the supplied icon is "Squeeze".
+      // Keep both aliases so the real 2D image is shown everywhere.
+      if(parsed['Squeeze']){ parsed['squezzy']=parsed['Squeeze']; parsed['squeezy']=parsed['Squeeze']; }
       window.getCubeIcon=function(name){
         var s=String(name||'');
         if(parsed[s]) return parsed[s];
@@ -4077,6 +4080,27 @@ body{overflow-x:hidden;}
 </script>
 
 
+
+(function installGlobalImagePreloader(){
+  try{
+    const start=()=>{
+      if(window.__gdplayImageObserver || !document.body) return;
+      const obs=new MutationObserver((records)=>{
+        for(const rec of records){
+          for(const node of rec.addedNodes||[]){
+            if(node.nodeType!==1) continue;
+            if(node.tagName==='IMG' && node.src){ const im=new Image(); im.decoding='async'; im.src=node.currentSrc||node.src; }
+            node.querySelectorAll?.('img[src]').forEach(el=>{ const im=new Image(); im.decoding='async'; im.src=el.currentSrc||el.src; });
+          }
+        }
+      });
+      obs.observe(document.body,{childList:true,subtree:true});
+      window.__gdplayImageObserver=obs;
+    };
+    if(document.body) start(); else document.addEventListener('DOMContentLoaded',start,{once:true});
+  }catch(_){ }
+})();
+
 <style id="gdplay-2d-icons-persistent-fix">
 /* Keep stack rows separated instead of visually nesting/overlapping. */
 #inventoryList .inv-stack-list{display:grid!important;gap:8px!important;margin:8px 0 12px 10px!important;padding:0 0 0 11px!important;box-sizing:border-box!important;}
@@ -4096,6 +4120,10 @@ body{overflow-x:hidden;}
 .inv-cube-2d,.cube-icon-inline,.spin-result-cube-icon,.wheel-cube-icon,.spin-multi-cube-icon,.best-drop-cube-icon{loading:eager;}
 </style>
 
+<style id="gdplay-upgrade-cube-clean-final">
+#upgradeModal .upgrade-cat-cube{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important;}
+#upgradeModal .upgrade-cat-cube-icon{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;}
+</style>
 <style id="gdplay-upgrade-cube-icons-and-stack-fix">
 /* 2D cube visuals in upgrader: same compact footprint as the old left selector. */
 #upgradeModal .upgrade-cat-item{
@@ -4109,10 +4137,11 @@ body{overflow-x:hidden;}
 #upgradeModal .upgrade-cat-cube{
   grid-column:1 !important;grid-row:1 !important;
   width:46px !important;height:46px !important;min-width:46px !important;
-  border-radius:11px !important;border:1px solid rgba(201,151,77,.24) !important;
-  background:rgba(201,151,77,.07) !important;
+  border:0 !important;border-radius:0 !important;
+  background:transparent !important;
   display:flex !important;align-items:center !important;justify-content:center !important;
-  box-sizing:border-box !important;overflow:hidden !important;
+  box-sizing:border-box !important;overflow:visible !important;
+  box-shadow:none !important;
 }
 #upgradeModal .upgrade-cat-cube-icon{
   width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;
@@ -4234,6 +4263,11 @@ body{overflow-x:hidden;}
 .best-drop-cube-icon{
   visibility:visible!important;
   opacity:1!important;
+}
+</style>
+<style id="gdplay-cube-image-transparent-final">
+.inv-cube-2d,.cube-icon-inline,.spin-result-cube-icon,.wheel-cube-icon,.spin-multi-cube-icon,.best-drop-cube-icon,.upgrade-cat-cube-icon{
+  background:transparent!important;border:0!important;box-shadow:none!important;
 }
 </style>
 </head>
@@ -5872,6 +5906,21 @@ function removeContractsUI(){
   document.querySelectorAll('[data-tab="contracts"], #page-contracts, [data-menu-tab="contracts"]').forEach(el=>el.remove());
 }
 
+function preloadAllRenderedImages(){
+  try{
+    const seen=window.GDPLAY_IMAGE_CACHE || (window.GDPLAY_IMAGE_CACHE=new Set());
+    const preload=(src)=>{
+      src=String(src||'').trim();
+      if(!src || seen.has(src)) return;
+      seen.add(src);
+      const img=new Image();
+      img.decoding='async';
+      img.src=src;
+    };
+    document.querySelectorAll('img[src]').forEach(img=>preload(img.currentSrc||img.src));
+  }catch(_){ }
+}
+
 async function preloadProfileImages(user){
   try{
     const urls=new Set();
@@ -5916,10 +5965,11 @@ async function showApp(skipServer=false){
   // predecoded Image objects, so icons do not blink out in Telegram WebView.
   await Promise.allSettled([
     ensureCaseImages(),
-    window.cubeIconsReady || Promise.resolve()
+    window.cubeIconsReady || Promise.resolve(),
+    preloadProfileImages(data)
   ]);
-  preloadProfileImages(data).catch(()=>{});
   renderAll();
+  preloadAllRenderedImages();
   refreshGlobalTechBreak();
 }
 
