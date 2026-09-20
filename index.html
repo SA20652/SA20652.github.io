@@ -4566,6 +4566,15 @@ body{overflow-x:hidden;}
 
     <!-- CASES -->
     <div class="page active" id="page-cases">
+      <div class="channel-bonus-card" id="channelBonusCard">
+        <div class="channel-bonus-icon">📢</div>
+        <div class="channel-bonus-copy">
+          <div class="channel-bonus-title">Бонус за подписку</div>
+          <div class="channel-bonus-sub">Подпишись на канал GDplay и получи <b>5 000 💰</b></div>
+        </div>
+        <div class="channel-bonus-actions"><button class="btn" id="channelSubscribeBtn" type="button">Подписаться</button></div>
+        <button class="channel-bonus-close" id="channelBonusClose" type="button" aria-label="Скрыть бонус">×</button>
+      </div>
       <div class="daily-card cases-bonus-card" id="dailyBonusCard" style="margin:0 0 12px">
         <div class="cases-bonus-main"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div></div>
         <button class="btn" id="dailyBtn">Забрать</button>
@@ -9467,7 +9476,7 @@ async function claimChannelBonus(){
   if(b){b.disabled=true;b.textContent='Проверка…';}
   try{
     const j=await apiFetch('/api/channel/claim',{});
-    if(j.claimed){data.balance=Number(j.balance||data.balance);persistLocal();updateBalanceUI();showToast('🎁 +1000 💰 за подписку на GDplay','success');}
+    if(j.claimed){data.balance=Number(j.balance||data.balance);persistLocal();updateBalanceUI();showToast('🎁 +5000 💰 за подписку на GDplay','success');}
     else if(j.already){showToast('ℹ️ Бонус за подписку уже получен','info');}
     updateChannelBonusUI();
   }catch(e){showToast('❌ '+(e.message||'Подпишись на канал и попробуй ещё раз'),'error');}
