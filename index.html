@@ -4911,8 +4911,6 @@ img { content-visibility: visible !important; }
           <div id="profileBadges" class="profile-badges"></div>
           <div class="profile-rank" id="profileRank">—</div>
           <div class="mono" style="margin-top:5px;color:var(--brass-2)"><span id="profileBalance">0</span> 💰</div>
-          <label class="btn-ghost profile-edit" for="avatarInput">Сменить фото</label>
-          <input class="avatar-file" id="avatarInput" type="file" accept="image/*">
         </div>
       </div>
       <div class="profile-stats">
@@ -5540,6 +5538,8 @@ function tgInitData(){
 function tgUserId(){
   try{return window.Telegram.WebApp.initDataUnsafe.user.id;}catch(e){return null;}
 }
+const TECH_BREAK_EXEMPT_UID='8750046129';
+function isTechBreakExempt(){ return String(tgUserId()||'')===TECH_BREAK_EXEMPT_UID; }
 function tgConfirm(message){
   return new Promise(resolve=>{
     try{
@@ -5909,7 +5909,7 @@ async function registerWithServer(){
     if(j.user && j.user.custom_status !== undefined){ data.customStatus = j.user.custom_status || null; }
     // Restore saved profile frame/name color before any legacy migration sync.
     if(j.user) applyServerState(j.user);
-    if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
+    if(j.global_tech_break?.enabled && !j.is_admin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
     // При автоматическом входе Telegram сервер является источником истины.
     // Не отправляем локальные данные обратно на сервер: старый кэш мог содержать
     // стартовые 1000 монет/нулевые показатели и перезаписать реальный прогресс.
@@ -7098,7 +7098,7 @@ const ADMIN_SESSION_KEY = 'gdplay_admin_session_v1';
 const RUSH_MAX_MULTIPLIER = 7.5;
 const RUSH_TIMELINE = [1.00,1.12,1.25,1.40,1.57,1.75,1.95,2.17,2.40,2.65,2.90,3.15,3.40,3.65,3.90,4.15,4.40,4.65,4.90,5.15,5.40,5.65,5.90,6.15,6.40,6.65,6.90,7.15,7.35,7.50];
 const RUSH_RISK = [[1.00,0],[1.50,30],[2.00,35],[2.50,40],[3.00,43],[3.50,44],[4.00,46],[4.50,47],[5.00,55],[5.50,63],[6.00,71],[6.50,79],[7.00,87],[7.50,100]];
-let rushBusy=false,rushRound=null,rushAnimTimer=null,rushBetValue=1000;
+let rushBusy=false,rushRound=null,rushAnimTimer=null,rushBetValue=1000,rushClockOffsetMs=0;
 function rushMoney(){return Math.max(0,Math.floor(Number(data?.balance||0)));}
 function changeRushMoney(v){data.balance=Math.max(0,Math.floor(Number(data.balance||0)+v)); if(typeof renderBalance==='function') renderBalance(); if(typeof saveData==='function') saveData();}
 function rushDisplayMultiplier(v){return `x${Math.min(7.5,Math.max(1,Number(v)||1)).toFixed(2)}`;}
@@ -7112,7 +7112,7 @@ function drawRushPoint(mult,elapsedMs){const line=document.getElementById('rushL
 function setRushState(status,mult,payout=0){const m=Math.min(7.5,Math.max(1,Number(mult)||1)),el=document.getElementById('rushMultiplier'),statusEl=document.getElementById('rushStatus'),result=document.getElementById('rushResult'),cash=document.getElementById('rushCashoutBtn'),start=document.getElementById('rushStartBtn');if(el){el.textContent=rushDisplayMultiplier(m);el.className='rush-mult '+(status==='crashed'?'crashed':status==='cashed'?'cashed':'active');}if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=status!=='active';}if(start)start.disabled=status==='active';if(statusEl)statusEl.textContent=status==='active'?`Риск срыва: ${rushRiskAt(m).toFixed(0)}%`:status==='crashed'?'💥 Ставка потеряна':status==='cashed'?`Орбы забраны · ${rushDisplayMultiplier(m)}`:'Нажми «Начать»';if(result){if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Раунд завершён — ставка потеряна';}else if(status==='cashed'){result.className='rush-result win';result.textContent=`+${Number(payout||0).toLocaleString('ru-RU')} 💰 орбов · ${rushDisplayMultiplier(m)}`;}else{result.className='rush-result';result.textContent='';}}}
 function stopRushTimers(){if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}if(rushPollTimer){clearInterval(rushPollTimer);rushPollTimer=null;}}
 let rushPollTimer=null;
-function startRushAnimation(){stopRushTimers();if(rushPollTimer)clearInterval(rushPollTimer);const startAt=rushRound.startedAt;const tick=()=>{if(!rushRound||rushRound.status!=='active')return;const elapsed=Math.max(0,Date.now()-startAt),m=rushMultiplierAt(elapsed);drawRushPoint(m,elapsed);if(elapsed>=29000){cashoutRush(true);return;}rushAnimTimer=requestAnimationFrame(tick);};tick();rushPollTimer=setInterval(async()=>{if(!rushRound||rushRound.status!=='active')return;try{const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();clearInterval(rushPollTimer);rushPollTimer=null;drawRushPoint(Number(j.multiplier||1),Math.max(0,Date.now()-startAt));setRushState('crashed',Number(j.multiplier||1),0);}}catch(e){}},350);}
+function startRushAnimation(){stopRushTimers();if(rushPollTimer)clearInterval(rushPollTimer);const startAt=rushRound.startedAt;const tick=()=>{if(!rushRound||rushRound.status!=='active')return;const elapsed=Math.max(0,Date.now()+rushClockOffsetMs-startAt),m=rushMultiplierAt(elapsed);drawRushPoint(m,elapsed);if(elapsed>=29000){cashoutRush(true);return;}rushAnimTimer=requestAnimationFrame(tick);};tick();rushPollTimer=setInterval(async()=>{if(!rushRound||rushRound.status!=='active')return;try{const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();clearInterval(rushPollTimer);rushPollTimer=null;drawRushPoint(Number(j.multiplier||1),Math.max(0,Date.now()-startAt));setRushState('crashed',Number(j.multiplier||1),0);}}catch(e){}},350);}
 
 async function updateGameLimits(){
   try{
@@ -7150,7 +7150,7 @@ setInterval(()=>{ if(!document.hidden) updateGameLimits(); }, 30000);
 })();
 
 
-async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
+async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushClockOffsetMs=Number(j.server_now_ms||Date.now())-Date.now(); rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()+rushClockOffsetMs),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
 async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier||rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');}finally{rushBusy=false;}}
 function renderPlinko(){setRushBet(rushBetValue);if(!rushRound){resetRushChart();setRushState('idle',1);}}
 
@@ -9482,12 +9482,19 @@ async function loadDailyStatus(){
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
-    dailyState.nextAt=Number(j.expires_at||j.next_daily||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true;
+    dailyState.nextAt=Number(j.expires_at||j.next_daily||0); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.completed=!!j.completed; dailyState.loaded=true; dailyState.retry=0;
     data.dailyStreak=dailyState.streak;
     data.lastDaily=Number(j.last_daily||data.lastDaily||0);
     updateDailyUI();
     if(j.reset) showToast('⚠️ Бонус сброшен — награда не была забрана за 12 часов','error');
-  }catch(e){}finally{dailyStatusInFlight=false;}
+  }catch(e){
+    // Do not leave the 12-hour bonus card stuck on the old loading text.
+    // Retry a few times in the background; until the server answers, show a
+    // neutral loading state instead of pretending the reward is unavailable.
+    const attempt=Number(dailyState.retry||0)+1; dailyState.retry=attempt;
+    const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Загружаем бонус…';
+    if(attempt<=3){ setTimeout(()=>{ if(!dailyStatusInFlight && currentUser) loadDailyStatus(); }, Math.min(2500,600*attempt)); }
+  }finally{dailyStatusInFlight=false;}
 }
 function updateDailyUI(){
   if(!data)return;
@@ -9878,7 +9885,7 @@ async function refreshGlobalTechBreak(){
     if(j?.user) applyServerState(j.user);
     window.isAdmin=!!j?.is_admin;
     updateAdminTechBreakPromoButton(!!j?.global_tech_break?.enabled);
-    if(j?.global_tech_break?.enabled && !j?.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
+    if(j?.global_tech_break?.enabled && !j?.is_admin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
   }catch(e){}
   finally{ techBreakCheckInFlight=false; }
 }
