@@ -8230,7 +8230,7 @@ function refreshUpgradeStake(){
   label.textContent=upgradeStake.toLocaleString('ru-RU')+' 💰';
 }
 function refreshUpgradeChance(chanceOverride=null){
-  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(99.5,Number(chanceOverride)||0));
+  const chance=chanceOverride==null?getUpgradeChance():Math.max(0,Math.min(95,Number(chanceOverride)||0));
   const value=document.getElementById('upgradeChanceValue');
   const fill=document.getElementById('upgradeChanceFill');
   if(value) value.textContent=chance.toFixed(1)+'%';
@@ -8366,7 +8366,7 @@ async function confirmUpgrade(){
     document.getElementById('upgradeStepResult').style.display='block';
     const serverChanceRaw=Number(j.chance);
     const serverRollRaw=Number(j.roll);
-    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(99.5,serverChanceRaw)):0;
+    const serverChance=Number.isFinite(serverChanceRaw)?Math.max(0,Math.min(95,serverChanceRaw)):0;
     const roll=Number.isFinite(serverRollRaw)?Math.max(0,Math.min(100,serverRollRaw)):0;
     refreshUpgradeChance(serverChance);
 
@@ -8381,7 +8381,7 @@ async function confirmUpgrade(){
     // Use exactly the same one-decimal value for the label and the wheel.
     // The wheel is drawn as two SVG arcs, so the green arc length is mathematically
     // identical to the displayed percentage: 1% = 3.6 degrees.
-    const chance=Math.max(0,Math.min(99.5,Number(serverChance.toFixed(1))));
+    const chance=Math.max(0,Math.min(95,Number(serverChance.toFixed(1))));
     const chanceDeg=chance*3.6;
     const cx=100, cy=100, r=78;
     const start=-90;
