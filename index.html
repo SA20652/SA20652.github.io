@@ -6068,25 +6068,28 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
-  // Render the local UI immediately. Asset/server warmups must never block the
-  // first frame after the splash: otherwise the case page can appear empty on
-  // the first launch and only become visible after a second visit.
+  // Build the first screen, then wait for the important local/server assets
+  // before releasing the startup splash. This prevents the "loading finished
+  // but half the UI/images appear later" effect on slower Telegram WebViews.
   renderAll();
   try{ ensureCasesFirstPaint(); }catch(_){}
-  preloadAllRenderedImages();
   refreshGlobalTechBreak();
 
-  // Warm up everything in the background and repaint only when local assets or
-  // the server catalog actually become available. The loading screen itself is
-  // intentionally independent from all of these operations.
-  Promise.allSettled([
+  await Promise.allSettled([
     loadServerCases(),
     ensureCaseImages(),
     window.cubeIconsReady || Promise.resolve(),
     preloadProfileImages(data)
-  ]).then(()=>{
-    try{ renderAll(); preloadAllRenderedImages(); refreshGlobalTechBreak(); }catch(_){ }
-  });
+  ]);
+  try{
+    renderAll();
+    preloadAllRenderedImages();
+    refreshGlobalTechBreak();
+  }catch(_){ }
+
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  try{ renderAll(); preloadAllRenderedImages(); refreshGlobalTechBreak(); }catch(_){ }
+
 }
 
 let pendingTelegramCaseId='';
@@ -6207,15 +6210,17 @@ async function boot(){
     return serverBoot;
   }
 
-  // IMPORTANT: the splash must NEVER wait for bootSafe(). Network/auth code can
-  // hang in a Telegram WebView, but that must not leave the user behind a 100%
-  // progress bar forever. The UI is released on a local timer; bootSafe() keeps
-  // running in the background and will switch to the app when it succeeds.
-  await new Promise(resolve=>setTimeout(resolve,4350));
+  // Wait for the real bootstrap and its initial asset pass. A hard timeout
+  // prevents an unavailable server from ever trapping the user on the splash.
+  // Normal launches therefore leave the splash only after the first complete
+  // UI/assets pass has finished.
+  await Promise.race([
+    serverBoot,
+    new Promise(resolve=>setTimeout(resolve,15000))
+  ]);
 
   // Always expose a real screen before removing the splash. If bootSafe() has
-  // not finished yet, show the normal auth screen as a safe fallback. When
-  // bootSafe() finishes later, it will replace this with the app automatically.
+  // not finished yet, show the normal auth screen as a safe fallback.
   const authEl=document.getElementById('authScreen');
   const appEl=document.getElementById('appScreen');
   const authVisible=!!authEl && getComputedStyle(authEl).display!=='none';
@@ -6570,7 +6575,7 @@ async function redeemPromo(){
 }
 async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-share-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">📤 Поделиться</button><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
 async function createAdminPromo(){const code=String(document.getElementById('promoAdminCode')?.value||'').trim().toUpperCase(),reward_type=document.getElementById('promoAdminReward')?.value||'coins',coins=Math.max(0,Math.floor(Number(document.getElementById('promoAdminCoins')?.value||0))),vip_days=Math.max(0,Math.floor(Number(document.getElementById('promoAdminVipDays')?.value||0))),max_uses=Math.max(1,Math.floor(Number(document.getElementById('promoAdminMaxUses')?.value||1))),m=document.getElementById('promoAdminMessage');try{const j=await apiFetch('/api/admin/promo/create',{code,reward_type,coins,vip_days,max_uses});window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};if(j.promo_link)window.GDPLAY_PROMO_LINKS[j.promo.code]=j.promo_link;if(m){m.innerHTML='Промокод <b>'+j.promo.code+'</b> создан'+(j.promo_link?' · ссылка готова':'');m.style.color='var(--brass-2)'}document.getElementById('promoAdminCode').value='';await renderAdminPromos()}catch(e){if(m){m.textContent=e.message||'Ошибка';m.style.color='var(--danger)'}}}
-async function shareAdminPromoLink(code){try{const link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}const text='🎁 Промокод '+code+'\n\nНажми на ссылку, чтобы открыть бота и ввести промокод.';const shareUrl='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(shareUrl); else window.open(shareUrl,'_blank');showToast('📤 Открываю окно отправки','success')}catch(e){showToast('❌ Не удалось открыть отправку','error')}}
+async function shareAdminPromoLink(code){try{let link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}if(link.includes('?start=promo_')) link=link.replace('?start=promo_','?startapp=promo_');const text='🎁 Промокод '+code+'\n\nНажми на ссылку, чтобы открыть GDPLAY и ввести промокод.';const shareUrl='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(shareUrl); else window.open(shareUrl,'_blank');showToast('📤 Открываю окно отправки','success')}catch(e){showToast('❌ Не удалось открыть отправку','error')}}
 async function disableAdminPromo(id){if(!await tgConfirm('Отключить этот промокод?'))return;try{await apiFetch('/api/admin/promo/disable',{promo_id:Number(id)});await renderAdminPromos()}catch(e){showToast('❌ '+e.message,'error')}}
 async function renderAdmin(){
   if(!tgInitData()) return;
