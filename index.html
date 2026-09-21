@@ -5273,6 +5273,7 @@ const CASES = [
     {name:"MrKotovskyu",rarity:"divine",value:500000,chance:1.0}
   ]},
   {id:"extreme",name:"Extreme-кейс",price:75000,icon:'',items:[
+    {name:"DiamondMon",rarity:"common",value:30000,chance:15.88},
     {name:"Vortrox",rarity:"common",value:41250,chance:17.76},
     {name:"Temp",rarity:"rare",value:56250,chance:28.64},
     {name:"Xanii",rarity:"epic",value:90000,chance:20.97},
@@ -5281,6 +5282,7 @@ const CASES = [
     {name:"Jenkins",rarity:"divine",value:562500,chance:2.98}
   ]},
   {id:"vault",name:"Хранилище OG",price:130000,icon:'',items:[
+    {name:"Deku",rarity:"common",value:52000,chance:14.95},
     {name:"Cersia",rarity:"common",value:71500,chance:16.87},
     {name:"Rafer",rarity:"rare",value:97500,chance:28.3},
     {name:"JonathanGD",rarity:"epic",value:156000,chance:23.39},
@@ -6512,9 +6514,11 @@ async function redeemPromo(){
   }catch(e){promoSetMessage(e.message||'Не удалось активировать промокод')}
   finally{if(b)b.disabled=false}
 }
-async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-copy-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">🔗 Ссылка</button><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
+async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-share-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">📤 Поделиться</button><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
 async function createAdminPromo(){const code=String(document.getElementById('promoAdminCode')?.value||'').trim().toUpperCase(),reward_type=document.getElementById('promoAdminReward')?.value||'coins',coins=Math.max(0,Math.floor(Number(document.getElementById('promoAdminCoins')?.value||0))),vip_days=Math.max(0,Math.floor(Number(document.getElementById('promoAdminVipDays')?.value||0))),max_uses=Math.max(1,Math.floor(Number(document.getElementById('promoAdminMaxUses')?.value||1))),m=document.getElementById('promoAdminMessage');try{const j=await apiFetch('/api/admin/promo/create',{code,reward_type,coins,vip_days,max_uses});window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};if(j.promo_link)window.GDPLAY_PROMO_LINKS[j.promo.code]=j.promo_link;if(m){m.innerHTML='Промокод <b>'+j.promo.code+'</b> создан'+(j.promo_link?' · ссылка готова':'');m.style.color='var(--brass-2)'}document.getElementById('promoAdminCode').value='';await renderAdminPromos()}catch(e){if(m){m.textContent=e.message||'Ошибка';m.style.color='var(--danger)'}}}
-async function copyAdminPromoLink(code){try{const link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}if(navigator.clipboard?.writeText) await navigator.clipboard.writeText(link);else{const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}showToast('🔗 Ссылка на промокод скопирована','success')}catch(e){showToast('❌ Не удалось скопировать ссылку','error')}}
+async function shareAdminPromoLink(code){try{const link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}const text='🎁 Промокод '+code+'
+
+Нажми на ссылку, чтобы открыть бота и ввести промокод.';const shareUrl='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(shareUrl); else window.open(shareUrl,'_blank');showToast('📤 Открываю окно отправки','success')}catch(e){showToast('❌ Не удалось открыть отправку','error')}}
 async function disableAdminPromo(id){if(!await tgConfirm('Отключить этот промокод?'))return;try{await apiFetch('/api/admin/promo/disable',{promo_id:Number(id)});await renderAdminPromos()}catch(e){showToast('❌ '+e.message,'error')}}
 async function renderAdmin(){
   if(!tgInitData()) return;
@@ -9727,7 +9731,7 @@ function handleButton(button, e){
   if(action==='admin-ip-unban'){ adminIpUnban(); return; }
   if(action==='admin-toggle-cubes'){ adminToggleCubes(button.dataset.uid); return; }
   if(action==='admin-account'){ openAdminAccount(button.dataset.uid); return; }
-  if(action==='admin-promo-copy-link'){ copyAdminPromoLink(button.dataset.promoCode||''); return; }
+  if(action==='admin-promo-share-link'){ shareAdminPromoLink(button.dataset.promoCode||''); return; }
   if(action==='admin-promo-disable'){ disableAdminPromo(button.dataset.promoId); return; }
 
   switch(button.id){
