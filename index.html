@@ -6062,6 +6062,7 @@ async function showApp(skipServer=false){
   // first frame after the splash: otherwise the case page can appear empty on
   // the first launch and only become visible after a second visit.
   renderAll();
+  try{ ensureCasesFirstPaint(); }catch(_){}
   preloadAllRenderedImages();
   refreshGlobalTechBreak();
 
@@ -6886,6 +6887,24 @@ async function adminReset(uid){
 
 
 let tabRenderToken = 0;
+function ensureCasesFirstPaint(){
+  try{
+    const page=document.getElementById('page-cases');
+    const list=document.getElementById('casesList');
+    if(!page || !list) return;
+    // Paint the local case catalog immediately; never wait for server/catalog images.
+    if(typeof renderCases==='function' && Array.isArray(CASES) && CASES.length){
+      renderCases();
+    }
+    // A second paint catches the first Telegram WebView layout pass without requiring a re-entry.
+    requestAnimationFrame(()=>{
+      try{ if(page.classList.contains('active') && typeof renderCases==='function' && list.children.length===0) renderCases(); }catch(_){}
+    });
+    setTimeout(()=>{
+      try{ if(page.classList.contains('active') && typeof renderCases==='function' && list.children.length===0) renderCases(); }catch(_){}
+    },120);
+  }catch(_){}
+}
 function switchTab(tab){
   if(document.getElementById('battleDiceModal')?.classList.contains('open')) closeBattleDiceModal();
   currentTab = tab;
@@ -6905,7 +6924,10 @@ function switchTab(tab){
     if(tab==='admin' && window.isAdmin) renderAdmin();
     if(tab==='profile') renderProfile();
     if(tab==='settings') refreshTwoFactorUI();
-    if(tab==='cases') renderCases();
+    if(tab==='cases') {
+      try{ ensureCasesFirstPaint(); }catch(_){}
+      renderCases();
+    }
     if(tab==='vault') renderVault();
     if(tab==='trades'){loadTrades();loadTradeHistory();}
     // Warm the browser cache after the selected page has rendered.
