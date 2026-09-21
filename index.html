@@ -279,6 +279,10 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 }
 .inv-item-info{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;}
 .inv-icon{font-size:20px;}
+.market-cube-icon{width:46px;height:46px;min-width:46px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.market-cube-photo{width:46px;height:46px;object-fit:contain;display:block;}
+.inv-icon-fallback{font-size:20px;line-height:1;}
+
 .inv-name{font-weight:600;font-size:13.5px;}
 .inv-rarity{font-size:11px;font-weight:600;margin-top:1px;}
 .inv-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1 1 auto;justify-content:flex-end;}
@@ -7996,7 +8000,9 @@ function renderMarketItems(){
     const rarity=x.cube_rarity||x.rarity||(x.key&&x.key.rarity)||'common';
     const m=RARITY_META[rarity]||RARITY_META.common;
     const name=x.cube_name||x.key_name||x.keyName||x.item_name||x.name||(x.key&&x.key.name)||(isKey?'Ключ':'Куб');
+    const cubePhoto=!isKey && window.getCubeIcon ? window.getCubeIcon(name) : null;
     const icon=(x.key&&x.key.icon)||x.icon||(isKey?'🗝️':m.icon);
+    const iconMarkup=cubePhoto ? `<img class="market-cube-photo" src="${cubePhoto}" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">` : `<span class="inv-icon-fallback" style="color:${m.color}">${icon}</span>`;
     const currentUid = String(tgUserId()||'').trim();
     const sellerUid = String(x.seller_id??x.user_id??x.owner_id??x.telegram_id??'').trim();
     const sellerName = String(x.seller_name||'').trim();
@@ -8008,7 +8014,7 @@ function renderMarketItems(){
       (sellerUid !== '' && currentUid !== '' && sellerUid === currentUid) ||
       String(x.owner_username||'').trim() === currentName;
     const premiumTag = isPremiumActive() && Number(x.price||0)>=5000 ? `<span class="market-premium-tag">+BONUS</span>` : '';
-    return `<div class="market-card ${isKey?'key-item':''}" style="--item-color:${m.color};border-left-color:${m.color}"><span class="inv-icon" style="color:${m.color}">${icon}</span><div class="market-info"><div class="market-name">${name}${premiumTag}</div><div class="market-seller">${isKey?'🗝️ Ключ · ':''}Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}<div class="market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div></div></div>${mine?`<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>`:`<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
+    return `<div class="market-card ${isKey?'key-item':''}" style="--item-color:${m.color};border-left-color:${m.color}"><span class="inv-icon market-cube-icon">${iconMarkup}</span><div class="market-info"><div class="market-name">${name}${premiumTag}</div><div class="market-seller">${isKey?'🗝️ Ключ · ':''}Продавец: ${x.seller_name||'Игрок'}</div><div class="market-price">💰 ${formatPrice(x.price)}<div class="market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div></div></div>${mine?`<button type="button" class="btn-sell market-remove" data-action="market-remove" data-market-remove="${x.id}">Убрать</button>`:`<button type="button" class="btn market-buy" data-action="market-buy" data-market-buy="${x.id}" ${data.balance<x.price?'disabled':''}>Купить</button>`}</div>`;
   }).join('');
 }
 
@@ -9696,6 +9702,7 @@ document.getElementById('adminSearch')?.addEventListener('keydown', function(e){
 });
 
 document.getElementById('marketSearch')?.addEventListener('input',renderMarketItems);
+if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){ window.cubeIconsReady.then(()=>{ if(typeof renderMarketItems==='function') renderMarketItems(); }).catch(()=>{}); }
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
 document.getElementById('profileNameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-name]');if(b&&!b.disabled)setProfileNameStyle(b.dataset.profileName);});
