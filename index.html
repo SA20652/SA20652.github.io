@@ -762,7 +762,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
 .startup-loader-progress{width:min(280px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:2px;}
-.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 6s linear forwards;}
+.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 5s linear forwards;}
 @keyframes startupProgress{from{width:0%}to{width:100%}}
 @keyframes startupLogoPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(227,184,114,0))}50%{transform:scale(1.045);filter:drop-shadow(0 0 16px rgba(227,184,114,.22))}}
 
@@ -2397,12 +2397,12 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 /* Avoid expensive permanent layout/paint work while keeping the same appearance. */
 #page-market .market-card{
   contain:layout paint style;
-  content-visibility:auto;
-  contain-intrinsic-size:84px;
+  
+  
 }
 #page-market #marketList{contain:layout style;}
 #page-market .market-info{contain:layout paint;}
-img{content-visibility:auto;}
+img{content-visibility:visible!important;}
 .startup-loader-logo{content-visibility:visible!important;}
 @media (prefers-reduced-motion:no-preference){
   #page-market .market-card{will-change:auto;}
@@ -3572,7 +3572,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
 .startup-loader-progress{width:min(280px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:2px;}
-.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 6s linear forwards;}
+.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 5s linear forwards;}
 @keyframes startupProgress{from{width:0%}to{width:100%}}
 @keyframes startupLogoPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(227,184,114,0))}50%{transform:scale(1.045);filter:drop-shadow(0 0 16px rgba(227,184,114,.22))}}
 
@@ -3870,8 +3870,8 @@ nav .nav-btn[data-tab="inventory"] .nav-icon .nav-supplied-icon{width:42px!impor
 </style>
 <style id="gdplay-performance-v6">
 html{contain:none!important;}
-.page:not(.active){content-visibility:auto;contain-intrinsic-size:700px;}
-img{content-visibility:auto;}
+.page:not(.active){}
+img{content-visibility:visible!important;}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
 body.app-hidden .case-preview-animation,body.app-hidden .spin-confetti{display:none!important;}
 body.app-hidden *{scroll-behavior:auto!important;}
@@ -4339,6 +4339,25 @@ body{overflow-x:hidden;}
     contain:layout style;
   }
 }
+</style>
+<style id="gdplay-no-image-flicker-v10">
+/* Keep preloaded app images paintable while rapidly scrolling. Do not use content-visibility on images: Telegram WebView may skip/recycle their paint and show a brief blank frame. */
+img, .case-icon-image, .inv-cube-2d, .cube-icon-inline, .spin-result-cube-icon, .wheel-cube-icon, .spin-multi-cube-icon, .best-drop-cube-icon, .market-cube-photo {
+  content-visibility:visible!important;
+}
+#casesList .bot-case-card, #inventoryList .inv-item, #inventoryList .inv-stack {
+  content-visibility:visible!important;
+}
+</style>
+<style id="gdplay-no-image-virtualization-final">
+/* Final fix: never virtualize image rendering. This prevents cube/case photos from blinking during fast scrolling. */
+#casesList, #inventoryList, #casesList *, #inventoryList *,
+#casesList img, #inventoryList img,
+.bot-case-card, .inv-item, .inv-stack, .inv-cube-2d, .cube-icon-inline,
+.case-preview-image, .market-cube-photo {
+  content-visibility: visible !important;
+}
+img { content-visibility: visible !important; }
 </style>
 </head>
 <body>
@@ -6137,9 +6156,9 @@ async function boot(){
     return serverBoot;
   }
 
-  // Прогресс идёт ровно 6 секунд и не зависит от сервера. Высота splash фиксирована в момент первого
+  // Прогресс идёт ровно 5 секунд и не зависит от сервера. Высота splash фиксирована в момент первого
   // кадра, поэтому изменение Telegram viewport больше не может сдвинуть его.
-  await new Promise(resolve=>setTimeout(resolve,6000));
+  await new Promise(resolve=>setTimeout(resolve,5000));
   if(startupLoader) startupLoader.classList.add('hide');
   // Не расширяем Telegram WebView одновременно с исчезновением splash:
   // именно это давало визуальный рывок/сдвиг в нижнюю часть экрана.
@@ -9978,7 +9997,7 @@ boot();
 #spinModal .wheel-dial{transition:transform 2.9s cubic-bezier(.12,.72,.12,1)!important;}
 
 /* Keep inactive screens cheap. */
-.page:not(.active) #casesList,.page:not(.active) #recentDropsList{content-visibility:auto;contain-intrinsic-size:1px 500px;}
+.page:not(.active) #casesList,.page:not(.active) #recentDropsList{}
 </style>
 
 
