@@ -4261,12 +4261,20 @@ body{overflow-x:hidden;}
     var cache=window.__gdplayImageCache=window.__gdplayImageCache||Object.create(null);
     var pending=window.__gdplayImagePending=window.__gdplayImagePending||Object.create(null);
     function warm(src){
-      if(!src || typeof src!=='string' || src.indexOf('data:')===0 && cache[src]) return;
+      if(!src || typeof src!=='string') return;
       if(cache[src] || pending[src]) return;
       var im=new Image();
       im.decoding='async';
+      im.loading='eager';
       pending[src]=im;
-      im.onload=im.onerror=function(){ cache[src]=1; delete pending[src]; im.onload=im.onerror=null; };
+      im.onload=function(){
+        cache[src]=im;
+        delete pending[src];
+        try{ if(im.decode) im.decode().catch(function(){}); }catch(e){}
+      };
+      im.onerror=function(){
+        delete pending[src];
+      };
       im.src=src;
     }
     function scan(root){
@@ -5974,10 +5982,14 @@ function preloadAllRenderedImages(){
     const preload=(src)=>{
       src=String(src||'').trim();
       if(!src || cache.has(src)) return;
+      const retained=window.__gdplayImageCache && window.__gdplayImageCache[src];
+      if(retained instanceof Image){ cache.set(src,retained); return; }
       const img=new Image();
       img.decoding='async';
+      img.loading='eager';
       cache.set(src,img);
-      img.onload=img.onerror=()=>{};
+      img.onload=()=>{};
+      img.onerror=()=>{};
       img.src=src;
       if(img.decode) img.decode().catch(()=>{});
     };
