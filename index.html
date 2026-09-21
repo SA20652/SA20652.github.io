@@ -762,7 +762,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
 .startup-loader-progress{width:min(280px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:2px;}
-.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 4s linear forwards;}
+.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 6s linear forwards;}
 @keyframes startupProgress{from{width:0%}to{width:100%}}
 @keyframes startupLogoPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(227,184,114,0))}50%{transform:scale(1.045);filter:drop-shadow(0 0 16px rgba(227,184,114,.22))}}
 
@@ -3572,7 +3572,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
 .startup-loader-progress{width:min(280px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:2px;}
-.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 4s linear forwards;}
+.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 6s linear forwards;}
 @keyframes startupProgress{from{width:0%}to{width:100%}}
 @keyframes startupLogoPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(227,184,114,0))}50%{transform:scale(1.045);filter:drop-shadow(0 0 16px rgba(227,184,114,.22))}}
 
@@ -3890,6 +3890,8 @@ html{contain:none!important;}
 body{overflow-x:hidden;}
 #startupLoader{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;transform:none!important;contain:none!important;isolation:isolate;overflow:hidden!important;}
 #startupLoader .startup-loader-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);will-change:auto;}
+#startupLoader{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100vh!important;z-index:999999!important;background:var(--bg)!important;}
+#startupLoader.startup-loader-full{display:flex!important;align-items:center!important;justify-content:center!important;}
 #startupLoader.hide{pointer-events:none!important;}
 </style>
 
@@ -4034,6 +4036,7 @@ body{overflow-x:hidden;}
 (function(){
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
+  window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
   window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v4',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
@@ -4060,8 +4063,11 @@ body{overflow-x:hidden;}
       return Promise.all(keys.map(function(k){
         return new Promise(function(resolve){
           if(window.CUBE_ICON_PRELOADED[k]) return resolve();
-          var img=new Image();
+          var img=window.GDPLAY_IMAGE_CACHE.get(parsed[k]);
+          if(img && img.complete && img.naturalWidth) { window.CUBE_ICON_PRELOADED[k]=true; return resolve(); }
+          img=img || new Image();
           img.decoding='async';
+          window.GDPLAY_IMAGE_CACHE.set(parsed[k], img);
           img.onload=function(){window.CUBE_ICON_PRELOADED[k]=true;img.onload=img.onerror=null;resolve();};
           img.onerror=function(){img.onload=img.onerror=null;resolve();};
           img.src=parsed[k];
@@ -4258,24 +4264,23 @@ body{overflow-x:hidden;}
 /* GDPLAY_IMMEDIATE_GLOBAL_IMAGE_PRELOADER */
 (function(){
   try{
+    // Keep the actual Image objects alive. Storing only a boolean after
+    // onload lets weak WebViews discard decoded images, which caused photos
+    // to disappear and re-decode when switching tabs.
     var cache=window.__gdplayImageCache=window.__gdplayImageCache||Object.create(null);
     var pending=window.__gdplayImagePending=window.__gdplayImagePending||Object.create(null);
     function warm(src){
       if(!src || typeof src!=='string') return;
-      if(cache[src] || pending[src]) return;
-      var im=new Image();
+      if(cache[src] && (cache[src].complete || cache[src].naturalWidth)) return;
+      if(pending[src]) return;
+      var im=cache[src] || new Image();
       im.decoding='async';
-      im.loading='eager';
+      cache[src]=im;
       pending[src]=im;
-      im.onload=function(){
-        cache[src]=im;
-        delete pending[src];
-        try{ if(im.decode) im.decode().catch(function(){}); }catch(e){}
-      };
-      im.onerror=function(){
-        delete pending[src];
-      };
+      im.onload=function(){ delete pending[src]; };
+      im.onerror=function(){ delete pending[src]; };
       im.src=src;
+      try{ if(im.decode) im.decode().catch(function(){}); }catch(_){}
     }
     function scan(root){
       if(!root) return;
@@ -4291,12 +4296,16 @@ body{overflow-x:hidden;}
       }).catch(function(){});
     }
     function start(){
+      // Full local asset warm-up: this is deliberately independent of the
+      // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
       preloadCatalog('cube_icons.html?v=immediate',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
       setTimeout(function(){scan(document);},1500);
+      setTimeout(function(){scan(document);},3000);
+      setTimeout(function(){scan(document);},5500);
     }
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
     var queuedNodes=[];
@@ -5982,14 +5991,10 @@ function preloadAllRenderedImages(){
     const preload=(src)=>{
       src=String(src||'').trim();
       if(!src || cache.has(src)) return;
-      const retained=window.__gdplayImageCache && window.__gdplayImageCache[src];
-      if(retained instanceof Image){ cache.set(src,retained); return; }
       const img=new Image();
       img.decoding='async';
-      img.loading='eager';
       cache.set(src,img);
-      img.onload=()=>{};
-      img.onerror=()=>{};
+      img.onload=img.onerror=()=>{};
       img.src=src;
       if(img.decode) img.decode().catch(()=>{});
     };
@@ -6132,9 +6137,9 @@ async function boot(){
     return serverBoot;
   }
 
-  // Прогресс идёт все 4 секунды. Высота splash фиксирована в момент первого
+  // Прогресс идёт ровно 6 секунд и не зависит от сервера. Высота splash фиксирована в момент первого
   // кадра, поэтому изменение Telegram viewport больше не может сдвинуть его.
-  await new Promise(resolve=>setTimeout(resolve,4000));
+  await new Promise(resolve=>setTimeout(resolve,6000));
   if(startupLoader) startupLoader.classList.add('hide');
   // Не расширяем Telegram WebView одновременно с исчезновением splash:
   // именно это давало визуальный рывок/сдвиг в нижнюю часть экрана.
