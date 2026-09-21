@@ -4359,6 +4359,14 @@ img, .case-icon-image, .inv-cube-2d, .cube-icon-inline, .spin-result-cube-icon, 
 }
 img { content-visibility: visible !important; }
 <style>#createBattleBtn{margin-top:6px!important;position:relative!important;z-index:3!important;display:block!important;clear:both!important;} .battle-form #battleMode{margin-bottom:4px!important;} </style>
+
+<style id="gdplay-startup-autohide-v13">
+/* Startup splash is controlled by boot(): never hide it while the app is still blank. */
+#startupLoader{animation:none!important;}
+#startupLoader .startup-loader-progress-fill{animation:startupProgressWait 4.2s linear forwards!important;}
+@keyframes startupProgressWait{0%{width:0%}82%{width:88%}100%{width:100%;}}
+#startupLoader .startup-loader-sub{min-height:16px;}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -6146,30 +6154,44 @@ async function boot(){
   const releaseProgressFill=document.getElementById('releaseProgressFill');
   const startupLoader=document.getElementById('startupLoader');
   const startupLoaderLogo=document.getElementById('startupLoaderLogo');
+  const startupProgressFill=startupLoader?.querySelector('.startup-loader-progress-fill');
   const firstLaunch=false;
 
-  // Куб уже встроен прямо в HTML, поэтому заставка не зависит от DOM-порядка
-  // и не ждёт загрузки auth-блока или сети.
-  if(startupLoaderLogo && !startupLoaderLogo.getAttribute('src')){
-    try{
-      const sourceLogo=document.querySelector('.auth-logo img');
-      if(sourceLogo?.src) startupLoaderLogo.src=sourceLogo.src;
-    }catch(e){}
-  }
+  // The splash itself is fully local. Server/auth work runs in parallel, but
+  // the splash is NOT allowed to disappear while both authScreen and appScreen
+  // are hidden. That was the reason for the previous "100% -> blank screen" bug.
+  try{
+    const sourceLogo=document.querySelector('.auth-logo img');
+    if(startupLoaderLogo && sourceLogo?.src && !startupLoaderLogo.src) startupLoaderLogo.src=sourceLogo.src;
+  }catch(_){ }
 
-  // Серверная инициализация запускается параллельно: локальная заставка
-  // никогда не ждёт ответа сервера и заканчивается по своему таймеру.
-  const serverBoot=Promise.resolve().then(()=>bootSafe()).catch(e=>{
-    console.error('GDPLAY boot error:', e);
-    // Не создаём здесь пустой локальный профиль: при ошибке авторизации это
-    // могло визуально превратить существующий аккаунт в новый с 1000 монетами.
-    currentUser=null; data=null; showAuth();
-    showAuthError('Не удалось загрузить профиль с сервера. Обнови приложение и попробуй ещё раз.');
+  let bootFinished=false;
+  let bootError=null;
+  const serverBoot=Promise.resolve().then(()=>bootSafe()).then(()=>{
+    bootFinished=true;
+  }).catch(e=>{
+    bootError=e;
+    bootFinished=true;
+    console.error('GDPLAY boot error:',e);
+    currentUser=null;
+    data=null;
+    try{showAuth();}catch(_){ }
+    try{showAuthError('Не удалось загрузить профиль с сервера. Обнови приложение и попробуй ещё раз.');}catch(_){ }
   });
 
+  const hideSplash=()=>{
+    if(startupProgressFill){
+      startupProgressFill.style.animation='none';
+      startupProgressFill.style.width='100%';
+    }
+    if(startupLoader){
+      startupLoader.classList.add('hide');
+      startupLoader.setAttribute('aria-hidden','true');
+    }
+  };
+
   if(firstLaunch){
-    // На первом входе релизный экран полностью заменяет обычную загрузку.
-    if(startupLoader) startupLoader.classList.add('hide');
+    if(startupLoader){startupLoader.classList.add('hide');startupLoader.setAttribute('aria-hidden','true');}
     if(releaseScreen) releaseScreen.classList.add('show');
     if(releaseProgressFill){
       releaseProgressFill.classList.remove('run');
@@ -6185,20 +6207,49 @@ async function boot(){
     return serverBoot;
   }
 
-  // Прогресс идёт ровно 5 секунд и не зависит от сервера. Высота splash фиксирована в момент первого
-  // кадра, поэтому изменение Telegram viewport больше не может сдвинуть его.
-  await new Promise(resolve=>setTimeout(resolve,4000));
-  if(startupLoader) startupLoader.classList.add('hide');
-  // Не расширяем Telegram WebView одновременно с исчезновением splash:
-  // именно это давало визуальный рывок/сдвиг в нижнюю часть экрана.
-  await new Promise(resolve=>setTimeout(resolve,620));
+  // IMPORTANT: the splash must NEVER wait for bootSafe(). Network/auth code can
+  // hang in a Telegram WebView, but that must not leave the user behind a 100%
+  // progress bar forever. The UI is released on a local timer; bootSafe() keeps
+  // running in the background and will switch to the app when it succeeds.
+  await new Promise(resolve=>setTimeout(resolve,4350));
+
+  // Always expose a real screen before removing the splash. If bootSafe() has
+  // not finished yet, show the normal auth screen as a safe fallback. When
+  // bootSafe() finishes later, it will replace this with the app automatically.
+  const authEl=document.getElementById('authScreen');
+  const appEl=document.getElementById('appScreen');
+  const authVisible=!!authEl && getComputedStyle(authEl).display!=='none';
+  const appVisible=!!appEl && getComputedStyle(appEl).display!=='none';
+  if(!authVisible && !appVisible){
+    try{showAuth();}catch(_){ }
+  }
+
+  // Release the splash independently of server/auth. This is the critical fix
+  // for the reported 100% -> frozen splash problem.
+  hideSplash();
+
+  // If the bootstrap is still pending, give it a short grace period for the
+  // normal Telegram auto-login, but DO NOT keep the splash on screen.
+  if(!bootFinished){
+    setTimeout(()=>{
+      if(!bootFinished){
+        console.warn('GDPLAY bootstrap is still pending; splash already released');
+        try{
+          const a=document.getElementById('authScreen');
+          const b=document.getElementById('appScreen');
+          if(a && b && getComputedStyle(a).display==='none' && getComputedStyle(b).display==='none') showAuth();
+        }catch(_){ }
+      }
+    },5000);
+  }
+
+  await new Promise(resolve=>setTimeout(resolve,180));
   try{
     const tw=window.Telegram?.WebApp;
-    if(tw){ try{tw.expand();}catch(e){} try{tw.disableVerticalSwipes?.();}catch(e){} }
-  }catch(e){}
+    if(tw){try{tw.expand();}catch(_){ }try{tw.disableVerticalSwipes?.();}catch(_){ }}
+  }catch(_){ }
   return serverBoot;
 }
-
 async function waitForTelegramInitData(timeoutMs=12000){
   // Telegram WebApp иногда отдаёт initData не в тот же момент, когда загружается DOM.
   // Ждём его немного, чтобы автоматический вход не падал после перезахода/перезагрузки.
@@ -6519,9 +6570,7 @@ async function redeemPromo(){
 }
 async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-share-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">📤 Поделиться</button><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
 async function createAdminPromo(){const code=String(document.getElementById('promoAdminCode')?.value||'').trim().toUpperCase(),reward_type=document.getElementById('promoAdminReward')?.value||'coins',coins=Math.max(0,Math.floor(Number(document.getElementById('promoAdminCoins')?.value||0))),vip_days=Math.max(0,Math.floor(Number(document.getElementById('promoAdminVipDays')?.value||0))),max_uses=Math.max(1,Math.floor(Number(document.getElementById('promoAdminMaxUses')?.value||1))),m=document.getElementById('promoAdminMessage');try{const j=await apiFetch('/api/admin/promo/create',{code,reward_type,coins,vip_days,max_uses});window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};if(j.promo_link)window.GDPLAY_PROMO_LINKS[j.promo.code]=j.promo_link;if(m){m.innerHTML='Промокод <b>'+j.promo.code+'</b> создан'+(j.promo_link?' · ссылка готова':'');m.style.color='var(--brass-2)'}document.getElementById('promoAdminCode').value='';await renderAdminPromos()}catch(e){if(m){m.textContent=e.message||'Ошибка';m.style.color='var(--danger)'}}}
-async function shareAdminPromoLink(code){try{const link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}const text='🎁 Промокод '+code+'
-
-Нажми на ссылку, чтобы открыть бота и ввести промокод.';const shareUrl='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(shareUrl); else window.open(shareUrl,'_blank');showToast('📤 Открываю окно отправки','success')}catch(e){showToast('❌ Не удалось открыть отправку','error')}}
+async function shareAdminPromoLink(code){try{const link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}const text='🎁 Промокод '+code+'\n\nНажми на ссылку, чтобы открыть бота и ввести промокод.';const shareUrl='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(shareUrl); else window.open(shareUrl,'_blank');showToast('📤 Открываю окно отправки','success')}catch(e){showToast('❌ Не удалось открыть отправку','error')}}
 async function disableAdminPromo(id){if(!await tgConfirm('Отключить этот промокод?'))return;try{await apiFetch('/api/admin/promo/disable',{promo_id:Number(id)});await renderAdminPromos()}catch(e){showToast('❌ '+e.message,'error')}}
 async function renderAdmin(){
   if(!tgInitData()) return;
@@ -9969,13 +10018,7 @@ try{
   ]);
 }catch(_){ }
 
-boot();
-// Жёсткий локальный предохранитель: сервер/Telegram не могут удерживать
-// заставку после окончания полосы прогресса. Он не трогает авторизацию —
-// только гарантированно скрывает локальный splash.
-setTimeout(()=>{
-  try{ document.getElementById('startupLoader')?.classList.add('hide'); }catch(e){}
-},4600);
+boot().catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
 
 })();
 </script>
