@@ -11309,3 +11309,31 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   }
 }
 </style>
+<style id="gdplay-reel-winner-same-background-v13">
+/* The stopped/winning reel item must use exactly the same card background as every other reel item. */
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{
+  background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.015))!important;
+}
+#spinModal.multi-open .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{
+  background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.015))!important;
+}
+</style>
+<style id="gdplay-gold-winner-frame-final">
+/* Winner frame: bot-style gold outline around the entire cube/name/value area. */
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after,
+#spinModal.multi-open .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after{
+  display:block!important;
+  content:""!important;
+  position:absolute!important;
+  inset:10px 7px!important;
+  border:1px solid var(--brass-2)!important;
+  border-radius:13px!important;
+  background:transparent!important;
+  box-shadow:0 0 12px rgba(201,151,77,.22), inset 0 0 10px rgba(201,151,77,.06)!important;
+  pointer-events:none!important;
+  z-index:0!important;
+}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{
+  background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.015))!important;
+}
+</style>
