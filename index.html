@@ -9063,9 +9063,23 @@ function renderProfileCustomization(){
     b.classList.toggle('active',key===selected); b.disabled=!info.ok;
     b.title=info.ok?'Разблокировано':('Условие: '+info.label);
   });
+  // Все декоративные стили имени доступны только при активном Premium.
+  // Если Premium закончился, стиль сразу сбрасывается на обычный.
+  const effectiveNameStyle = vipActive ? nameStyle : 'default';
+  if(!vipActive && nameStyle!=='default'){
+    data.profileNameStyle='default';
+    persistLocal();
+  }
+  if(name){
+    name.className='profile-name';
+    if(effectiveNameStyle!=='default') name.classList.add(effectiveNameStyle+'-name');
+  }
   document.querySelectorAll('[data-profile-name]').forEach(b=>{
-    const key=b.dataset.profileName; b.classList.toggle('active',key===nameStyle);
-    const locked=key!=='default'; b.disabled=false;
+    const key=b.dataset.profileName;
+    b.classList.toggle('active',key===effectiveNameStyle);
+    const premiumOnly=key!=='default';
+    b.disabled=premiumOnly && !vipActive;
+    b.title=(premiumOnly && !vipActive)?'Доступно только с Premium':'Доступно';
   });
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
 }
@@ -9103,7 +9117,13 @@ function isPremiumActive(){
 }
 async function setProfileNameStyle(key){
   const premiumActive=isPremiumActive();
-  if(key==='default'){ data.profileNameStyle=key; } 
+  if(key!=='default' && !premiumActive){
+    data.profileNameStyle='default';
+    persistLocal();
+    renderProfileCustomization();
+    showToast('⭐ Стиль имени доступен только с Premium','error');
+    return;
+  }
   const prev=String(data.profileNameStyle||'default');
   data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
   try{
