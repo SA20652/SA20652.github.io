@@ -762,7 +762,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
 .startup-loader-progress{width:min(280px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:2px;}
-.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 4s linear forwards;}
+.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 5s linear forwards;}
 @keyframes startupProgress{from{width:0%}to{width:100%}}
 @keyframes startupLogoPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(227,184,114,0))}50%{transform:scale(1.045);filter:drop-shadow(0 0 16px rgba(227,184,114,.22))}}
 
@@ -3572,7 +3572,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
 .startup-loader-progress{width:min(280px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:2px;}
-.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 4s linear forwards;}
+.startup-loader-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);animation:startupProgress 5s linear forwards;}
 @keyframes startupProgress{from{width:0%}to{width:100%}}
 @keyframes startupLogoPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(227,184,114,0))}50%{transform:scale(1.045);filter:drop-shadow(0 0 16px rgba(227,184,114,.22))}}
 
@@ -4363,7 +4363,7 @@ img { content-visibility: visible !important; }
 <style id="gdplay-startup-autohide-v13">
 /* Startup splash is controlled by boot(): never hide it while the app is still blank. */
 #startupLoader{animation:none!important;}
-#startupLoader .startup-loader-progress-fill{animation:startupProgressWait 4.2s linear forwards!important;}
+#startupLoader .startup-loader-progress-fill{animation:startupProgressWait 5s linear forwards!important;}
 @keyframes startupProgressWait{0%{width:0%}82%{width:88%}100%{width:100%;}}
 #startupLoader .startup-loader-sub{min-height:16px;}
 </style>
@@ -6068,27 +6068,27 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
-  // Build the first screen, then wait for the important local/server assets
-  // before releasing the startup splash. This prevents the "loading finished
-  // but half the UI/images appear later" effect on slower Telegram WebViews.
+  // The splash is independent and lasts exactly 5 seconds. Start all
+  // important loading immediately in the background so those 5 seconds are
+  // used for server data, cube icons and profile/case images without making
+  // the splash depend on the server response.
   renderAll();
   try{ ensureCasesFirstPaint(); }catch(_){}
   refreshGlobalTechBreak();
 
-  await Promise.allSettled([
+  const assetWarmup=Promise.allSettled([
     loadServerCases(),
     ensureCaseImages(),
     window.cubeIconsReady || Promise.resolve(),
     preloadProfileImages(data)
-  ]);
-  try{
-    renderAll();
-    preloadAllRenderedImages();
-    refreshGlobalTechBreak();
-  }catch(_){ }
-
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  try{ renderAll(); preloadAllRenderedImages(); refreshGlobalTechBreak(); }catch(_){ }
+  ]).then(()=>{
+    try{
+      renderAll();
+      preloadAllRenderedImages();
+      refreshGlobalTechBreak();
+    }catch(_){}
+  });
+  window.gdplayAssetWarmup=assetWarmup;
 
 }
 
@@ -6210,14 +6210,10 @@ async function boot(){
     return serverBoot;
   }
 
-  // Wait for the real bootstrap and its initial asset pass. A hard timeout
-  // prevents an unavailable server from ever trapping the user on the splash.
-  // Normal launches therefore leave the splash only after the first complete
-  // UI/assets pass has finished.
-  await Promise.race([
-    serverBoot,
-    new Promise(resolve=>setTimeout(resolve,15000))
-  ]);
+  // Startup splash is deliberately independent from server/auth. It always
+  // runs for 5 seconds while bootSafe() and the asset warmup continue in the
+  // background. This gives the app a fixed, predictable startup time.
+  await new Promise(resolve=>setTimeout(resolve,5000));
 
   // Always expose a real screen before removing the splash. If bootSafe() has
   // not finished yet, show the normal auth screen as a safe fallback.
@@ -6226,27 +6222,10 @@ async function boot(){
   const authVisible=!!authEl && getComputedStyle(authEl).display!=='none';
   const appVisible=!!appEl && getComputedStyle(appEl).display!=='none';
   if(!authVisible && !appVisible){
-    try{showAuth();}catch(_){ }
+    try{showAuth();}catch(_){}
   }
 
-  // Release the splash independently of server/auth. This is the critical fix
-  // for the reported 100% -> frozen splash problem.
   hideSplash();
-
-  // If the bootstrap is still pending, give it a short grace period for the
-  // normal Telegram auto-login, but DO NOT keep the splash on screen.
-  if(!bootFinished){
-    setTimeout(()=>{
-      if(!bootFinished){
-        console.warn('GDPLAY bootstrap is still pending; splash already released');
-        try{
-          const a=document.getElementById('authScreen');
-          const b=document.getElementById('appScreen');
-          if(a && b && getComputedStyle(a).display==='none' && getComputedStyle(b).display==='none') showAuth();
-        }catch(_){ }
-      }
-    },5000);
-  }
 
   await new Promise(resolve=>setTimeout(resolve,180));
   try{
