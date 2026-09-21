@@ -10942,3 +10942,42 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   #spinModal .wheel-multi-row .wheel-item b{max-width:88px!important;font-size:10.5px!important;line-height:12px!important;}
 }
 </style>
+<style id="gdplay-3x-comfort-v8">
+/* 2x/3x: slightly larger window, with reel contents sitting a little lower. */
+#spinModal.multi-open .spin-modal{
+  width:min(96vw,410px)!important;
+  padding:12px 12px 13px!important;
+}
+#spinModal.multi-open .wheel-multi-row{gap:6px!important;margin-bottom:8px!important;}
+#spinModal.multi-open .wheel-multi-row .multi-reel{
+  height:84px!important;
+  min-height:84px!important;
+}
+#spinModal.multi-open .wheel-multi-row .wheel-item{
+  height:84px!important;
+  min-height:84px!important;
+  padding:6px 3px 2px!important;
+  justify-content:center!important;
+  transform:translateY(5px);
+}
+#spinModal.multi-open .wheel-multi-row .wheel-cube-icon{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  min-height:36px!important;
+  flex-basis:36px!important;
+}
+#spinModal.multi-open .wheel-multi-row .wheel-item b{
+  transform:translateY(2px);
+}
+@media(max-width:430px){
+  #spinModal.multi-open .spin-modal{width:calc(100vw - 14px)!important;}
+}
+@media(max-height:650px){
+  #spinModal.multi-open .spin-modal{padding:9px!important;}
+  #spinModal.multi-open .wheel-multi-row .multi-reel,
+  #spinModal.multi-open .wheel-multi-row .wheel-item{height:72px!important;min-height:72px!important;}
+  #spinModal.multi-open .wheel-multi-row .wheel-cube-icon{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex-basis:32px!important;}
+  #spinModal.multi-open .wheel-multi-row .wheel-item{transform:translateY(4px);}
+}
+</style>
