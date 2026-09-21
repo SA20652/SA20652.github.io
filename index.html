@@ -4358,7 +4358,7 @@ img, .case-icon-image, .inv-cube-2d, .cube-icon-inline, .spin-result-cube-icon, 
   content-visibility: visible !important;
 }
 img { content-visibility: visible !important; }
-</style>
+<style>#createBattleBtn{margin-top:6px!important;position:relative!important;z-index:3!important;display:block!important;clear:both!important;} .battle-form #battleMode{margin-bottom:4px!important;} </style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -6086,9 +6086,27 @@ function handleTelegramStartApp(){
   try{
     if(telegramCaseAutoOpened) return;
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
+    const promoRaw=raw.startsWith('promo_') ? raw.slice(6).trim().toUpperCase() : '';
+    if(promoRaw){
+      switchTab('profile');
+      const applyPromo=()=>{const input=document.getElementById('promoInput');if(!input)return false;input.value=promoRaw;try{input.closest('.promo-card')?.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}try{input.focus({preventScroll:true});}catch(_){}return true;};
+      if(!applyPromo()){requestAnimationFrame(()=>requestAnimationFrame(applyPromo));setTimeout(applyPromo,350);setTimeout(applyPromo,900);}
+      return;
+    }
     let cid=raw.startsWith('case_') ? raw.slice(5) : '';
     let source='startapp';
     if(!cid){
+      try{
+        const qp=new URLSearchParams(window.location.search||'').get('promo');
+        if(qp){
+          const promoCode=String(qp).trim().toUpperCase();
+          switchTab('profile');
+          const applyQueryPromo=()=>{const input=document.getElementById('promoInput');if(!input)return false;input.value=promoCode;try{input.closest('.promo-card')?.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}try{input.focus({preventScroll:true});}catch(_){}return true;};
+          if(!applyQueryPromo()){requestAnimationFrame(()=>requestAnimationFrame(applyQueryPromo));setTimeout(applyQueryPromo,350);setTimeout(applyQueryPromo,900);}
+          try{history.replaceState(history.state,'',window.location.pathname+window.location.hash);}catch(_){}
+          return;
+        }
+      }catch(_){}
       try{ cid=new URLSearchParams(window.location.search||'').get('case')||''; source='query'; }catch(_){ }
     }
     cid=String(cid).trim();
@@ -6494,8 +6512,9 @@ async function redeemPromo(){
   }catch(e){promoSetMessage(e.message||'Не удалось активировать промокод')}
   finally{if(b)b.disabled=false}
 }
-async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
-async function createAdminPromo(){const code=String(document.getElementById('promoAdminCode')?.value||'').trim().toUpperCase(),reward_type=document.getElementById('promoAdminReward')?.value||'coins',coins=Math.max(0,Math.floor(Number(document.getElementById('promoAdminCoins')?.value||0))),vip_days=Math.max(0,Math.floor(Number(document.getElementById('promoAdminVipDays')?.value||0))),max_uses=Math.max(1,Math.floor(Number(document.getElementById('promoAdminMaxUses')?.value||1))),m=document.getElementById('promoAdminMessage');try{const j=await apiFetch('/api/admin/promo/create',{code,reward_type,coins,vip_days,max_uses});if(m){m.textContent='Промокод '+j.promo.code+' создан';m.style.color='var(--brass-2)'}document.getElementById('promoAdminCode').value='';await renderAdminPromos()}catch(e){if(m){m.textContent=e.message||'Ошибка';m.style.color='var(--danger)'}}}
+async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-copy-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">🔗 Ссылка</button><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
+async function createAdminPromo(){const code=String(document.getElementById('promoAdminCode')?.value||'').trim().toUpperCase(),reward_type=document.getElementById('promoAdminReward')?.value||'coins',coins=Math.max(0,Math.floor(Number(document.getElementById('promoAdminCoins')?.value||0))),vip_days=Math.max(0,Math.floor(Number(document.getElementById('promoAdminVipDays')?.value||0))),max_uses=Math.max(1,Math.floor(Number(document.getElementById('promoAdminMaxUses')?.value||1))),m=document.getElementById('promoAdminMessage');try{const j=await apiFetch('/api/admin/promo/create',{code,reward_type,coins,vip_days,max_uses});window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};if(j.promo_link)window.GDPLAY_PROMO_LINKS[j.promo.code]=j.promo_link;if(m){m.innerHTML='Промокод <b>'+j.promo.code+'</b> создан'+(j.promo_link?' · ссылка готова':'');m.style.color='var(--brass-2)'}document.getElementById('promoAdminCode').value='';await renderAdminPromos()}catch(e){if(m){m.textContent=e.message||'Ошибка';m.style.color='var(--danger)'}}}
+async function copyAdminPromoLink(code){try{const link=window.GDPLAY_PROMO_LINKS?.[code]||'';if(!link){showToast('Ссылка не найдена','error');return}if(navigator.clipboard?.writeText) await navigator.clipboard.writeText(link);else{const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}showToast('🔗 Ссылка на промокод скопирована','success')}catch(e){showToast('❌ Не удалось скопировать ссылку','error')}}
 async function disableAdminPromo(id){if(!await tgConfirm('Отключить этот промокод?'))return;try{await apiFetch('/api/admin/promo/disable',{promo_id:Number(id)});await renderAdminPromos()}catch(e){showToast('❌ '+e.message,'error')}}
 async function renderAdmin(){
   if(!tgInitData()) return;
@@ -7601,7 +7620,7 @@ async function openCaseBatch(c, qty, useKey=false){
   const crack=document.getElementById('vaultCrack'); if(crack) crack.style.display='none';
   if(title) title.textContent=`${c.name} · ${qty} кейса`;
   if(icon) icon.innerHTML=caseImage(c.id,c.name);
-  if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
+  if(price){ price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`; price.style.display=qty>1?'none':''; }
   if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие кейса';
   if(pill) pill.textContent='КРУТИМ';
 
@@ -7609,7 +7628,7 @@ async function openCaseBatch(c, qty, useKey=false){
   // Prepare the selected case image BEFORE the modal becomes visible.
   if(title) title.textContent=`${c.name} · ${qty} кейса`;
   if(icon) icon.innerHTML=caseImage(c.id,c.name);
-  if(price) price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`;
+  if(price){ price.textContent=`${(Number(c.price)*qty).toLocaleString('ru-RU')} 💰`; price.style.display=qty>1?'none':''; }
   if(sub) sub.textContent=qty>1 ? `${qty} награды одновременно` : 'Открытие кейса';
   if(pill) pill.textContent='КРУТИМ';
   await prepareCaseImageForOpen(c.id);
@@ -7740,7 +7759,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
   const prePill=document.getElementById('spinStatusPill');
   if(preTitle) preTitle.textContent = total>1 ? `${c.name} (${seq}/${total})` : c.name;
   if(preIcon) preIcon.innerHTML = caseImage(c.id,c.name);
-  if(prePrice) prePrice.textContent = `${Number(c.price).toLocaleString('ru-RU')} 💰`;
+  if(prePrice){ prePrice.textContent = `${Number(c.price).toLocaleString('ru-RU')} 💰`; prePrice.style.display=''; }
   if(preSub) preSub.textContent = `${c.items.length} предметов · ${Number(c.price).toLocaleString('ru-RU')} 💰`;
   if(prePill) prePill.textContent = 'КРУТИМ';
   await prepareCaseImageForOpen(c.id);
@@ -9708,6 +9727,7 @@ function handleButton(button, e){
   if(action==='admin-ip-unban'){ adminIpUnban(); return; }
   if(action==='admin-toggle-cubes'){ adminToggleCubes(button.dataset.uid); return; }
   if(action==='admin-account'){ openAdminAccount(button.dataset.uid); return; }
+  if(action==='admin-promo-copy-link'){ copyAdminPromoLink(button.dataset.promoCode||''); return; }
   if(action==='admin-promo-disable'){ disableAdminPromo(button.dataset.promoId); return; }
 
   switch(button.id){
@@ -10764,4 +10784,73 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 #casesList .rad-drop .rad-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;grid-column:2!important;grid-row:1!important;}
 #casesList .rad-drop>b{grid-column:3!important;grid-row:1!important;justify-self:end!important;white-space:nowrap!important;}
 #casesList .rad-drop .cube-icon-inline{grid-column:1!important;grid-row:1!important;width:34px!important;height:34px!important;flex:0 0 34px!important;}
+</style>
+
+<style id="gdplay-multi-case-full-cubes-final">
+/* 2x/3x opening: keep the entire cube and full name visible; price stays hidden only during the spin. */
+#spinModal .wheel-multi-row{
+  height:auto!important;
+  gap:8px!important;
+  overflow:visible!important;
+}
+#spinModal .wheel-multi-row .multi-reel{
+  height:124px!important;
+  min-height:124px!important;
+  position:relative!important;
+  overflow:hidden!important;
+  border-radius:18px!important;
+}
+#spinModal .wheel-multi-row .multi-reel-mask{
+  height:100%!important;
+  overflow:hidden!important;
+  border-radius:18px!important;
+}
+#spinModal .wheel-multi-row .wheel-dial{
+  height:100%!important;
+  align-items:stretch!important;
+}
+#spinModal .wheel-multi-row .wheel-item{
+  width:100px!important;
+  min-width:100px!important;
+  height:124px!important;
+  padding:8px 5px!important;
+  box-sizing:border-box!important;
+  gap:4px!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+#spinModal .wheel-multi-row .wheel-cube-icon{
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  max-width:48px!important;
+  max-height:48px!important;
+  object-fit:contain!important;
+  flex:0 0 48px!important;
+}
+#spinModal .wheel-multi-row .wheel-item b{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+  text-overflow:clip!important;
+  width:100%!important;
+  max-width:92px!important;
+  min-height:26px!important;
+  line-height:13px!important;
+  font-size:11px!important;
+  text-align:center!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+}
+/* Prices are intentionally hidden while 2x/3x reels are spinning. */
+#spinModal .wheel-multi-row .wheel-item small{display:none!important;}
+@media(max-width:430px){
+  #spinModal .wheel-multi-row .multi-reel{height:120px!important;min-height:120px!important;}
+  #spinModal .wheel-multi-row .wheel-item{width:96px!important;min-width:96px!important;height:120px!important;}
+  #spinModal .wheel-multi-row .wheel-cube-icon{width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;flex-basis:46px!important;}
+  #spinModal .wheel-multi-row .wheel-item b{max-width:88px!important;font-size:10.5px!important;line-height:12px!important;}
+}
 </style>
