@@ -11069,18 +11069,24 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   #spinModal.multi-open #spinCloseBtn{height:38px!important;min-height:38px!important;}
 }
 </style>
-<style id="gdplay-2x3x-larger-final-v10">
-/* 2x/3x final polish: slightly larger reels and noticeably larger result rewards/total. */
+<style id="gdplay-multi-case-result-final-v10">
+/* 2x/3x: a little more space for the reels and noticeably larger result cards. */
+#spinModal.multi-open .spin-modal{
+  width:min(97vw,420px)!important;
+  padding:13px 13px 14px!important;
+}
+/* Slightly enlarge the three/two spinning reels without making the modal scroll. */
 #spinModal.multi-open .wheel-multi-row .multi-reel{
   height:94px!important;
   min-height:94px!important;
-  border-radius:18px!important;
 }
 #spinModal.multi-open .wheel-multi-row .wheel-item{
   height:94px!important;
   min-height:94px!important;
-  padding:9px 3px 3px!important;
-  transform:translateY(6px)!important;
+  padding:12px 3px 2px!important;
+  justify-content:flex-start!important;
+  gap:4px!important;
+  transform:translateY(7px)!important;
 }
 #spinModal.multi-open .wheel-multi-row .wheel-cube-icon{
   width:42px!important;
@@ -11093,12 +11099,13 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   font-size:11.5px!important;
   line-height:13px!important;
   min-height:26px!important;
-  max-width:94px!important;
+  max-width:92px!important;
+  transform:none!important;
 }
-
+/* Larger cards showing exactly which cubes dropped. */
 #spinModal.multi-open .spin-result-multi{
   gap:7px!important;
-  margin-top:7px!important;
+  margin-top:6px!important;
 }
 #spinModal.multi-open .spin-result-multi-item{
   height:46px!important;
@@ -11108,22 +11115,21 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   font-size:12px!important;
 }
 #spinModal.multi-open .spin-result-multi-item b{
-  max-width:180px!important;
+  max-width:185px!important;
   font-size:12px!important;
-  line-height:14px!important;
 }
 #spinModal.multi-open .spin-multi-cube-icon{
   width:34px!important;
   height:34px!important;
-  min-width:34px!important;
-  min-height:34px!important;
   margin-right:6px!important;
 }
+/* Larger total block. */
 #spinModal.multi-open .spin-result{
-  margin:8px 0 0!important;
+  margin:7px 0 0!important;
   padding:11px 12px!important;
   min-height:50px!important;
   border-radius:12px!important;
+  line-height:1.15!important;
 }
 #spinModal.multi-open .spin-final-label{
   font-size:13px!important;
@@ -11138,23 +11144,78 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   height:44px!important;
   min-height:44px!important;
   margin-top:8px!important;
+  border-radius:12px!important;
   font-size:13.5px!important;
 }
 @media(max-width:430px){
-  #spinModal.multi-open .wheel-multi-row .multi-reel,
-  #spinModal.multi-open .wheel-multi-row .wheel-item{height:90px!important;min-height:90px!important;}
-  #spinModal.multi-open .wheel-multi-row .wheel-cube-icon{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;flex-basis:40px!important;}
-  #spinModal.multi-open .wheel-multi-row .wheel-item b{font-size:11px!important;line-height:12.5px!important;max-width:92px!important;}
-  #spinModal.multi-open .spin-result-multi-item{height:44px!important;min-height:44px!important;padding:5px 10px!important;}
-  #spinModal.multi-open .spin-multi-cube-icon{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;}
-  #spinModal.multi-open .spin-result{min-height:48px!important;padding:10px 11px!important;}
+  #spinModal.multi-open .spin-modal{width:calc(100vw - 10px)!important;}
+  #spinModal.multi-open .wheel-multi-row .wheel-item{transform:translateY(6px)!important;}
 }
 @media(max-height:650px){
   #spinModal.multi-open .wheel-multi-row .multi-reel,
-  #spinModal.multi-open .wheel-multi-row .wheel-item{height:80px!important;min-height:80px!important;}
+  #spinModal.multi-open .wheel-multi-row .wheel-item{height:82px!important;min-height:82px!important;}
+  #spinModal.multi-open .wheel-multi-row .wheel-item{padding-top:8px!important;transform:translateY(4px)!important;}
   #spinModal.multi-open .wheel-multi-row .wheel-cube-icon{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;flex-basis:36px!important;}
   #spinModal.multi-open .spin-result-multi-item{height:40px!important;min-height:40px!important;}
-  #spinModal.multi-open .spin-result{min-height:42px!important;padding:8px 9px!important;}
-  #spinModal.multi-open #spinCloseBtn{height:38px!important;min-height:38px!important;}
+  #spinModal.multi-open .spin-multi-cube-icon{width:30px!important;height:30px!important;}
+  #spinModal.multi-open .spin-result{min-height:44px!important;padding:8px 10px!important;}
+  #spinModal.multi-open .spin-result-value{font-size:13px!important;}
+  #spinModal.multi-open #spinCloseBtn{height:40px!important;min-height:40px!important;}
+}
+</style>
+<style id="gdplay-multi-reel-outline-final-v11">
+/* 2x/3x reels: remove the inner winner/selection outline entirely. */
+#spinModal.multi-open .wheel-multi-row .wheel-item::after{
+  display:none!important;
+  border:none!important;
+  box-shadow:none!important;
+}
+#spinModal.multi-open .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after{
+  display:none!important;
+  border:none!important;
+  box-shadow:none!important;
+}
+#spinModal.multi-open .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{
+  transform:translateY(7px)!important;
+  box-shadow:none!important;
+}
+/* Slightly smaller cube image so the cube + name always stay inside the reel. */
+#spinModal.multi-open .wheel-multi-row .wheel-cube-icon{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  flex-basis:38px!important;
+}
+#spinModal.multi-open .wheel-multi-row .wheel-item b{
+  font-size:11px!important;
+  line-height:12.5px!important;
+  max-width:92px!important;
+  min-height:25px!important;
+}
+/* Keep the cube and its name a little lower, but inside the reel. */
+#spinModal.multi-open .wheel-multi-row .wheel-item{
+  padding:12px 3px 2px!important;
+  justify-content:flex-start!important;
+  transform:translateY(7px)!important;
+  gap:4px!important;
+}
+@media(max-height:650px){
+  #spinModal.multi-open .wheel-multi-row .wheel-cube-icon{
+    width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;flex-basis:34px!important;
+  }
+  #spinModal.multi-open .wheel-multi-row .wheel-item{padding-top:8px!important;transform:translateY(4px)!important;}
+}
+</style>
+<style id="gdplay-remove-all-reel-selection-outline">
+/* Remove the selected/target cube outline for 1x, 2x and 3x reels. */
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]::after{
+  border-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+#spinModal .wheel-dial.is-stopped .wheel-item[data-reel-target="1"]{
+  box-shadow:none!important;
 }
 </style>
