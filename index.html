@@ -4037,7 +4037,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v4',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v5',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -6073,6 +6073,11 @@ async function showApp(skipServer=false){
   // used for server data, cube icons and profile/case images without making
   // the splash depend on the server response.
   renderAll();
+  // Cases are the normal landing page after every regular app launch.
+  // Explicit Telegram start parameters are handled separately below.
+  currentTab='cases';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='cases'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-cases'));
   try{ ensureCasesFirstPaint(); }catch(_){}
   refreshGlobalTechBreak();
 
@@ -6084,6 +6089,9 @@ async function showApp(skipServer=false){
   ]).then(()=>{
     try{
       renderAll();
+      currentTab='cases';
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='cases'));
+      document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-cases'));
       preloadAllRenderedImages();
       refreshGlobalTechBreak();
     }catch(_){}
