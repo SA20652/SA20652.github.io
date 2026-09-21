@@ -7298,6 +7298,33 @@ function renderCases(){
   startCasePreviewAnimation();
 }
 const caseOpenQty = {};
+function patchCaseCardsUI(){
+  const list=document.getElementById('casesList');
+  if(!list || !Array.isArray(CASES)) return;
+  const balanceNow=Number(data?.balance||0);
+  list.querySelectorAll('.rad-case-card[data-case-id]').forEach(card=>{
+    const id=String(card.dataset.caseId||'');
+    const c=CASES.find(x=>String(x.id)===id);
+    if(!c) return;
+    const qty=Math.max(1,Math.min(3,Number(caseOpenQty[id]||1)));
+    card.querySelectorAll('.case-qty-btn').forEach(btn=>{
+      btn.classList.toggle('active',Number(btn.dataset.qty)===qty);
+    });
+    const open=card.querySelector('.rad-open');
+    const total=Number(c.price)*qty;
+    const affordable=Number.isFinite(balanceNow)&&balanceNow>=total;
+    if(open){
+      open.disabled=!affordable;
+      open.textContent=affordable?(qty>1?'Открыть · '+total.toLocaleString('ru-RU')+' 💰':'Открыть кейс'):'Не хватает '+Math.max(0,total-balanceNow).toLocaleString('ru-RU')+' 💰';
+    }
+    const pity= Math.max(0,Number(data?.casePity?.[id]||0));
+    const limit= id==='hall' ? 50 : 25;
+    const head=card.querySelector('.case-pity-head b');
+    const fill=card.querySelector('.case-pity-fill');
+    if(head) head.textContent=`${pity}/${limit}`;
+    if(fill) fill.style.width=Math.min(100,Math.max(0,pity/limit*100))+'%';
+  });
+}
 function casePityLimit(caseId){ return String(caseId)==='hall' ? 50 : 25; }
 function casePityGuarantee(c){
   if(String(c?.id)==='hall'){
@@ -7835,7 +7862,7 @@ async function openCaseBatch(c, qty, useKey=false){
   if(closeBtn) closeBtn.classList.remove('hidden');
   closeBtn.onclick=()=>{
     closeModal('spinModal'); wheelWrap.classList.remove('reel-opening'); if(multiRow){multiRow.classList.remove('reel-opening');multiRow.style.display='none';multiRow.innerHTML='';}
-    multiResult.classList.add('hidden'); multiResult.innerHTML=''; if(caseUiDirty){ renderInventory(); renderCases(); caseUiDirty=false; } updateBalanceUI(); closeBtn.onclick=null;
+    multiResult.classList.add('hidden'); multiResult.innerHTML=''; if(caseUiDirty){ if(currentTab==='inventory') renderInventory(); else if(currentTab==='cases') patchCaseCardsUI(); caseUiDirty=false; } updateBalanceUI(); closeBtn.onclick=null;
   };
   const batchBookkeeping=()=>{
     wins.forEach(won=>{pushDrop({username:data.username,item:won.name,rarity:won.rarity,value:won.value,time:Date.now()});recordBestDrop(won);});
@@ -7985,7 +8012,13 @@ function collectSpinReward(){
   if(multiResult){ multiResult.classList.add('hidden'); multiResult.innerHTML=''; }
   document.getElementById('wheelWrap').style.display='block';
   document.getElementById('wheelWrap').classList.remove('reel-opening');
-  if(caseUiDirty){ renderInventory(); renderCases(); caseUiDirty=false; }
+  // Update only the page that is currently visible. Rebuilding both large
+  // lists here caused a one-frame blank flash in Telegram WebView.
+  if(caseUiDirty){
+    if(currentTab==='inventory') renderInventory();
+    else if(currentTab==='cases') patchCaseCardsUI();
+    caseUiDirty=false;
+  }
   updateBalanceUI();
   persistLocal();
   showToast('Награда забрана в инвентарь','success');
@@ -9801,7 +9834,7 @@ function handleButton(button, e){
   }
 
   if(action==='open-case'){ if(!button.disabled){ openCase(button.dataset.case,false).catch(err=>showToast('❌ '+(err.message||'Ошибка открытия'),'error')); } return; }
-  if(action==='set-case-qty'){ caseOpenQty[button.dataset.case] = Number(button.dataset.qty); renderCases(); return; }
+  if(action==='set-case-qty'){ caseOpenQty[button.dataset.case] = Number(button.dataset.qty); patchCaseCardsUI(); return; }
   if(action==='toggle-stack'){ const sid=button.dataset.stackId||''; if(sid){ if(expandedCubeStacks.has(sid)) expandedCubeStacks.delete(sid); else expandedCubeStacks.add(sid); renderInventory(); } return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
     if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
