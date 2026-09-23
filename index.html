@@ -5008,6 +5008,7 @@ img { content-visibility: visible !important; }
     <!-- SETTINGS -->
 <div class="page" id="page-settings">
       <div class="section-title">Настройки</div>
+      <button type="button" class="settings-row settings-policy-btn" id="privacyPolicyBtn"><span class="label">Политика конфиденциальности</span><span class="btn-ghost">Открыть</span></button>
 
       <div class="settings-row"><span class="label">Звуки</span><button class="btn-ghost" id="soundToggle">Включены</button></div>
       <div class="settings-row"><span class="label">Анимации</span><button class="btn-ghost" id="motionToggle">Включены</button></div>
@@ -5195,10 +5196,37 @@ img { content-visibility: visible !important; }
   <button type="button" class="btn-ghost" id="notificationsCloseBtn" style="width:100%;margin-top:10px">Закрыть</button>
 </div></div>
 <div id="toastBox"></div>
+<div class="modal-overlay" id="privacyPolicyModal" aria-hidden="true">
+  <div class="input-modal privacy-policy-modal">
+    <div class="notification-head"><div><h3 style="margin:0">Политика конфиденциальности</h3><div class="section-sub" style="margin-top:3px">GDPLAY · информация об обработке данных</div></div><button type="button" class="btn-ghost" id="privacyPolicyClose">Закрыть</button></div>
+    <div class="privacy-policy-content">
+      <p><b>1. Общая информация</b><br>GDPLAY — независимое пользовательское приложение и Telegram Mini App. Приложение не является официальным продуктом, сервисом или приложением RobTop Games и не связано с RobTop Games, Geometry Dash или их правообладателями, если прямо не указано иное.</p>
+      <p><b>2. Какие данные могут обрабатываться</b><br>Для работы игры могут использоваться данные Telegram, необходимые для идентификации аккаунта: Telegram ID, имя/отображаемое имя, username (если доступен), фотография профиля, а также игровой прогресс и настройки GDPLAY.</p>
+      <p><b>3. Технические данные</b><br>Для безопасности и диагностики могут фиксироваться технические сведения о запросах, например IP-адрес, время запроса и сведения об ошибках. IP-адрес может использоваться для защиты от злоупотреблений и ограничений. Геолокация по IP, если используется, является приблизительной и не определяет точный адрес пользователя.</p>
+      <p><b>4. Игровые данные</b><br>Игровой баланс, кубы, открытия кейсов, покупки внутри приложения, настройки профиля, рефералы и другие игровые показатели используются для работы функций GDPLAY и синхронизации аккаунта между устройствами.</p>
+      <p><b>5. Передача данных</b><br>Данные не предназначены для продажи третьим лицам. Технические и Telegram-данные могут передаваться только тем сервисам, которые необходимы для работы приложения, например Telegram и инфраструктуре хостинга.</p>
+      <p><b>6. Telegram Stars</b><br>Если в приложении используются Telegram Stars, платежная обработка выполняется средствами Telegram. GDPLAY не получает данные банковской карты или иные платёжные реквизиты, которые Telegram не передаёт приложению.</p>
+      <p><b>7. Удаление данных</b><br>Если вы хотите удалить игровой аккаунт или связанные с ним данные, обратитесь к администрации GDPLAY через предусмотренный канал связи бота.</p>
+      <p><b>8. Изменения</b><br>Политика может обновляться при изменении функций приложения. Актуальная версия всегда доступна в разделе «Настройки».</p>
+      <p class="privacy-policy-note">GDPLAY — самостоятельный проект. Упоминание Geometry Dash используется только для описания тематики пользовательского приложения и не означает официального одобрения или аффилированности с RobTop Games.</p>
+    </div>
+  </div>
+</div>
+
 
 <script>
 (function(){
 "use strict";
+
+const gdplayPrivacyPolicyHandlers=true;
+document.addEventListener('click',function(e){
+  const open=e.target.closest&&e.target.closest('#privacyPolicyBtn');
+  const close=e.target.closest&&e.target.closest('#privacyPolicyClose');
+  const modal=document.getElementById('privacyPolicyModal');
+  if(open&&modal){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); return; }
+  if(close&&modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); return; }
+  if(e.target===modal&&modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+});
 
 // Критические обработчики авторизации подключаем сразу. Если Telegram WebView
 // задержит/сломает какой-либо необязательный код ниже, Вход и Регистрация
@@ -5758,7 +5786,7 @@ function applyServerState(u){
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
-  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined && String(u.profile_name_style||'default') !== String(data.profileNameStyle||'default')){ data.profileNameStyle=String(u.profile_name_style||'default'); changed=true; } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
+  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
   if(Array.isArray(u.buffs) && JSON.stringify(u.buffs)!==JSON.stringify(data.buffs)){ data.buffs=u.buffs; changed=true; }
   if(Array.isArray(u.best_drops) && JSON.stringify(u.best_drops)!==JSON.stringify(data.bestDrops)){ data.bestDrops=u.best_drops; changed=true; }
   if(Array.isArray(u.notifications)){
@@ -9366,7 +9394,7 @@ async function setProfileNameStyle(key){
   data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
   try{
     const j=await apiFetch('/api/profile/name-style',{style:key});
-    data.profileNameStyle=String(j.profile_name_style||key); persistLocal(); renderProfileCustomization();
+    { const serverStyle=String(j.profile_name_style||'default'); if(serverStyle!=='default' || key==='default' || !isPremiumActive()) data.profileNameStyle=serverStyle||key; else data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); }
     // Серверное значение является источником истины и переживает перезаход.
     await refreshProfileAppearanceFromServer();
     renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
@@ -11504,4 +11532,14 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 #page-profile #profileAvatarFrame.frame-cyan{border:3px solid #25e6e6!important;box-shadow:0 0 20px rgba(37,230,230,.62),inset 0 0 8px rgba(255,255,255,.18)!important;}
 #page-profile #profileAvatarFrame.frame-sapphire{border:3px solid #4d8dff!important;box-shadow:0 0 22px rgba(77,141,255,.66),inset 0 0 8px rgba(180,220,255,.16)!important;}
 #page-profile #profileAvatarFrame.frame-aurora{border:3px solid #8cffd1!important;box-shadow:0 0 25px rgba(140,255,209,.70),inset 0 0 10px rgba(255,255,255,.18)!important;}
+</style>
+
+<style id="gdplay-privacy-policy-v1">
+.settings-policy-btn{width:100%;border:1px solid var(--line);background:var(--bg-3);color:var(--paper);padding:12px 13px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;text-align:left;margin:8px 0;}
+.settings-policy-btn .label{font-size:13px;font-weight:700;}
+.privacy-policy-modal{max-height:min(82vh,760px);overflow:hidden;display:flex;flex-direction:column;}
+.privacy-policy-content{overflow:auto;padding:12px 2px 4px;font-size:12px;line-height:1.55;color:var(--paper);}
+.privacy-policy-content p{margin:0 0 13px;}
+.privacy-policy-note{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.025);color:var(--muted);}
+#privacyPolicyModal.open{display:flex!important;}
 </style>
