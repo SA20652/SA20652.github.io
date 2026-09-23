@@ -5343,14 +5343,14 @@ const CASES = [
     {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77}
   ]},
   {id:"icon",name:"Иконический кейс",price:380000,icon:'',items:[
-    {name:"Superkobster",rarity:"common",value:152000,chance:13.16},
-    {name:"nng122",rarity:"common",value:209000,chance:15.14},
-    {name:"Netermind",rarity:"rare",value:285000,chance:27.48},
-    {name:"Taiago",rarity:"epic",value:456000,chance:28.22},
-    {name:"Attasha",rarity:"legendary",value:1488228,chance:9.0},
-    {name:"Bistik",rarity:"mythic",value:1292000,chance:3.33},
-    {name:"ItzGet",rarity:"mythic",value:1300000,chance:1.0},
-    {name:"workfornft",rarity:"divine",value:2850000,chance:2.67}
+    {name:"Superkobster",rarity:"common",value:152000,chance:35.0},
+    {name:"nng122",rarity:"common",value:209000,chance:30.0},
+    {name:"Netermind",rarity:"rare",value:285000,chance:22.0},
+    {name:"Taiago",rarity:"epic",value:456000,chance:8.0},
+    {name:"Attasha",rarity:"legendary",value:1488228,chance:3.0},
+    {name:"Bistik",rarity:"mythic",value:1292000,chance:1.0},
+    {name:"ItzGet",rarity:"mythic",value:1300000,chance:0.5},
+    {name:"workfornft",rarity:"divine",value:2850000,chance:0.5}
   ]},
   {id:"hall",name:"Зал славы GD",price:650000,icon:'',items:[
     {name:"Riot",rarity:"common",value:260000,chance:12.32},
@@ -9502,7 +9502,7 @@ function updateDailyUI(){
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
   const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
   const nextAt=Number(dailyState.nextAt||0),can=!!dailyState.available && dailyState.streak<14;
-  const rewards=[1000,1500,2000,2500,3000,4000,5000],day=Math.max(1,streak||1),reward=rewards[day-1]*(premium?2:1);
+  const rewards=[1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,9000,10000,12000,15000],day=Math.max(1,Math.min(14,streak||1)),reward=Number(dailyState.reward||0)||rewards[day-1]*(premium?2:1);
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent='Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn){btn.disabled=!can;btn.classList.toggle('disabled',!can);btn.setAttribute('aria-disabled',String(!can));}
   const timer=document.getElementById('dailyTimer');if(timer){if(can)timer.textContent='Бонус доступен — забери его в течение 12 часов';else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}else timer.textContent='Проверяем доступность награды…';}
