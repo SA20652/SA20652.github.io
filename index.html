@@ -9204,7 +9204,6 @@ function profileFrameUnlock(key){
   const vipActive=!!(data && ((data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now()) || data.vip===true || data.isVip===true || data.vip_until || data.vipUntil));
   const userId=String(tgUserId()||data?.user_id||data?.id||'');
   const cases=Number(data?.cases_opened||0);
-  if(userId==='7491528121') return {ok:true, label:'Доступна владельцу ID 74915228121'};
   const balance=Number(data?.balance||0);
   const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
@@ -9344,6 +9343,8 @@ async function loadReferralStats(force=false){
     const link=document.getElementById('referralLink'); if(link) link.textContent=referralLinkValue||'Ссылка временно недоступна';
     data.referralCount=Number(j.count||0);
     const count=document.getElementById('referralCount'); if(count) count.textContent=Number(j.count||0).toLocaleString('ru-RU');
+    // Referral milestones affect profile-frame availability immediately.
+    renderProfileCustomization();
     // Prepare the Telegram share in the background while the referral card is visible.
     // This removes the long wait from the actual Share button press.
     warmupReferralShare();
@@ -10301,7 +10302,7 @@ boot().catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
 #spinModal .spin-modal{height:auto!important;min-height:0!important;max-height:calc(100dvh - 20px)!important;overflow-y:auto!important;}
 #spinModal .spin-result{margin-bottom:8px!important;}
 #spinModal #spinCloseBtn{position:static!important;}
-.top-user-name,[data-top-name]{color:var(--paper)}
+.top-user-name:not(.name-gold):not(.name-emerald):not(.name-ruby):not(.name-amethyst):not(.name-ice):not(.name-neon):not(.name-rainbow):not(.name-plasma):not(.name-arctic):not(.name-diamond):not(.name-sunset):not(.name-ocean):not(.name-toxic):not(.name-aurora),[data-top-name]:not(.name-gold):not(.name-emerald):not(.name-ruby):not(.name-amethyst):not(.name-ice):not(.name-neon):not(.name-rainbow):not(.name-plasma):not(.name-arctic):not(.name-diamond):not(.name-sunset):not(.name-ocean):not(.name-toxic):not(.name-aurora){color:var(--paper)}
 
 /* Final responsive vault fixes */
 #spinModal .spin-modal{
