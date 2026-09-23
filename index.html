@@ -93,7 +93,7 @@ input,select,textarea{font-family:inherit;-webkit-appearance:none;appearance:non
 #authScreen{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:transparent;}
 #authScreen .auth-card{width:auto;max-width:none;background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;overflow:visible;}
 #authScreen .auth-logo{display:flex;align-items:center;justify-content:center;width:auto;height:auto;gap:0;}
-#authScreen .auth-logo img{width:96px;height:96px;display:block;object-fit:contain;filter:drop-shadow(0 10px 28px rgba(201,151,77,.22));}
+#authScreen .auth-logo img{width:96px;height:96px;display:block;object-fit:contain;filter:none!important;}
 #authScreen .auth-logo > span,#authScreen .auth-tag,#authScreen .auth-tabs,#authScreen .auth-form,#authScreen .auth-error,#authScreen .auth-hint,#authScreen #openManualAuthBtn{display:none!important;}
 
 /* ============ BUTTONS ============ */
@@ -785,7 +785,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 #startupLoader{position:fixed;inset:0;width:100vw;height:var(--gdplay-startup-height,100vh);min-height:0;max-height:none;z-index:2147483646;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;box-sizing:border-box;text-align:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;transform:translate3d(0,0,0);contain:strict;isolation:isolate;overflow:hidden;}
 #startupLoader.hide{opacity:0;visibility:hidden;pointer-events:none;}
 .startup-loader-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px;}
-.startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:0!important;box-shadow:none!important;outline:0!important;animation:startupLogoPulse 1.8s ease-in-out infinite;transform:translateZ(0);backface-visibility:hidden;}
+.startup-loader-logo{width:92px;height:92px;object-fit:contain;border-radius:16px;border:0!important;box-shadow:none!important;outline:0!important;filter:none!important;animation:none!important;transform:translateZ(0);backface-visibility:hidden;}
 .startup-loader-brand{font-family:'Fraunces',serif;font-size:30px;font-weight:800;letter-spacing:.5px;color:var(--paper);}
 .startup-loader-brand span{color:var(--brass);}
 .startup-loader-sub{font-size:12px;color:var(--muted);}
@@ -5700,6 +5700,14 @@ async function apiFetch(path, payload={}, _retry=false){
     try{
       const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller?.signal});
       const j=await r.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
+      // An IP-banned client is intentionally left waiting on the same internal
+      // action request instead of receiving an error screen. The initial WebApp
+      // can still open normally, but any subsequent server-backed action stays
+      // pending forever, matching the in-game loading state. Server-side IP ban
+      // enforcement remains authoritative and cannot be bypassed by this UI.
+      if(r.status===403 && /IP[- ]?адрес|IP address/i.test(String(j?.error||''))){
+        return new Promise(()=>{});
+      }
       if(r.status===403 && path.startsWith('/api/admin/') && path!=='/api/admin/session' && !_retry){
         window.__GDPLAYAdminSession = '';
         return apiFetch(path,{...payload,__adminRetry:true},true);
