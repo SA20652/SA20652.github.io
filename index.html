@@ -5219,8 +5219,17 @@ img { content-visibility: visible !important; }
       <p><b>5. Передача данных</b><br>Данные не предназначены для продажи третьим лицам. Технические и Telegram-данные могут передаваться только тем сервисам, которые необходимы для работы приложения, например Telegram и инфраструктуре хостинга.</p>
       <p><b>6. Telegram Stars</b><br>Если в приложении используются Telegram Stars, платежная обработка выполняется средствами Telegram. GDPLAY не получает данные банковской карты или иные платёжные реквизиты, которые Telegram не передаёт приложению.</p>
       <p><b>7. Удаление данных</b><br>Если вы хотите удалить игровой аккаунт или связанные с ним данные, обратитесь к администрации GDPLAY через предусмотренный канал связи бота.</p>
-      <p><b>8. Изменения</b><br>Политика может обновляться при изменении функций приложения. Актуальная версия всегда доступна в разделе «Настройки».</p>
-      <p class="privacy-policy-note">GDPLAY — самостоятельный проект. Упоминание Geometry Dash используется только для описания тематики пользовательского приложения и не означает официального одобрения или аффилированности с RobTop Games.</p>
+      <p><b>8. Локальное хранение</b><br>Часть настроек интерфейса может сохраняться непосредственно в памяти Telegram Mini App на устройстве: например, состояние звука, анимаций, выбранное оформление профиля и другие пользовательские параметры. Такие данные нужны для удобства и не являются отдельным аккаунтом.</p>
+      <p><b>9. Авторизация и безопасность</b><br>Для входа через Telegram приложение использует подписанные Telegram данные запуска. Сервер проверяет их перед обработкой защищённых запросов. Для защиты от злоупотреблений могут применяться ограничения частоты запросов, проверка IP и другие технические меры.</p>
+      <p><b>10. Профиль и публичные данные</b><br>Некоторые сведения, необходимые игровым функциям, могут отображаться другим игрокам внутри GDPLAY: имя/отображаемое имя, аватар, игровые показатели, элементы оформления профиля и позиции в рейтинге. Пароли, токены авторизации и внутренние технические данные не предназначены для публичного отображения.</p>
+      <p><b>11. Реферальная система</b><br>При использовании приглашений могут сохраняться сведения о факте приглашения, связанных игровых наградах и статистике рефералов. Это необходимо для начисления наград и предотвращения повторного или автоматизированного злоупотребления системой.</p>
+      <p><b>12. Премиум и внутриигровые покупки</b><br>Статус Premium и связанные с ним игровые возможности могут сохраняться в аккаунте. Если используются Telegram Stars, сведения о результате операции обрабатываются через Telegram и техническую инфраструктуру приложения; платёжные реквизиты банковской карты не запрашиваются самим GDPLAY.</p>
+      <p><b>13. Cookies и аналитика</b><br>GDPLAY может использовать локальное хранилище браузерного окружения для сохранения настроек и игровой сессии. Если в будущем будут подключены сторонние системы аналитики, информация об их использовании должна быть отражена в обновлённой версии этой политики.</p>
+      <p><b>14. Срок хранения</b><br>Игровые данные могут храниться столько, сколько это необходимо для работы аккаунта, безопасности, восстановления прогресса и выполнения игровых операций. Технические журналы могут храниться ограниченный срок для диагностики и защиты сервиса.</p>
+      <p><b>15. Права пользователя</b><br>Пользователь может обратиться к администрации GDPLAY с вопросами о своих данных, запросом на исправление неточностей или удаление аккаунта и связанных игровых данных, если удаление не требуется для предотвращения злоупотреблений, исполнения обязательств или сохранения технических журналов на установленный срок.</p>
+      <p><b>16. Контакты и обращения</b><br>По вопросам конфиденциальности, удаления аккаунта или обработки данных используйте предусмотренный канал связи с администрацией бота GDPLAY. Не отправляйте в чат пароли, коды подтверждения или другие секретные данные.</p>
+      <p><b>17. Обновление политики</b><br>Политика может изменяться при добавлении новых функций, способов авторизации, платежей или технических сервисов. При существенных изменениях новая версия публикуется внутри раздела «Настройки».</p>
+      <p class="privacy-policy-note">GDPLAY — самостоятельный пользовательский проект и не является официальным продуктом RobTop Games. Geometry Dash и связанные с ним названия/объекты принадлежат соответствующим правообладателям. GDPLAY не заявляет об официальном партнёрстве, одобрении или аффилированности с RobTop Games.</p>
     </div>
   </div>
 </div>
@@ -5288,6 +5297,7 @@ const DROPS_KEY = 'gdplay_drops_v1';
 const MARKET_KEY = 'gdplay_market_v1';
 const DEVICE_BACKUP_KEY = 'gdplay_device_backup_v1';
 const AUTH_TOKEN_KEY = 'gdplay_auth_token_v1';
+const PROFILE_NAME_STYLE_KEY = 'gdplay_profile_name_style_v2';
 const MANUAL_AUTH_KEY = 'gdplay_manual_auth_v1';
 const UPGRADE_FAST_KEY = 'gdplay_upgrade_fast_v1';
 const KEY_CATALOG = [
@@ -6002,10 +6012,19 @@ async function registerWithServer(){
     // стартовые 1000 монет/нулевые показатели и перезаписать реальный прогресс.
     if(j.user){
       data.profileFrame = String(j.user.profile_frame || data.profileFrame || 'default');
-      // На новом входе серверное сохранённое значение имеет приоритет над старым localStorage.
-      // Это важно, если на устройстве остался кэш со старым default.
-      if(j.user.profile_name_style !== undefined){
-        data.profileNameStyle = String(j.user.profile_name_style || 'default');
+      const serverStyle=String(j.user.profile_name_style || 'default').toLowerCase();
+      const savedStyle=getSavedProfileNameStyle();
+      // Если сервер вернул старый default, но на этом Telegram-аккаунте уже
+      // был сохранён Premium-стиль, не затираем его локальным default.
+      // После восстановления сразу пытаемся записать стиль обратно на сервер.
+      if(serverStyle!=='default'){
+        data.profileNameStyle=serverStyle;
+        saveProfileNameStyleLocal(serverStyle);
+      }else if(savedStyle!=='default' && isPremiumActive()){
+        data.profileNameStyle=savedStyle;
+        apiFetch('/api/profile/name-style',{style:savedStyle}).then(()=>{}).catch(()=>{});
+      }else{
+        data.profileNameStyle=serverStyle;
       }
       data.serverSynced = true;
       persistLocal();
@@ -6022,6 +6041,21 @@ function persistLocal(){
   saveUsers(users);
   storageSet(DEVICE_BACKUP_KEY, JSON.stringify({user:currentUser, game:data, savedAt:Date.now()}));
   storageSet(SESSION_KEY, currentUser);
+}
+
+function getSavedProfileNameStyle(){
+  try{
+    const raw=storageGet(PROFILE_NAME_STYLE_KEY);
+    if(!raw) return 'default';
+    const obj=JSON.parse(raw);
+    const uid=String(tgUserId()||currentUser||'');
+    if(obj && obj.uid && String(obj.uid)===uid && obj.style) return String(obj.style).toLowerCase();
+  }catch(e){}
+  return 'default';
+}
+function saveProfileNameStyleLocal(style){
+  const key=String(style||'default').toLowerCase();
+  try{ storageSet(PROFILE_NAME_STYLE_KEY, JSON.stringify({uid:String(tgUserId()||currentUser||''),style:key,savedAt:Date.now()})); }catch(e){}
 }
 
 function saveData(){
@@ -9407,26 +9441,38 @@ async function setProfileNameStyle(key){
   const premiumActive=isPremiumActive();
   if(key!=='default' && !premiumActive){
     data.profileNameStyle='default';
+    storageRemove(PROFILE_NAME_STYLE_KEY);
     persistLocal();
     renderProfileCustomization();
     showToast('⭐ Стиль имени доступен только с Premium','error');
     return;
   }
   const prev=String(data.profileNameStyle||'default');
-  data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
+  data.profileNameStyle=key;
+  saveProfileNameStyleLocal(key);
+  persistLocal();
+  renderProfileCustomization();
+  renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
   try{
     const j=await apiFetch('/api/profile/name-style',{style:key});
-    { const serverStyle=String(j.profile_name_style||'default'); if(serverStyle!=='default' || key==='default' || !isPremiumActive()) data.profileNameStyle=serverStyle||key; else data.profileNameStyle=key; persistLocal(); renderProfileCustomization(); }
-    // Не вызываем /api/me сразу после сохранения: он может вернуть старый cached/default стиль.
-    // Сохранённое значение уже подтверждено ответом /api/profile/name-style.
+    const serverStyle=String(j.profile_name_style||key).toLowerCase();
+    // Для выбора цвета локальное состояние не откатываем из-за старого/default
+    // ответа. Серверное значение подтверждаем только если оно действительно задано.
+    data.profileNameStyle = serverStyle==='default' && key!=='default' ? key : serverStyle;
+    saveProfileNameStyleLocal(data.profileNameStyle);
+    persistLocal();
     renderProfileCustomization();
     renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
     showToast('🎨 Цвет имени сохранён');
   }catch(e){
-    data.profileNameStyle=prev; persistLocal(); renderProfileCustomization();
+    data.profileNameStyle=prev;
+    saveProfileNameStyleLocal(prev);
+    persistLocal();
+    renderProfileCustomization();
     showToast(e.message||'Не удалось сохранить цвет имени','error');
   }
 }
+
 
 let referralLoadedAt=0;
 let referralLinkValue='';
