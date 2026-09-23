@@ -6002,7 +6002,11 @@ async function registerWithServer(){
     // стартовые 1000 монет/нулевые показатели и перезаписать реальный прогресс.
     if(j.user){
       data.profileFrame = String(j.user.profile_frame || data.profileFrame || 'default');
-      data.profileNameStyle = String(j.user.profile_name_style || data.profileNameStyle || 'default');
+      // На новом входе серверное сохранённое значение имеет приоритет над старым localStorage.
+      // Это важно, если на устройстве остался кэш со старым default.
+      if(j.user.profile_name_style !== undefined){
+        data.profileNameStyle = String(j.user.profile_name_style || 'default');
+      }
       data.serverSynced = true;
       persistLocal();
     }
