@@ -724,7 +724,56 @@ function applyServerState(u){
 // Локальный прогресс отправляется на сервер только ОДИН РАЗ (для миграции
 // старых игроков) — дальше сервер всегда источник истины, чтобы действия
 // админа (баланс/сброс/куб) никогда не затирались устаревшими локальными данными.
-async function loadAdminUI(){ return false; }
+async function loadAdminUI(){
+  if(!window.isAdmin || window.adminUIReady) return true;
+  const root = document.getElementById('adminDynamicRoot');
+  const menu = document.getElementById('menuPanel');
+  if(!root || !menu) return false;
+  try{
+    // Сначала очищаем только динамическую админскую часть, чтобы повторная
+    // загрузка после истечения сессии не создавала дубликаты.
+    root.querySelectorAll('.admin-dynamic-page, .admin-dynamic-modal').forEach(el=>el.remove());
+    menu.querySelector('#adminMenuBtn')?.remove();
+
+    let html = '';
+    try{
+      const j = await apiFetch('/api/admin/ui', {});
+      html = j && typeof j.html === 'string' ? j.html : '';
+    }catch(e){
+      console.warn('admin UI API unavailable, using built-in admin UI:', e);
+    }
+    // Встроенный fallback гарантирует, что панель добавится даже если
+    // admin_fragment.html временно недоступен на сервере.
+    if(!html){
+      const tpl = document.getElementById('adminUiFallback');
+      html = tpl ? tpl.innerHTML : '';
+    }
+    if(!html) return false;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = html;
+    const menuItem = wrap.querySelector('#adminMenuBtn');
+    if(menuItem){ menuItem.classList.add('admin-dynamic-menu'); menu.insertBefore(menuItem, document.getElementById('menuLogout') || null); }
+    const page = wrap.querySelector('#page-admin');
+    if(page){ page.classList.add('admin-dynamic-page'); root.appendChild(page); }
+    wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>{ el.classList.add('admin-dynamic-modal'); root.appendChild(el); });
+    window.adminUIReady = !!(menu.querySelector('#adminMenuBtn') && root.querySelector('#page-admin'));
+    if(window.adminUIReady){
+      // The fragment is injected after the initial /api/me call, so apply the
+      // current state to the newly created tech-break button as well.
+      try{
+        const tb = await apiFetch('/api/me',{});
+        updateAdminTechBreakPromoButton(!!tb?.global_tech_break?.enabled);
+      }catch(_){}
+    }
+    // Обработчик кнопок админки подключается ниже через единый делегированный
+    // listener. Здесь ничего дополнительно не навешиваем, чтобы при повторной
+    // загрузке admin_fragment.html не появлялись дубли обработчиков.
+    return window.adminUIReady;
+  }catch(e){
+    console.error('admin UI load error', e);
+    return false;
+  }
+}
 
 let techBreakFrame=null;
 function ensureTechBreakFrame(){
@@ -758,6 +807,27 @@ function hideTechBreak(){
   techBreakFrame?.contentWindow?.postMessage({type:'gdplay-tech-break',enabled:false,reason:''},'*');
 }
 
+function updateAdminTechBreakPromoButton(enabled){
+  const buttons=[document.getElementById('adminTechBreakPromoBtn'),document.getElementById('adminTechBreakPanelBtn')].filter(Boolean);
+  buttons.forEach(b=>{ if(!window.isAdmin){b.style.display='none';return;} b.style.display='inline-flex'; b.textContent=enabled?'Снять тех. перерыв':'Тех. перерыв'; b.classList.toggle('danger-admin',!!enabled); b.dataset.active=enabled?'1':'0'; });
+}
+
+async function adminGlobalTechBreakToggle(){
+  const b=document.getElementById('adminTechBreakPanelBtn') || document.getElementById('adminTechBreakPromoBtn');
+  const active=b?.dataset.active==='1';
+  if(active){
+    if(!await tgConfirm('Снять технический перерыв у всех игроков?')) return;
+    try{
+      await apiFetch('/api/admin/tech-break',{action:'clear'});
+      updateAdminTechBreakPromoButton(false);
+      hideTechBreak();
+      showToast('✅ Глобальный тех. перерыв снят','success');
+    }catch(e){ showToast(e.message||'Ошибка','error'); }
+    return;
+  }
+  adminTechBreak(tgUserId());
+}
+
 function showModerationNotice(notice){
   if(!notice || !notice.reason) return;
   const type=notice.notice_type==='delete' ? '🗑️ Аккаунт удалён' : '🚫 Аккаунт заблокирован';
@@ -778,6 +848,7 @@ async function registerWithServer(){
     if(j.moderation_notice) showModerationNotice(j.moderation_notice);
     window.isAdmin = !!j.is_admin;
     updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
+    if(window.isAdmin) await loadAdminUI();
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
     if(j.user && j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
     if(j.user && j.user.vip !== undefined){ data.vip = !!j.user.vip; }
@@ -1321,6 +1392,362 @@ async function renderAdmin(){
   }
 }
 
+async function loadAdminUsers(search){
+  const box = document.getElementById('adminUsersList');
+  box.innerHTML = '<div class="admin-log">Загрузка…</div>';
+  try{
+    const j = await apiFetch('/api/admin/users', {search: search||''});
+    const users = j.users||[];
+    window.adminUsersCache = users;
+    if(!users.length){ box.innerHTML='<div class="admin-log">Никого не найдено</div>'; return; }
+    box.innerHTML = users.slice(0,30).map(u=>{
+      const premiumActive = u.premium_until && new Date(u.premium_until+'Z').getTime() > Date.now();
+      const creatorActive = !!u.creator_badge;
+      const testerActive = !!u.tester_badge;
+      const customStatus = u.custom_status && typeof u.custom_status === 'object' ? u.custom_status : null;
+      const customStatusHtml = customStatus && (customStatus.text || customStatus.emoji)
+        ? (()=>{const c1=/^#[0-9a-fA-F]{6}$/.test(customStatus.color1||'')?customStatus.color1:'#f0c674';const c2=/^#[0-9a-fA-F]{6}$/.test(customStatus.color2||'')?customStatus.color2:'#ffffff';const st=customStatus.gradient?'background:linear-gradient(90deg,'+c1+','+c2+','+c1+');background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;border-color:'+c1+'66;animation:gdplayStatusGradient 2.4s ease-in-out infinite':'color:'+c1+';border-color:'+c1+'73';return `<span class="profile-badge" style="${st}">${customStatus.emoji||''} ${customStatus.text||''}</span>`})()
+        : '';
+      const cubesHtml = (u.cubes||[]).length
+        ? u.cubes.map(c=>{const m=RARITY_META[c.rarity]||RARITY_META.common; return `<div class="admin-log" style="border-left:3px solid ${m.color}">${c.name} — ${m.label}, 💰${Number(c.value||0).toLocaleString('ru-RU')}</div>`;}).join('')
+        : '<div class="admin-log">Кубов нет</div>';
+      return `
+      <div class="admin-user">
+        <div class="admin-user-head">
+          <div><b>${u.username||'Без имени'}</b><span class="admin-badges">${premiumActive?' ⭐':''}${creatorActive?' 🛠️':''}${testerActive?' 🧪':''}${customStatusHtml}</span><br><span style="color:var(--muted);font-size:11px">ID ${u.user_id} · 💰${Number(u.balance||0).toLocaleString('ru-RU')} · кубов ${u.cube_count||0}${u.tech_break_enabled?' · 🛠️ Тех. перерыв':''}</span></div>
+          <div style="font-size:11px;color:${u.banned?'var(--danger)':'var(--success)'}">${u.banned?'Забанен':(u.shadow_banned?'Теневой бан':'Активен')}</div>
+        </div>
+        <div class="admin-user-actions">
+          <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="500">+500 💰</button>
+          <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
+          <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
+          <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
+          <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
+          <button type="button" class="btn-ghost" onclick="adminGrantCases(${u.user_id})">📦 Выдать кейсы</button>
+          <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
+          <button type="button" class="btn-ghost" data-action="admin-premium" data-uid="${u.user_id}">Выдать Premium</button>
+          ${premiumActive ? `<button type="button" class="btn-ghost danger-admin" data-action="admin-remove-premium" data-uid="${u.user_id}">⭐ Снять Premium</button>` : ''}
+          <button type="button" class="btn-ghost" data-action="admin-custom-status" data-uid="${u.user_id}">🏷️ Свой статус</button>
+          <button type="button" class="btn-ghost" data-action="admin-buff" data-uid="${u.user_id}">⚡ Выдать бафф</button>
+          ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-creator" data-uid="${u.user_id}" data-enabled="${creatorActive?0:1}">${creatorActive?'Снять 🛠️':'Выдать 🛠️'}</button>` : ''}
+          ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-tester" data-uid="${u.user_id}" data-enabled="${testerActive?0:1}">${testerActive?'Снять 🛡️':'Выдать 🛡️'}</button>` : ''}
+          
+          <button type="button" class="btn-ghost danger-admin" data-action="admin-delete-user" data-uid="${u.user_id}">🗑️ Удалить аккаунт</button>
+          <button type="button" class="btn-ghost" data-action="admin-toggle-cubes" data-uid="${u.user_id}">Кубы (${u.cube_count||0})</button>
+          <button type="button" class="btn-ghost" data-action="admin-account" data-uid="${u.user_id}">⚙️ Аккаунт</button>
+        </div>
+        <div id="adminCubes-${u.user_id}" style="display:none;margin-top:8px">${cubesHtml}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    box.innerHTML = `<div class="admin-log">Ошибка: ${e.message}</div>`;
+  }
+}
+
+async function adminAccountAction(uid, action, extra={}){
+  try{
+    const j=await apiFetch('/api/admin/account', Object.assign({user_id:Number(uid), action}, extra));
+    showToast('✅ Изменение применено','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    if(String(uid)===String(tgUserId()||'')){ data=serverUserToGame(j.user,data?.username||j.user?.username); renderProfile(); updateSettingsUI(); }
+    return j;
+  }catch(e){ showToast('❌ '+e.message,'error'); throw e; }
+}
+function openAdminAccount(uid){
+  const u=(window.adminUsersCache||[]).find(x=>String(x.user_id)===String(uid));
+  document.getElementById('adminAccountUid').textContent=uid;
+  document.getElementById('adminAccountNick').value=u?.username||'';
+  document.getElementById('adminAccountPassword').value='';
+  document.getElementById('adminAccountBalance').value=u?.balance??'';
+  document.getElementById('adminAccountLevel').value=u?.level??'';
+  const avatarPreview=document.getElementById('adminAccountAvatarPreview');
+  const avatarFile=document.getElementById('adminAccountAvatarFile');
+  if(avatarFile) avatarFile.value='';
+  if(avatarPreview){
+    avatarPreview.innerHTML=u?.avatar ? `<img src="${u.avatar}" alt="Аватар" loading="lazy" decoding="async"` : '?';
+  }
+  document.getElementById('adminAccount2faBtn').textContent=u?.two_factor_enabled?'🔐 Отключить 2FA':'🔐 Включить 2FA';
+  openModal('adminAccountModal');
+  document.getElementById('adminAccountModal').querySelector('.input-modal')?.scrollTo(0,0);
+  const once=(id,fn)=>{const el=document.getElementById(id); el.onclick=fn;};
+  once('adminAccountCloseBtn', ()=>closeModal('adminAccountModal'));
+  once('adminAccountNickBtn', async()=>{const v=document.getElementById('adminAccountNick').value.trim(); if(!v)return showToast('❌ Введи ник','error'); await adminAccountAction(uid,'username',{username:v});});
+  once('adminAccountPasswordBtn', async()=>{const v=document.getElementById('adminAccountPassword').value; if(v.length<4)return showToast('❌ Пароль минимум 4 символа','error'); await adminAccountAction(uid,'password',{password:v}); document.getElementById('adminAccountPassword').value='';});
+  once('adminAccount2faBtn', async()=>{ const enabled=!!u?.two_factor_enabled; if(await tgConfirm(enabled?'Отключить 2FA и сбросить незавершённые коды?':'Включить 2FA для этого аккаунта?')) await adminAccountAction(uid,'2fa',{enabled:!enabled}); });
+  once('adminAccountSessionsBtn', async()=>{ if(await tgConfirm('Завершить все активные сессии этого аккаунта?')) await adminAccountAction(uid,'sessions'); });
+  once('adminAccountBalanceBtn', async()=>{await adminAccountAction(uid,'balance',{value:Number(document.getElementById('adminAccountBalance').value||0)});});
+  once('adminAccountLevelBtn', async()=>{await adminAccountAction(uid,'level',{value:Number(document.getElementById('adminAccountLevel').value||0)});});
+  once('adminAccountAvatarClear', async()=>{
+    if(await tgConfirm('Убрать фотографию профиля у этого аккаунта?')){
+      const j=await adminAccountAction(uid,'avatar',{avatar:''});
+      const preview=document.getElementById('adminAccountAvatarPreview');
+      const file=document.getElementById('adminAccountAvatarFile');
+      if(preview) preview.innerHTML='?';
+      if(file) file.value='';
+    }
+  });
+  once('adminAccountRemovePremiumBtn', async()=>{if(await tgConfirm('Снять Premium и удалить только Premium-баффы у игрока?')) await adminAccountAction(uid,'remove_premium');});
+  once('adminAccountClearBuffsBtn', async()=>{if(await tgConfirm('Удалить все активные баффы?')) await adminAccountAction(uid,'clear_buffs');});
+  once('adminAccountClearDropsBtn', async()=>{if(await tgConfirm('Удалить список лучших дропов?')) await adminAccountAction(uid,'clear_drops');});
+  once('adminAccountCheckBtn', async()=>{try{const j=await adminAccountAction(uid,'verify_password'); showToast((j.password_set?'🔑 Пароль задан':'⚠️ Пароль не задан')+' · '+(j.two_factor_enabled?'2FA включена':'2FA отключена'),'success');}catch(_){}});
+}
+
+function adminToggleCubes(uid){
+  const el = document.getElementById('adminCubes-'+uid);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+
+async function adminGrantCases(uid){
+  const modal=document.getElementById('adminCasesModal');
+  document.getElementById('adminCasesUid').textContent=uid;
+  document.getElementById('adminCasesAmount').value='100';
+  openModal('adminCasesModal');
+  const ok=document.getElementById('adminCasesAccept');
+  const cancel=document.getElementById('adminCasesCancel');
+  ok.onclick=async()=>{
+    const amount=Math.max(1,Number(document.getElementById('adminCasesAmount').value||0));
+    try{
+      const res=await apiFetch('/api/admin/add-cases',{user_id:Number(uid),amount});
+      if(!res || res.ok===false) throw new Error('Сервер не подтвердил выдачу кейсов');
+      closeModal('adminCasesModal');
+      showToast('📦 Кейсы выданы','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){showToast('❌ '+e.message,'error');}
+  };
+  cancel.onclick=()=>closeModal('adminCasesModal');
+}
+
+async function adminGrantCube(uid){
+  document.getElementById('adminCubeUid').textContent = uid;
+  document.getElementById('adminCubeName').value = 'Подарок от админа';
+  document.getElementById('adminCubeRarity').value = 'rare';
+  document.getElementById('adminCubeValue').value = '500';
+  openModal('adminCubeModal');
+  const accept = document.getElementById('adminCubeAccept');
+  const cancel = document.getElementById('adminCubeCancel');
+  const done = async ()=>{
+    accept.onclick=null; cancel.onclick=null;
+    const name = document.getElementById('adminCubeName').value.trim() || 'Подарок от админа';
+    const rarity = document.getElementById('adminCubeRarity').value;
+    let value = parseInt(document.getElementById('adminCubeValue').value||'0', 10); if(!Number.isFinite(value)) value=0;
+    const known=[]; CASES.forEach(c=>c.items.forEach(it=>{if(it.name===name && it.rarity===rarity) known.push(Number(it.value));}));
+    if(known.length) value=known[0];
+    closeModal('adminCubeModal');
+    try{
+      await apiFetch('/api/admin/cube', {user_id: Number(uid), name, rarity, value});
+      showToast('✅ Куб выдан','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  };
+  accept.onclick = done;
+  cancel.onclick = ()=>{ accept.onclick=null; cancel.onclick=null; closeModal('adminCubeModal'); };
+}
+
+function isCreatorAdmin(){
+  return !!window.isAdmin;
+}
+
+async function adminCreator(uid, enabled){
+  if(!isCreatorAdmin()){ showToast('❌ Нет прав владельца','error'); return; }
+  const ok=await tgConfirm(enabled ? 'Выдать этому игроку значок 🛠️ Создатель?' : 'Снять с игрока значок 🛠️ Создатель?');
+  if(!ok) return;
+  try{
+    await apiFetch('/api/admin/creator-badge', {user_id:Number(uid), enabled:!!enabled});
+    showToast(enabled ? '🛠️ Значок создателя выдан' : '🛠️ Значок создателя снят','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
+}
+
+async function adminTester(uid, enabled){
+  if(!isCreatorAdmin()){ showToast('❌ Нет прав владельца','error'); return; }
+  const ok=await tgConfirm(enabled ? 'Выдать этому игроку статус 🧪 Тестер?' : 'Снять с игрока статус 🧪 Тестер?');
+  if(!ok) return;
+  try{
+    await apiFetch('/api/admin/tester-badge', {user_id:Number(uid), enabled:!!enabled});
+    showToast(enabled ? '🧪 Статус тестера выдан' : '🧪 Статус тестера снят','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
+}
+
+document.addEventListener('click', function(ev){
+  const btn = ev.target && ev.target.closest ? ev.target.closest('[data-action="admin-custom-status"]') : null;
+  if(!btn) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  const uid = btn.getAttribute('data-uid');
+  if(uid) window.adminCustomStatus(uid);
+}, true);
+
+async function adminCustomStatus(uid){
+  if(!window.isAdmin){ showToast('❌ Нет прав администратора','error'); return; }
+  const modal=document.getElementById('adminCustomStatusModal');
+  if(!modal){ showToast('❌ Окно статуса не загрузилось','error'); return; }
+  const u=(window.adminUsersCache||[]).find(x=>String(x.user_id)===String(uid));
+  const current=u?.custom_status || {};
+  document.getElementById('adminCustomStatusUid').textContent=uid;
+  document.getElementById('adminCustomStatusEmoji').value=String(current.emoji||'');
+  document.getElementById('adminCustomStatusText').value=String(current.text||'');
+  document.getElementById('adminCustomStatusGradient').checked=!!current.gradient;
+  document.getElementById('adminCustomStatusColor1').value=String(current.color1||'#ff4d6d');
+  document.getElementById('adminCustomStatusColor2').value=String(current.color2||'#7c4dff');
+  openModal('adminCustomStatusModal');
+  const accept=document.getElementById('adminCustomStatusAccept');
+  const clear=document.getElementById('adminCustomStatusClear');
+  const cancel=document.getElementById('adminCustomStatusCancel');
+  const close=document.getElementById('adminCustomStatusCloseBtn');
+  const cleanup=()=>{accept.onclick=null;clear.onclick=null;cancel.onclick=null;close.onclick=null;};
+  close.onclick=()=>{cleanup();closeModal('adminCustomStatusModal');};
+  cancel.onclick=()=>{cleanup();closeModal('adminCustomStatusModal');};
+  accept.onclick=async()=>{
+    const emoji=document.getElementById('adminCustomStatusEmoji').value.trim().slice(0,8);
+    const text=document.getElementById('adminCustomStatusText').value.trim().slice(0,32);
+    const gradient=!!document.getElementById('adminCustomStatusGradient').checked;
+    const color1=document.getElementById('adminCustomStatusColor1').value;
+    const color2=document.getElementById('adminCustomStatusColor2').value;
+    if(!text && !emoji){ showToast('❌ Укажи эмодзи или текст статуса','error'); return; }
+    try{
+      await apiFetch('/api/admin/custom-status',{user_id:Number(uid),emoji,text,gradient,color1,color2});
+      showToast('🏷️ Свой статус выдан','success');
+      cleanup(); closeModal('adminCustomStatusModal');
+      await loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  };
+  clear.onclick=async()=>{
+    if(!await tgConfirm('Снять собственный статус с этого игрока?')) return;
+    try{
+      await apiFetch('/api/admin/custom-status',{user_id:Number(uid),emoji:'',text:''});
+      showToast('✅ Свой статус снят','success');
+      cleanup(); closeModal('adminCustomStatusModal');
+      await loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  };
+}
+
+window.adminCustomStatus = adminCustomStatus;
+
+async function adminBuff(uid){
+  if(!window.isAdmin){showToast('❌ Баффы может выдавать только администратор','error');return;}
+  document.getElementById('adminBuffUid').textContent=uid;
+  document.getElementById('adminBuffHours').value='24';
+  openModal('adminBuffModal');
+  const accept=document.getElementById('adminBuffAccept'), cancel=document.getElementById('adminBuffCancel');
+  const done=async()=>{
+    accept.onclick=null; cancel.onclick=null;
+    const type=document.getElementById('adminBuffType').value;
+    const hours=Math.max(1,Math.min(720,Math.floor(Number(document.getElementById('adminBuffHours').value||24))));
+    closeModal('adminBuffModal');
+    try{
+      const j=await apiFetch('/api/admin/buff',{user_id:Number(uid),buff_type:type,type,duration_hours:hours,enabled:true});
+      showToast('⚡ Бафф выдан на '+hours+' ч.','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+      if(String(uid)===String(tgUserId()||'')){ if(j.user?.buffs) data.buffs=j.user.buffs; renderProfile(); }
+    }catch(e){showToast('❌ '+e.message,'error');}
+  };
+  accept.onclick=done; cancel.onclick=()=>{accept.onclick=null;cancel.onclick=null;closeModal('adminBuffModal');};
+}
+
+async function adminTechBreak(uid){
+  askReason('🛠️ Технический перерыв','Укажи причину. Она будет показана игроку в отдельном окне.', '', async reason=>{
+    try{
+      const j=await apiFetch('/api/admin/tech-break',{action:'enable',reason});
+      showToast('🛠️ Тех. перерыв включён','success');
+      updateAdminTechBreakPromoButton(true);
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+      if(String(uid)===String(tgUserId()||'') && !window.isAdmin) showTechBreak(j.user?.tech_break_reason||reason);
+    }catch(e){showToast('❌ '+e.message,'error');}
+  });
+}
+async function adminClearTechBreak(uid){
+  if(!await tgConfirm('Убрать технический перерыв у этого игрока?')) return;
+  try{
+    const j=await apiFetch('/api/admin/account',{user_id:Number(uid),action:'clear_tech_break'});
+    showToast('✅ Тех. перерыв снят','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    if(String(uid)===String(tgUserId()||'')) hideTechBreak();
+  }catch(e){showToast('❌ '+e.message,'error');}
+}
+
+async function adminIpBan(){
+  const ip=(document.getElementById('adminIp')?.value||'').trim();
+  const reason=(document.getElementById('adminIpReason')?.value||'').trim();
+  const minutes=Math.max(1,Math.min(43200,Math.floor(Number(document.getElementById('adminIpMinutes')?.value||60))));
+  const permanent=!!document.getElementById('adminIpPermanent')?.checked;
+  if(!ip||!reason){showToast('❌ Укажи IP и причину','error');return;}
+  try{await apiFetch('/api/admin/ip-ban',{ip,reason,minutes,permanent});showToast('🌐 IP заблокирован','success');}
+  catch(e){showToast('❌ '+e.message,'error');}
+}
+async function adminIpUnban(){
+  const ip=(document.getElementById('adminIp')?.value||'').trim();
+  if(!ip){showToast('❌ Укажи IP','error');return;}
+  try{await apiFetch('/api/admin/ip-unban',{ip});showToast('🌐 IP-блок снят','success');}
+  catch(e){showToast('❌ '+e.message,'error');}
+}
+
+async function adminDeleteUser(uid){
+  const ok=await tgConfirm('Точно удалить этот аккаунт? Все его кубы, объявления, бои и данные будут удалены без возможности восстановления.');
+  if(!ok) return;
+  askReason('🗑️ Причина удаления','Эта причина будет показана владельцу при следующем входе.', '', async reason=>{
+    try{
+      await apiFetch('/api/admin/delete-user', {user_id:Number(uid), reason});
+      showToast('🗑️ Аккаунт удалён','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  });
+}
+
+async function adminPremium(uid){
+  askNumber('⭐ Выдать Premium', 'На сколько дней выдать Premium этому игроку?', 7, async days => {
+    days = Math.max(1, Math.round(days));
+    try{
+      await apiFetch('/api/admin/premium', {user_id: Number(uid), days});
+      showToast('✅ Premium выдан на '+days+' дн.','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  });
+}
+
+async function adminMoney(uid, amount){
+  try{
+    await apiFetch('/api/admin/money', {user_id: Number(uid), amount: Number(amount)});
+    showToast('✅ Баланс изменён','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
+}
+async function adminBan(uid, val){
+  if(Number(val)===1){
+    askReason('🚫 Причина бана','Напиши причину. Её увидит игрок при следующем входе.', '', async reason=>{
+      try{
+        await apiFetch('/api/admin/ban', {user_id:Number(uid), banned:1, reason});
+        showToast('✅ Игрок забанен','success');
+        loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+      }catch(e){ showToast('❌ '+e.message,'error'); }
+    });
+  }else{
+    try{
+      await apiFetch('/api/admin/ban', {user_id:Number(uid), banned:0});
+      showToast('✅ Бан снят','success');
+      loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+    }catch(e){ showToast('❌ '+e.message,'error'); }
+  }
+}
+async function adminShadow(uid, val){
+  try{
+    await apiFetch('/api/admin/shadow', {user_id: Number(uid), shadow_banned: Number(val)});
+    showToast('✅ Готово','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
+}
+async function adminReset(uid){
+  try{
+    await apiFetch('/api/admin/reset', {user_id: Number(uid)});
+    showToast('✅ Прогресс сброшен','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){ showToast('❌ '+e.message,'error'); }
+}
+
+
+
 function switchTab(tab){
   if(document.getElementById('battleDiceModal')?.classList.contains('open')) closeBattleDiceModal();
   currentTab = tab;
@@ -1333,6 +1760,7 @@ function switchTab(tab){
   if(tab==='battles') renderBattles();
   if(tab==='plinko') renderPlinko();
   if(tab==='mines') renderMines();
+  if(tab==='admin' && window.isAdmin) renderAdmin();
   if(tab==='profile') renderProfile();
   if(tab==='settings'){ updateSettingsUI(); refreshTwoFactorUI(); }
   if(tab==='cases') renderCases();
@@ -3645,10 +4073,13 @@ function handleButton(button, e){
   if(button.matches('.top-tab') || action==='top-sort'){ renderLeaderboard(button.dataset.topSort||'cases'); return; }
   if(button.dataset.menuAction==='notifications'){ if(e){e.preventDefault();e.stopPropagation();} openNotifications(); return; }
   if(button.dataset.menuAction==='share-orbs'){ if(e){e.preventDefault();e.stopPropagation();} document.getElementById('menuPanel')?.classList.remove('open'); openShareOrbs(); return; }
-  if(button.matches('[data-menu-tab]')){
+  if(button.matches('[data-menu-tab], #adminMenuBtn[data-tab]')){
     const tab=button.dataset.menuTab || button.dataset.tab;
+    // Кнопка меню — кликабельна всей площадью, а не только по тексту.
+    // Не даём событию уйти на элементы страницы под выпадающим меню.
     if(e){ e.preventDefault?.(); e.stopPropagation?.(); }
     switchTab(tab);
+    if(tab==='admin') renderAdmin();
     document.getElementById('menuPanel')?.classList.remove('open');
     return;
   }
@@ -3671,6 +4102,8 @@ function handleButton(button, e){
   if(button.matches('.rush-preset')){ setRushBet(Number(button.dataset.rushPreset||10)); return; }
   if(button.id==='rushStartBtn'){ startRush(); return; }
   if(button.id==='rushCashoutBtn'){ cashoutRush(); return; }
+  if(button.id==='adminTechBreakPanelBtn'){ const active=button.dataset.active==='1'; if(active) adminGlobalTechBreakToggle(); else adminTechBreak(tgUserId()); return; }
+  if(button.id==='adminTechBreakPromoBtn'){ adminGlobalTechBreakToggle(); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
@@ -3681,6 +4114,7 @@ function handleButton(button, e){
   if(action==='admin-grant-cases'){ adminGrantCases(button.dataset.uid); return; }
   if(action==='admin-grant-cube'){ adminGrantCube(button.dataset.uid); return; }
   if(action==='admin-premium'){ adminPremium(button.dataset.uid); return; }
+  if(action==='admin-remove-premium'){ tgConfirm('Снять Premium и удалить Premium-баффы?').then(ok=>{ if(ok) adminAccountAction(button.dataset.uid,'remove_premium'); }); return; }
   if(action==='admin-custom-status'){ if(typeof window.adminCustomStatus==='function') window.adminCustomStatus(button.dataset.uid); else showToast('❌ Окно статуса ещё загружается','error'); return; }
   if(action==='admin-buff'){ adminBuff(button.dataset.uid); return; }
   if(action==='admin-tech-break'){ adminTechBreak(button.dataset.uid); return; }
@@ -3777,6 +4211,7 @@ document.addEventListener('click', e=>{
 document.getElementById('promoInput')?.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();redeemPromo();}});
 document.getElementById('promoAdminCode')?.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();createAdminPromo();}});
 document.getElementById('adminSearch')?.addEventListener('keydown', function(e){
+  if(e.key==='Enter'){ e.preventDefault(); loadAdminUsers(this.value||''); }
 });
 
 document.getElementById('marketSearch')?.addEventListener('input',renderMarketItems);
