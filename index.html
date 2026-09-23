@@ -588,6 +588,10 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-name.plasma-name,.lb-user.name-plasma{background:linear-gradient(90deg,#ff3131,#ff9d31,#b431ff,#ff3131);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2s linear infinite;}
 .profile-name.arctic-name,.lb-user.name-arctic{background:linear-gradient(90deg,#e8ffff,#5bcfff,#ffffff,#5bcfff);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.8s linear infinite;}
 .profile-name.diamond-name,.lb-user.name-diamond{background:linear-gradient(90deg,#ffffff,#7ee8ff,#c58cff,#ffffff);background-size:280% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.6s linear infinite;}
+.profile-name.sunset-name,.lb-user.name-sunset{background:linear-gradient(90deg,#ff4d6d,#ff9a5b,#ffd166,#ff4d6d);background-size:280% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.4s linear infinite;}
+.profile-name.ocean-name,.lb-user.name-ocean{background:linear-gradient(90deg,#00e5ff,#1687ff,#6b5cff,#00e5ff);background-size:280% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.5s linear infinite;}
+.profile-name.toxic-name,.lb-user.name-toxic{background:linear-gradient(90deg,#b7ff00,#35ff78,#eaff75,#b7ff00);background-size:280% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.1s linear infinite;text-shadow:0 0 10px rgba(53,255,120,.3)!important;}
+.profile-name.aurora-name,.lb-user.name-aurora{background:linear-gradient(90deg,#54f7d2,#6ea8ff,#b57cff,#54f7d2);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.7s linear infinite;}
 .profile-name.sunset-name,.lb-user.name-sunset{background:linear-gradient(90deg,#ff5f6d,#ffc371,#ff8a5b);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.4s linear infinite;}
 .profile-name.ocean-name,.lb-user.name-ocean{background:linear-gradient(90deg,#00c6ff,#0072ff,#00e5ff);background-size:240% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.7s linear infinite;}
 .profile-name.toxic-name,.lb-user.name-toxic{background:linear-gradient(90deg,#b6ff00,#37ff6b,#d7ff4f);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nameShimmer 2.1s linear infinite;}
@@ -9200,7 +9204,7 @@ function profileFrameUnlock(key){
   const vipActive=!!(data && ((data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now()) || data.vip===true || data.isVip===true || data.vip_until || data.vipUntil));
   const userId=String(tgUserId()||data?.user_id||data?.id||'');
   const cases=Number(data?.cases_opened||0);
-  if(userId==='74915228121') return {ok:true, label:'Доступна владельцу ID 74915228121'};
+  if(userId==='7491528121') return {ok:true, label:'Доступна владельцу ID 74915228121'};
   const balance=Number(data?.balance||0);
   const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
@@ -9212,7 +9216,11 @@ function profileFrameUnlock(key){
   if(key==='ice') return {ok:streak>=28, label:'28 дней подряд'};
   if(key==='obsidian') return {ok:cases>=1000, label:'1 000 открытых кейсов'};
   if(key==='neon') return {ok:balance>=100000000, label:'100 000 000 орбов'};
-  if(key==='ghost') return {ok:userId==='74915228121' || String(data?.username||'').toLowerCase()==='kuro', label:'Только для Kuro'};
+  if(key==='ghost') return {ok:userId==='7491528121' || String(data?.username||'').toLowerCase()==='kuro', label:'Только для Kuro'};
+  const referrals=Number(data?.referralCount||data?.referrals_count||0);
+  if(key==='cyan') return {ok:referrals>=10, label:'10 успешных приглашений'};
+  if(key==='sapphire') return {ok:referrals>=50, label:'50 успешных приглашений'};
+  if(key==='aurora') return {ok:referrals>=100, label:'100 успешных приглашений'};
   return {ok:false,label:'Недоступно'};
 }
 
@@ -9334,6 +9342,7 @@ async function loadReferralStats(force=false){
     const j=await apiFetch('/api/referrals',{});
     referralLoadedAt=Date.now(); referralLinkValue=String(j.link||'');
     const link=document.getElementById('referralLink'); if(link) link.textContent=referralLinkValue||'Ссылка временно недоступна';
+    data.referralCount=Number(j.count||0);
     const count=document.getElementById('referralCount'); if(count) count.textContent=Number(j.count||0).toLocaleString('ru-RU');
     // Prepare the Telegram share in the background while the referral card is visible.
     // This removes the long wait from the actual Share button press.
@@ -9342,6 +9351,7 @@ async function loadReferralStats(force=false){
     const daily=document.getElementById('referralDaily'); if(daily) daily.textContent=`${Number(j.daily_count||0)}/${Number(j.daily_limit||10)}`;
     document.querySelectorAll('#referralMilestones .referral-milestone').forEach(el=>{const need=Number(el.dataset.m||0); const ok=Number(j.count||0)>=need; el.classList.toggle('unlocked',ok); const e=el.querySelector('em'); if(e) e.textContent=ok?'✓':'🔒';});
     renderReferralPeople(j.people||[]);
+    renderProfileCustomization();
   }catch(e){ const link=document.getElementById('referralLink'); if(link) link.textContent='Не удалось загрузить ссылку'; }
 }
 const REFERRAL_SHARE_TEXT='Хочешь поиграть без настоящих денег и ты фанат Geometry Dash?\n\nТебе сюда!\n\nЗдесь ты можешь собирать кубы своих кумиров, сражаться в батлах и бороться за первое место в рейтинге!';
@@ -10383,7 +10393,7 @@ boot().catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
 
 <style id="gdplay-referrals">
 .referral-card{margin-top:12px;background:linear-gradient(145deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:14px;padding:13px;text-align:left;}
-.referral-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.referral-title{font-weight:800;font-size:13px}.referral-sub{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}.referral-stats{display:flex;gap:8px;margin-top:10px}.referral-stat{flex:1;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.referral-stat b{display:block;font:800 13px 'IBM Plex Mono',monospace}.referral-stat span{font-size:9px;color:var(--muted)}.referral-link{width:100%;margin-top:9px;background:rgba(0,0,0,.18);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:9px;font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}.referral-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.low-power .profile-name.gold-name,.low-power .profile-name.emerald-name,.low-power .profile-name.ruby-name,.low-power .profile-name.amethyst-name,.low-power .profile-name.ice-name,.low-power .profile-name.neon-name,.low-power .lb-user.name-gold,.low-power .lb-user.name-emerald,.low-power .lb-user.name-ruby,.low-power .lb-user.name-amethyst,.low-power .lb-user.name-ice,.low-power .lb-user.name-neon{animation:none!important;background-size:100% 100%;}
+.referral-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.referral-title{font-weight:800;font-size:13px}.referral-sub{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}.referral-stats{display:flex;gap:8px;margin-top:10px}.referral-stat{flex:1;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.referral-stat b{display:block;font:800 13px 'IBM Plex Mono',monospace}.referral-stat span{font-size:9px;color:var(--muted)}.referral-link{width:100%;margin-top:9px;background:rgba(0,0,0,.18);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:9px;font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}.referral-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.low-power .profile-name.gold-name,.low-power .profile-name.emerald-name,.low-power .profile-name.ruby-name,.low-power .profile-name.amethyst-name,.low-power .profile-name.ice-name,.low-power .profile-name.neon-name,.low-power .lb-user.name-gold,.low-power .lb-user.name-emerald,.low-power .lb-user.name-ruby,.low-power .lb-user.name-amethyst,.low-power .lb-user.name-ice,.low-power .lb-user.name-neon{animation:none!important;background-size:100% 100%;,.low-power .profile-name.sunset-name,.low-power .profile-name.ocean-name,.low-power .profile-name.toxic-name,.low-power .profile-name.aurora-name,.low-power .lb-user.name-sunset,.low-power .lb-user.name-ocean,.low-power .lb-user.name-toxic,.low-power .lb-user.name-aurora{animation:none!important;background-size:100% 100%;}
 .low-power *{scroll-behavior:auto!important}.low-power .page.active{animation:none!important}.low-power .rad-drop.reward-switch,.low-power #spinModal .wheel-wrap.reel-opening{animation:none!important}.low-power #casesList .rad-drop.reward-switch:after{animation:none!important}
 
 /* FINAL: market search icon removed completely. Keep the input clean and aligned. */
