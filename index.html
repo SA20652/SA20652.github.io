@@ -572,6 +572,11 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar-wrap > .profile-avatar-frame.frame-cyan{border:3px solid #25e6e6!important;box-shadow:0 0 20px rgba(37,230,230,.55),inset 0 0 8px rgba(255,255,255,.18)!important;}
 .profile-avatar-wrap > .profile-avatar-frame.frame-sapphire{border:3px solid #4d8dff!important;box-shadow:0 0 22px rgba(77,141,255,.58),inset 0 0 8px rgba(180,220,255,.16)!important;}
 .profile-avatar-wrap > .profile-avatar-frame.frame-aurora{border:3px solid #8cffd1!important;box-shadow:0 0 25px rgba(140,255,209,.62),inset 0 0 10px rgba(255,255,255,.18)!important;}
+.profile-avatar-wrap > .profile-avatar-frame.frame-cyan,.profile-avatar-wrap > .profile-avatar-frame.frame-sapphire,.profile-avatar-wrap > .profile-avatar-frame.frame-aurora{outline:2px solid transparent!important;}
+.public-profile-avatar-frame.frame-cyan,.lb-avatar-frame.frame-cyan{border:3px solid #25e6e6!important;box-shadow:0 0 20px rgba(37,230,230,.55),inset 0 0 8px rgba(255,255,255,.18)!important;}
+.public-profile-avatar-frame.frame-sapphire,.lb-avatar-frame.frame-sapphire{border:3px solid #4d8dff!important;box-shadow:0 0 22px rgba(77,141,255,.58),inset 0 0 8px rgba(180,220,255,.16)!important;}
+.public-profile-avatar-frame.frame-aurora,.lb-avatar-frame.frame-aurora{border:3px solid #8cffd1!important;box-shadow:0 0 25px rgba(140,255,209,.62),inset 0 0 10px rgba(255,255,255,.18)!important;}
+
 
 .profile-customize{margin-top:12px;background:linear-gradient(145deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:14px;padding:12px;}
 .profile-customize-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -3399,6 +3404,11 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar-wrap > .profile-avatar-frame.frame-cyan{border:3px solid #25e6e6!important;box-shadow:0 0 20px rgba(37,230,230,.55),inset 0 0 8px rgba(255,255,255,.18)!important;}
 .profile-avatar-wrap > .profile-avatar-frame.frame-sapphire{border:3px solid #4d8dff!important;box-shadow:0 0 22px rgba(77,141,255,.58),inset 0 0 8px rgba(180,220,255,.16)!important;}
 .profile-avatar-wrap > .profile-avatar-frame.frame-aurora{border:3px solid #8cffd1!important;box-shadow:0 0 25px rgba(140,255,209,.62),inset 0 0 10px rgba(255,255,255,.18)!important;}
+.profile-avatar-wrap > .profile-avatar-frame.frame-cyan,.profile-avatar-wrap > .profile-avatar-frame.frame-sapphire,.profile-avatar-wrap > .profile-avatar-frame.frame-aurora{outline:2px solid transparent!important;}
+.public-profile-avatar-frame.frame-cyan,.lb-avatar-frame.frame-cyan{border:3px solid #25e6e6!important;box-shadow:0 0 20px rgba(37,230,230,.55),inset 0 0 8px rgba(255,255,255,.18)!important;}
+.public-profile-avatar-frame.frame-sapphire,.lb-avatar-frame.frame-sapphire{border:3px solid #4d8dff!important;box-shadow:0 0 22px rgba(77,141,255,.58),inset 0 0 8px rgba(180,220,255,.16)!important;}
+.public-profile-avatar-frame.frame-aurora,.lb-avatar-frame.frame-aurora{border:3px solid #8cffd1!important;box-shadow:0 0 25px rgba(140,255,209,.62),inset 0 0 10px rgba(255,255,255,.18)!important;}
+
 
 .profile-customize{margin-top:12px;background:linear-gradient(145deg,var(--bg-2),var(--bg-3));border:1px solid var(--line);border-radius:14px;padding:12px;}
 .profile-customize-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -5509,7 +5519,7 @@ function newUserData(username){
     wins: 0,
     battle_winnings: 0,
     vault_balance: 0,
-    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default',
+    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileOwnedFrames: [],
     created: Date.now()
   };
 }
@@ -9025,7 +9035,7 @@ async function renderLeaderboard(sortBy='cases'){
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
-          <div class="lb-user name-${String(r.profile_name_style||'default').toLowerCase()}" ${r.text_color?`style="color:${String(r.text_color).replace(/"/g,'&quot;')};"`:''}>${r.username}${r.key===myId?' (ты)':''}</div>
+          <div class="lb-user name-${String(r.profile_name_style||'default').toLowerCase()}" style="${r.text_color?`color:${String(r.text_color).replace(/"/g,'&quot;')};`:''}${profileNameInlineStyle(r.profile_name_style)}">${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
           ${customStatusBadgeHtml(r.custom_status)}
           <div class="lb-sub">${sortBy==='balance' ? r.balance.toLocaleString('ru-RU')+' монет' : sortBy==='winnings' ? r.winnings.toLocaleString('ru-RU')+' орбов выиграно' : r.cases+' кейсов открыто'}</div>
@@ -9217,6 +9227,8 @@ function profileFrameUnlock(key){
   const balance=Number(data?.balance||0);
   const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
+  const owned=Array.isArray(data?.profileOwnedFrames) && data.profileOwnedFrames.includes(key);
+  if(owned || String(data?.profileFrame||'default')===key) return {ok:true, label:'Получена'};
   if(key==='gold') return {ok:cases>=25, label:'25 открытых кейсов'};
   if(key==='premium') return {ok:vipActive, label:'Активный Premium'};
   if(key==='emerald') return {ok:cases>=100, label:'100 открытых кейсов'};
@@ -9270,8 +9282,9 @@ function renderProfileCustomization(){
   const nameStyle=String(data?.profileNameStyle||data?.profile_name_style||'default');
   if(frame){
     frame.className='profile-avatar-frame';
-    if(selected!=='default' && profileFrameUnlock(selected).ok) frame.classList.add('frame-'+selected);
-    frame.style.display=(selected!=='default' && profileFrameUnlock(selected).ok)?'block':'none';
+    const selectedFrameOk = selected!=='default' && profileFrameUnlock(selected).ok;
+    if(selectedFrameOk) frame.classList.add('frame-'+selected);
+    frame.style.display=selectedFrameOk?'block':'none';
   }
   if(name){
     name.className='profile-name';
@@ -9293,6 +9306,8 @@ function renderProfileCustomization(){
     name.className='profile-name';
     if(effectiveNameStyle!=='default') name.classList.add(effectiveNameStyle+'-name');
     applyProfileNameVisual(name,effectiveNameStyle);
+    if(effectiveNameStyle!=='default') name.setAttribute('style',profileNameInlineStyle(effectiveNameStyle));
+    else name.removeAttribute('style');
   }
   document.querySelectorAll('[data-profile-name]').forEach(b=>{
     const key=b.dataset.profileName;
@@ -9311,6 +9326,7 @@ async function refreshProfileAppearanceFromServer(){
     if(u){
       if(u.profile_frame!==undefined) data.profileFrame=String(u.profile_frame||'default');
       if(u.profile_name_style!==undefined) data.profileNameStyle=String(u.profile_name_style||'default');
+      try{ const rw=await apiFetch('/api/profile/rewards',{}); if(Array.isArray(rw.frames)) data.profileOwnedFrames=rw.frames.filter(x=>x.owned).map(x=>String(x.key)); }catch(_e){}
       persistLocal();
       renderProfileCustomization();
     }
@@ -9333,7 +9349,10 @@ async function setProfileFrame(key){
   }
 }
 function isPremiumActive(){
-  return !!(data && data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now());
+  if(!data || data.premiumUntil==null || data.premiumUntil==='') return false;
+  const raw=String(data.premiumUntil).trim();
+  if(/^\d+$/.test(raw)){ let n=Number(raw); if(n>1e10)n/=1000; return n>Date.now()/1000; }
+  const t=Date.parse(raw); return Number.isFinite(t) && t>Date.now();
 }
 async function setProfileNameStyle(key){
   const premiumActive=isPremiumActive();
@@ -9381,6 +9400,7 @@ async function loadReferralStats(force=false){
     referralLoadedAt=Date.now(); referralLinkValue=String(j.link||'');
     const link=document.getElementById('referralLink'); if(link) link.textContent=referralLinkValue||'Ссылка временно недоступна';
     data.referralCount=Number(j.count||0);
+    try{ const rw=await apiFetch('/api/profile/rewards',{}); if(Array.isArray(rw.frames)) data.profileOwnedFrames=rw.frames.filter(x=>x.owned).map(x=>String(x.key)); }catch(_e){}
     const count=document.getElementById('referralCount'); if(count) count.textContent=Number(j.count||0).toLocaleString('ru-RU');
     // Referral milestones affect profile-frame availability immediately.
     renderProfileCustomization();
@@ -9520,7 +9540,7 @@ function renderProfile(){
   if(!dailyState.loaded){
     document.getElementById('dailyDesc').textContent='Загрузка бонуса…';
     document.getElementById('dailyBtn').disabled=true;
-    const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Проверяем сохранённый прогресс…';
+    const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Загружаем бонус…';
     const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent='—/14';
     const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width='0%';
     loadDailyStatus();
@@ -9561,12 +9581,13 @@ async function loadDailyStatus(){
     updateDailyUI();
     if(j.reset) showToast('⚠️ Бонус сброшен — награда не была забрана за 12 часов','error');
   }catch(e){
-    // Do not leave the 12-hour bonus card stuck on the old loading text.
-    // Retry a few times in the background; until the server answers, show a
-    // neutral loading state instead of pretending the reward is unavailable.
     const attempt=Number(dailyState.retry||0)+1; dailyState.retry=attempt;
-    const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Загружаем бонус…';
-    if(attempt<=3){ setTimeout(()=>{ if(!dailyStatusInFlight && currentUser) loadDailyStatus(); }, Math.min(2500,600*attempt)); }
+    // Never leave the UI in a phantom 'checking availability' state.
+    // Keep the current streak and expose a deterministic retry state.
+    dailyState.loaded=true;
+    const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Не удалось проверить бонус — повторяем…';
+    if(attempt<=5){ setTimeout(()=>{ if(!dailyStatusInFlight && currentUser) loadDailyStatus(); }, Math.min(3000,700*attempt)); }
+    updateDailyUI();
   }finally{dailyStatusInFlight=false;}
 }
 function updateDailyUI(){
