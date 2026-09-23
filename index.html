@@ -6265,6 +6265,7 @@ async function showApp(skipServer=false){
 
 let pendingTelegramCaseId='';
 let telegramCaseAutoOpened=false;
+let pendingPromoScroll=false;
 const TELEGRAM_CASE_CONSUMED_KEY='gdplay_telegram_case_consumed_v2';
 function handleTelegramStartApp(){
   try{
@@ -6272,8 +6273,9 @@ function handleTelegramStartApp(){
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
     const promoRaw=raw.startsWith('promo_') ? raw.slice(6).trim().toUpperCase() : '';
     if(promoRaw){
-      switchTab('profile');
-      const applyPromo=()=>{const input=document.getElementById('promoInput');if(!input)return false;input.value=promoRaw;try{input.closest('.promo-card')?.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}try{input.focus({preventScroll:true});}catch(_){}return true;};
+      pendingPromoScroll=true;
+      switchTab('cases');
+      const applyPromo=()=>{const input=document.getElementById('promoInput');if(!input)return false;input.value=promoRaw;try{input.focus({preventScroll:true});}catch(_){}return true;};
       if(!applyPromo()){requestAnimationFrame(()=>requestAnimationFrame(applyPromo));setTimeout(applyPromo,350);setTimeout(applyPromo,900);}
       return;
     }
@@ -6284,8 +6286,9 @@ function handleTelegramStartApp(){
         const qp=new URLSearchParams(window.location.search||'').get('promo');
         if(qp){
           const promoCode=String(qp).trim().toUpperCase();
-          switchTab('profile');
-          const applyQueryPromo=()=>{const input=document.getElementById('promoInput');if(!input)return false;input.value=promoCode;try{input.closest('.promo-card')?.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}try{input.focus({preventScroll:true});}catch(_){}return true;};
+          pendingPromoScroll=true;
+          switchTab('cases');
+          const applyQueryPromo=()=>{const input=document.getElementById('promoInput');if(!input)return false;input.value=promoCode;try{input.focus({preventScroll:true});}catch(_){}return true;};
           if(!applyQueryPromo()){requestAnimationFrame(()=>requestAnimationFrame(applyQueryPromo));setTimeout(applyQueryPromo,350);setTimeout(applyQueryPromo,900);}
           try{history.replaceState(history.state,'',window.location.pathname+window.location.hash);}catch(_){}
           return;
@@ -7152,11 +7155,32 @@ function switchTab(tab){
     if(tab==='plinko') renderPlinko();
     if(tab==='mines') renderMines();
     if(tab==='admin' && window.isAdmin) renderAdmin();
-    if(tab==='profile') renderProfile();
+    if(tab==='profile') {
+      renderProfile();
+    }
     if(tab==='settings') refreshTwoFactorUI();
     if(tab==='cases') {
       try{ ensureCasesFirstPaint(); }catch(_){}
       renderCases();
+      if(pendingPromoScroll){
+        pendingPromoScroll=false;
+        const scrollPromoToBottom=()=>{
+          const input=document.getElementById('promoInput');
+          const card=input?.closest('.promo-card');
+          if(!input || !card) return false;
+          try{
+            // Промокод находится в самом низу страницы кейсов: прокручиваем именно к нему.
+            card.scrollIntoView({behavior:'smooth',block:'end'});
+            setTimeout(()=>{ try{ window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'}); }catch(_){} },180);
+          }catch(_){ try{ window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'}); }catch(__){} }
+          try{ input.focus({preventScroll:true}); }catch(_){ }
+          return true;
+        };
+        requestAnimationFrame(()=>{ scrollPromoToBottom(); requestAnimationFrame(scrollPromoToBottom); });
+        setTimeout(scrollPromoToBottom,180);
+        setTimeout(scrollPromoToBottom,500);
+        setTimeout(scrollPromoToBottom,900);
+      }
     }
     if(tab==='vault') renderVault();
     if(tab==='trades'){loadTrades();loadTradeHistory();}
