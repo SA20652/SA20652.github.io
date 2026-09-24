@@ -1949,7 +1949,14 @@ function casePityGuarantee(c){
   if(String(c?.id)==='hall'){
     return c.items.filter(it=>String(it.name)==='Kuro' && String(it.rarity).toLowerCase()==='emerald');
   }
-  return c.items.filter(it=>String(it.rarity).toLowerCase()==='divine');
+  const divine=c.items.filter(it=>String(it.rarity).toLowerCase()==='divine');
+  if(divine.length) return divine;
+  const order=['mythic','legendary','epic','rare','common'];
+  for(const rarity of order){
+    const pool=c.items.filter(it=>String(it.rarity).toLowerCase()===rarity);
+    if(pool.length) return pool;
+  }
+  return [];
 }
 function rollCaseItemWithPity(c){
   if(!data.casePity || typeof data.casePity!=='object') data.casePity={};
@@ -2103,7 +2110,8 @@ function runSecretReveal(){
 
 let caseUiDirty=false;
 
-function showSpinResult(item, isSecret){
+async function showSpinResult(item, isSecret){
+  try{ if(window.cubeIconsReady) await window.cubeIconsReady; }catch(_){}
   const m = RARITY_META[item.rarity];
   const box = document.getElementById('spinResult');
   box.innerHTML = `

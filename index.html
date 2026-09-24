@@ -4358,7 +4358,7 @@ body{overflow-x:hidden;}
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
-      preloadCatalog('cube_icons.html?v=immediate',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('cube_icons.html?v=immediate-v6',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -5444,8 +5444,7 @@ const CASES = [
     {name:"MoistenedEgg",rarity:"epic",value:264000,chance:25.8},
     {name:"thejshadow",rarity:"legendary",value:352000,chance:9.06},
     {name:"GToast",rarity:"mythic",value:748000,chance:4.41},
-    {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77},
-    {name:"Хижина гоблина",rarity:"divine",value:1650000,chance:16.0}
+    {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77}
   ]},
   {id:"icon",name:"Иконический кейс",price:380000,icon:'',items:[
     {name:"Superkobster",rarity:"common",value:152000,chance:35.0},
@@ -7468,7 +7467,14 @@ function casePityGuarantee(c){
   if(String(c?.id)==='hall'){
     return c.items.filter(it=>String(it.name)==='Kuro' && String(it.rarity).toLowerCase()==='emerald');
   }
-  return c.items.filter(it=>String(it.rarity).toLowerCase()==='divine');
+  const divine=c.items.filter(it=>String(it.rarity).toLowerCase()==='divine');
+  if(divine.length) return divine;
+  const order=['mythic','legendary','epic','rare','common'];
+  for(const rarity of order){
+    const pool=c.items.filter(it=>String(it.rarity).toLowerCase()===rarity);
+    if(pool.length) return pool;
+  }
+  return [];
 }
 function rollCaseItemWithPity(c){
   if(!data.casePity || typeof data.casePity!=='object') data.casePity={};
@@ -7742,7 +7748,8 @@ if(!document.getElementById('gdplay-confetti-style')){
   document.head.appendChild(style);
 }
 
-function showSpinResult(item, isSecret){
+async function showSpinResult(item, isSecret){
+  try{ if(window.cubeIconsReady) await window.cubeIconsReady; }catch(_){}
   const m = RARITY_META[item.rarity];
   const box = document.getElementById('spinResult');
   box.innerHTML = `
