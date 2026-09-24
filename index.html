@@ -4096,7 +4096,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v5',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v6',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -5444,7 +5444,8 @@ const CASES = [
     {name:"MoistenedEgg",rarity:"epic",value:264000,chance:25.8},
     {name:"thejshadow",rarity:"legendary",value:352000,chance:9.06},
     {name:"GToast",rarity:"mythic",value:748000,chance:4.41},
-    {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77}
+    {name:"AyumiRenko",rarity:"divine",value:1650000,chance:2.77},
+    {name:"Хижина гоблина",rarity:"divine",value:1650000,chance:16.0}
   ]},
   {id:"icon",name:"Иконический кейс",price:380000,icon:'',items:[
     {name:"Superkobster",rarity:"common",value:152000,chance:35.0},
