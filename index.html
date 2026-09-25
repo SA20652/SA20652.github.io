@@ -4475,6 +4475,57 @@ img { content-visibility: visible !important; }
   #spinModal.multi-open #spinCloseBtn{height:34px!important;min-height:34px!important;margin-top:4px!important;}
 }
 </style>
+
+<style id="gdplay-scroll-performance-v1">
+/* Scroll performance: keep every image preloaded, but reduce per-frame paint work while the list is moving. */
+#casesList,#inventoryList{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  isolation:isolate;
+}
+#casesList .rad-case-card,
+#inventoryList .inv-item,
+#inventoryList .inv-stack{
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+  transform:translateZ(0);
+}
+body.gdplay-fast-scroll #casesList .rad-case-card,
+body.gdplay-fast-scroll #inventoryList .inv-item,
+body.gdplay-fast-scroll #inventoryList .inv-stack{
+  transition:none!important;
+  animation:none!important;
+}
+body.gdplay-fast-scroll #casesList .rad-case-card,
+body.gdplay-fast-scroll #inventoryList .inv-item{
+  box-shadow:none!important;
+}
+</style>
+<script id="gdplay-scroll-performance-js">
+(function(){
+  'use strict';
+  var timer=0, scrolling=false;
+  function allowed(){
+    var c=document.getElementById('page-cases'), i=document.getElementById('page-inventory');
+    return !!((c&&c.classList.contains('active'))||(i&&i.classList.contains('active')));
+  }
+  function start(){
+    if(!allowed()) return;
+    if(!scrolling){ scrolling=true; document.body.classList.add('gdplay-fast-scroll'); }
+    clearTimeout(timer);
+    timer=setTimeout(function(){
+      scrolling=false;
+      document.body.classList.remove('gdplay-fast-scroll');
+    },140);
+  }
+  window.addEventListener('scroll',start,{passive:true});
+  window.addEventListener('touchmove',start,{passive:true});
+  window.addEventListener('wheel',start,{passive:true});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ clearTimeout(timer); scrolling=false; document.body.classList.remove('gdplay-fast-scroll'); }
+  });
+})();
+</script>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
