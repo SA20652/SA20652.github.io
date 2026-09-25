@@ -4107,7 +4107,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v12-cache-fix',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v11-exact-final',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -4369,7 +4369,7 @@ body{overflow-x:hidden;}
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
-      preloadCatalog('cube_icons.html?v=elite-cubes-v12-cache-fix',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('cube_icons.html?v=elite-cubes-v11-exact-final',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -7471,7 +7471,7 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=elite-case-v12-cache-fix',{cache:'force-cache'}).then(r=>{
+    fetch('case_images.html?v=elite-case-v11-exact-named-images',{cache:'force-cache'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -7482,7 +7482,7 @@ function ensureCaseImages(){
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=elite-case-v12-cache-fix';
+      iframe.src='case_images.html?v=elite-case-v11-exact-named-images';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
@@ -7685,12 +7685,34 @@ function warmEliteCaseImages(){
 function eliteCaseCubeIconMarkup(item, cls){
   const name=String(item?.name||'');
   const direct=String(ELITE_CUBE_IMAGES?.[name]||'');
-  if(direct) return `<img class="${cls||'cube-icon-inline'}" src="${direct}" alt="" aria-hidden="true" draggable="false" decoding="sync">`;
-  const elite=typeof CASES!=='undefined' ? CASES.find(c=>String(c.id)==='elite') : null;
-  const match=elite?.items?.find(it=>String(it.name)===name);
-  const src=String(match?.image||'');
-  if(src) return `<img class="${cls||'cube-icon-inline'}" src="${src}" alt="" aria-hidden="true" draggable="false" decoding="sync">`;
-  return window.cubeIconMarkup?.(name,cls)||'';
+  const c=cls||'cube-icon-inline';
+  if(direct){
+    // The reel uses a short data-key first; the real image URL is assigned once
+    // after the reel HTML exists. This avoids putting large base64 strings into
+    // every one of the 22 reel cards and removes the main source of reel lag.
+    if(c==='wheel-cube-icon') return `<img class="${c}" data-elite-cube="${escapeHtml(name)}" alt="" aria-hidden="true" draggable="false" decoding="async">`;
+    return `<img class="${c}" src="${direct}" alt="" aria-hidden="true" draggable="false" decoding="async">`;
+  }
+  return window.cubeIconMarkup?.(name,c)||'';
+}
+function hydrateEliteWheelImages(root){
+  if(!root) return;
+  root.querySelectorAll('img[data-elite-cube]').forEach(img=>{
+    const name=img.getAttribute('data-elite-cube')||'';
+    const src=String(ELITE_CUBE_IMAGES?.[name]||'');
+    if(src && img.getAttribute('src')!==src) img.src=src;
+  });
+}
+
+function preloadEliteCubeImages(){
+  if(window.__eliteCubePreloadPromise) return window.__eliteCubePreloadPromise;
+  const urls=Object.values(ELITE_CUBE_IMAGES||{}).filter(Boolean);
+  window.__eliteCubePreloadPromise=Promise.all(urls.map(src=>{
+    const img=new Image(); img.decoding='async'; img.src=src;
+    if(img.decode) return img.decode().catch(()=>{});
+    return new Promise(r=>{img.onload=img.onerror=r;});
+  }));
+  return window.__eliteCubePreloadPromise;
 }
 
 function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=null){
@@ -7745,6 +7767,7 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
     }
     return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}>${icon}<b style="color:${m.color}">${name}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`;
   }).join('');
+  hydrateEliteWheelImages(dial);
   dial.querySelectorAll('.wheel-item b').forEach(fitReelName);
   dial.style.transition='none';dial.style.transform='translate3d(0,0,0)';
 }
@@ -8159,6 +8182,8 @@ async function openCaseBatch(c, qty, useKey=false){
   if(window.requestIdleCallback) requestIdleCallback(batchBookkeeping,{timeout:700}); else setTimeout(batchBookkeeping,120);
   caseUiDirty=true; spinning=false; document.querySelectorAll('.open-case-btn').forEach(b=>b.disabled=false);
 }
+preloadEliteCubeImages();
+
 async function openEliteCaseInstant(c, useKey=false){
   if(spinning) return false;
   spinning=true;
@@ -8243,6 +8268,7 @@ async function openEliteCaseInstant(c, useKey=false){
         const v=Math.floor(Number(won.value)||0);
         const iconHtml=eliteCaseCubeIconMarkup(won,'wheel-cube-icon')||`<span>${m.icon}</span>`;
         target.innerHTML=`${iconHtml}<b style="color:${m.color}">${String(won.name||'Награда')}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small>`;
+        hydrateEliteWheelImages(target);
         fitReelName(target.querySelector('b'));
       }
     }
