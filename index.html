@@ -4107,7 +4107,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v11-exact-final',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v12-direct-icons',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -4369,7 +4369,7 @@ body{overflow-x:hidden;}
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
-      preloadCatalog('cube_icons.html?v=elite-cubes-v11-exact-final',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('cube_icons.html?v=elite-cubes-v12-direct-icons',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -5502,17 +5502,23 @@ const ELITE_CUBE_IMAGES = Object.freeze({...ELITE_EXACT_IMAGES});
 // Inventory, upgrader, profile, market and drop lists must use the exact images
 // supplied for the Elite Case instead of the older global cube catalog.
 window.__ELITE_EXACT_IMAGES = ELITE_EXACT_IMAGES;
+window.__ELITE_EXACT_IMAGES_NORMALIZED = Object.freeze(Object.keys(ELITE_EXACT_IMAGES).reduce((m,k)=>{m[k.trim().toLocaleLowerCase('ru-RU')]=ELITE_EXACT_IMAGES[k];return m;},{}));
+function resolveEliteExactCubeImage(name){
+  const key=String(name??'').trim();
+  return ELITE_EXACT_IMAGES[key] || window.__ELITE_EXACT_IMAGES_NORMALIZED[key.toLocaleLowerCase('ru-RU')] || '';
+}
 (function installEliteGlobalIconOverride(){
   const previousGet = window.getCubeIcon;
   const previousMarkup = window.cubeIconMarkup;
   window.getCubeIcon = function(name){
-    const key=String(name||'');
-    const exact=window.__ELITE_EXACT_IMAGES?.[key];
+    const exact=resolveEliteExactCubeImage(name);
     if(exact) return exact;
+    const key=String(name||'');
     return previousGet ? previousGet(key) : null;
   };
   window.cubeIconMarkup = function(name, cls){
-    const src=window.getCubeIcon(name);
+    const exact=resolveEliteExactCubeImage(name);
+    const src=exact || (previousGet ? previousGet(String(name||'')) : null);
     if(!src) return previousMarkup ? previousMarkup(name, cls) : '';
     const c=cls||'cube-icon-inline';
     return '<img class="'+c+'" src="'+src+'" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">';
@@ -5533,6 +5539,7 @@ window.__ELITE_EXACT_IMAGES = ELITE_EXACT_IMAGES;
 }
 
 CASES.forEach(c=>{
+  if(String(c.id)==='elite'){ c.items.forEach(it=>{ const exact=resolveEliteExactCubeImage(it?.name); if(exact) it.image=exact; }); }
   const epicValues=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).map(it=>Number(it.value)||0).filter(v=>v>0);
   if(epicValues.length && String(c.id)!=='elite'){ c.price=Math.min(Number(c.price)||0, Math.min(...epicValues)); }
 });
@@ -5650,6 +5657,7 @@ function normalizeGameState(){
   if(!Array.isArray(data.bestDrops)) data.bestDrops=[];
   if(typeof data.vault_balance !== 'number' || !isFinite(data.vault_balance)) data.vault_balance=0;
   normalizeAllCubeValues();
+  (data.cubes||[]).forEach(c=>{ const exact=resolveEliteExactCubeImage(c?.name); if(exact) c.image=exact; });
   if(typeof data.creatorBadge !== 'boolean') data.creatorBadge=!!data.creatorBadge;
   if(!data.profileFrame) data.profileFrame='default';
   if(!data.profileNameStyle) data.profileNameStyle='default';
@@ -5850,6 +5858,7 @@ function applyServerCubes(serverCubes, authoritativeItems=[]){
     }
   }
   next.forEach(normalizeCubeValue);
+  next.forEach(c=>{ const exact=resolveEliteExactCubeImage(c?.name); if(exact) c.image=exact; });
   data.cubes=next;
 }
 
@@ -8123,7 +8132,7 @@ async function openCaseBatch(c, qty, useKey=false){
       if(!Array.isArray(j.drops)||j.drops.length!==qty) throw new Error('Сервер вернул некорректные результаты кейсов');
       j.drops.forEach(d=>wins.push({name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
       data.balance=Number(j.balance)||0;
-      if(Array.isArray(j.cubes)) data.cubes=j.cubes.map(x=>({...x}));
+      if(Array.isArray(j.cubes)) data.cubes=j.cubes.map(x=>({...x, ...(resolveEliteExactCubeImage(x?.name)?{image:resolveEliteExactCubeImage(x.name)}:{})}));
       if(Array.isArray(j.keys)) data.keys=j.keys.map(x=>({...x}));
       if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');});
       data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+qty;
@@ -8133,7 +8142,7 @@ async function openCaseBatch(c, qty, useKey=false){
       for(let i=0;i<qty;i++){
         const won=rollCaseItemWithPity(c); normalizeCubeValue(won); won.value=Math.floor(Number(won.value||0));
         if(!useKey) data.balance-=c.price;
-        data.cubes.push({...won,source_case_id:c.id}); data.cases_opened=(data.cases_opened||0)+1;
+        data.cubes.push({...won,source_case_id:c.id, ...(resolveEliteExactCubeImage(won?.name)?{image:resolveEliteExactCubeImage(won?.name)}:{})}); data.cases_opened=(data.cases_opened||0)+1;
         wins.push({...won,source_case_id:c.id});
       }
     }
@@ -8287,7 +8296,7 @@ async function openEliteCaseInstant(c, useKey=false){
     }else{
       won=provisional;
       if(!useKey) data.balance-=Number(c.price)||0;
-      data.cubes.push({...won,source_case_id:c.id});
+      data.cubes.push({...won,source_case_id:c.id, ...(resolveEliteExactCubeImage(won?.name)?{image:resolveEliteExactCubeImage(won?.name)}:{})});
       data.cases_opened=(data.cases_opened||0)+1;
     }
 
@@ -8559,7 +8568,7 @@ function renderInventory(){
          </button>`
       : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
     const header = `<div class="inv-item ${isStack?'inv-stack-header':''}" data-rarity="${String(c.rarity||'common').toLowerCase()}" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
-      <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${(window.getCubeIcon?.(c.name)||window.CUBE_ICONS?.[c.name])?`<img class="inv-cube-2d" src="${window.getCubeIcon(c.name)}" alt="" loading="eager">`:`<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}</div>
+      <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${(c.image||window.getCubeIcon?.(c.name)||window.CUBE_ICONS?.[c.name])?`<img class="inv-cube-2d" src="${c.image||window.getCubeIcon(c.name)}" alt="" loading="eager" decoding="sync">`:`<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}</div>
       ${headerNameHtml}</div>
       ${isStack ? '' : cubeLockButton(c,indices[0])}
       <div class="inv-actions"><span class="inv-value">💰 ${Number(c.value).toLocaleString('ru-RU')}</span>
@@ -8568,7 +8577,8 @@ function renderInventory(){
     if(!isStack || !expanded) return header;
     const rows = indices.map((idx,n)=>{
       const it=data.cubes[idx]||c;
-      const subIcon=(window.cubeIconMarkup ? window.cubeIconMarkup(it.name,'inv-cube-2d inv-cube-2d-small') : '');
+      const subExact=resolveEliteExactCubeImage(it?.name);
+      const subIcon=subExact ? `<img class="inv-cube-2d inv-cube-2d-small" src="${subExact}" alt="" loading="eager" decoding="sync">` : (window.cubeIconMarkup ? window.cubeIconMarkup(it.name,'inv-cube-2d inv-cube-2d-small') : '');
       return `<div class="inv-item inv-subitem" data-rarity="${String(it.rarity||c.rarity||'common').toLowerCase()}" style="--item-color:${m.color}" data-cube-index="${idx}">
         <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${subIcon || `<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>`}</div><div class="inv-sub-info"><div class="inv-name">${n+1}. ${c.name} <span class="inv-subid">#${it.id!=null?it.id:idx}</span></div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div></div>
         ${cubeLockButton(it,idx)}
@@ -8825,7 +8835,7 @@ const UPGRADE_CATALOG = (()=>{
   const map = new Map();
   CASES.forEach(c=>c.items.forEach(it=>{
     const key = 'cube|'+it.name+'|'+it.value;
-    if(!map.has(key)) map.set(key, {kind:'cube',name:it.name,rarity:it.rarity,value:it.value,icon:(RARITY_META[it.rarity]||{}).icon||'◆'});
+    if(!map.has(key)) map.set(key, {kind:'cube',name:it.name,rarity:it.rarity,value:it.value,icon:(RARITY_META[it.rarity]||{}).icon||'◆',image:resolveEliteExactCubeImage(it.name)||''});
   }));
   KEY_CATALOG.forEach(k=>{
     map.set('key|'+k.id, {...k,kind:'key'});
@@ -8906,7 +8916,8 @@ function renderUpgradeCatalog(filter){
   box.innerHTML=list.map(it=>{
     const m=RARITY_META[it.rarity]||RARITY_META.common;
     const chance=Math.max(0, Math.min(95, (Number(source.value||0)/Number(it.value||1))*100));
-    const iconHtml=(window.cubeIconMarkup ? window.cubeIconMarkup(it.name,'upgrade-cat-cube-icon') : '');
+    const exactUpgrade=resolveEliteExactCubeImage(it.name);
+    const iconHtml=exactUpgrade ? `<img class="upgrade-cat-cube-icon" src="${exactUpgrade}" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">` : (window.cubeIconMarkup ? window.cubeIconMarkup(it.name,'upgrade-cat-cube-icon') : '');
     const visual=iconHtml || `<span class="upgrade-cat-cube-fallback">${it.icon||m.icon||'◆'}</span>`;
     return `<button type="button" class="upgrade-cat-item" data-action="pick-upgrade-target" data-kind="${it.kind}" data-name="${it.name}" data-rarity="${it.rarity}" data-value="${it.value}" data-key-id="${it.id||''}">
       <span class="upgrade-cat-cube">${visual}</span>
@@ -8922,8 +8933,10 @@ function selectUpgradeTarget(name,rarity,value,kind='cube',keyId=''){
   const sm=RARITY_META[source.rarity]||RARITY_META.common, tm=RARITY_META[rarity]||RARITY_META.common;
   const sourceNameEl=document.getElementById('upgradeSourceName');
   const targetNameEl=document.getElementById('upgradeTargetName');
-  const sourceIcon=upgradeSource.kind==='cube' ? (window.cubeIconMarkup?.(source.name,'upgrade-selected-cube-icon')||'') : '🗝️';
-  const targetIcon=kind==='cube' ? (window.cubeIconMarkup?.(name,'upgrade-selected-cube-icon')||'') : '🗝️';
+  const sourceExact=upgradeSource.kind==='cube' ? resolveEliteExactCubeImage(source.name) : '';
+  const targetExact=kind==='cube' ? resolveEliteExactCubeImage(name) : '';
+  const sourceIcon=upgradeSource.kind==='cube' ? (sourceExact ? `<img class="upgrade-selected-cube-icon" src="${sourceExact}" alt="" aria-hidden="true">` : (window.cubeIconMarkup?.(source.name,'upgrade-selected-cube-icon')||'')) : '🗝️';
+  const targetIcon=kind==='cube' ? (targetExact ? `<img class="upgrade-selected-cube-icon" src="${targetExact}" alt="" aria-hidden="true">` : (window.cubeIconMarkup?.(name,'upgrade-selected-cube-icon')||'')) : '🗝️';
   if(sourceNameEl){ sourceNameEl.innerHTML=sourceIcon+(sourceIcon?' ':'')+escapeHtml(source.name); sourceNameEl.style.color=sm.color; }
   if(targetNameEl){ targetNameEl.innerHTML=targetIcon+(targetIcon?' ':'')+escapeHtml(name); targetNameEl.style.color=tm.color; }
   document.getElementById('upgradeSourceValue').textContent='💰 '+Number(source.value).toLocaleString('ru-RU');
@@ -9543,7 +9556,7 @@ function renderBestDrops(listEl, drops){
   if(!arr.length){listEl.innerHTML='<div class="empty-state">Лучших дропов пока нет.</div>';return;}
   listEl.innerHTML=arr.map(d=>{
     const m=RARITY_META[d.rarity]||RARITY_META.common;
-    return `<div class="best-drop" style="border-left:3px solid ${m.color}"><div class="best-drop-name" style="color:${m.color}">${window.cubeIconMarkup?.(d.name,'best-drop-cube-icon')||m.icon} ${d.name}<div style="font-size:9px;color:var(--muted);font-weight:500">${m.label}</div></div><div class="best-drop-value">💰 ${Number(d.value||0).toLocaleString('ru-RU')}</div></div>`;
+    const bestExact=resolveEliteExactCubeImage(d?.name); const bestIcon=bestExact ? `<img class="best-drop-cube-icon" src="${bestExact}" alt="" aria-hidden="true">` : (window.cubeIconMarkup?.(d.name,'best-drop-cube-icon')||m.icon); return `<div class="best-drop" style="border-left:3px solid ${m.color}"><div class="best-drop-name" style="color:${m.color}">${bestIcon} ${d.name}<div style="font-size:9px;color:var(--muted);font-weight:500">${m.label}</div></div><div class="best-drop-value">💰 ${Number(d.value||0).toLocaleString('ru-RU')}</div></div>`;
   }).join('');
 }
 function activeBuffs(){
@@ -9634,7 +9647,7 @@ async function openPublicProfile(userId, seed={}){
     const m=RARITY_META[rarity]||RARITY_META.common;
     const name=x.cube_name||x.key_name||x.keyName||x.item_name||x.name||(x.key&&x.key.name)||(isKey?'Ключ':'Куб');
     const icon=(x.key&&x.key.icon)||x.icon||(isKey?'🗝️':m.icon);
-    const cubeImage=!isKey ? (window.cubeIconMarkup?.(name,'public-market-cube-icon')||'') : '';
+    const marketExact=!isKey ? resolveEliteExactCubeImage(name) : ''; const cubeImage=!isKey ? (marketExact ? `<img class="public-market-cube-icon" src="${marketExact}" alt="" aria-hidden="true">` : (window.cubeIconMarkup?.(name,'public-market-cube-icon')||'')) : '';
     const canBuy=!myProfile && String(x.seller_name||'')!==String(data.username||'');
     return `<div class="public-market-card">
       <span class="inv-icon" style="color:${m.color};font-size:22px">${cubeImage||icon}</span>
