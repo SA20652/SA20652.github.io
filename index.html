@@ -4098,7 +4098,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=2dicons-v6',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v7',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -4360,7 +4360,7 @@ body{overflow-x:hidden;}
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
-      preloadCatalog('cube_icons.html?v=immediate-v6',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('cube_icons.html?v=elite-cubes-v7',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -5468,18 +5468,17 @@ const CASES = [
     {name:"nSwish",rarity:"divine",value:4875000,chance:2.07},
     {name:"Kuro",rarity:"emerald",value:7000000,chance:1.39},{name:"squezzy",rarity:"common",value:500000,chance:82}
   ]},
-  {id:"elite",name:"Элитный Кейс",price:1500000,icon:'',items:[
-    {name:"Spu7nix",rarity:"common",value:500000,chance:22.0},
-    {name:"Без названия",rarity:"common",value:650000,chance:18.0},
-    {name:"w3rty",rarity:"rare",value:850000,chance:15.0},
-    {name:"Roze",rarity:"rare",value:1000000,chance:12.0},
-    {name:"Sunix",rarity:"epic",value:1250000,chance:10.0},
-    {name:"SerVax",rarity:"epic",value:1500000,chance:8.0},
-    {name:"Bacon",rarity:"legendary",value:2000000,chance:6.0},
-    {name:"Muni",rarity:"mythic",value:2800000,chance:4.0},
-    {name:"tvink3n",rarity:"mythic",value:3500000,chance:2.5},
-    {name:"Ad3usgmd",rarity:"divine",value:7000000,chance:1.5},
-    {name:"ItzKiba",rarity:"divine",value:5000000,chance:1.0}
+  {id:"elite",name:"Элитный Кейс",price:1500000,icon:"elite",items:[
+    {name:"Spu7nix",rarity:"common",value:500000,chance:24},
+    {name:"w3rty",rarity:"common",value:650000,chance:19},
+    {name:"Roze",rarity:"rare",value:850000,chance:15},
+    {name:"Sunix",rarity:"rare",value:1000000,chance:12},
+    {name:"SerVax",rarity:"epic",value:1250000,chance:10},
+    {name:"Bacon",rarity:"epic",value:1500000,chance:8},
+    {name:"Muni",rarity:"legendary",value:2000000,chance:5},
+    {name:"tvink3n",rarity:"mythic",value:2800000,chance:3.5},
+    {name:"Ad3usgmd",rarity:"divine",value:7000000,chance:2},
+    {name:"ItzKiba",rarity:"divine",value:5000000,chance:1.5}
   ]},
 ];
 
@@ -7437,7 +7436,7 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=5',{cache:'force-cache'}).then(r=>{
+    fetch('case_images.html?v=elite-case-v6',{cache:'force-cache'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -7448,7 +7447,7 @@ function ensureCaseImages(){
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=5';
+      iframe.src='case_images.html?v=elite-case-v6';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
