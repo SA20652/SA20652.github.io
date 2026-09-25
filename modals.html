@@ -413,7 +413,7 @@ const CASES = [
 // этом НЕ меняются.
 CASES.forEach(c=>{
   const epicValues=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).map(it=>Number(it.value)||0).filter(v=>v>0);
-  if(epicValues.length){ c.price=Math.min(Number(c.price)||0, Math.min(...epicValues)); }
+  if(epicValues.length && String(c.id)!=='elite'){ c.price=Math.min(Number(c.price)||0, Math.min(...epicValues)); }
 });
 
 // ===== ФИКСИРОВАННЫЕ ЦЕНЫ КУБОВ =====
