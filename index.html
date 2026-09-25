@@ -12115,6 +12115,11 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   transform:translateY(8px) scale(.9);
   transition:opacity .18s ease,visibility .18s ease,transform .18s ease,background .18s ease;
   -webkit-tap-highlight-color:transparent;
+  touch-action:none;
+  -ms-touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
 }
 .gdplay-scroll-arrow.visible{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);}
 .gdplay-scroll-arrow:active{transform:scale(.92);background:rgba(42,33,25,.98);}
@@ -12142,6 +12147,7 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
     var up=document.getElementById('gdplayScrollUp');
     if(!down||!up) return;
     var ticking=false;
+    var stopTimer=0;
     var lastY=window.scrollY||document.documentElement.scrollTop||0;
     var lastDirection=0;
 
@@ -12173,19 +12179,47 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
       lastY=y;
     }
     function requestUpdate(forceDirection){
+      if(stopTimer) clearTimeout(stopTimer);
       if(!ticking){
         ticking=true;
-        requestAnimationFrame(function(){update(forceDirection||0);});
+        requestAnimationFrame(function(){
+          update(forceDirection||0);
+          stopTimer=setTimeout(function(){
+            if(allowedPage()) hide();
+          },180);
+        });
       }
     }
-    down.addEventListener('click',function(){
+    var actionLock=0;
+    function goDown(){
+      var now=Date.now();
+      if(now-actionLock<250) return;
+      actionLock=now;
       hide();
       window.scrollTo({top:getMaxScroll(),behavior:'smooth'});
-    });
-    up.addEventListener('click',function(){
+    }
+    function goUp(){
+      var now=Date.now();
+      if(now-actionLock<250) return;
+      actionLock=now;
       hide();
       window.scrollTo({top:0,behavior:'smooth'});
-    });
+    }
+    function armTouch(el,fn){
+      el.addEventListener('touchstart',function(e){
+        e.stopPropagation();
+        if(e.cancelable) e.preventDefault();
+      },{passive:false});
+      el.addEventListener('touchend',function(e){
+        e.stopPropagation();
+        if(e.cancelable) e.preventDefault();
+        fn();
+      },{passive:false});
+      el.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
+      el.addEventListener('click',function(e){ e.stopPropagation(); fn(); });
+    }
+    armTouch(down,goDown);
+    armTouch(up,goUp);
     window.addEventListener('scroll',function(){requestUpdate();},{passive:true});
     window.addEventListener('resize',function(){requestUpdate();},{passive:true});
 
