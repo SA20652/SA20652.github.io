@@ -4430,6 +4430,33 @@ img, .case-icon-image, .inv-cube-2d, .cube-icon-inline, .spin-result-cube-icon, 
 img { content-visibility: visible !important; }
 <style>#createBattleBtn{margin-top:6px!important;position:relative!important;z-index:3!important;display:block!important;clear:both!important;} .battle-form #battleMode{margin-bottom:4px!important;} </style>
 
+<style id="gdplay-upgrade-always-rendered-v1">
+/* Upgrader catalog: keep every row, text and cube image paintable while its own scroll area moves. */
+#upgradeModal #upgradeCatalogList,
+#upgradeModal #upgradeCatalogList .upgrade-cat-item,
+#upgradeModal #upgradeCatalogList .upgrade-cat-cube,
+#upgradeModal #upgradeCatalogList .upgrade-cat-cube-icon,
+#upgradeModal #upgradeCatalogList .upgrade-cat-name,
+#upgradeModal #upgradeCatalogList .upgrade-cat-value{
+  content-visibility:visible!important;
+  contain:none!important;
+  visibility:visible!important;
+}
+#upgradeModal #upgradeCatalogList .upgrade-cat-item{
+  -webkit-backface-visibility:visible!important;
+  backface-visibility:visible!important;
+  transform:translateZ(0);
+  will-change:auto;
+}
+#upgradeModal #upgradeCatalogList img{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  content-visibility:visible!important;
+  -webkit-backface-visibility:visible!important;
+  backface-visibility:visible!important;
+}
+</style>
 <style id="gdplay-startup-autohide-v13">
 /* Startup splash is controlled by boot(): never hide it while the app is still blank. */
 #startupLoader{animation:none!important;}
@@ -9002,6 +9029,7 @@ function renderUpgradeCatalog(filter){
       <div class="upgrade-cat-value">💰${Number(it.value).toLocaleString('ru-RU')} · ${chance.toFixed(0)}%</div>
     </button>`;
   }).join('');
+  try{ if(window.gdplayPreloadImages) window.gdplayPreloadImages(box); }catch(_){}
 }
 function selectUpgradeTarget(name,rarity,value,kind='cube',keyId=''){
   const source=getUpgradeSource(); if(!source) return;
