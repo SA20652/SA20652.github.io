@@ -4107,7 +4107,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v10-uploaded-webp',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v11-exact-final',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -4369,7 +4369,7 @@ body{overflow-x:hidden;}
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
-      preloadCatalog('cube_icons.html?v=elite-cubes-v10-uploaded-webp',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('cube_icons.html?v=elite-cubes-v11-exact-final',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -5491,10 +5491,21 @@ const CASES = [
   ]},
 ];
 
+// ЖЁСТКАЯ ПРИВЯЗКА ФОТО ЭЛИТНОГО КЕЙСА.
+// Снимок берётся из исходного каталога до серверной синхронизации и сохраняется
+// отдельно, поэтому API/кэш/общий каталог не могут подменить фотографию.
+const ELITE_CUBE_IMAGES = Object.fromEntries((CASES.find(c=>String(c.id)==='elite')?.items||[]).map(it=>[String(it.name), String(it.image||'')]));
+
 // В каждом кейсе предметы от Эпохального (epic) и выше должны как минимум
 // окупать цену открытия. Если в будущем цена кейса будет поднята выше epic,
 // автоматически оставляем её не выше минимальной epic-награды. Цены кубов при
 // этом НЕ меняются.
+// Re-apply the exact Elite image map before every first render.
+{
+  const elite=CASES.find(c=>String(c.id)==='elite');
+  if(elite) elite.items.forEach(it=>{ if(ELITE_CUBE_IMAGES[String(it.name)]) it.image=ELITE_CUBE_IMAGES[String(it.name)]; });
+}
+
 CASES.forEach(c=>{
   const epicValues=c.items.filter(it=>['epic','legendary','mythic','divine','emerald'].includes(it.rarity)).map(it=>Number(it.value)||0).filter(v=>v>0);
   if(epicValues.length && String(c.id)!=='elite'){ c.price=Math.min(Number(c.price)||0, Math.min(...epicValues)); }
@@ -7413,7 +7424,8 @@ function renderCasePreviewDrop(c){
   const totalChance=(c.items||[]).reduce((sum,item)=>sum+Math.max(0,Number(item.chance)||0),0);
   const meta=RARITY_META[it.rarity]||RARITY_META.common;
   const chance=totalChance?(Number(it.chance)||0)/totalChance*100:0;
-  box.innerHTML=`<div class="rad-drop reward-switch" style="--drop:${meta.color}">${it.image ? `<img class="cube-icon-inline" src="${it.image}" alt="" aria-hidden="true" draggable="false" decoding="sync">` : (window.cubeIconMarkup?.(it.name,'cube-icon-inline')||`<span class="rad-drop-icon">${meta.icon}</span>`)}<span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
+  const itemIcon=(String(c.id)==='elite' ? eliteCaseCubeIconMarkup(it,'cube-icon-inline') : (it.image ? `<img class="cube-icon-inline" src="${it.image}" alt="" aria-hidden="true" draggable="false" decoding="sync">` : (window.cubeIconMarkup?.(it.name,'cube-icon-inline')||''))) || `<span class="rad-drop-icon">${meta.icon}</span>`;
+  box.innerHTML=`<div class="rad-drop reward-switch" style="--drop:${meta.color}">${itemIcon}<span class="rad-drop-name">${it.name}</span><b>${chance.toFixed(chance%1?1:0)}%</b></div>`;
 }
 function startCasePreviewAnimation(){
   clearInterval(casePreviewTimer); casePreviewStep=0;
@@ -7672,10 +7684,12 @@ function warmEliteCaseImages(){
 
 function eliteCaseCubeIconMarkup(item, cls){
   const name=String(item?.name||'');
+  const direct=String(ELITE_CUBE_IMAGES?.[name]||'');
+  if(direct) return `<img class="${cls||'cube-icon-inline'}" src="${direct}" alt="" aria-hidden="true" draggable="false" decoding="sync">`;
   const elite=typeof CASES!=='undefined' ? CASES.find(c=>String(c.id)==='elite') : null;
   const match=elite?.items?.find(it=>String(it.name)===name);
   const src=String(match?.image||'');
-  if(src) return `<img class="${cls||'cube-icon-inline'}" src="${src}" alt="" aria-hidden="true" draggable="false" decoding="async">`;
+  if(src) return `<img class="${cls||'cube-icon-inline'}" src="${src}" alt="" aria-hidden="true" draggable="false" decoding="sync">`;
   return window.cubeIconMarkup?.(name,cls)||'';
 }
 
