@@ -6859,7 +6859,7 @@ async function shareAdminPromoLink(code){
   try{
     const tg=window.Telegram?.WebApp;
     if(typeof tg?.shareMessage==='function'){
-      const j=await adminPost('/api/admin/promo/share',{code});
+      const j=await apiFetch('/api/admin/promo/share',{code});
       const msgId=String(j.id||'');
       if(!msgId) throw new Error('Telegram не вернул сообщение для отправки');
       await new Promise((resolve,reject)=>{
@@ -9855,7 +9855,6 @@ async function setProfileFrame(key){
     data.profileFrame=String(j.profile_frame||key); persistLocal(); renderProfileCustomization();
     // Серверное значение является источником истины и переживает перезаход.
     await refreshProfileAppearanceFromServer();
-    showToast('🖼️ Рамка сохранена');
   }catch(e){
     data.profileFrame=prev; persistLocal(); renderProfileCustomization();
     showToast(e.message||'Не удалось сохранить рамку','error');
@@ -9893,7 +9892,6 @@ async function setProfileNameStyle(key){
     persistLocal();
     renderProfileCustomization();
     renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
-    showToast('🎨 Цвет имени сохранён');
   }catch(e){
     data.profileNameStyle=prev;
     saveProfileNameStyleLocal(prev);
