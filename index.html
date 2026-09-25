@@ -4090,6 +4090,8 @@ body{overflow-x:hidden;}
 .wheel-cube-icon{width:44px;height:44px;object-fit:contain;display:block;margin:0 auto 2px;filter:drop-shadow(0 0 7px rgba(255,255,255,.13))}
 .spin-multi-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px}
 .best-drop-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px}
+.public-market-cube-icon{width:34px;height:34px;object-fit:contain;display:block;filter:drop-shadow(0 0 6px rgba(255,255,255,.13))}
+.upgrade-selected-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px;filter:drop-shadow(0 0 6px rgba(255,255,255,.14))}
 </style>
 <script>
 (function(){
@@ -8628,11 +8630,13 @@ function selectUpgradeTarget(name,rarity,value,kind='cube',keyId=''){
   if(kind==='key'){ showToast('❌ Ключи нельзя получать через апгрейд','error'); return; }
   upgradeTarget={kind:'cube',name,rarity,value:Number(value),id:''};
   const sm=RARITY_META[source.rarity]||RARITY_META.common, tm=RARITY_META[rarity]||RARITY_META.common;
-  document.getElementById('upgradeSourceName').textContent=(upgradeSource.kind==='key'?'🗝️ ':'')+source.name;
-  document.getElementById('upgradeSourceName').style.color=sm.color;
+  const sourceNameEl=document.getElementById('upgradeSourceName');
+  const targetNameEl=document.getElementById('upgradeTargetName');
+  const sourceIcon=upgradeSource.kind==='cube' ? (window.cubeIconMarkup?.(source.name,'upgrade-selected-cube-icon')||'') : '🗝️';
+  const targetIcon=kind==='cube' ? (window.cubeIconMarkup?.(name,'upgrade-selected-cube-icon')||'') : '🗝️';
+  if(sourceNameEl){ sourceNameEl.innerHTML=sourceIcon+(sourceIcon?' ':'')+escapeHtml(source.name); sourceNameEl.style.color=sm.color; }
+  if(targetNameEl){ targetNameEl.innerHTML=targetIcon+(targetIcon?' ':'')+escapeHtml(name); targetNameEl.style.color=tm.color; }
   document.getElementById('upgradeSourceValue').textContent='💰 '+Number(source.value).toLocaleString('ru-RU');
-  document.getElementById('upgradeTargetName').textContent=(kind==='key'?'🗝️ ':'')+name;
-  document.getElementById('upgradeTargetName').style.color=tm.color;
   document.getElementById('upgradeTargetValue').textContent='💰 '+Number(value).toLocaleString('ru-RU');
   refreshUpgradeStake(); refreshUpgradeChance();
   document.getElementById('upgradeStepPick').style.display='none';
@@ -9340,9 +9344,10 @@ async function openPublicProfile(userId, seed={}){
     const m=RARITY_META[rarity]||RARITY_META.common;
     const name=x.cube_name||x.key_name||x.keyName||x.item_name||x.name||(x.key&&x.key.name)||(isKey?'Ключ':'Куб');
     const icon=(x.key&&x.key.icon)||x.icon||(isKey?'🗝️':m.icon);
+    const cubeImage=!isKey ? (window.cubeIconMarkup?.(name,'public-market-cube-icon')||'') : '';
     const canBuy=!myProfile && String(x.seller_name||'')!==String(data.username||'');
     return `<div class="public-market-card">
-      <span class="inv-icon" style="color:${m.color};font-size:22px">${icon}</span>
+      <span class="inv-icon" style="color:${m.color};font-size:22px">${cubeImage||icon}</span>
       <div class="public-market-info">
         <div class="public-market-name">${name}</div>
         <div class="public-market-price">💰 ${formatPrice(x.price)}<div class="public-market-real-price">Настоящая цена: ${formatPrice(x.cube_value)}</div></div>
@@ -10231,7 +10236,18 @@ document.getElementById('adminSearch')?.addEventListener('keydown', function(e){
 });
 
 document.getElementById('marketSearch')?.addEventListener('input',renderMarketItems);
-if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){ window.cubeIconsReady.then(()=>{ if(typeof renderMarketItems==='function') renderMarketItems(); }).catch(()=>{}); }
+if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
+  window.cubeIconsReady.then(()=>{
+    // All cube-bearing screens are rendered once more after the real 2D
+    // artwork finishes preloading. This prevents a fallback mini-cube/rarity
+    // icon from remaining on screens that rendered before cube_icons.html.
+    try{ if(typeof renderMarketItems==='function') renderMarketItems(); }catch(_){}
+    try{ if(typeof renderInventory==='function') renderInventory(); }catch(_){}
+    try{ if(typeof renderCases==='function') renderCases(); }catch(_){}
+    try{ if(typeof renderUpgradeCatalog==='function' && typeof upgradeSource!=='undefined' && upgradeSource) renderUpgradeCatalog(document.getElementById('upgradeSearch')?.value||''); }catch(_){}
+    try{ if(typeof renderProfile==='function') renderProfile(); }catch(_){}
+  }).catch(()=>{});
+}
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
 document.getElementById('profileNameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-name]');if(b&&!b.disabled)setProfileNameStyle(b.dataset.profileName);});
