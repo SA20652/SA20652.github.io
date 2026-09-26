@@ -8707,8 +8707,10 @@ function renderInventory(){
   const stackedCubes=Object.values(cubeStacks);
   const sortSelect=document.getElementById('inventorySort');
   const allowedSortKeys=new Set(['value-desc','value-asc','rarity-desc','rarity-asc','name-asc','name-desc','count-desc','count-asc','case-groups']);
-  const storedSort=storageGet('GDPLAY_CUBE_SORT') || 'value-desc';
-  const sortKey=allowedSortKeys.has(String(sortSelect?.value||'')) ? String(sortSelect.value) : (allowedSortKeys.has(String(storedSort)) ? String(storedSort) : 'value-desc');
+  const storedSort=storageGet('GDPLAY_CUBE_SORT') || '';
+  const storedSortKey=allowedSortKeys.has(String(storedSort)) ? String(storedSort) : '';
+  const currentSortKey=allowedSortKeys.has(String(sortSelect?.value||'')) ? String(sortSelect.value) : '';
+  const sortKey=storedSortKey || currentSortKey || 'value-desc';
   if(sortSelect && sortSelect.value!==sortKey) sortSelect.value=sortKey;
   storageSet('GDPLAY_CUBE_SORT',sortKey);
   const rarityRank=(r)=>({common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6}[String(r||'common').toLowerCase()] ?? 0);
@@ -10587,7 +10589,12 @@ let shareTarget=null;
 async function openShareOrbs(){shareTarget=null;document.getElementById('shareSelected').textContent='';document.getElementById('shareAmountRow').style.display='none';document.getElementById('shareAmount').value='';openModal('shareOrbsModal');await loadOnlineUsers();}
 async function loadOnlineUsers(){const list=document.getElementById('onlineUsersList');if(!list)return;list.innerHTML='<div class="section-sub">Загрузка…</div>';try{const j=await apiFetch('/api/all-users',{search:document.getElementById('shareSearch')?.value||''});const users=j.users||[];list.innerHTML=users.length?users.map(u=>{const n=(u.display_name||u.username||'Игрок').replace(/"/g,'&quot;');const av=u.avatar?`<img src="${u.avatar}" alt="" loading="eager" decoding="async">`:(n[0]||'И');return `<div class="online-user-row"><div class="online-user-avatar">${av}</div><div class="online-user-name">${n}</div><button class="btn-ghost" data-share-user="${u.user_id}">Отправить</button></div>`}).join(''):'<div class="section-sub">Игроки не найдены</div>';}catch(e){list.innerHTML='<div class="section-sub">❌ '+(e.message||'Не удалось загрузить игроков')+'</div>';}}
 function selectShareUser(uid,name){shareTarget={uid:Number(uid),name};document.getElementById('shareSelected').textContent='Получатель: '+name;document.getElementById('shareAmountRow').style.display='flex';document.getElementById('shareAmount').focus();}
-async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.getElementById('shareAmount').value);if(!Number.isInteger(amount)||amount<1){toast('Введите целое число орбов');return;}const btn=document.getElementById('shareSendBtn');btn.disabled=true;try{const j=await apiFetch('/api/orbs/transfer',{user_id:shareTarget.uid,amount});data.balance=Number(j.balance||0);persistLocal();updateBalanceUI();toast(`Отправлено ${amount.toLocaleString('ru-RU')} 💰 игроку ${shareTarget.name}`);closeModal('shareOrbsModal');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
+async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.getElementById('shareAmount').value);if(!Number.isInteger(amount)||amount<1){toast('Введите целое число орбов');return;}const btn=document.getElementById('shareSendBtn');btn.disabled=true;try{const j=await apiFetch('/api/orbs/transfer',{user_id:shareTarget.uid,amount});data.balance=Number(j.balance||0);persistLocal();updateBalanceUI();
+const recipientName=String(shareTarget.name||'Игрок');
+const amountFormatted=Number(amount).toLocaleString('ru-RU');
+const balanceFormatted=Number(j.balance||0).toLocaleString('ru-RU');
+toast(`✅ Перевод выполнен\n\nОтправлено: ${amountFormatted} ${amount===1?'орб':'орбов'}\nПолучатель: ${recipientName}\n\nВаш баланс: ${balanceFormatted} орбов`, 6500);
+closeModal('shareOrbsModal');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
 document.getElementById('shareSearch')?.addEventListener('input',()=>loadOnlineUsers());
 document.getElementById('onlineUsersList')?.addEventListener('click',e=>{const b=e.target.closest('[data-share-user]');if(b)selectShareUser(b.dataset.shareUser,b.parentElement.querySelector('.online-user-name')?.textContent||'Игрок');});
 document.getElementById('shareSendBtn')?.addEventListener('click',sendOrbs);document.getElementById('shareCloseBtn')?.addEventListener('click',()=>closeModal('shareOrbsModal'));
