@@ -4923,6 +4923,14 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
         <label for="inventorySort" class="section-sub" style="margin:0">Сортировка</label>
         <div class="gdplay-select-wrap" data-select-id="inventorySort"></div>
         <select id="inventorySort" class="inv-sort" aria-label="Сортировка кубов">
+          <option value="value-desc">Стоимость: сначала дорогие</option>
+          <option value="value-asc">Стоимость: сначала дешёвые</option>
+          <option value="rarity-desc">Редкость: сначала редкие</option>
+          <option value="rarity-asc">Редкость: сначала обычные</option>
+          <option value="name-asc">Название: А → Я</option>
+          <option value="name-desc">Название: Я → А</option>
+          <option value="count-desc">Количество: больше → меньше</option>
+          <option value="count-asc">Количество: меньше → больше</option>
           <option value="case-groups">По кейсам</option>
         </select>
       </div>
@@ -8636,10 +8644,12 @@ function renderInventory(){
     cubeStacks[id].indices.push(i);
   });
   const stackedCubes=Object.values(cubeStacks);
-  const sortKey='case-groups';
   const sortSelect=document.getElementById('inventorySort');
-  if(sortSelect && sortSelect.value!=='case-groups') sortSelect.value='case-groups';
-  storageSet('GDPLAY_CUBE_SORT','case-groups');
+  const allowedSortKeys=new Set(['value-desc','value-asc','rarity-desc','rarity-asc','name-asc','name-desc','count-desc','count-asc','case-groups']);
+  const storedSort=storageGet('GDPLAY_CUBE_SORT') || 'value-desc';
+  const sortKey=allowedSortKeys.has(String(sortSelect?.value||'')) ? String(sortSelect.value) : (allowedSortKeys.has(String(storedSort)) ? String(storedSort) : 'value-desc');
+  if(sortSelect && sortSelect.value!==sortKey) sortSelect.value=sortKey;
+  storageSet('GDPLAY_CUBE_SORT',sortKey);
   const rarityRank=(r)=>({common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6}[String(r||'common').toLowerCase()] ?? 0);
   const cubeSourceCaseId=(cube)=>{
     const direct=cube?.source_case_id ?? cube?.metadata?.source_case_id;
@@ -8721,13 +8731,20 @@ function renderInventory(){
     if(group) group.items.push(item); else unmatched.push(item);
   });
 
+  if(sortKey!=='case-groups'){
+    list.innerHTML=stackedCubes.map(renderStack).join('');
+    return;
+  }
+
   const groupsHtml=[];
   caseGroups.forEach(group=>{
     if(!group.items.length) return;
+    group.items.sort(compare);
     const title=String(group.case.name||'').replace(/<[^>]*>/g,'');
     groupsHtml.push(`<section class="inv-case-group"><div class="inv-case-group-title">${title}</div>${group.items.map(renderStack).join('')}</section>`);
   });
   if(unmatched.length){
+    unmatched.sort(compare);
     groupsHtml.push(`<section class="inv-case-group"><div class="inv-case-group-title">Другие</div>${unmatched.map(renderStack).join('')}</section>`);
   }
   list.innerHTML=groupsHtml.join('');
