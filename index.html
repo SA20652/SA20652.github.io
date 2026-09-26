@@ -4926,6 +4926,18 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
           <option value="name-desc">Название: Я → А</option>
           <option value="count-desc">Количество: больше → меньше</option>
           <option value="count-asc">Количество: меньше → больше</option>
+          <option value="case:elite">Кейс: Элитный Кейс — 1 500 000 💰</option>
+          <option value="case:hall">Кейс: Зал славы GD — 650 000 💰</option>
+          <option value="case:iconic">Кейс: Иконический кейс — 380 000 💰</option>
+          <option value="case:master">Кейс: Master-кейс — 220 000 💰</option>
+          <option value="case:og">Кейс: Хранилище OG — 130 000 💰</option>
+          <option value="case:extreme">Кейс: Extreme-кейс — 75 000 💰</option>
+          <option value="case:legendary">Кейс: Легендарный кейс — 40 000 💰</option>
+          <option value="case:creator">Кейс: Creator-кейс — 22 000 💰</option>
+          <option value="case:demon">Кейс: Demon-кейс — 12 000 💰</option>
+          <option value="case:gilded">Кейс: Позолоченный кейс — 6 000 💰</option>
+          <option value="case:obsidian">Кейс: Чёрный кейс — 2 500 💰</option>
+          <option value="case:brass">Кейс: Латунный кейс — 500 💰</option>
         </select>
       </div>
       <div class="inv-toolbar">
@@ -8641,6 +8653,14 @@ function renderInventory(){
   const sortKey=String(document.getElementById('inventorySort')?.value || storageGet('GDPLAY_CUBE_SORT') || 'value-desc');
   const sortSelect=document.getElementById('inventorySort'); if(sortSelect && sortSelect.value!==sortKey) sortSelect.value=sortKey;
   const rarityRank=(r)=>({common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6}[String(r||'common').toLowerCase()] ?? 0);
+  const cubeSourceCaseId=(cube)=>{
+    const direct=cube?.source_case_id ?? cube?.metadata?.source_case_id;
+    if(direct && CASES.some(c=>String(c.id)===String(direct))) return String(direct);
+    const name=String(cube?.name||''), rarity=String(cube?.rarity||'common'), value=Number(cube?.value||0);
+    const found=CASES.find(c=>c.items.some(it=>String(it.name)===name && String(it.rarity)===rarity && Number(it.value)===value));
+    return found ? String(found.id) : '';
+  };
+  const caseRank=new Map(CASES.map((c,i)=>[String(c.id), {price:Number(c.price)||0,index:i}]));
   const compare=(a,b)=>{
     const av=Number(a.cube?.value||0), bv=Number(b.cube?.value||0);
     const ar=rarityRank(a.cube?.rarity), br=rarityRank(b.cube?.rarity);
@@ -8652,6 +8672,13 @@ function renderInventory(){
     if(sortKey==='name-desc') return -an || bv-av;
     if(sortKey==='count-desc') return b.count-a.count || bv-av || an;
     if(sortKey==='count-asc') return a.count-b.count || av-bv || an;
+    if(sortKey.startsWith('case:')){
+      const wanted=sortKey.slice(5);
+      const ac=cubeSourceCaseId(a.cube), bc=cubeSourceCaseId(b.cube);
+      const aMatch=ac===wanted, bMatch=bc===wanted;
+      if(aMatch!==bMatch) return aMatch ? -1 : 1;
+      return bv-av || br-ar || an;
+    }
     return bv-av || br-ar || an;
   };
   stackedCubes.sort(compare);
