@@ -5543,7 +5543,7 @@ const CASES = [
     {name:"MoistenedEgg",rarity:"epic",value:264000,chance:19.9},
     {name:"thejshadow",rarity:"legendary",value:352000,chance:13.2667},
     {name:"GToast",rarity:"mythic",value:748000,chance:6.6333},
-    {name:"AyumiRenko",rarity:"divine",value:1650000,chance:0.5}
+    {name:"Хижина гоблина",rarity:"divine",value:1650000,chance:0.5}
   ]},
   {id:"icon",name:"Иконический кейс",price:380000,icon:'',items:[
     {name:"Superkobster",rarity:"common",value:152000,chance:24.875},
@@ -7975,12 +7975,13 @@ function buildWheelIn(dial, items, wonIndex, wonValue=null, authoritativeDrop=nu
     const m=RARITY_META[it.rarity]||RARITY_META.common;
     const v=Math.floor(Number(it.value||0));
     const name=String(it.name||'Награда');
+    const drumName=name==='Хижина гоблина'?'Хижина':name;
     let icon=iconCache.get(name);
     if(icon===undefined){
       icon=eliteCaseCubeIconMarkup(it,'wheel-cube-icon')||`<span>${m.icon}</span>`;
       iconCache.set(name,icon);
     }
-    return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}>${icon}<b style="color:${m.color}">${name}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`;
+    return `<div class="wheel-item" ${idx===REEL_TARGET_POS?'data-reel-target="1"':''}>${icon}<b style="color:${m.color}">${drumName}</b><small style="color:${m.color}">${v.toLocaleString('ru-RU')} 💰</small></div>`;
   }).join('');
   hydrateEliteWheelImages(dial);
   dial.querySelectorAll('.wheel-item b').forEach(fitReelName);
