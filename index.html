@@ -10592,10 +10592,10 @@ async function loadOnlineUsers(){const list=document.getElementById('onlineUsers
 function selectShareUser(uid,name){shareTarget={uid:Number(uid),name};document.getElementById('shareSelected').textContent='Получатель: '+name;document.getElementById('shareAmountRow').style.display='flex';document.getElementById('shareAmount').focus();}
 async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.getElementById('shareAmount').value);if(!Number.isInteger(amount)||amount<1){toast('Введите целое число орбов');return;}const btn=document.getElementById('shareSendBtn');btn.disabled=true;try{const j=await apiFetch('/api/orbs/transfer',{user_id:shareTarget.uid,amount});data.balance=Number(j.balance||0);persistLocal();updateBalanceUI();
 const recipientName=String(shareTarget.name||'Игрок');
-const amountFormatted=Number(amount).toLocaleString('ru-RU');
-const balanceFormatted=Number(j.balance||0).toLocaleString('ru-RU');
+const amountFormatted=Number(amount).toLocaleString('de-DE');
+const amountWord=amount%100>=11&&amount%100<=14?'орбов':amount%10===1?'Орб':amount%10>=2&&amount%10<=4?'орба':'орбов';
 closeModal('shareOrbsModal');
-showToast(`Перевод выполнен\n\nОтправлено: ${amountFormatted} ${amount===1?'орб':'орбов'}\nПолучатель: ${recipientName}\n\nВаш баланс: ${balanceFormatted} орбов`,'success');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
+showToast(`Перевод выполнен\n\nОтправлено: ${amountFormatted} ${amountWord}\nПолучатель: ${recipientName}`,'success');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
 document.getElementById('shareSearch')?.addEventListener('input',()=>loadOnlineUsers());
 document.getElementById('onlineUsersList')?.addEventListener('click',e=>{const b=e.target.closest('[data-share-user]');if(b)selectShareUser(b.dataset.shareUser,b.parentElement.querySelector('.online-user-name')?.textContent||'Игрок');});
 document.getElementById('shareSendBtn')?.addEventListener('click',sendOrbs);document.getElementById('shareCloseBtn')?.addEventListener('click',()=>closeModal('shareOrbsModal'));
