@@ -213,6 +213,8 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 /* ============ MODAL / WHEEL ============ */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,8,6,.78);display:none;align-items:flex-start;justify-content:center;z-index:2000;padding:calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;}
 .modal-overlay.open{display:flex;}
+#sellConfirmModal.open{align-items:center;justify-content:center;overflow:hidden;}
+#sellConfirmModal .sell-confirm-modal{margin:auto;}
 .sell-confirm-modal{width:min(420px,100%);background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45);max-height:calc(100dvh - 40px);overflow-y:auto;box-sizing:border-box;}
 .sell-confirm-modal h3{margin:0 0 10px;font-size:18px;}
 .sell-confirm-modal p{margin:0;color:var(--muted);line-height:1.5;font-size:13px;}
@@ -3076,6 +3078,8 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 /* ============ MODAL / WHEEL ============ */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,8,6,.78);display:none;align-items:flex-start;justify-content:center;z-index:2000;padding:calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;}
 .modal-overlay.open{display:flex;}
+#sellConfirmModal.open{align-items:center;justify-content:center;overflow:hidden;}
+#sellConfirmModal .sell-confirm-modal{margin:auto;}
 .sell-confirm-modal{width:min(420px,100%);background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45);max-height:calc(100dvh - 40px);overflow-y:auto;box-sizing:border-box;}
 .sell-confirm-modal h3{margin:0 0 10px;font-size:18px;}
 .sell-confirm-modal p{margin:0;color:var(--muted);line-height:1.5;font-size:13px;}
@@ -7721,6 +7725,14 @@ function applyLiveCasePity(caseId,pityMap){
   const next=Math.max(0,Math.min(limit,Number(pityMap[id]||0)));
   data.casePity={...(data.casePity||{}),[id]:next};
   updateCasePityCard(id);
+  persistLocal();
+}
+function resetCasePityLive(caseId){
+  if(!data) return;
+  const id=String(caseId);
+  data.casePity={...(data.casePity||{}),[id]:0};
+  updateCasePityCard(id);
+  persistLocal();
 }
 function advanceCasePityLive(caseId, amount=1){
   if(!data) return;
@@ -8301,6 +8313,8 @@ async function openCaseBatch(c, qty, useKey=false){
       if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');});
       data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+qty;
       if(j.case_pity && typeof j.case_pity==='object'){ applyLiveCasePity(c.id,j.case_pity); }
+      const batchGuaranteePool=casePityGuarantee(c).map(x=>String(x.name));
+      if(wins.some(w=>batchGuaranteePool.includes(String(w.name)))) resetCasePityLive(c.id);
       data._casePityAuthoritativeUntil=Date.now()+15000;
       if(j.farm_action) handleFarmAction?.(j.farm_action);
     }else{
@@ -8460,6 +8474,8 @@ async function openEliteCaseInstant(c, useKey=false){
       if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
       data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+1;
       if(j.case_pity&&typeof j.case_pity==='object'){ applyLiveCasePity(c.id,j.case_pity); }
+      const singleGuaranteePool=casePityGuarantee(c).map(x=>String(x.name));
+      if(singleGuaranteePool.includes(String(won.name))) resetCasePityLive(c.id);
       if(j.farm_action&&typeof handleFarmAction==='function') handleFarmAction(j.farm_action);
     }else{
       won=provisional;
@@ -8869,7 +8885,7 @@ function sellAll(){
   if(!unlocked.length){showToast('🔒 Все кубы заморожены','error');return;}
   const total = unlocked.reduce((sum,c)=>sum+Math.floor(c.value*ratio),0);
   const full = unlocked.reduce((sum,c)=>sum+Number(c.value||0),0);
-  document.getElementById('sellConfirmText').textContent = `От всей стоимости кубов (${full.toLocaleString('ru-RU')} монет) ты получишь ${isPremium?'85% (Premium)':'70%'} — ${total.toLocaleString('ru-RU')} монет.`;
+  document.getElementById('sellConfirmText').textContent = `В стоимость входят только незамороженные кубы: ${full.toLocaleString('ru-RU')} монет. Замороженные кубы не продаются и в сумму не входят. Ты получишь ${isPremium?'85% (Premium)':'70%'} — ${total.toLocaleString('ru-RU')} монет.`;
   openModal('sellConfirmModal');
 }
 
