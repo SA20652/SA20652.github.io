@@ -7722,6 +7722,15 @@ function applyLiveCasePity(caseId,pityMap){
   data.casePity={...(data.casePity||{}),[id]:next};
   updateCasePityCard(id);
 }
+function advanceCasePityLive(caseId, amount=1){
+  if(!data) return;
+  const id=String(caseId);
+  const limit=casePityLimit(id);
+  const current=Math.max(0, Math.min(limit, Number(data?.casePity?.[id]||0)));
+  const next=Math.min(limit, current + Math.max(0, Number(amount)||0));
+  data.casePity={...(data.casePity||{}), [id]:next};
+  updateCasePityCard(id);
+}
 function updateCasePityCards(caseIds){
   if(Array.isArray(caseIds)) caseIds.forEach(updateCasePityCard);
   else CASES.forEach(c=>updateCasePityCard(c.id));
@@ -8281,6 +8290,8 @@ async function openCaseBatch(c, qty, useKey=false){
   try{
     if(tgInitData()){
       const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      // Показатель гаранта меняется сразу при начале открытия, не после ответа сервера.
+      advanceCasePityLive(c.id, qty);
       const j=await apiFetch('/api/cube/open-batch',{case_id:c.id,qty,use_key:!!useKey,request_id:requestId});
       if(!Array.isArray(j.drops)||j.drops.length!==qty) throw new Error('Сервер вернул некорректные результаты кейсов');
       j.drops.forEach(d=>wins.push({name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
@@ -8437,6 +8448,8 @@ async function openEliteCaseInstant(c, useKey=false){
   try{
     if(tgInitData()){
       const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      // Показатель гаранта меняется сразу при начале прокрутки этого кейса.
+      advanceCasePityLive(c.id, 1);
       const serverPromise=apiFetch('/api/cube/open',{case_id:c.id,use_key:!!useKey,request_id:requestId});
       const j=await serverPromise;
       if(!j.drop) throw new Error('Сервер не вернул результат кейса');
@@ -9281,7 +9294,7 @@ async function confirmUpgrade(){
     pointer.style.transform='translateX(-50%)';
     const fast=isUpgradeFast();
     const duration=fast ? 400 : 900;
-    const finalAngle=90 - visualDeg + (360*5);
+    const finalAngle=-visualDeg + (360*5);
     gauge.style.transition='none';
     gauge.style.transform='rotate(0deg)';
     void gauge.offsetWidth;
