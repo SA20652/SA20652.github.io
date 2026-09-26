@@ -11464,6 +11464,13 @@ boot().catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
     if(!select || select.dataset.gdplayCustomised==='1') return;
     select.dataset.gdplayCustomised='1';
     select.classList.add('gdplay-select-native-hidden');
+    // Restore persisted inventory sorting before creating the visible custom trigger.
+    if(select.id==='inventorySort'){
+      try{
+        const saved=storageGet('GDPLAY_CUBE_SORT');
+        if(saved && Array.from(select.options).some(o=>o.value===saved)) select.value=saved;
+      }catch(e){}
+    }
     let wrap=document.querySelector('.gdplay-select-wrap[data-select-id="'+CSS.escape(select.id)+'"]');
     if(!wrap){
       wrap=document.createElement('div');
