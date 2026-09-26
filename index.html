@@ -8561,7 +8561,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
       if(Array.isArray(j.keys)) data.keys = j.keys.map(x=>({...x}));
       if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
       data.cases_opened = j.cases_opened != null ? j.cases_opened : (data.cases_opened||0)+1;
-      if(j.case_pity && typeof j.case_pity==='object') data.casePity={...j.case_pity};
+      if(j.case_pity && typeof j.case_pity==='object'){ data.casePity={...j.case_pity}; updateCasePityCard(c.id); }
       if(j.farm_action && typeof handleFarmAction === 'function') handleFarmAction(j.farm_action);
     }else{
       won = rollCaseItemWithPity(c);
@@ -12413,10 +12413,3 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
   else initScrollArrows();
 })();
 </script>
-<style>
-/* Case quantity controls: keep 1x/2x/3x stable during fast scrolling/repaints. */
-#casesList .rad-actions{min-width:0;overflow:visible!important;position:relative;z-index:4;}
-#casesList .rad-qty{flex:0 0 auto!important;display:flex!important;visibility:visible!important;opacity:1!important;overflow:visible!important;position:relative;z-index:5;}
-#casesList .rad-qty .case-qty-btn{flex:0 0 34px!important;width:34px!important;min-width:34px!important;display:flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:6;}
-@media(max-width:430px){#casesList .rad-qty .case-qty-btn{flex-basis:31px!important;width:31px!important;min-width:31px!important;}}
-</style>
