@@ -5958,8 +5958,20 @@ function applyServerState(u){
   if(Array.isArray(u.keys) && JSON.stringify(u.keys) !== JSON.stringify(data.keys)){ data.keys = u.keys; changed = true; }
   if(typeof u.cases_opened === 'number' && u.cases_opened !== data.cases_opened){ data.cases_opened = u.cases_opened; changed = true; }
   if(u.case_pity && typeof u.case_pity === 'object'){
-    const nextPity={...u.case_pity};
-    if(JSON.stringify(nextPity)!==JSON.stringify(data.casePity||{})){ data.casePity=nextPity; changed=true; }
+    // Do not let an older /api/me response roll the visible pity counter
+    // backwards while an opening request has already advanced it. A real
+    // reset is only accepted when the local counter was at the guarantee
+    // threshold (the server resets it to 0 after the guaranteed reward).
+    const incoming={...u.case_pity};
+    const current={...(data.casePity||{})};
+    const merged={...incoming};
+    Object.keys(current).forEach(cid=>{
+      const cur=Number(current[cid]||0);
+      const inc=Number(incoming[cid]||0);
+      const limit=(String(cid)==='hall'||String(cid)==='elite')?50:25;
+      if(Number.isFinite(cur) && Number.isFinite(inc) && inc < cur && !(cur >= limit-1 && inc === 0)) merged[cid]=cur;
+    });
+    if(JSON.stringify(merged)!==JSON.stringify(data.casePity||{})){ data.casePity=merged; changed=true; }
   }
   if(u.daily_claimed !== undefined){
     const serverLastDaily = u.daily_claimed ? Date.parse(u.daily_claimed) : 0;
@@ -7685,10 +7697,13 @@ function renderCases(){
   startCasePreviewAnimation();
 }
 const caseOpenQty = {};
-function casePityLimit(caseId){ return String(caseId)==='hall' ? 50 : 25; }
+function casePityLimit(caseId){ return (String(caseId)==='hall' || String(caseId)==='elite') ? 50 : 25; }
 function casePityGuarantee(c){
   if(String(c?.id)==='hall'){
     return c.items.filter(it=>String(it.name)==='Kuro' && String(it.rarity).toLowerCase()==='emerald');
+  }
+  if(String(c?.id)==='elite'){
+    return c.items.filter(it=>String(it.name)==='Ad3usgmd' && String(it.rarity).toLowerCase()==='emerald');
   }
   const divine=c.items.filter(it=>String(it.rarity).toLowerCase()==='divine');
   if(divine.length) return divine;
@@ -8810,7 +8825,7 @@ function sellAll(){
   const unlocked=data.cubes.filter(c=>!c.metadata?.locked);
   if(!unlocked.length){showToast('🔒 Все кубы заморожены','error');return;}
   const total = unlocked.reduce((sum,c)=>sum+Math.floor(c.value*ratio),0);
-  const full = unlocked.reduce((sum,c)=>sum+c.value,0);
+  const full = unlocked.reduce((sum,c)=>sum+Number(c.value||0),0);
   document.getElementById('sellConfirmText').textContent = `От всей стоимости кубов (${full.toLocaleString('ru-RU')} монет) ты получишь ${isPremium?'85% (Premium)':'70%'} — ${total.toLocaleString('ru-RU')} монет.`;
   openModal('sellConfirmModal');
 }
@@ -8819,7 +8834,7 @@ async function executeSellAll(){
   serverActionInFlight++; serverBusyUntil=Date.now()+150;
   if(!data.cubes.length){ serverActionInFlight=Math.max(0,serverActionInFlight-1); closeModal('sellConfirmModal'); return; }
   const localRatio = data.premiumUntil && new Date(data.premiumUntil).getTime()>Date.now() ? 0.85 : 0.7;
-  const localTotal = data.cubes.reduce((sum,c)=>sum+Math.floor(c.value*localRatio),0);
+  const localTotal = data.cubes.filter(c=>!c.metadata?.locked).reduce((sum,c)=>sum+Math.floor(Number(c.value||0)*localRatio),0);
   try{
     if(tgInitData()){
       const j = await apiFetch('/api/cube/sell-all', {});
