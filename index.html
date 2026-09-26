@@ -8713,6 +8713,7 @@ function renderInventory(){
   const sortKey=storedSortKey || currentSortKey || 'value-desc';
   if(sortSelect && sortSelect.value!==sortKey) sortSelect.value=sortKey;
   storageSet('GDPLAY_CUBE_SORT',sortKey);
+  try{ if(typeof syncTrigger==='function' && sortSelect) syncTrigger(sortSelect); }catch(e){}
   const rarityRank=(r)=>({common:0,rare:1,epic:2,legendary:3,mythic:4,divine:5,emerald:6}[String(r||'common').toLowerCase()] ?? 0);
   const cubeSourceCaseId=(cube)=>{
     const direct=cube?.source_case_id ?? cube?.metadata?.source_case_id;
@@ -10593,8 +10594,8 @@ async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.ge
 const recipientName=String(shareTarget.name||'Игрок');
 const amountFormatted=Number(amount).toLocaleString('ru-RU');
 const balanceFormatted=Number(j.balance||0).toLocaleString('ru-RU');
-toast(`✅ Перевод выполнен\n\nОтправлено: ${amountFormatted} ${amount===1?'орб':'орбов'}\nПолучатель: ${recipientName}\n\nВаш баланс: ${balanceFormatted} орбов`, 6500);
-closeModal('shareOrbsModal');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
+closeModal('shareOrbsModal');
+showToast(`Перевод выполнен\n\nОтправлено: ${amountFormatted} ${amount===1?'орб':'орбов'}\nПолучатель: ${recipientName}\n\nВаш баланс: ${balanceFormatted} орбов`,'success');}catch(e){toast(e.message||'Не удалось отправить орбы');}finally{btn.disabled=false;}}
 document.getElementById('shareSearch')?.addEventListener('input',()=>loadOnlineUsers());
 document.getElementById('onlineUsersList')?.addEventListener('click',e=>{const b=e.target.closest('[data-share-user]');if(b)selectShareUser(b.dataset.shareUser,b.parentElement.querySelector('.online-user-name')?.textContent||'Игрок');});
 document.getElementById('shareSendBtn')?.addEventListener('click',sendOrbs);document.getElementById('shareCloseBtn')?.addEventListener('click',()=>closeModal('shareOrbsModal'));
