@@ -8108,18 +8108,7 @@ if(!document.getElementById('gdplay-confetti-style')){
 }
 
 async function showSpinResult(item, isSecret){
-  // The result must never depend on the large global cube-image preload. If
-  // that promise is delayed/stuck, the old version never reached the result
-  // card or the "Забрать" button. Give the image catalog a short grace period
-  // and then render the authoritative reward anyway.
-  try{
-    if(window.cubeIconsReady){
-      await Promise.race([
-        Promise.resolve(window.cubeIconsReady),
-        new Promise(resolve=>setTimeout(resolve,700))
-      ]);
-    }
-  }catch(_){}
+  // Reward card is rendered immediately; never wait for the global image preload.
   const m = RARITY_META[item?.rarity] || RARITY_META.common;
   const box = document.getElementById('spinResult');
   const closeBtn = document.getElementById('spinCloseBtn');
@@ -8313,8 +8302,7 @@ async function openCaseBatch(c, qty, useKey=false){
       if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');});
       data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+qty;
       if(j.case_pity && typeof j.case_pity==='object'){ applyLiveCasePity(c.id,j.case_pity); }
-      const batchGuaranteePool=casePityGuarantee(c).map(x=>String(x.name));
-      if(wins.some(w=>batchGuaranteePool.includes(String(w.name)))) resetCasePityLive(c.id);
+      if(j.guarantee_triggered===true) resetCasePityLive(c.id);
       data._casePityAuthoritativeUntil=Date.now()+15000;
       if(j.farm_action) handleFarmAction?.(j.farm_action);
     }else{
@@ -8474,8 +8462,7 @@ async function openEliteCaseInstant(c, useKey=false){
       if(j.key) showToast('🗝️ Дополнительно найден ключ «'+j.key.name+'»','success');
       data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+1;
       if(j.case_pity&&typeof j.case_pity==='object'){ applyLiveCasePity(c.id,j.case_pity); }
-      const singleGuaranteePool=casePityGuarantee(c).map(x=>String(x.name));
-      if(singleGuaranteePool.includes(String(won.name))) resetCasePityLive(c.id);
+      if(j.guarantee_triggered===true) resetCasePityLive(c.id);
       if(j.farm_action&&typeof handleFarmAction==='function') handleFarmAction(j.farm_action);
     }else{
       won=provisional;
