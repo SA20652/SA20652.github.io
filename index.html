@@ -10347,16 +10347,16 @@ function renderProfile(){
     loadDailyStatus();
     return;
   }
-  const streak=Math.max(0,Math.min(140,Number(dailyState.streak||0)));
+  const streak=Math.max(0,Math.min(14,Number(dailyState.streak||0)));
   const nextAt=Number(dailyState.nextAt||0);
-  const can=streak<140 && (dailyState.available || (!nextAt && !dailyState.waiting && !dailyState.error && !dailyState.completed));
+  const can=streak<14 && (dailyState.available || (!nextAt && !dailyState.waiting && !dailyState.error && !dailyState.completed));
   const nextReward=Number(dailyState.reward||0);
-  const progressLabel=streak<14 ? streak+'/14' : streak+'/140';
-  document.getElementById('dailyDesc').textContent=streak>=140?'Серия 140/140 завершена':'Следующий бонус: '+nextReward.toLocaleString('ru-RU')+' 💰';
+  const progressLabel=streak+'/14';
+  document.getElementById('dailyDesc').textContent=streak>=14?'Серия 14/14 завершена':'Следующий бонус: '+nextReward.toLocaleString('ru-RU')+' 💰';
   document.getElementById('dailyBtn').disabled=!can;
-  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=140) timer.textContent='Все 140 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else if(nextAt>Date.now()){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else { timer.textContent='Бонус готов к получению'; } }
+  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=14) timer.textContent='Все 14 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else if(nextAt>Date.now()){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else { timer.textContent='Бонус готов к получению'; } }
   const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=progressLabel;
-  const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=(streak<14 ? (streak/14*10) : (streak/140*100))+'%';
+  const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=((streak/14*100))+'%';
   if(nextAt && Date.now()>=nextAt && !dailyStatusInFlight) loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
@@ -10397,15 +10397,15 @@ function updateDailyUI(){
   if(!data)return;
   updateDailyBonusVisibility();
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
-  const streak=Math.max(0,Math.min(140,Number(dailyState.streak||data.dailyStreak||0)));
-  const nextAt=Number(dailyState.nextAt||0),can=streak<140 && !dailyState.completed && !dailyState.error && !dailyState.waiting && (!nextAt || Date.now()<nextAt) || (streak<140 && !!dailyState.available && (!nextAt || Date.now()<nextAt));
+  const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
+  const nextAt=Number(dailyState.nextAt||0),can=streak<14 && !dailyState.completed && !dailyState.error && !dailyState.waiting && (!nextAt || Date.now()<nextAt) || (streak<14 && !!dailyState.available && (!nextAt || Date.now()<nextAt));
   const reward=Number(dailyState.reward||0)||dailyRewardForClaim(streak,premium);
-  const progressLabel=streak<14 ? streak+'/14' : streak+'/140';
-  const desc=document.getElementById('dailyDesc');if(desc)desc.textContent=(dailyState.completed||streak>=140)?'Все 140 наград получены':'Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
+  const progressLabel=streak+'/14';
+  const desc=document.getElementById('dailyDesc');if(desc)desc.textContent=(dailyState.completed||streak>=14)?'Все 14 наград получены':'Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn){btn.disabled=!can;btn.classList.toggle('disabled',!can);btn.setAttribute('aria-disabled',String(!can));}
-  const timer=document.getElementById('dailyTimer');if(timer){if(!dailyState.loaded) timer.textContent='Загружаем бонус…'; else if(dailyState.completed || streak>=140) timer.textContent='Все 140 наград получены'; else if(can){const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(dailyState.error){timer.textContent=dailyState.error;} else if(dailyState.waiting){const target=Number(dailyState.availableAt||nextAt||0); if(target>Date.now()){const left=target-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else {timer.textContent='Бонус готов к получению';}} else {timer.textContent='Бонус готов к получению';}}
+  const timer=document.getElementById('dailyTimer');if(timer){if(!dailyState.loaded) timer.textContent='Загружаем бонус…'; else if(dailyState.completed || streak>=14) timer.textContent='Все 14 наград получены'; else if(can){const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(dailyState.error){timer.textContent=dailyState.error;} else if(dailyState.waiting){const target=Number(dailyState.availableAt||nextAt||0); if(target>Date.now()){const left=target-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else {timer.textContent='Бонус готов к получению';}} else {timer.textContent='Бонус готов к получению';}}
   const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=progressLabel;
-  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=(streak<14 ? (streak/14*10) : (streak/140*100))+'%';
+  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=((streak/14*100))+'%';
 }
 async function claimDaily(){
   if(!data)return;
@@ -10415,10 +10415,10 @@ async function claimDaily(){
   serverActionInFlight++;serverBusyUntil=Date.now()+150;
   try{
     const j=await apiFetch('/api/daily',{});
-    data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
-    dailyState.availableAt=Number(j.available_at||j.next_daily||0);dailyState.nextAt=Number(j.next_daily||dailyState.availableAt||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=false;dailyState.completed=dailyState.streak>=140;dailyState.loaded=true;
+    data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||0);
+    dailyState.availableAt=Number(j.available_at||j.next_daily||0);dailyState.nextAt=Number(j.next_daily||dailyState.availableAt||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=false;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
     persistLocal();updateBalanceUI();renderProfile();
-    const msg=dailyState.streak>=140?' 🔥 140/140 — максимум':' 🔥 Забрано '+dailyState.streak+'/140';
+    const msg=j.cycle_reset?' 🔥 14/14 — цикл завершён, прогресс сброшен':' 🔥 Забрано '+dailyState.streak+'/14';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
   }catch(e){
     const msg=String(e?.message||'');
