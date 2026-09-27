@@ -506,17 +506,30 @@ nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;
 .promo-photo-overlay.show .promo-photo-card{transform:scale(1) translateY(0);}
 .promo-photo-card img{display:block;width:100%;height:auto;max-height:82vh;object-fit:contain;}
 
-.mackros-promo-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:rgba(8,6,5,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .28s ease;}
+.mackros-promo-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:radial-gradient(circle at 50% 42%,rgba(202,153,70,.10),transparent 38%),rgba(8,6,5,.88);backdrop-filter:blur(16px) saturate(1.08);-webkit-backdrop-filter:blur(16px) saturate(1.08);opacity:0;pointer-events:none;transition:opacity .34s ease;}
 .mackros-promo-overlay.open{opacity:1;pointer-events:auto;}
-.mackros-promo-card{width:min(92vw,420px);box-sizing:border-box;border:1px solid rgba(225,180,100,.28);border-radius:24px;padding:14px;background:linear-gradient(145deg,rgba(34,28,22,.98),rgba(20,17,16,.99));box-shadow:0 28px 90px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.045);transform:translateY(18px) scale(.96);transition:transform .36s cubic-bezier(.2,1.25,.35,1);overflow:hidden;}
-.mackros-promo-overlay.open .mackros-promo-card{transform:translateY(0) scale(1);}
-.mackros-promo-image{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:18px;border:1px solid rgba(225,180,100,.16);box-shadow:0 12px 34px rgba(0,0,0,.42);background:#fff;}
+.mackros-promo-card{position:relative;width:min(92vw,420px);box-sizing:border-box;border:1px solid rgba(225,180,100,.34);border-radius:24px;padding:14px;background:linear-gradient(145deg,rgba(39,32,25,.985),rgba(20,17,16,.995));box-shadow:0 32px 100px rgba(0,0,0,.76),0 0 0 1px rgba(255,220,145,.035),inset 0 1px 0 rgba(255,255,255,.06);transform:translateY(32px) scale(.90) rotateX(5deg);opacity:0;overflow:hidden;isolation:isolate;}
+.mackros-promo-card::before{content:'';position:absolute;z-index:-1;inset:-35%;background:conic-gradient(from 210deg,transparent 0deg,rgba(255,216,130,.16) 48deg,transparent 92deg,transparent 230deg,rgba(255,216,130,.08) 280deg,transparent 320deg);filter:blur(18px);animation:mackrosPromoGlow 5s linear infinite;pointer-events:none;}
+.mackros-promo-card::after{content:'';position:absolute;left:9%;right:9%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,224,154,.8),transparent);box-shadow:0 0 18px rgba(229,181,88,.45);pointer-events:none;}
+.mackros-promo-overlay.open .mackros-promo-card{animation:mackrosPromoCardIn .62s cubic-bezier(.16,1.18,.3,1) forwards;}
+.mackros-promo-image{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:18px;border:1px solid rgba(225,180,100,.20);box-shadow:0 14px 38px rgba(0,0,0,.48),0 0 28px rgba(209,157,67,.08);background:#fff;opacity:0;transform:scale(.94);}
+.mackros-promo-overlay.open .mackros-promo-image{animation:mackrosPromoImageIn .55s .10s cubic-bezier(.2,1.12,.3,1) forwards;}
 .mackros-promo-content{text-align:center;padding:16px 8px 4px;}
-.mackros-promo-title{font:900 19px 'Fraunces',serif;color:var(--paper);letter-spacing:.1px;margin:0 0 9px;}
-.mackros-promo-text{font:500 13px/1.55 'Inter',sans-serif;color:var(--muted);margin:0 auto 15px;max-width:350px;}
-.mackros-promo-go{width:100%;border:1px solid rgba(255,220,145,.48);border-radius:14px;padding:12px 16px;box-sizing:border-box;background:linear-gradient(180deg,#e0b86e,#b98435);color:#24180b;font:900 13px 'IBM Plex Mono',monospace;letter-spacing:.45px;box-shadow:0 8px 24px rgba(194,143,64,.24),inset 0 1px 0 rgba(255,255,255,.3);cursor:pointer;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;}
-.mackros-promo-go:active{transform:scale(.98);filter:brightness(.94);box-shadow:0 4px 14px rgba(194,143,64,.2);}
-.mackros-promo-close{display:block;width:100%;margin-top:8px;border:0;background:transparent;color:rgba(232,220,198,.52);font:600 11px 'IBM Plex Mono',monospace;padding:7px;cursor:pointer;}
+.mackros-promo-title{font:900 19px 'Fraunces',serif;color:var(--paper);letter-spacing:.1px;margin:0 0 9px;opacity:0;transform:translateY(8px);}
+.mackros-promo-text{font:500 13px/1.55 'Inter',sans-serif;color:var(--muted);margin:0 auto 15px;max-width:350px;opacity:0;transform:translateY(8px);}
+.mackros-promo-go{width:100%;border:1px solid rgba(255,220,145,.52);border-radius:14px;padding:12px 16px;box-sizing:border-box;background:linear-gradient(180deg,#e5bf78,#b98435);color:#24180b;font:900 13px 'IBM Plex Mono',monospace;letter-spacing:.45px;box-shadow:0 10px 28px rgba(194,143,64,.28),inset 0 1px 0 rgba(255,255,255,.34);cursor:pointer;opacity:0;transform:translateY(8px);transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;}
+.mackros-promo-overlay.open .mackros-promo-title{animation:mackrosPromoTextIn .42s .25s ease-out forwards;}
+.mackros-promo-overlay.open .mackros-promo-text{animation:mackrosPromoTextIn .42s .32s ease-out forwards;}
+.mackros-promo-overlay.open .mackros-promo-go{animation:mackrosPromoTextIn .42s .39s ease-out forwards;}
+.mackros-promo-go:active{transform:translateY(1px) scale(.98)!important;filter:brightness(.94);box-shadow:0 5px 16px rgba(194,143,64,.22);}
+.mackros-promo-go:hover{filter:brightness(1.06);box-shadow:0 12px 32px rgba(194,143,64,.34),inset 0 1px 0 rgba(255,255,255,.4);}
+.mackros-promo-close{display:block;width:100%;margin-top:8px;border:0;background:transparent;color:rgba(232,220,198,.52);font:600 11px 'IBM Plex Mono',monospace;padding:7px;cursor:pointer;opacity:0;}
+.mackros-promo-overlay.open .mackros-promo-close{animation:mackrosPromoTextIn .35s .46s ease-out forwards;}
+@keyframes mackrosPromoCardIn{0%{opacity:0;transform:translateY(32px) scale(.90) rotateX(5deg)}65%{opacity:1;transform:translateY(-3px) scale(1.012) rotateX(0)}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
+@keyframes mackrosPromoImageIn{0%{opacity:0;transform:scale(.94) translateY(5px);filter:brightness(.65) blur(4px)}100%{opacity:1;transform:scale(1) translateY(0);filter:brightness(1) blur(0)}}
+@keyframes mackrosPromoTextIn{to{opacity:1;transform:translateY(0)}}
+@keyframes mackrosPromoGlow{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.mackros-promo-card::before{animation:none}.mackros-promo-overlay.open .mackros-promo-card,.mackros-promo-overlay.open .mackros-promo-image,.mackros-promo-overlay.open .mackros-promo-title,.mackros-promo-overlay.open .mackros-promo-text,.mackros-promo-overlay.open .mackros-promo-go,.mackros-promo-overlay.open .mackros-promo-close{animation:none;opacity:1;transform:none;filter:none}}
 
 
 .upgrade-stake-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -6959,7 +6972,7 @@ function closeMackrosPromo(){
 }
 function goToMackrosHelper(){
   closeMackrosPromo();
-  const url='https://t.me/MackrosHelperAI_bot';
+  const url='https://t.me/MackrosHelperAI_bot?start=gdplay_mackroshelper';
   try{
     if(window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(url);
     else if(window.Telegram?.WebApp?.openLink) window.Telegram.WebApp.openLink(url);
