@@ -4642,10 +4642,6 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
       <h3>Статистика</h3>
       <div id="adminStats" class="admin-log">Загрузка…</div>
     </div>
-    <div class="admin-card">
-      <h3>Журнал</h3>
-      <div id="adminLogs"><div class="admin-log">Загрузка…</div></div>
-    </div>
   </div>
   <div class="admin-card" style="margin-top:10px">
     <button type="button" class="btn-ghost" id="adminOnlinePlayersToggle" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center">
@@ -7006,15 +7002,6 @@ async function renderAdmin(){
     document.getElementById('adminStats').textContent = 'Ошибка: '+e.message;
   }
   renderAdminPromos();
-  try{
-    const j = await apiFetch('/api/admin/logs', {});
-    const logs = j.logs||[];
-    document.getElementById('adminLogs').innerHTML = logs.length ? logs.slice(0,20).map(l=>
-      `<div class="admin-log">${l.action||''} → ${l.target_id||''} ${l.details?('('+l.details+')'):''}</div>`
-    ).join('') : '<div class="admin-log">Пусто</div>';
-  }catch(e){
-    document.getElementById('adminLogs').textContent = 'Ошибка: '+e.message;
-  }
 }
 
 async function loadAdminUsers(search){
