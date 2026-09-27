@@ -6086,6 +6086,10 @@ async function loadAdminUI(){
       });
     }
     if(window.adminUIReady){
+      // The server fragment does not have to rely on a legacy promo-list
+      // handler. Load the list through the central apiFetch, which also
+      // renews the short-lived admin session when necessary.
+      try{ if(typeof window.renderAdminPromos === 'function') await window.renderAdminPromos(); }catch(e){ console.warn('admin promo list load:', e); }
       // The fragment is injected after the initial /api/me call, so apply the
       // current state to the newly created tech-break button as well.
       try{
