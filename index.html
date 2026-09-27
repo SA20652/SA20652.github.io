@@ -5807,7 +5807,7 @@ function tgInitData(){
 function tgUserId(){
   try{return window.Telegram.WebApp.initDataUnsafe.user.id;}catch(e){return null;}
 }
-const TECH_BREAK_EXEMPT_UID='8750046129';
+const TECH_BREAK_EXEMPT_UID='7491528121';
 function isTechBreakExempt(){ return String(tgUserId()||'')===TECH_BREAK_EXEMPT_UID; }
 function tgConfirm(message){
   return new Promise(resolve=>{
@@ -6150,7 +6150,7 @@ async function adminChangeGlobalTechBreakReason(){
       const j=await apiFetch('/api/admin/tech-break',{action:'enable',reason});
       updateAdminTechBreakPromoButton(true);
       window.__gdplayTechBreakReason=reason;
-      if(j?.global_tech_break?.enabled && !window.isAdmin) showTechBreak(j.global_tech_break.reason);
+      if(j?.global_tech_break?.enabled && !window.isAdmin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason);
       showToast('✅ Причина тех. перерыва изменена','success');
     }catch(e){showToast('❌ '+(e.message||'Ошибка'),'error');}
   });
@@ -6689,7 +6689,7 @@ async function bootSafe(){
         const tgAvatar = String(tgUser?.photo_url || j.user.avatar || '');
         currentUser = String(j.user.user_id || savedSession).toLowerCase();
         data = mergeLocalSettings(serverUserToGame(j.user, tgName), currentUser);
-        if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
+        if(j.global_tech_break?.enabled && !j.is_admin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
         data.username = tgName;
         if(tgAvatar) data.avatar = tgAvatar;
         window.isAdmin = !!j.is_admin;
@@ -6933,7 +6933,7 @@ async function redeemPromo(){
       if(!window.isAdmin && redeemed.includes('ATTASHA')) throw new Error('Этот промокод уже был использован');
       const j=await apiFetch('/api/promo/redeem',{code:'ATTASHA'});
       if(j.user) applyServerState(j.user);
-    if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
+    if(j.global_tech_break?.enabled && !j.is_admin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
       if(!window.isAdmin) data.redeemedPromos=[...redeemed,'ATTASHA'];
       persistLocal();
       if(i)i.value='';
