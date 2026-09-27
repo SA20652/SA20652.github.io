@@ -10857,16 +10857,26 @@ async function resizeAvatarFile(file){
   return canvas.toDataURL('image/jpeg',0.82);
 }
 
-document.getElementById('adminAccountAvatarFile')?.addEventListener('change',async function(){
-  const f=this.files&&this.files[0];
+// Admin avatar upload uses delegated change handling because the admin panel
+// can be injected/re-rendered after the main page script has already loaded.
+// This keeps the gallery button working even when #adminAccountAvatarFile
+// did not exist at initial script execution time.
+document.addEventListener('change', async function(e){
+  const input=e.target?.closest?.('#adminAccountAvatarFile');
+  if(!input) return;
+  const f=input.files&&input.files[0];
   if(!f) return;
   if(f.size>5*1024*1024){
     showToast('Фото слишком большое (максимум 5 МБ)','error');
-    this.value='';
+    input.value='';
     return;
   }
-  const uid=document.getElementById('adminAccountUid')?.textContent;
-  if(!uid) return;
+  const uid=document.getElementById('adminAccountUid')?.textContent?.trim();
+  if(!uid){
+    showToast('❌ Не выбран игрок','error');
+    input.value='';
+    return;
+  }
   try{
     const avatar=await resizeAvatarFile(f);
     const preview=document.getElementById('adminAccountAvatarPreview');
@@ -10876,9 +10886,9 @@ document.getElementById('adminAccountAvatarFile')?.addEventListener('change',asy
   }catch(e){
     showToast('❌ Не удалось загрузить фото: '+e.message,'error');
   }finally{
-    this.value='';
+    input.value='';
   }
-});
+}, false);
 
 document.getElementById('avatarInput')?.addEventListener('change',async function(){
   const f=this.files&&this.files[0]; if(!f) return;
