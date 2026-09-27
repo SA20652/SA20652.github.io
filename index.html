@@ -4650,12 +4650,16 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
     <div id="adminOnlinePlayersBody" style="display:none;margin-top:10px"><div id="adminOnlinePlayersList" style="display:grid;gap:7px"></div></div>
   </div>
   <div class="admin-card" style="margin-top:10px">
-    <h3>Игроки</h3>
-    <div class="admin-search">
-      <input id="adminSearch" type="search" placeholder="Ник или Telegram ID">
-      <button id="adminSearchBtn" type="button" class="btn">Найти</button>
+    <button type="button" class="btn-ghost" id="adminPlayersToggle" style="width:100%;display:flex;justify-content:space-between;align-items:center">
+      <span>👥 Управление игроками и поиск</span><span id="adminPlayersArrow">▸</span>
+    </button>
+    <div id="adminPlayersBody" style="display:none;margin-top:10px">
+      <div class="admin-search">
+        <input id="adminSearch" type="search" placeholder="Ник или Telegram ID">
+        <button id="adminSearchBtn" type="button" class="btn">Найти</button>
+      </div>
+      <div id="adminUsersList" style="margin-top:10px"><div class="admin-log">Загрузка…</div></div>
     </div>
-    <div id="adminUsersList" style="margin-top:10px"><div class="admin-log">Загрузка…</div></div>
   </div>
   <div class="admin-card" style="margin-top:10px">
     <h3>Промокоды</h3>
@@ -6958,7 +6962,7 @@ async function redeemPromo(){
   }catch(e){promoSetMessage(e.message||'Не удалось активировать промокод')}
   finally{if(b)b.disabled=false}
 }
-async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-share-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">📤 Поделиться</button><button class="btn-ghost" data-action="admin-promo-disable" data-promo-id="${p.id}" ${Number(p.active)?'':'disabled'}>Отключить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
+async function renderAdminPromos(){const box=document.getElementById('promoAdminList');if(!box)return;box.innerHTML='<div class="admin-log">Загрузка промокодов…</div>';try{const j=await apiFetch('/api/admin/promos',{}),ps=j.promos||[];if(!ps.length){box.innerHTML='<div class="admin-log">Промокодов пока нет</div>';return}window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};ps.forEach(p=>{if(p.promo_link)window.GDPLAY_PROMO_LINKS[p.code]=p.promo_link});box.innerHTML=ps.map(p=>{const r=p.reward_type==='coins'?Number(p.coins).toLocaleString('ru-RU')+' монет':p.reward_type==='vip'?'VIP '+p.vip_days+' дн.':Number(p.coins).toLocaleString('ru-RU')+' монет + VIP '+p.vip_days+' дн.';return `<div class="promo-admin-item"><div style="min-width:0;flex:1"><div class="promo-code">${p.code}</div><div class="promo-meta">${r} · ${p.uses_count}/${p.max_uses} использований · ${Number(p.active)?'Активен':'Отключён'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn-ghost" type="button" data-action="admin-promo-share-link" data-promo-code="${String(p.code).replace(/"/g,'&quot;')}">📤 Поделиться</button><button class="btn-ghost" data-action="admin-promo-delete" data-promo-id="${p.id}">Удалить</button></div></div>`}).join('')}catch(e){box.innerHTML='<div class="admin-log">Ошибка: '+e.message+'</div>'}}
 async function createAdminPromo(){const code=String(document.getElementById('promoAdminCode')?.value||'').trim().toUpperCase(),reward_type=document.getElementById('promoAdminReward')?.value||'coins',coins=Math.max(0,Math.floor(Number(document.getElementById('promoAdminCoins')?.value||0))),vip_days=Math.max(0,Math.floor(Number(document.getElementById('promoAdminVipDays')?.value||0))),max_uses=Math.max(1,Math.floor(Number(document.getElementById('promoAdminMaxUses')?.value||1))),m=document.getElementById('promoAdminMessage');try{const j=await apiFetch('/api/admin/promo/create',{code,reward_type,coins,vip_days,max_uses});window.GDPLAY_PROMO_LINKS=window.GDPLAY_PROMO_LINKS||{};if(j.promo_link)window.GDPLAY_PROMO_LINKS[j.promo.code]=j.promo_link;if(m){m.innerHTML='Промокод <b>'+j.promo.code+'</b> создан'+(j.promo_link?' · ссылка готова':'');m.style.color='var(--brass-2)'}document.getElementById('promoAdminCode').value='';await renderAdminPromos()}catch(e){if(m){m.textContent=e.message||'Ошибка';m.style.color='var(--danger)'}}}
 async function shareAdminPromoLink(code){
   code=String(code||'').trim().toUpperCase();
@@ -6987,7 +6991,7 @@ async function shareAdminPromoLink(code){
     showToast('Окно отправки открыто','success');
   }catch(e){if(e?.message!=='Отправка отменена')showToast(e.message||'❌ Не удалось открыть отправку','error')}
 }
-async function disableAdminPromo(id){if(!await tgConfirm('Отключить этот промокод?'))return;try{await apiFetch('/api/admin/promo/disable',{promo_id:Number(id)});await renderAdminPromos()}catch(e){showToast('❌ '+e.message,'error')}}
+async function deleteAdminPromo(id){if(!await tgConfirm('Удалить этот промокод? Это действие необратимо.'))return;try{await apiFetch('/api/admin/promo/delete',{promo_id:Number(id)});await renderAdminPromos()}catch(e){showToast('❌ '+e.message,'error')}}
 async function renderAdmin(){
   if(!tgInitData()) return;
   loadAdminUsers(document.getElementById('adminSearch')?.value||'');
@@ -7003,6 +7007,8 @@ async function renderAdmin(){
   }
   renderAdminPromos();
 }
+
+document.getElementById('adminPlayersToggle')?.addEventListener('click',()=>{const body=document.getElementById('adminPlayersBody'),arrow=document.getElementById('adminPlayersArrow');if(!body)return;const open=body.style.display==='none';body.style.display=open?'block':'none';if(arrow)arrow.textContent=open?'▾':'▸';if(open)loadAdminUsers(document.getElementById('adminSearch')?.value||'');});
 
 async function loadAdminUsers(search){
   const box = document.getElementById('adminUsersList');
@@ -9943,7 +9949,9 @@ function profileFrameUnlock(key){
   const userId=String(tgUserId()||data?.user_id||data?.id||'');
   const cases=Number(data?.cases_opened||0);
   const balance=Number(data?.balance||0);
-  const streak=Number(data?.dailyStreak||0);
+  function dailyRewardForClaim(i,premium=false){const n=Math.max(0,Number(i)||0),base=[1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,9000,10000,12000,15000];const r=n<base.length?base[n]:base[base.length-1]+2000*(n-(base.length-1));return r*(premium?2:1);}
+
+const streak=Number(data?.dailyStreak||0);
   if(key==='default') return {ok:true, label:'Доступна сразу'};
   const owned=Array.isArray(data?.profileOwnedFrames) && data.profileOwnedFrames.includes(key);
   if(owned || String(data?.profileFrame||'default')===key) return {ok:true, label:'Получена'};
@@ -10274,20 +10282,20 @@ function renderProfile(){
     document.getElementById('dailyDesc').textContent='Загрузка бонуса…';
     document.getElementById('dailyBtn').disabled=true;
     const timer=document.getElementById('dailyTimer'); if(timer) timer.textContent='Загружаем бонус…';
-    const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent='—/14';
+    const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent='—/140';
     const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width='0%';
     loadDailyStatus();
     return;
   }
   const streak=Number(dailyState.streak||0);
   const nextAt=Number(dailyState.nextAt||0);
-  const can=!!dailyState.available && streak<14 && (!nextAt || Date.now()<nextAt);
+  const can=!!dailyState.available && streak<140 && (!nextAt || Date.now()<nextAt);
   const nextReward=Number(dailyState.reward||0);
-  document.getElementById('dailyDesc').textContent=streak>=14?'Серия 14/14 завершена':'Следующий бонус: '+nextReward.toLocaleString('ru-RU')+' 💰';
+  document.getElementById('dailyDesc').textContent=streak>=140?'Серия 140/140 завершена':'Следующий бонус: '+nextReward.toLocaleString('ru-RU')+' 💰';
   document.getElementById('dailyBtn').disabled=!can;
-  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=14) timer.textContent='Все 14 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else timer.textContent='Награда недоступна'; }
-  const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/14';
-  const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/14*100)+'%';
+  const timer=document.getElementById('dailyTimer'); if(timer){ if(streak>=140) timer.textContent='Все 140 наград получены'; else if(can){ const left=Math.max(0,nextAt-Date.now()); const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); } else timer.textContent='Награда недоступна'; }
+  const streakText=document.getElementById('dailyStreakText'); if(streakText) streakText.textContent=streak+'/140';
+  const streakFill=document.getElementById('dailyStreakFill'); if(streakFill) streakFill.style.width=Math.min(100,streak/140*100)+'%';
   if(nextAt && Date.now()>=nextAt && !dailyStatusInFlight) loadDailyStatus();
   const tips=['Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.','Если выпал дорогой куб, проверь апгрейдер перед продажей.','Три открытия подряд дают лучший шанс быстро найти нужный предмет — просто следи за балансом.','Редкие кубы удобно сравнивать по стоимости прямо в инвентаре.'];
   const tip=document.getElementById('dailyTip'); if(tip) tip.textContent=tips[(Math.floor(Date.now()/86400000)+Number(data.cases_opened||0))%tips.length];
@@ -10327,14 +10335,14 @@ function updateDailyUI(){
   if(!data)return;
   updateDailyBonusVisibility();
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
-  const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
-  const nextAt=Number(dailyState.nextAt||0),can=!!dailyState.available && dailyState.streak<14;
-  const rewards=[1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,9000,10000,12000,15000],day=Math.max(1,Math.min(14,streak||1)),reward=Number(dailyState.reward||0)||rewards[day-1]*(premium?2:1);
-  const desc=document.getElementById('dailyDesc');if(desc)desc.textContent=(dailyState.completed||streak>=14)?'Все 14 наград получены':'Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
+  const streak=Math.max(0,Math.min(140,Number(dailyState.streak||data.dailyStreak||0)));
+  const nextAt=Number(dailyState.nextAt||0),can=!!dailyState.available && dailyState.streak<140;
+  const reward=Number(dailyState.reward||0)||dailyRewardForClaim(streak,premium);
+  const desc=document.getElementById('dailyDesc');if(desc)desc.textContent=(dailyState.completed||streak>=140)?'Все 140 наград получены':'Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn){btn.disabled=!can;btn.classList.toggle('disabled',!can);btn.setAttribute('aria-disabled',String(!can));}
-  const timer=document.getElementById('dailyTimer');if(timer){if(!dailyState.loaded) timer.textContent='Загружаем бонус…'; else if(dailyState.completed || streak>=14) timer.textContent='Все 14 наград получены'; else if(can) timer.textContent='Бонус доступен — забери его в течение 12 часов'; else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(dailyState.waiting){timer.textContent='Проверяем доступность бонуса…';} else timer.textContent='Бонус доступен — обнови бонус';}
-  const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/14';
-  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/14*100)+'%';
+  const timer=document.getElementById('dailyTimer');if(timer){if(!dailyState.loaded) timer.textContent='Загружаем бонус…'; else if(dailyState.completed || streak>=140) timer.textContent='Все 140 наград получены'; else if(can) timer.textContent='Бонус доступен — забери его в течение 12 часов'; else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(dailyState.waiting){timer.textContent='Проверяем доступность бонуса…';} else timer.textContent='Бонус доступен — обнови бонус';}
+  const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=streak+'/140';
+  const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=Math.min(100,streak/140*100)+'%';
 }
 async function claimDaily(){
   if(!data)return;
@@ -10345,9 +10353,9 @@ async function claimDaily(){
   try{
     const j=await apiFetch('/api/daily',{});
     data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||data.dailyStreak||1);
-    dailyState.availableAt=Number(j.available_at||j.next_daily||0);dailyState.nextAt=Number(j.next_daily||dailyState.availableAt||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=false;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
+    dailyState.availableAt=Number(j.available_at||j.next_daily||0);dailyState.nextAt=Number(j.next_daily||dailyState.availableAt||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=false;dailyState.completed=dailyState.streak>=140;dailyState.loaded=true;
     persistLocal();updateBalanceUI();renderProfile();
-    const msg=dailyState.streak>=14?' 🔥 14/14 — максимум':' 🔥 Забрано '+dailyState.streak+'/14';
+    const msg=dailyState.streak>=140?' 🔥 140/140 — максимум':' 🔥 Забрано '+dailyState.streak+'/140';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
   }catch(e){
     const msg=String(e?.message||'');
@@ -10699,7 +10707,7 @@ function handleButton(button, e){
   if(action==='admin-toggle-cubes'){ adminToggleCubes(button.dataset.uid); return; }
   if(action==='admin-account'){ openAdminAccount(button.dataset.uid); return; }
   if(action==='admin-promo-share-link'){ shareAdminPromoLink(button.dataset.promoCode||''); return; }
-  if(action==='admin-promo-disable'){ disableAdminPromo(button.dataset.promoId); return; }
+  if(action==='admin-promo-delete'){ deleteAdminPromo(button.dataset.promoId); return; }
 
   switch(button.id){
      case 'buyPremiumBtn': buyPremium(); break;

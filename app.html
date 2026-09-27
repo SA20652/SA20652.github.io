@@ -18,12 +18,16 @@
     </div>
   </div>
   <div class="admin-card" style="margin-top:10px">
-    <h3>Игроки</h3>
-    <div class="admin-search">
-      <input id="adminSearch" type="search" placeholder="Ник или Telegram ID">
-      <button id="adminSearchBtn" type="button" class="btn">Найти</button>
+    <button type="button" class="btn-ghost" id="adminPlayersToggle" style="width:100%;display:flex;justify-content:space-between;align-items:center">
+      <span>👥 Управление игроками и поиск</span><span id="adminPlayersArrow">▸</span>
+    </button>
+    <div id="adminPlayersBody" style="display:none;margin-top:10px">
+      <div class="admin-search">
+        <input id="adminSearch" type="search" placeholder="Ник или Telegram ID">
+        <button id="adminSearchBtn" type="button" class="btn">Найти</button>
+      </div>
+      <div id="adminUsersList" style="margin-top:10px"><div class="admin-log">Загрузка…</div></div>
     </div>
-    <div id="adminUsersList" style="margin-top:10px"><div class="admin-log">Загрузка…</div></div>
   </div>
   <div class="admin-card" style="margin-top:10px">
     <h3>Промокоды</h3>
