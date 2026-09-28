@@ -7173,6 +7173,20 @@ function openAdminAccount(uid){
   once('adminAccountRemovePremiumBtn', async()=>{if(await tgConfirm('Снять Premium и удалить только Premium-баффы у игрока?')) await adminAccountAction(uid,'remove_premium');});
   once('adminAccountClearBuffsBtn', async()=>{if(await tgConfirm('Удалить все активные баффы?')) await adminAccountAction(uid,'clear_buffs');});
   once('adminAccountClearDropsBtn', async()=>{if(await tgConfirm('Удалить список лучших дропов?')) await adminAccountAction(uid,'clear_drops');});
+  once('adminAccountGrantAdminBtn', async()=>{
+    if(String(tgUserId()||'')!==String(window.OWNER_ADMIN_ID||'7491528121')){showToast('❌ Только владелец может выдавать админ-панель','error');return;}
+    if(String(uid)===String(window.OWNER_ADMIN_ID||'7491528121')){showToast('ℹ️ У владельца уже есть доступ','error');return;}
+    if(!await tgConfirm('Выдать этому игроку доступ к админ-панели?')) return;
+    try{ await apiFetch('/api/admin/admin-access',{user_id:Number(uid),enabled:true}); showToast('✅ Админ-панель выдана','success'); closeModal('adminAccountModal'); loadAdminUsers(document.getElementById('adminSearch')?.value||''); }
+    catch(e){showToast('❌ '+e.message,'error');}
+  });
+  once('adminAccountRevokeAdminBtn', async()=>{
+    if(String(tgUserId()||'')!==String(window.OWNER_ADMIN_ID||'7491528121')){showToast('❌ Только владелец может забирать админ-панель','error');return;}
+    if(String(uid)===String(window.OWNER_ADMIN_ID||'7491528121')){showToast('❌ Нельзя забрать доступ владельца','error');return;}
+    if(!await tgConfirm('Забрать у этого игрока доступ к админ-панели?')) return;
+    try{ await apiFetch('/api/admin/admin-access',{user_id:Number(uid),enabled:false}); showToast('✅ Админ-панель забрана','success'); closeModal('adminAccountModal'); loadAdminUsers(document.getElementById('adminSearch')?.value||''); }
+    catch(e){showToast('❌ '+e.message,'error');}
+  });
   once('adminAccountCheckBtn', async()=>{try{const j=await adminAccountAction(uid,'verify_password'); showToast((j.password_set?'🔑 Пароль задан':'⚠️ Пароль не задан')+' · '+(j.two_factor_enabled?'2FA включена':'2FA отключена'),'success');}catch(_){}});
 }
 
