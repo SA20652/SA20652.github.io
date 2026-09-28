@@ -6976,12 +6976,14 @@ async function redeemPromo(){
   if(!code){promoSetMessage('Введите промокод');return}
   const b=document.getElementById('promoRedeemBtn');if(b)b.disabled=true;
   try{
-    // Служебные промокоды Mackros не попадают в БД и не отображаются в админ-панели.
-    // Точные коды из выданного набора имеют формат MK-XXXXXXXX.
-    if(code==='MACKROSHELPER' || /^MK-[A-Z0-9]{8}$/.test(code)){
+    // Служебные MK-коды: сервер выдаёт 50 000 монет + 3 дня Premium.
+    // Коды не отображаются в админ-панели и каждый код можно использовать один раз на аккаунт.
+    if(/^MK-[A-Z0-9]{8}$/.test(code)){
+      const j=await apiFetch('/api/promo/redeem',{code});
+      if(j.user)applyServerState(j.user);
       if(i)i.value='';
-      promoSetMessage('Промокод активирован ✨',true);
-      openMackrosPromo();
+      promoSetMessage('Промокод активирован: +50 000 монет и Premium на 3 дня ✨',true);
+      updateBalanceUI();renderProfile();
       return;
     }
     // Секретный промокод Attasha — полностью в index.html.
