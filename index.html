@@ -7111,7 +7111,7 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-buff" data-uid="${u.user_id}">⚡ Выдать бафф</button>
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-creator" data-uid="${u.user_id}" data-enabled="${creatorActive?0:1}">${creatorActive?'Снять 🛠️':'Выдать 🛠️'}</button>` : ''}
           ${isCreatorAdmin() ? `<button type="button" class="btn-ghost" data-action="admin-tester" data-uid="${u.user_id}" data-enabled="${testerActive?0:1}">${testerActive?'Снять 🛡️':'Выдать 🛡️'}</button>` : ''}
-          
+          ${String(tgUserId()||'')===String(window.OWNER_ADMIN_ID||'7491528121') && String(u.user_id)!==String(window.OWNER_ADMIN_ID||'7491528121') ? `<button type="button" class="btn-ghost" data-action="admin-access" data-uid="${u.user_id}" data-enabled="${u.admin_access?0:1}">${u.admin_access?'Забрать админ-панель':'Выдать админ-панель'}</button>` : ''}
           <button type="button" class="btn-ghost danger-admin" data-action="admin-delete-user" data-uid="${u.user_id}">🗑️ Удалить аккаунт</button>
           <button type="button" class="btn-ghost" data-action="admin-toggle-cubes" data-uid="${u.user_id}">Кубы (${u.cube_count||0})</button>
           <button type="button" class="btn-ghost" data-action="admin-account" data-uid="${u.user_id}">⚙️ Аккаунт</button>
@@ -7230,6 +7230,17 @@ async function adminGrantCube(uid){
 
 function isCreatorAdmin(){
   return !!window.isAdmin;
+}
+
+async function adminAccess(uid, enabled){
+  if(String(tgUserId()||'')!==String(window.OWNER_ADMIN_ID||'7491528121')){showToast('❌ Только владелец может менять доступ','error');return;}
+  const ok=await tgConfirm(enabled ? 'Выдать этому игроку доступ к админ-панели?' : 'Забрать у игрока доступ к админ-панели?');
+  if(!ok)return;
+  try{
+    await apiFetch('/api/admin/admin-access',{user_id:Number(uid),enabled:!!enabled});
+    showToast(enabled?'✅ Админ-панель выдана':'✅ Админ-панель забрана','success');
+    loadAdminUsers(document.getElementById('adminSearch')?.value||'');
+  }catch(e){showToast('❌ '+e.message,'error');}
 }
 
 async function adminCreator(uid, enabled){
@@ -10766,6 +10777,7 @@ function handleButton(button, e){
   if(action==='view-profile'){ openPublicProfile(button.dataset.profileUid, leaderboardProfileSeeds[String(button.dataset.profileUid)]||{}); return; }
   if(action==='admin-creator'){ adminCreator(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
   if(action==='admin-tester'){ adminTester(button.dataset.uid, Number(button.dataset.enabled)===1); return; }
+  if(action==='admin-access'){ adminAccess(button.dataset.uid, button.dataset.enabled==='1'); return; }
   if(action==='admin-delete-user'){ adminDeleteUser(button.dataset.uid); return; }
   if(action==='admin-ip-ban'){ adminIpBan(); return; }
   if(action==='admin-ip-unban'){ adminIpUnban(); return; }
