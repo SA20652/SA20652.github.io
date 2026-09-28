@@ -10433,7 +10433,8 @@ function updateDailyUI(){
   updateDailyBonusVisibility();
   const premium=!!(data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now());
   const streak=Math.max(0,Math.min(14,Number(dailyState.streak||data.dailyStreak||0)));
-  const nextAt=Number(dailyState.nextAt||0),can=streak<14 && !dailyState.completed && !dailyState.error && !dailyState.waiting && (!nextAt || Date.now()<nextAt) || (streak<14 && !!dailyState.available && (!nextAt || Date.now()<nextAt));
+  const nextAt=Number(dailyState.nextAt||0);
+  const can=streak<14 && !dailyState.completed && !dailyState.error && !!dailyState.available && !dailyState.waiting && (!nextAt || Date.now()<nextAt);
   const reward=Number(dailyState.reward||0)||dailyRewardForClaim(streak,premium);
   const progressLabel=streak+'/14';
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent=(dailyState.completed||streak>=14)?'Все 14 наград получены':'Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
@@ -10442,16 +10443,21 @@ function updateDailyUI(){
   const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=progressLabel;
   const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=((streak/14*100))+'%';
 }
+let dailyClaimInFlight=false;
 async function claimDaily(){
-  if(!data)return;
+  if(!data || dailyClaimInFlight || serverActionInFlight>0)return;
   if(!dailyState.loaded){ await loadDailyStatus(); return; }
-  if(!dailyState.available){ await loadDailyStatus(); return; }
+  if(!dailyState.available || dailyState.waiting || dailyState.completed){ await loadDailyStatus(); return; }
   if(dailyState.nextAt&&Date.now()>=dailyState.nextAt){ await loadDailyStatus(); return; }
+  dailyClaimInFlight=true;
+  dailyState.available=false;
+  dailyState.waiting=true;
+  updateDailyUI();
   serverActionInFlight++;serverBusyUntil=Date.now()+150;
   try{
     const j=await apiFetch('/api/daily',{});
     data.balance=Number(j.balance??data.balance);data.lastDaily=Number(j.last_daily||Date.now());data.dailyStreak=Number(j.streak||0);
-    dailyState.availableAt=Number(j.available_at||j.next_daily||0);dailyState.nextAt=Number(j.next_daily||dailyState.availableAt||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=false;dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;
+    dailyState.availableAt=Number(j.available_at||j.next_daily||0);dailyState.nextAt=Number(j.next_daily||dailyState.availableAt||0);dailyState.streak=Number(j.streak||data.dailyStreak);dailyState.claims=0;dailyState.reward=Number(j.reward||0);dailyState.premium=!!j.premium;dailyState.available=!!j.available;dailyState.waiting=!!j.waiting || (!!dailyState.nextAt && !dailyState.available);dailyState.completed=dailyState.streak>=14;dailyState.loaded=true;dailyState.error='';
     persistLocal();updateBalanceUI();renderProfile();
     const msg=j.cycle_reset?' 🔥 14/14 — цикл завершён, прогресс сброшен':' 🔥 Забрано '+dailyState.streak+'/14';
     showToast((j.premium?'⭐ Premium · ':'🎁 ')+'+'+Number(j.reward).toLocaleString('ru-RU')+' 💰'+msg,'success');
@@ -10460,7 +10466,7 @@ async function claimDaily(){
     const m=msg.match(/через\s+(\d{2}):(\d{2}):(\d{2})/i);
     if(m){dailyState.nextAt=Date.now()+((+m[1])*3600+(+m[2])*60+(+m[3]))*1000;updateDailyUI();return;}
     showToast('❌ '+msg,'error');
-  }finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+100;}
+  }finally{serverActionInFlight=Math.max(0,serverActionInFlight-1);serverBusyUntil=Date.now()+100;dailyClaimInFlight=false;}
 }
 
 async function setAccountPassword(){
