@@ -4603,6 +4603,9 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
   visibility:visible !important;
 }
 </style>
+<script>
+window.getInitData = window.getInitData || function(){ return window.Telegram?.WebApp?.initData || window.__telegramInitData || ''; };
+</script>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -7288,8 +7291,8 @@ async function adminGrantCube(uid){
     try{
       const f=fileInput?.files?.[0];
       if(f){
-        const fd=new FormData(); fd.append('image',f); fd.append('initData',getInitData()); fd.append('adminSession',window.__GDPLAYAdminSession||'');
-        const up=await fetch('/api/admin/cube-image',{method:'POST',body:fd});
+        const fd=new FormData(); fd.append('image',f); fd.append('initData',window.getInitData()); fd.append('adminSession',window.__GDPLAYAdminSession||'');
+        const apiBase=(window.__GDPLAY_API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,''); const up=await fetch(apiBase+'/api/admin/cube-image',{method:'POST',body:fd});
         const uj=await up.json().catch(()=>({}));
         if(!up.ok || !uj.ok) throw new Error(uj.error||'Не удалось загрузить фото');
         image_url=String(uj.url||'');
