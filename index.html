@@ -2321,6 +2321,30 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 @media (prefers-reduced-motion: reduce){.startup-loader-logo{animation:none!important;}}
 </style>
 
+<style id="profile-socials-ui">
+#page-profile .profile-socials{margin:0 0 12px;padding:14px;border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.01)),#15120f;border:1px solid rgba(255,255,255,.075);box-shadow:0 12px 28px rgba(0,0,0,.2);}
+#page-profile .profile-socials-title{font-size:14px;font-weight:800;}
+#page-profile .profile-socials-sub{font-size:9.5px;color:var(--muted);margin-top:4px;}
+.profile-social-links{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px;}
+.profile-social-link{min-height:46px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.025);color:var(--paper);display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;font:800 10px 'IBM Plex Mono',monospace;transition:transform .15s ease,border-color .15s ease,background .15s ease;}
+.profile-social-link:active{transform:scale(.97);}
+.profile-social-link:hover{border-color:rgba(227,184,114,.3);background:rgba(201,151,77,.06);}
+.profile-social-link img{width:18px;height:18px;object-fit:contain;}
+.profile-social-settings{margin-top:9px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+.profile-social-settings-title{font-size:11px;font-weight:800;}
+.profile-social-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;}
+.profile-social-row label{font-size:9px;color:var(--muted);min-width:68px;}
+.profile-social-input{flex:1;min-width:0;height:36px;padding:0 10px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18);color:var(--paper);font:700 11px 'IBM Plex Mono',monospace;outline:none;}
+.profile-social-input:focus{border-color:rgba(227,184,114,.38);}
+.profile-social-save{width:100%;height:38px;margin-top:9px;border-radius:11px;font-size:10px;}
+.profile-social-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.025);margin-top:8px;}
+.profile-social-toggle span{font-size:9px;color:var(--muted);}
+.profile-social-switch{width:40px;height:22px;border:0;border-radius:99px;background:#34302b;padding:2px;cursor:pointer;}
+.profile-social-switch i{display:block;width:18px;height:18px;border-radius:50%;background:#aaa;transition:transform .18s ease,background .18s ease;}
+.profile-social-switch.active{background:rgba(63,138,112,.65);}
+.profile-social-switch.active i{transform:translateX(18px);background:#dfffe9;}
+@media(max-width:380px){.profile-social-links{grid-template-columns:1fr;} .profile-social-row{align-items:stretch;flex-direction:column;gap:5px;}.profile-social-input{width:100%;box-sizing:border-box;}}
+</style>
 <style id="profile-total-redesign">
 /* ===== PROFILE TOTAL REDESIGN — visual only, functionality untouched ===== */
 #page-profile{padding:4px 0 28px!important;}
@@ -5138,10 +5162,24 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 12 часов · 💣 10 игр в «Минах» каждые 12 часов · x0.85 продажа · +10% удачи · ∞ слотов в инвентаре · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
       <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>3 000 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+3 000 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div><div class="referral-stat"><b id="referralDaily">0/10</b><span>сегодня</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать ссылку</button><button type="button" class="btn" id="referralShareBtn">Поделиться ссылкой</button></div><div class="referral-milestones" id="referralMilestones"><div class="referral-milestone" data-m="10"><b>10</b><span>Циановая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="50"><b>50</b><span>Сапфировая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="100"><b>100</b><span>Аврора</span><em>🔒</em></div></div><div class="referral-people-title">👤 Перешли по твоей ссылке</div><div class="referral-people" id="referralPeople"><div class="referral-empty">Пока никто не перешёл</div></div></div>
       <div class="tip-card"><div class="tip-title">💡 Совет хранителя</div><div class="tip-text" id="dailyTip">Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.</div></div>
+      <div class="profile-socials" id="profileSocials">
+        <div class="profile-socials-title">Социальные сети</div>
+        <div class="profile-socials-sub">Добавь свои профили и открывай их прямо из GDPLAY</div>
+        <div class="profile-social-links" id="profileSocialLinks"></div>
+      </div>
       <div class="section-title" style="margin-top:15px">🏆 Лучшие дропы</div>
       <div id="profileBestDrops" class="best-drops"></div>
       <div class="section-title" style="margin-top:15px">⚡ Активные баффы</div>
       <div id="buffList" class="buff-list"></div>
+      <div class="section-title" style="margin-top:15px">⚙️ Настройки профиля</div>
+      <div class="profile-socials" id="profileSocialSettings">
+        <div class="profile-socials-title">Социальные сети</div>
+        <div class="profile-socials-sub">Настрой, какие профили будут видны другим игрокам</div>
+        <div class="profile-social-row"><label>YouTube</label><input class="profile-social-input" id="socialYoutubeInput" maxlength="30" autocomplete="off" spellcheck="false" placeholder="username"></div>
+        <div class="profile-social-row"><label>Discord</label><input class="profile-social-input" id="socialDiscordInput" maxlength="32" autocomplete="off" spellcheck="false" placeholder="username"></div>
+        <div class="profile-social-toggle"><span>Показывать Telegram в профиле</span><button type="button" class="profile-social-switch active" id="socialTelegramToggle" aria-label="Показывать Telegram"><i></i></button></div>
+        <button type="button" class="btn-main profile-social-save" id="socialSaveBtn">Сохранить</button>
+      </div>
     </div>
 
     <!-- SETTINGS -->
@@ -6372,7 +6410,7 @@ function serverUserToGame(u,fallbackName){
     battles:Number(u?.battles_played||0), wins:Number(u?.total_wins||0), battle_winnings:Number(u?.battle_winnings||0),
     spins:Number(u?.total_spins||0), losses:Number(u?.total_losses||0), biggestWin:Number(u?.biggest_win||0),
     vault_balance:Number(u?.vault_balance||0),
-    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, notificationSettings:u?.notification_settings&&typeof u.notification_settings==='object'?{...u.notification_settings}:null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
+    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, socials:u?.socials||{telegram_username:'',youtube_username:'',discord_username:'',telegram_visible:true}, notificationSettings:u?.notification_settings&&typeof u.notification_settings==='object'?{...u.notification_settings}:null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
 
@@ -10022,6 +10060,7 @@ async function openPublicProfile(userId, seed={}){
       <div class="pstat"><b>${Number(p.battles||0).toLocaleString('ru-RU')}</b><span>батлов</span></div>
       <div class="pstat"><b>${Number(p.wins||0).toLocaleString('ru-RU')}</b><span>побед</span></div>
     </div>
+    ${(()=>{const s=p.socials||{};const a=[];if(s.telegram_visible&&s.telegram_username)a.push(`<a class="profile-social-link" href="https://t.me/${encodeURIComponent(s.telegram_username)}" target="_blank" rel="noopener noreferrer"><img src="/assets/telegram-svgrepo-com.svg" alt="">Telegram</a>`);if(s.youtube_username)a.push(`<a class="profile-social-link" href="https://www.youtube.com/@${encodeURIComponent(s.youtube_username)}" target="_blank" rel="noopener noreferrer"><img src="/assets/youtube-168-svgrepo-com.svg" alt="">YouTube</a>`);if(s.discord_username)a.push(`<a class="profile-social-link" href="https://discord.com/users/${encodeURIComponent(s.discord_username)}" target="_blank" rel="noopener noreferrer"><img src="/assets/discord-svgrepo-com.svg" alt="">Discord</a>`);return a.length?`<div class="profile-socials" style="margin-top:12px"><div class="profile-socials-title">Социальные сети</div><div class="profile-social-links">${a.join('')}</div></div>`:''})()}
     <div class="section-title public-profile-section-title">🛒 На продаже</div>
     <div class="public-market-list">${sellingHtml}</div>
     <div class="section-title public-profile-section-title">🏆 Лучшие дропы</div>
@@ -10349,6 +10388,48 @@ document.addEventListener('click',(e)=>{
   if(share){e.preventDefault();e.stopPropagation();shareReferralLink();return;}
 },{passive:false});
 
+let profileSocialState={telegram_username:'',youtube_username:'',discord_username:'',telegram_visible:true};
+function normalizeSocialUsername(v){ return String(v||'').trim().replace(/^@+/,''); }
+function renderProfileSocials(){
+  const links=document.getElementById('profileSocialLinks');
+  const yi=document.getElementById('socialYoutubeInput'), di=document.getElementById('socialDiscordInput'), tg=document.getElementById('socialTelegramToggle');
+  if(!links) return;
+  const s=(data&&data.socials)||profileSocialState||{};
+  profileSocialState={telegram_username:normalizeSocialUsername(s.telegram_username),youtube_username:normalizeSocialUsername(s.youtube_username),discord_username:normalizeSocialUsername(s.discord_username),telegram_visible:s.telegram_visible!==false};
+  const out=[];
+  if(profileSocialState.telegram_visible && profileSocialState.telegram_username){ out.push(`<a class="profile-social-link" href="https://t.me/${encodeURIComponent(profileSocialState.telegram_username)}" target="_blank" rel="noopener noreferrer"><img src="/assets/telegram-svgrepo-com.svg" alt="">Telegram</a>`); }
+  if(profileSocialState.youtube_username){ out.push(`<a class="profile-social-link" href="https://www.youtube.com/@${encodeURIComponent(profileSocialState.youtube_username)}" target="_blank" rel="noopener noreferrer"><img src="/assets/youtube-168-svgrepo-com.svg" alt="">YouTube</a>`); }
+  if(profileSocialState.discord_username){ out.push(`<a class="profile-social-link" href="https://discord.com/users/${encodeURIComponent(profileSocialState.discord_username)}" target="_blank" rel="noopener noreferrer"><img src="/assets/discord-svgrepo-com.svg" alt="">Discord</a>`); }
+  links.innerHTML=out.length?out.join(''):'<div class="empty-state" style="grid-column:1/-1;padding:8px 4px">Социальные сети пока не добавлены</div>';
+  if(yi && document.activeElement!==yi) yi.value=profileSocialState.youtube_username;
+  if(di && document.activeElement!==di) di.value=profileSocialState.discord_username;
+  if(tg){ tg.classList.toggle('active',profileSocialState.telegram_visible); tg.setAttribute('aria-pressed',String(profileSocialState.telegram_visible)); }
+}
+async function loadProfileSocials(){
+  try{
+    const j=await apiFetch('/api/profile/socials',{});
+    if(j?.socials){ profileSocialState=j.socials; data.socials=j.socials; renderProfileSocials(); }
+  }catch(_){ renderProfileSocials(); }
+}
+async function saveProfileSocials(){
+  const yi=document.getElementById('socialYoutubeInput'), di=document.getElementById('socialDiscordInput'), tg=document.getElementById('socialTelegramToggle'), btn=document.getElementById('socialSaveBtn');
+  if(!yi||!di||!tg)return;
+  const youtube=normalizeSocialUsername(yi.value), discord=normalizeSocialUsername(di.value);
+  if(youtube && !/^[A-Za-z0-9._-]{3,30}$/.test(youtube)){ showToast('❌ Некорректный YouTube username','error'); return; }
+  if(discord && !/^[A-Za-z0-9_.]{2,32}$/.test(discord)){ showToast('❌ Некорректный Discord username','error'); return; }
+  if(btn)btn.disabled=true;
+  try{
+    const j=await apiFetch('/api/profile/socials',{youtube_username:youtube,discord_username:discord,telegram_visible:tg.classList.contains('active')});
+    if(j?.socials){data.socials=j.socials;profileSocialState=j.socials;renderProfileSocials();showToast('✓ Социальные сети сохранены','success');}
+  }catch(e){showToast('❌ '+(e?.message||'Не удалось сохранить'),'error');}
+  finally{if(btn)btn.disabled=false;}
+}
+document.addEventListener('click',(e)=>{
+  const toggle=e.target?.closest?.('#socialTelegramToggle');
+  const save=e.target?.closest?.('#socialSaveBtn');
+  if(toggle){e.preventDefault();toggle.classList.toggle('active');toggle.setAttribute('aria-pressed',String(toggle.classList.contains('active')));return;}
+  if(save){e.preventDefault();saveProfileSocials();return;}
+});
 function renderProfile(){
   loadReferralStats();
   const avatar=document.getElementById('profileAvatar');
@@ -10358,6 +10439,7 @@ function renderProfile(){
   const badges=document.getElementById('profileBadges');
   if(badges) badges.innerHTML=(isPremium?'<span class="profile-badge premium">⭐ Premium</span>':'')+(data.creatorBadge?'<span class="profile-badge creator">🛠️ Создатель</span>':'')+(data.testerBadge?'<span class="profile-badge tester">🛡️ Тестер</span>':'')+((data.customStatus&&(data.customStatus.text||data.customStatus.emoji))?'<span class="profile-badge" style="color:#f0c674;border-color:rgba(240,198,116,.45)">'+(data.customStatus.emoji||'')+' '+(data.customStatus.text||'')+'</span>':'');
   renderProfileCustomization();
+  renderProfileSocials();
   const premiumTimer=document.getElementById('premiumTimeLeft');
   if(premiumTimer){
     if(isPremium){
