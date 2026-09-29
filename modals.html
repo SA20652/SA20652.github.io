@@ -1537,6 +1537,10 @@ async function adminGrantCube(uid){
   document.getElementById('adminCubeName').value = 'Подарок от админа';
   document.getElementById('adminCubeRarity').value = 'rare';
   document.getElementById('adminCubeValue').value = '500';
+  const fileInput=document.getElementById('adminCubeImage');
+  const preview=document.getElementById('adminCubeImagePreview');
+  const previewImg=document.getElementById('adminCubeImagePreviewImg');
+  if(fileInput){ fileInput.value=''; fileInput.onchange=()=>{ const f=fileInput.files?.[0]; if(!f){preview.style.display='none';return;} if(f.size>5*1024*1024){fileInput.value='';preview.style.display='none';showToast('❌ Максимум 5 МБ','error');return;} const u=URL.createObjectURL(f); previewImg.src=u; preview.style.display='block'; }; }
   openModal('adminCubeModal');
   const accept = document.getElementById('adminCubeAccept');
   const cancel = document.getElementById('adminCubeCancel');
@@ -1546,18 +1550,26 @@ async function adminGrantCube(uid){
     const rarity = document.getElementById('adminCubeRarity').value;
     let value = parseInt(document.getElementById('adminCubeValue').value||'0', 10); if(!Number.isFinite(value)) value=0;
     const known=[]; CASES.forEach(c=>c.items.forEach(it=>{if(it.name===name && it.rarity===rarity) known.push(Number(it.value));}));
-    if(known.length) value=known[0];
-    closeModal('adminCubeModal');
+    if(known.length && value >= 0) value=known[0];
+    let image_url='';
     try{
-      await apiFetch('/api/admin/cube', {user_id: Number(uid), name, rarity, value});
+      const f=fileInput?.files?.[0];
+      if(f){
+        const fd=new FormData(); fd.append('image',f); fd.append('initData',getInitData()); fd.append('adminSession',window.__GDPLAYAdminSession||'');
+        const up=await fetch('/api/admin/cube-image',{method:'POST',body:fd});
+        const uj=await up.json().catch(()=>({}));
+        if(!up.ok || !uj.ok) throw new Error(uj.error||'Не удалось загрузить фото');
+        image_url=String(uj.url||'');
+      }
+      closeModal('adminCubeModal');
+      await apiFetch('/api/admin/cube', {user_id: Number(uid), name, rarity, value, image_url});
       showToast('✅ Куб выдан','success');
       loadAdminUsers(document.getElementById('adminSearch')?.value||'');
     }catch(e){ showToast('❌ '+e.message,'error'); }
   };
   accept.onclick = done;
-  cancel.onclick = ()=>{ accept.onclick=null; cancel.onclick=null; closeModal('adminCubeModal'); };
+  cancel.onclick = ()=>{ accept.onclick=null; cancel.onclick=null; if(fileInput) fileInput.value=''; closeModal('adminCubeModal'); };
 }
-
 function isCreatorAdmin(){
   return !!window.isAdmin;
 }
