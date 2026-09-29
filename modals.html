@@ -2556,10 +2556,10 @@ function renderInventory(){
     const expanded=isStack && expandedCubeStacks.has(stackId);
     const headerNameHtml = isStack
       ? `<button type="button" class="stack-toggle-btn ${expanded?'expanded':''}" data-action="toggle-stack" data-stack-id="${stackId}">
-           <span class="inv-name">${c.name} ×${count} <span class="stack-arrow">▼</span></span>
+           <span class="inv-name">${c.name} ×${count} <span class="inv-subid">#${itSafeId(c,indices[0])}</span> <span class="stack-arrow">▼</span></span>
            <span class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</span>
          </button>`
-      : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
+      : `<div><div class="inv-name">${c.name} <span class="inv-subid">#${itSafeId(c,indices[0])}</span></div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
     const header = `<div class="inv-item" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)"><div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div></div>
       ${headerNameHtml}</div>

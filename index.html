@@ -4545,9 +4545,10 @@ img { content-visibility: visible !important; }
 #casesList .rad-case-card,
 #inventoryList .inv-item,
 #inventoryList .inv-stack{
-  -webkit-backface-visibility:hidden;
-  backface-visibility:hidden;
-  transform:translateZ(0);
+  -webkit-backface-visibility:visible;
+  backface-visibility:visible;
+  transform:none;
+  will-change:auto;
 }
 body.gdplay-fast-scroll #casesList .rad-case-card,
 body.gdplay-fast-scroll #inventoryList .inv-item,
@@ -4585,6 +4586,23 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
   });
 })();
 </script>
+<style id="gdplay-no-flicker-final">
+/* Stable painting during fast Telegram WebView scrolling: do not promote
+   cards/images to transient GPU layers and never virtualize their paint. */
+#casesList .rad-case-card,#inventoryList .inv-item,#inventoryList .inv-stack,
+#casesList img,#inventoryList img{
+  transform:none !important;
+  -webkit-transform:none !important;
+  backface-visibility:visible !important;
+  -webkit-backface-visibility:visible !important;
+  will-change:auto !important;
+  content-visibility:visible !important;
+}
+#casesList img,#inventoryList img{
+  opacity:1 !important;
+  visibility:visible !important;
+}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -4793,6 +4811,9 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
     <input id="adminCubeName" placeholder="Название">
     <select id="adminCubeRarity" style="width:100%;margin-top:7px"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпохальный</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option><option value="divine">Божественный</option><option value="emerald">Изумрудный</option></select>
     <input id="adminCubeValue" type="number" min="0" placeholder="Стоимость" style="margin-top:7px">
+    <label class="btn-ghost" for="adminCubeImage" style="cursor:pointer;display:block;text-align:center;margin-top:7px">📷 Выбрать фото из галереи</label>
+    <input id="adminCubeImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+    <div id="adminCubeImagePreview" style="display:none;margin-top:8px;text-align:center"><img id="adminCubeImagePreviewImg" alt="" style="width:76px;height:76px;object-fit:contain;border-radius:12px"><div class="section-sub">Фото выбрано</div></div>
     <div class="input-modal-actions"><button id="adminCubeCancel" class="btn-ghost" type="button">Отмена</button><button id="adminCubeAccept" class="btn" type="button">Выдать</button></div>
   </div>
 </div>
@@ -8425,7 +8446,7 @@ async function openCaseBatch(c, qty, useKey=false){
       advanceCasePityLive(c.id, qty);
       const j=await apiFetch('/api/cube/open-batch',{case_id:c.id,qty,use_key:!!useKey,request_id:requestId});
       if(!Array.isArray(j.drops)||j.drops.length!==qty) throw new Error('Сервер вернул некорректные результаты кейсов');
-      j.drops.forEach(d=>wins.push({name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
+      j.drops.forEach(d=>wins.push({id:Number(d.id)||0,name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
       data.balance=Number(j.balance)||0;
       if(Array.isArray(j.cubes)) data.cubes=j.cubes.map(x=>({...x, ...(resolveEliteExactCubeImage(x?.name)?{image:resolveEliteExactCubeImage(x.name)}:{})}));
       if(Array.isArray(j.keys)) data.keys=j.keys.map(x=>({...x}));
@@ -8479,7 +8500,7 @@ async function openCaseBatch(c, qty, useKey=false){
     if(pill) pill.textContent=`${qty} КРУТЯТСЯ`;
     const revealBatch=()=>{
       multiResult.classList.remove('hidden');
-      multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${eliteCaseCubeIconMarkup(w,'spin-multi-cube-icon')||m.icon}<b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
+      multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${eliteCaseCubeIconMarkup(w,'spin-multi-cube-icon')||m.icon}<b style="color:${m.color}">${String(w.name).slice(0,24)}${Number(w.id)>0?` <span class=\"inv-subid\">#${w.id}</span>`:''}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
       const nearTotal=wins.reduce((sum,w)=>sum+Math.max(0,Number(w.value)||0),0);
       if(resultBox){resultBox.classList.remove('hidden');resultBox.innerHTML='<div class="spin-final-label">Награды готовы</div><div class="spin-result-value">Итого: '+nearTotal.toLocaleString('ru-RU')+' орбов</div>';}
       if(closeBtn) closeBtn.classList.remove('hidden');
@@ -8502,7 +8523,7 @@ async function openCaseBatch(c, qty, useKey=false){
   playBeep(wins.some(w=>w.rarity==='divine'||w.rarity==='mythic'||w.rarity==='emerald')?1180:840);
   if(multiResult){
     multiResult.classList.remove('hidden');
-    multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${eliteCaseCubeIconMarkup(w,'spin-multi-cube-icon')||m.icon}<b style="color:${m.color}">${String(w.name).slice(0,24)}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
+    multiResult.innerHTML=wins.map(w=>{const m=RARITY_META[w.rarity]||RARITY_META.common;return `<div class="spin-result-multi-item" style="border-left:3px solid ${m.color}"><span>${eliteCaseCubeIconMarkup(w,'spin-multi-cube-icon')||m.icon}<b style="color:${m.color}">${String(w.name).slice(0,24)}${Number(w.id)>0?` <span class=\"inv-subid\">#${w.id}</span>`:''}</b></span><span class="mono">💰 ${Number(w.value).toLocaleString('ru-RU')}</span></div>`;}).join('');
   }
   const totalWonValue=wins.reduce((sum,w)=>sum+Math.max(0,Number(w.value)||0),0);
   if(resultBox){
@@ -8585,7 +8606,7 @@ async function openEliteCaseInstant(c, useKey=false){
       const serverPromise=apiFetch('/api/cube/open',{case_id:c.id,use_key:!!useKey,request_id:requestId});
       const j=await serverPromise;
       if(!j.drop) throw new Error('Сервер не вернул результат кейса');
-      won={name:j.drop.name,rarity:j.drop.rarity,value:Number(j.drop.value)||0,source_case_id:j.drop.case_id};
+      won={id:Number(j.drop.id)||0,name:j.drop.name,rarity:j.drop.rarity,value:Number(j.drop.value)||0,source_case_id:j.drop.case_id};
       data.balance=Number(j.balance)||0;
       if(Array.isArray(j.cubes)) applyServerCubes(j.cubes,[{...won}]);
       if(Array.isArray(j.keys)) data.keys=j.keys.map(x=>({...x}));
@@ -8709,6 +8730,7 @@ async function openCaseOnce(c, seq, total, useKey=false){
       const j = await apiFetch('/api/cube/open', {case_id: c.id, use_key: !!useKey, request_id: requestId});
       if(!j.drop) throw new Error('Сервер не вернул результат кейса');
       won = {
+        id: Number(j.drop.id)||0,
         name: j.drop.name,
         rarity: j.drop.rarity,
         value: Number(j.drop.value)||0,
@@ -8879,6 +8901,7 @@ function renderInventory(){
        <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${c.metadata?.locked?'disabled':''}>💰 Продать</button>
        <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${c.metadata?.locked?'disabled':''}>⬆️ Апгрейд</button>
        <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${c.metadata?.locked?'disabled':''}>🏷️ На продажу</button>`;
+  const itSafeId=(cube,fallback)=>{ const n=Number(cube?.id); return Number.isFinite(n)&&n>0 ? n : (Number(fallback)+1); };
   const renderStack = ({cube:c,count,indices})=>{
     const m=RARITY_META[c.rarity]||RARITY_META.common;
     const stackId=encodeURIComponent(String(c.name)+'|'+String(c.rarity)+'|'+String(c.value));
@@ -8886,10 +8909,10 @@ function renderInventory(){
     const expanded=isStack && expandedCubeStacks.has(stackId);
     const headerNameHtml = isStack
       ? `<button type="button" class="stack-toggle-btn ${expanded?'expanded':''}" data-action="toggle-stack" data-stack-id="${stackId}">
-           <span class="inv-name">${c.name} ×${count} <span class="stack-arrow">▼</span></span>
+           <span class="inv-name">${c.name} ×${count} <span class="inv-subid">#${itSafeId(c,indices[0])}</span> <span class="stack-arrow">▼</span></span>
            <span class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</span>
          </button>`
-      : `<div><div class="inv-name">${c.name}</div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
+      : `<div><div class="inv-name">${c.name} <span class="inv-subid">#${itSafeId(c,indices[0])}</span></div><div class="inv-rarity" style="color:${m.color}">${m.icon||''} ${m.label}</div></div>`;
     const header = `<div class="inv-item ${isStack?'inv-stack-header':''}" data-rarity="${String(c.rarity||'common').toLowerCase()}" style="border-left-color:${m.color};--item-color:${m.color}" ${isStack?'':`data-cube-index="${indices[0]}"`}>
       <div class="inv-item-info"><div class="cube-visual" style="filter:drop-shadow(0 0 6px ${m.color}55)">${cubeImageMarkup(c,'inv-cube-2d') || (c.image?`<img class="inv-cube-2d" src="${c.image}" alt="" loading="eager" decoding="sync">`:'<div class="mini-cube"><span class="mini-face front"></span><span class="mini-face right"></span><span class="mini-face top"></span></div>')}</div>
       ${headerNameHtml}</div>

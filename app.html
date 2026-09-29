@@ -136,6 +136,9 @@
     <input id="adminCubeName" placeholder="Название">
     <select id="adminCubeRarity" style="width:100%;margin-top:7px"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпохальный</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option><option value="divine">Божественный</option><option value="emerald">Изумрудный</option></select>
     <input id="adminCubeValue" type="number" min="0" placeholder="Стоимость" style="margin-top:7px">
+    <label class="btn-ghost" for="adminCubeImage" style="cursor:pointer;display:block;text-align:center;margin-top:7px">📷 Выбрать фото из галереи</label>
+    <input id="adminCubeImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+    <div id="adminCubeImagePreview" style="display:none;margin-top:8px;text-align:center"><img id="adminCubeImagePreviewImg" alt="" style="width:76px;height:76px;object-fit:contain;border-radius:12px"><div class="section-sub">Фото выбрано</div></div>
     <div class="input-modal-actions"><button id="adminCubeCancel" class="btn-ghost" type="button">Отмена</button><button id="adminCubeAccept" class="btn" type="button">Выдать</button></div>
   </div>
 </div>
