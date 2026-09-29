@@ -9398,7 +9398,13 @@ async function confirmUpgrade(){
     // The roll is also mapped directly: 0..100 -> 0..360 degrees.
     // Therefore a 95% wheel occupies 342 degrees and a roll of 47.5 lands
     // exactly halfway through that green 95% sector.
-    const stopDeg=(roll/100)*360;
+    // The server provides an independent visual landing point inside the
+    // already determined success/failure sector. Outcome probability remains
+    // server-authoritative, while repeated spins no longer look like they use
+    // only a handful of fixed positions.
+    const visualRollRaw=Number(j.visual_roll);
+    const visualRoll=Number.isFinite(visualRollRaw)?Math.max(0,Math.min(100,visualRollRaw)):roll;
+    const stopDeg=(visualRoll/100)*360;
     const epsilon=Math.min(1.25,Math.max(.08,serverChance*3.6/80));
     let visualDeg=stopDeg;
     if(j.success && serverChance<100) visualDeg=Math.min(serverChance*3.6-epsilon,Math.max(epsilon,visualDeg));
