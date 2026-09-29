@@ -5724,11 +5724,17 @@ function canonicalCubeValues(){
 const CUBE_CANONICAL_VALUES = canonicalCubeValues();
 function customCubeImage(cube){
   const u=String(cube?.metadata?.custom_image||'').trim();
-  return /^\/assets\/uploads\/cubes\/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp|gif)$/i.test(u) ? u : '';
+  if(!/^\/assets\/uploads\/cubes\/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp|gif)$/i.test(u)) return '';
+  // Cube images are stored by the Railway API, while the WebApp itself is
+  // served from Netlify. A root-relative /assets URL would therefore point
+  // to Netlify and produce a broken image. Always resolve custom cube files
+  // against the API origin.
+  const base=String(window.__GDPLAY_API_BASE||API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,'');
+  return base+u;
 }
 function cubeImageMarkup(cube, cls){
   const custom=customCubeImage(cube);
-  if(custom) return `<img class="${cls||'cube-icon-inline'}" src="${custom}" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">`;
+  if(custom) return `<img class="${cls||'cube-icon-inline'}" src="${custom}" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="async" onerror="this.style.display='none'">`;
   const exact=resolveEliteExactCubeImage(cube?.name);
   if(exact) return `<img class="${cls||'cube-icon-inline'}" src="${exact}" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">`;
   return window.cubeIconMarkup?.(cube?.name,cls||'cube-icon-inline')||'';
@@ -7291,7 +7297,7 @@ async function adminGrantCube(uid){
     try{
       const f=fileInput?.files?.[0];
       if(f){
-        const fd=new FormData(); fd.append('image',f); fd.append('initData',window.getInitData()); fd.append('adminSession',window.__GDPLAYAdminSession||'');
+        const fd=new FormData(); fd.append('image',f); fd.append('initData', window.Telegram?.WebApp?.initData || window.__telegramInitData || ''); fd.append('adminSession',window.__GDPLAYAdminSession||'');
         const apiBase=(window.__GDPLAY_API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,''); const up=await fetch(apiBase+'/api/admin/cube-image',{method:'POST',body:fd});
         const uj=await up.json().catch(()=>({}));
         if(!up.ok || !uj.ok) throw new Error(uj.error||'Не удалось загрузить фото');
