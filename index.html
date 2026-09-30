@@ -4628,6 +4628,16 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 .profile-head,.public-profile-head-v2{position:relative;overflow:hidden;}
 .profile-banner-bg{position:absolute;inset:0;z-index:0;background-position:center;background-size:cover;background-repeat:no-repeat;pointer-events:none;}
 .profile-banner-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.88) 0%,rgba(15,12,9,.68) 42%,rgba(15,12,9,.48) 100%),linear-gradient(0deg,rgba(15,12,9,.72),rgba(15,12,9,.16));}
+.profile-banner-toggle{position:absolute;right:9px;top:9px;z-index:5;border:1px solid rgba(255,255,255,.16);background:rgba(10,8,7,.58);backdrop-filter:blur(7px);color:var(--paper);border-radius:8px;padding:5px 8px;font:800 9px Inter,sans-serif;cursor:pointer;}
+.profile-head.banner-collapsed{padding-top:30px!important;padding-bottom:9px!important;}
+.profile-head.banner-collapsed .profile-banner-bg{height:25px;inset:0 0 auto 0!important;}
+.profile-head.banner-collapsed .profile-banner-bg::after{background:linear-gradient(90deg,rgba(15,12,9,.55),rgba(15,12,9,.25));}
+.public-profile-head-v2.banner-collapsed{padding-top:30px!important;padding-bottom:9px!important;}
+.public-profile-head-v2.banner-collapsed .profile-banner-bg{height:25px;inset:0 0 auto 0!important;}
+.lb-banner-strip{position:absolute;left:0;right:0;top:0;height:30px;background-position:center;background-size:cover;border-radius:12px 12px 0 0;opacity:.72;pointer-events:none;}
+.lb-banner-strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.82),rgba(15,12,9,.35),rgba(15,12,9,.72));}
+.lb-item.has-profile-banner{padding-top:38px;overflow:hidden;}
+.lb-item.has-profile-banner .lb-rank,.lb-item.has-profile-banner .lb-avatar,.lb-item.has-profile-banner>div:nth-child(3),.lb-item.has-profile-banner>.lb-score{position:relative;z-index:2;}
 .profile-head-info,.profile-avatar-wrap{position:relative;z-index:2;}
 .profile-banner-picker{margin-top:12px;}
 .profile-banner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px;}
@@ -5150,6 +5160,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
     <div class="page" id="page-profile">
       <div class="profile-head" id="myProfileHead">
         <div class="profile-banner-bg" id="profileBannerBg" aria-hidden="true" style="display:none"></div>
+        <button type="button" class="profile-banner-toggle" id="profileBannerToggle" aria-label="Свернуть баннер">Свернуть</button>
         <div class="profile-avatar-wrap"><div class="profile-avatar" id="profileAvatar">?</div><div class="profile-avatar-frame" id="profileAvatarFrame" aria-hidden="true" style="display:none"></div></div>
         <div class="profile-head-info">
           <div class="profile-name" id="profileName">—</div>
@@ -7513,6 +7524,19 @@ async function adminIpUnban(){
   if(!ip){showToast('❌ Укажи IP','error');return;}
   try{await apiFetch('/api/admin/ip-unban',{ip});showToast('🌐 IP-блок снят','success');}
   catch(e){showToast('❌ '+e.message,'error');}
+}
+
+async function adminDeleteEmptyAccounts(){
+  if(!await tgConfirm('Удалить ВСЕ пустые аккаунты из базы? Удаление необратимо.')) return;
+  const msg=document.getElementById('adminDeleteEmptyMsg'); if(msg) msg.textContent='Очистка базы…';
+  try{ const j=await apiFetch('/api/admin/delete-empty-accounts',{}); if(!j.ok) throw new Error(j.error||'Ошибка'); if(msg) msg.textContent=`Удалено аккаунтов: ${j.deleted}. Осталось игроков: ${j.total_players}.`; showToast(`🧹 Удалено пустых аккаунтов: ${j.deleted}`,'success'); }
+  catch(e){ if(msg) msg.textContent=e.message||'Ошибка'; showToast(e.message||'Ошибка очистки','error'); }
+}
+async function adminCompactDatabase(){
+  if(!await tgConfirm('Оптимизировать базу? Старую историю и временные записи можно будет удалить.')) return;
+  const msg=document.getElementById('adminDeleteEmptyMsg'); if(msg) msg.textContent='Оптимизация базы…';
+  try{ const j=await apiFetch('/api/admin/compact-database',{}); if(!j.ok) throw new Error(j.error||'Ошибка'); if(msg) msg.textContent='База оптимизирована.'; showToast('🗜 База оптимизирована','success'); }
+  catch(e){ if(msg) msg.textContent=e.message||'Ошибка'; showToast(e.message||'Ошибка оптимизации','error'); }
 }
 
 async function adminDeleteUser(uid){
@@ -9971,7 +9995,8 @@ async function renderLeaderboard(sortBy='cases'){
     if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
-      <div class="lb-item ${r.key===myId?'me':''}">
+      <div class="lb-item ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() ? 'has-profile-banner':''}">
+        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-strip" style="background-image:url("${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}")"></div>`:''}
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
@@ -10126,6 +10151,7 @@ async function openPublicProfile(userId, seed={}){
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2">
       <div class="profile-banner-bg" id="publicProfileBannerBg" aria-hidden="true" style="${publicBannerStyle?publicBannerStyle+';display:block':'display:none'}"></div>
+      <button type="button" class="profile-banner-toggle public-profile-banner-toggle" data-action="toggle-public-profile-banner">Свернуть</button>
       <div class="profile-avatar-wrap public-profile-avatar-wrap">
         <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
         ${publicFrameHtml}
@@ -10222,7 +10248,27 @@ function applyProfileNameVisual(el,key){
   } else { el.style.setProperty('color','var(--paper)','important'); }
 }
 
+function setProfileBannerCollapsed(collapsed, root){
+  const el=root || document.getElementById('myProfileHead');
+  if(!el) return;
+  el.classList.toggle('banner-collapsed',!!collapsed);
+  const btn=el.querySelector('.profile-banner-toggle');
+  if(btn) btn.textContent=collapsed?'Развернуть':'Свернуть';
+}
+function toggleOwnProfileBanner(){
+  const el=document.getElementById('myProfileHead'); if(!el) return;
+  const collapsed=!el.classList.contains('banner-collapsed');
+  setProfileBannerCollapsed(collapsed,el);
+  try{localStorage.setItem('gdplay_profile_banner_collapsed',collapsed?'1':'0');}catch(_){}
+}
+function togglePublicProfileBanner(btn){
+  const el=btn?.closest('.public-profile-head-v2'); if(!el) return;
+  setProfileBannerCollapsed(!el.classList.contains('banner-collapsed'),el);
+}
+
 function renderProfileCustomization(){
+  const ownHead=document.getElementById('myProfileHead');
+  if(ownHead){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_profile_banner_collapsed')==='1';}catch(_){} setProfileBannerCollapsed(collapsed,ownHead); }
   const frame=document.getElementById('profileAvatarFrame');
   const name=document.getElementById('profileName');
   const vipActive=isPremiumActive();
@@ -10939,6 +10985,7 @@ function handleButton(button, e){
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
+  if(action==='toggle-public-profile-banner'){ togglePublicProfileBanner(button); return; }
   if(action==='admin-money'){ adminMoney(button.dataset.uid, button.dataset.amount); return; }
   if(action==='admin-ban'){ adminBan(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-shadow'){ adminShadow(button.dataset.uid, button.dataset.val); return; }
@@ -11075,6 +11122,7 @@ if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
 document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
+document.getElementById('profileBannerToggle')?.addEventListener('click',toggleOwnProfileBanner);
 document.getElementById('profileNameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-name]');if(b&&!b.disabled)setProfileNameStyle(b.dataset.profileName);});
 document.getElementById('passwordBtn')?.addEventListener('click',setAccountPassword);
 document.getElementById('twoFactorToggle')?.addEventListener('click',toggleTwoFactor);
