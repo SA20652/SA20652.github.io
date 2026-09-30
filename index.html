@@ -5729,10 +5729,14 @@ function customCubeImage(cube){
   // for old records and offline rendering.
   const id=Number(cube?.id||0);
   const base=String(window.__GDPLAY_API_BASE||API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,'');
-  const hasCustom=String(cube?.metadata?.custom_image_data||cube?.metadata?.custom_image||'').trim() ||
-                  /^data:image\//i.test(String(cube?.image||''));
+  // Only metadata explicitly marked as a custom admin upload may use the
+  // server-side /api/cube-image endpoint. Elite/system images also live in
+  // cube.image as data URLs and must NEVER be treated as custom uploads.
+  const customData=String(cube?.metadata?.custom_image_data||'').trim();
+  const customPath=String(cube?.metadata?.custom_image||'').trim();
+  const hasCustom=Boolean(customData || customPath);
   if(id>0 && hasCustom) return base+'/api/cube-image/'+encodeURIComponent(String(id));
-  const dataUrl=String(cube?.metadata?.custom_image_data||cube?.image||'').trim();
+  const dataUrl=customData;
   if(/^data:image\/(?:jpeg|jpg|png|webp|gif);base64,/i.test(dataUrl)) return dataUrl;
   const u=String(cube?.metadata?.custom_image||cube?.image||'').trim();
   if(!/^\/assets\/uploads\/cubes\/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp|gif)$/i.test(u)) return '';
