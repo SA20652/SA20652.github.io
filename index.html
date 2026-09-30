@@ -5723,9 +5723,11 @@ function canonicalCubeValues(){
 }
 const CUBE_CANONICAL_VALUES = canonicalCubeValues();
 function customCubeImage(cube){
-  const dataUrl=String(cube?.metadata?.custom_image_data||'').trim();
+  // Custom admin photos are exposed both in metadata and as cube.image by the API.
+  // Prefer the embedded data URL so the image works independently of Railway/Netlify paths.
+  const dataUrl=String(cube?.metadata?.custom_image_data||cube?.image||'').trim();
   if(/^data:image\/(?:jpeg|jpg|png|webp|gif);base64,/i.test(dataUrl)) return dataUrl;
-  const u=String(cube?.metadata?.custom_image||'').trim();
+  const u=String(cube?.metadata?.custom_image||cube?.image||'').trim();
   if(!/^\/assets\/uploads\/cubes\/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp|gif)$/i.test(u)) return '';
   const base=String(window.__GDPLAY_API_BASE||API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,'');
   return base+u;
