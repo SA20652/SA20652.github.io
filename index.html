@@ -4126,6 +4126,22 @@ body{overflow-x:hidden;}
 .public-market-cube-icon{width:34px;height:34px;object-fit:contain;display:block;filter:drop-shadow(0 0 6px rgba(255,255,255,.13))}
 .upgrade-selected-cube-icon{width:30px;height:30px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:5px;filter:drop-shadow(0 0 6px rgba(255,255,255,.14))}
 </style>
+
+<script id="gdplay-profile-banner-loader">
+(function(){
+  window.PROFILE_BANNERS = window.PROFILE_BANNERS || {};
+  window.profileBannersReady = fetch('./profile_banners.html?v=profile-banners-v1',{cache:'force-cache'})
+    .then(function(r){if(!r.ok)throw new Error('profile_banners.html '+r.status);return r.text();})
+    .then(function(src){
+      var m=src.match(/const\s+PROFILE_BANNERS\s*=\s*(\{[\s\S]*?\})\s*;/);
+      if(!m) throw new Error('PROFILE_BANNERS not found');
+      window.PROFILE_BANNERS=JSON.parse(m[1]);
+      Object.keys(window.PROFILE_BANNERS).forEach(function(k){try{var im=new Image();im.decoding='async';im.src=window.PROFILE_BANNERS[k];if(im.decode)im.decode().catch(function(){});}catch(_){} });
+      return window.PROFILE_BANNERS;
+    }).then(function(v){ try{ if(window.data && typeof window.renderProfileCustomization==='function') window.renderProfileCustomization(); }catch(_){} return v; })
+    .catch(function(e){console.warn('[PROFILE BANNERS]',e);return {};});
+})();
+</script>
 <script>
 (function(){
   window.CUBE_ICONS = window.CUBE_ICONS || {};
@@ -4403,6 +4419,7 @@ body{overflow-x:hidden;}
       scan(document);
       preloadCatalog('cube_icons.html?v=elite-cubes-v14-h1kara-embedded',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('profile_banners.html?v=profile-banners-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
       setTimeout(function(){scan(document);},1500);
@@ -4606,6 +4623,22 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
 <script>
 window.getInitData = window.getInitData || function(){ return window.Telegram?.WebApp?.initData || window.__telegramInitData || ''; };
 </script>
+
+<style id="gdplay-profile-banners">
+.profile-head,.public-profile-head-v2{position:relative;overflow:hidden;}
+.profile-banner-bg{position:absolute;inset:0;z-index:0;background-position:center;background-size:cover;background-repeat:no-repeat;pointer-events:none;}
+.profile-banner-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.88) 0%,rgba(15,12,9,.68) 42%,rgba(15,12,9,.48) 100%),linear-gradient(0deg,rgba(15,12,9,.72),rgba(15,12,9,.16));}
+.profile-head-info,.profile-avatar-wrap{position:relative;z-index:2;}
+.profile-banner-picker{margin-top:12px;}
+.profile-banner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px;}
+.profile-banner-btn{position:relative;min-height:68px;border:1px solid var(--line);border-radius:11px;background:var(--bg-3);overflow:hidden;padding:0;cursor:pointer;color:var(--paper);text-align:left;}
+.profile-banner-btn img{width:100%;height:68px;display:block;object-fit:cover;}
+.profile-banner-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.72));pointer-events:none;}
+.profile-banner-btn span{position:absolute;left:7px;bottom:6px;z-index:2;font-size:9px;font-weight:800;text-shadow:0 1px 3px #000;}
+.profile-banner-btn.active{border-color:var(--brass-2);box-shadow:0 0 0 1px rgba(227,184,114,.2) inset;}
+.profile-banner-btn:disabled{opacity:.42;cursor:not-allowed;}
+@media(max-width:380px){.profile-banner-grid{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -5115,7 +5148,8 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 
     <!-- PROFILE -->
     <div class="page" id="page-profile">
-      <div class="profile-head">
+      <div class="profile-head" id="myProfileHead">
+        <div class="profile-banner-bg" id="profileBannerBg" aria-hidden="true" style="display:none"></div>
         <div class="profile-avatar-wrap"><div class="profile-avatar" id="profileAvatar">?</div><div class="profile-avatar-frame" id="profileAvatarFrame" aria-hidden="true" style="display:none"></div></div>
         <div class="profile-head-info">
           <div class="profile-name" id="profileName">—</div>
@@ -5165,6 +5199,10 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
           <button type="button" class="profile-style-btn" data-profile-name="ocean"><span style="background:linear-gradient(90deg,#00c6ff,#0072ff);-webkit-background-clip:text;color:transparent">Aa</span>Океан</button>
           <button type="button" class="profile-style-btn" data-profile-name="toxic"><span style="background:linear-gradient(90deg,#b6ff00,#37ff6b);-webkit-background-clip:text;color:transparent">Aa</span>Токсик</button>
           <button type="button" class="profile-style-btn" data-profile-name="aurora"><span style="background:linear-gradient(90deg,#54f7d2,#8d7bff);-webkit-background-clip:text;color:transparent">Aa</span>Аврора</button>
+        </div>
+        <div class="profile-customize profile-banner-picker" id="profileBannerPicker">
+          <div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Баннер профиля</div><div class="profile-customize-sub">Доступно только при активном Premium</div></div><span class="profile-badge premium">Premium</span></div>
+          <div class="profile-banner-grid" id="profileBannerGrid"></div>
         </div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 12 часов · 💣 10 игр в «Минах» каждые 12 часов · x0.85 продажа · +10% удачи · ∞ слотов в инвентаре · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
@@ -5827,7 +5865,7 @@ function newUserData(username){
     wins: 0,
     battle_winnings: 0,
     vault_balance: 0,
-    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileOwnedFrames: [],
+    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileBanner: 'default', profileOwnedFrames: [],
     created: Date.now()
   };
 }
@@ -5844,6 +5882,7 @@ function normalizeGameState(){
   if(typeof data.creatorBadge !== 'boolean') data.creatorBadge=!!data.creatorBadge;
   if(!data.profileFrame) data.profileFrame='default';
   if(!data.profileNameStyle) data.profileNameStyle='default';
+  if(!data.profileBanner) data.profileBanner='default';
   if(!data.settings) data.settings={sound:true,motion:true};
 }
 
@@ -5998,6 +6037,7 @@ async function syncToServer(){
       tester_badge: !!data.testerBadge,
       profile_frame: String(data.profileFrame||'default'),
       profile_name_style: String(data.profileNameStyle||'default'),
+      profile_banner: String(data.profileBanner||'default'),
       custom_status: data.customStatus || null,
       buffs: data.buffs||[],
       best_drops: data.bestDrops||[]
@@ -6089,7 +6129,7 @@ function applyServerState(u){
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
-  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
+  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_banner !== undefined && String(u.profile_banner||'default') !== String(data.profileBanner||'default')){ data.profileBanner = String(u.profile_banner||'default'); changed = true; } if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
   if(Array.isArray(u.buffs) && JSON.stringify(u.buffs)!==JSON.stringify(data.buffs)){ data.buffs=u.buffs; changed=true; }
   if(Array.isArray(u.best_drops) && JSON.stringify(u.best_drops)!==JSON.stringify(data.bestDrops)){ data.bestDrops=u.best_drops; changed=true; }
   if(Array.isArray(u.notifications)){
@@ -9909,6 +9949,7 @@ async function renderLeaderboard(sortBy='cases'){
       custom_status: r.custom_status || {},
       profile_frame: r.profile_frame || r.profileFrame || '',
       profile_name_style: r.profile_name_style || r.profileNameStyle || 'default',
+      profile_banner: r.profile_banner || r.profileBanner || 'default',
       best_drops: r.best_drops || r.bestDrops || [],
       text_color: r.text_color || r.name_color || '',
       buffs: Array.isArray(r.buffs) ? r.buffs : [],
@@ -9921,7 +9962,7 @@ async function renderLeaderboard(sortBy='cases'){
     rows.forEach(r=>{ leaderboardProfileSeeds[r.key] = {
       user_id:r.key, username:r.username, avatar:r.avatar, balance:r.balance,
       cases_opened:r.cases, cube_count:r.cube_count, battles:Number(r.battles||0),
-      wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge, profile_name_style:r.profile_name_style || 'default',
+      wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge, profile_name_style:r.profile_name_style || 'default', profile_banner:r.profile_banner || 'default',
       tester_badge:r.tester_badge, custom_status:r.custom_status || {}, profile_frame:r.profile_frame || '', best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
       profile_name_style:r.profile_name_style || 'default',
       buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
@@ -10019,6 +10060,7 @@ function profileBadgeHtml(p){
 }
 async function openPublicProfile(userId, seed={}){
   window.__gdplayOpenProfileUserId=String(userId||'');
+  try{ if(window.profileBannersReady) await window.profileBannersReady; }catch(_){}
   const body=document.getElementById('publicProfileBody');
   if(!body) return;
   const cached=leaderboardProfileSeeds[String(userId)]||{};
@@ -10077,9 +10119,13 @@ async function openPublicProfile(userId, seed={}){
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
   const publicFrame = String(p.profile_frame||'').toLowerCase();
+  const publicBanner=String(p.profile_banner||'default').toLowerCase();
+  const publicBannerSrc=(window.PROFILE_BANNERS||{})[publicBanner];
+  const publicBannerStyle=(publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now())?`background-image:url(\"${publicBannerSrc}\")` : '';
   const publicFrameHtml = publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '';
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2">
+      <div class="profile-banner-bg" id="publicProfileBannerBg" aria-hidden="true" style="${publicBannerStyle?publicBannerStyle+';display:block':'display:none'}"></div>
       <div class="profile-avatar-wrap public-profile-avatar-wrap">
         <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
         ${publicFrameHtml}
@@ -10216,6 +10262,15 @@ function renderProfileCustomization(){
     b.disabled=premiumOnly && !vipActive;
     b.title=(premiumOnly && !vipActive)?'Доступно только с Premium':'Доступно';
   });
+  const bannerKey=String(data?.profileBanner||'default');
+  const bannerBg=document.getElementById('profileBannerBg');
+  const bannerSrc=(window.PROFILE_BANNERS||{})[bannerKey];
+  if(bannerBg){ bannerBg.style.backgroundImage=(vipActive&&bannerKey!=='default'&&bannerSrc)?`url(\"${bannerSrc}\")`:''; bannerBg.style.display=(vipActive&&bannerKey!=='default'&&bannerSrc)?'block':'none'; }
+  const grid=document.getElementById('profileBannerGrid');
+  if(grid){
+    const labels={tidal_wave:'Tidal Wave',orbit:'ORBIT',nullscapes:'Nullscapes',grief:'Grief',unleashed:'Unleashed',slaughterhouse:'Slaughterhouse'};
+    grid.innerHTML='<button type=\"button\" class=\"profile-banner-btn '+(bannerKey==='default'?'active':'')+'\" data-profile-banner=\"default\"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type=\"button\" class=\"profile-banner-btn ${bannerKey===k?'active':''}\" data-profile-banner=\"${k}\" ${vipActive?'':'disabled'}><img src=\"${window.PROFILE_BANNERS[k]}\" alt=\"\" loading=\"eager\" decoding=\"async\"><span>${labels[k]||k}</span></button>`).join('');
+  }
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
 }
 async function refreshProfileAppearanceFromServer(){
@@ -10225,6 +10280,7 @@ async function refreshProfileAppearanceFromServer(){
     const u=j&&j.user;
     if(u){
       if(u.profile_frame!==undefined) data.profileFrame=String(u.profile_frame||'default');
+      if(u.profile_banner!==undefined) data.profileBanner=String(u.profile_banner||'default');
       if(u.profile_name_style!==undefined){
         const serverStyle=String(u.profile_name_style||'default');
         const localStyle=String(data.profileNameStyle||'default');
@@ -10258,6 +10314,18 @@ function isPremiumActive(){
   const raw=String(data.premiumUntil).trim();
   if(/^\d+$/.test(raw)){ let n=Number(raw); if(n>1e10)n/=1000; return n>Date.now()/1000; }
   const t=Date.parse(raw); return Number.isFinite(t) && t>Date.now();
+}
+async function setProfileBanner(key){
+  key=String(key||'default').toLowerCase();
+  if(key!=='default' && !isPremiumActive()){ showToast('⭐ Баннеры доступны только с Premium','error'); return; }
+  const prev=String(data.profileBanner||'default');
+  data.profileBanner=key; persistLocal(); renderProfileCustomization();
+  try{
+    const j=await apiFetch('/api/profile/banner',{banner:key});
+    data.profileBanner=String(j.profile_banner||key);
+    if(j.premium_required) data.profileBanner='default';
+    persistLocal(); renderProfileCustomization();
+  }catch(e){ data.profileBanner=prev; persistLocal(); renderProfileCustomization(); showToast(e.message||'Не удалось сохранить баннер','error'); }
 }
 async function setProfileNameStyle(key){
   const premiumActive=isPremiumActive();
@@ -11006,6 +11074,7 @@ if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
 }
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
+document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
 document.getElementById('profileNameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-name]');if(b&&!b.disabled)setProfileNameStyle(b.dataset.profileName);});
 document.getElementById('passwordBtn')?.addEventListener('click',setAccountPassword);
 document.getElementById('twoFactorToggle')?.addEventListener('click',toggleTwoFactor);
