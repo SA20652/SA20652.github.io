@@ -4630,9 +4630,10 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 .profile-banner-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.88) 0%,rgba(15,12,9,.68) 42%,rgba(15,12,9,.48) 100%),linear-gradient(0deg,rgba(15,12,9,.72),rgba(15,12,9,.16));}
  .profile-banner-picker-toggle{font-size:10px;padding:5px 8px;line-height:1;white-space:nowrap;}
 .profile-banner-picker.is-collapsed .profile-banner-grid{display:none;}
-.lb-banner-strip{position:absolute;left:0;right:0;top:0;height:30px;background-position:center;background-size:cover;border-radius:12px 12px 0 0;opacity:.72;pointer-events:none;}
-.lb-banner-strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.82),rgba(15,12,9,.35),rgba(15,12,9,.72));}
-.lb-item.has-profile-banner{padding-top:38px;overflow:hidden;}
+.lb-banner-strip{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:12px;pointer-events:none;background-image:var(--lb-banner);background-position:center;background-size:cover;filter:blur(14px);transform:scale(1.04);opacity:.58;}
+.lb-banner-strip::before{content:"";position:absolute;inset:0;background-image:var(--lb-banner);background-position:center;background-size:auto 100%;background-repeat:no-repeat;filter:none;opacity:1;}
+.lb-banner-strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.72),rgba(15,12,9,.28),rgba(15,12,9,.68));}
+.lb-item.has-profile-banner{overflow:hidden;}
 .lb-item.has-profile-banner .lb-rank,.lb-item.has-profile-banner .lb-avatar,.lb-item.has-profile-banner>div:nth-child(3),.lb-item.has-profile-banner>.lb-score{position:relative;z-index:2;}
 .profile-head-info,.profile-avatar-wrap{position:relative;z-index:2;}
 .profile-banner-picker{margin-top:12px;}
@@ -9991,7 +9992,7 @@ async function renderLeaderboard(sortBy='cases'){
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() ? 'has-profile-banner':''}">
-        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-strip" style="background-image:url("${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}")"></div>`:''}
+        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-strip" style="--lb-banner:url("${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}")"></div>`:''}
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
@@ -10141,7 +10142,7 @@ async function openPublicProfile(userId, seed={}){
   const publicFrame = String(p.profile_frame||'').toLowerCase();
   const publicBanner=String(p.profile_banner||'default').toLowerCase();
   const publicBannerSrc=(window.PROFILE_BANNERS||{})[publicBanner];
-  const publicBannerStyle=(publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now())?`background-image:url(\"${publicBannerSrc}\")` : '';
+  const publicBannerStyle=(publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now())?`background-image:url(\"${publicBannerSrc}\");background-size:auto 100%;background-position:center;background-repeat:no-repeat` : '';
   const publicFrameHtml = publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '';
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2">
