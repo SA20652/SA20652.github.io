@@ -4131,7 +4131,7 @@ body{overflow-x:hidden;}
   window.CUBE_ICONS = window.CUBE_ICONS || {};
   window.CUBE_ICON_PRELOADED = window.CUBE_ICON_PRELOADED || {};
   window.GDPLAY_IMAGE_CACHE = window.GDPLAY_IMAGE_CACHE || new Map();
-  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v13-elixorus',{cache:'force-cache'})
+  window.cubeIconsReady = fetch('./cube_icons.html?v=elite-cubes-v14-h1kara-embedded',{cache:'force-cache'})
     .then(function(r){ if(!r.ok) throw new Error('cube_icons.html '+r.status); return r.text(); })
     .then(function(src){
       var m=src.match(/const\s+CUBE_ICONS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -4401,7 +4401,7 @@ body{overflow-x:hidden;}
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
-      preloadCatalog('cube_icons.html?v=elite-cubes-v13-elixorus',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('cube_icons.html?v=elite-cubes-v14-h1kara-embedded',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -5604,12 +5604,13 @@ const CASES = [
     {name:"SoulsTRK",rarity:"divine",value:780000,chance:0.5}
   ]},
   {id:"master",name:"Master-кейс",price:220000,icon:'',items:[
-    {name:"Sailent",rarity:"common",value:70400,chance:33.1667},
-    {name:"No ob",rarity:"rare",value:132000,chance:26.5333},
-    {name:"MoistenedEgg",rarity:"epic",value:211200,chance:19.9},
-    {name:"thejshadow",rarity:"legendary",value:281600,chance:13.2667},
-    {name:"GToast",rarity:"mythic",value:598400,chance:6.6333},
-    {name:"Хижина гоблина",rarity:"divine",value:1320000,chance:0.5}
+    {name:"Sailent",rarity:"common",value:70400,chance:31.5084},
+    {name:"No ob",rarity:"rare",value:132000,chance:25.2066},
+    {name:"MoistenedEgg",rarity:"epic",value:211200,chance:18.905},
+    {name:"thejshadow",rarity:"legendary",value:281600,chance:12.6034},
+    {name:"GToast",rarity:"mythic",value:598400,chance:6.3016},
+    {name:"h1kara",image_key:"h1kara",rarity:"legendary",value:300000,chance:5.0},
+    {name:"Хижина гоблина",rarity:"divine",value:1320000,chance:0.475}
   ]},
   {id:"icon",name:"Иконический кейс",price:380000,icon:'',items:[
     {name:"Superkobster",rarity:"common",value:121600,chance:24.875},
