@@ -4628,12 +4628,8 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 .profile-head,.public-profile-head-v2{position:relative;overflow:hidden;}
 .profile-banner-bg{position:absolute;inset:0;z-index:0;background-position:center;background-size:cover;background-repeat:no-repeat;pointer-events:none;}
 .profile-banner-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.88) 0%,rgba(15,12,9,.68) 42%,rgba(15,12,9,.48) 100%),linear-gradient(0deg,rgba(15,12,9,.72),rgba(15,12,9,.16));}
-.profile-banner-toggle{position:absolute;right:9px;top:9px;z-index:5;border:1px solid rgba(255,255,255,.16);background:rgba(10,8,7,.58);backdrop-filter:blur(7px);color:var(--paper);border-radius:8px;padding:5px 8px;font:800 9px Inter,sans-serif;cursor:pointer;}
-.profile-head.banner-collapsed{padding-top:30px!important;padding-bottom:9px!important;}
-.profile-head.banner-collapsed .profile-banner-bg{height:25px;inset:0 0 auto 0!important;}
-.profile-head.banner-collapsed .profile-banner-bg::after{background:linear-gradient(90deg,rgba(15,12,9,.55),rgba(15,12,9,.25));}
-.public-profile-head-v2.banner-collapsed{padding-top:30px!important;padding-bottom:9px!important;}
-.public-profile-head-v2.banner-collapsed .profile-banner-bg{height:25px;inset:0 0 auto 0!important;}
+ .profile-banner-picker-toggle{font-size:10px;padding:5px 8px;line-height:1;white-space:nowrap;}
+.profile-banner-picker.is-collapsed .profile-banner-grid{display:none;}
 .lb-banner-strip{position:absolute;left:0;right:0;top:0;height:30px;background-position:center;background-size:cover;border-radius:12px 12px 0 0;opacity:.72;pointer-events:none;}
 .lb-banner-strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.82),rgba(15,12,9,.35),rgba(15,12,9,.72));}
 .lb-item.has-profile-banner{padding-top:38px;overflow:hidden;}
@@ -5160,7 +5156,6 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
     <div class="page" id="page-profile">
       <div class="profile-head" id="myProfileHead">
         <div class="profile-banner-bg" id="profileBannerBg" aria-hidden="true" style="display:none"></div>
-        <button type="button" class="profile-banner-toggle" id="profileBannerToggle" aria-label="Свернуть баннер">Свернуть</button>
         <div class="profile-avatar-wrap"><div class="profile-avatar" id="profileAvatar">?</div><div class="profile-avatar-frame" id="profileAvatarFrame" aria-hidden="true" style="display:none"></div></div>
         <div class="profile-head-info">
           <div class="profile-name" id="profileName">—</div>
@@ -5212,7 +5207,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
           <button type="button" class="profile-style-btn" data-profile-name="aurora"><span style="background:linear-gradient(90deg,#54f7d2,#8d7bff);-webkit-background-clip:text;color:transparent">Aa</span>Аврора</button>
         </div>
         <div class="profile-customize profile-banner-picker" id="profileBannerPicker">
-          <div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Баннер профиля</div><div class="profile-customize-sub">Доступно только при активном Premium</div></div><span class="profile-badge premium">Premium</span></div>
+          <div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Баннер профиля</div><div class="profile-customize-sub">Доступно только при активном Premium</div></div><div style="display:flex;align-items:center;gap:7px"><span class="profile-badge premium">Premium</span><button type="button" class="btn-ghost profile-banner-picker-toggle" id="profileBannerPickerToggle">Свернуть</button></div></div>
           <div class="profile-banner-grid" id="profileBannerGrid"></div>
         </div>
       </div>
@@ -10151,7 +10146,6 @@ async function openPublicProfile(userId, seed={}){
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2">
       <div class="profile-banner-bg" id="publicProfileBannerBg" aria-hidden="true" style="${publicBannerStyle?publicBannerStyle+';display:block':'display:none'}"></div>
-      <button type="button" class="profile-banner-toggle public-profile-banner-toggle" data-action="toggle-public-profile-banner">Свернуть</button>
       <div class="profile-avatar-wrap public-profile-avatar-wrap">
         <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
         ${publicFrameHtml}
@@ -10248,27 +10242,21 @@ function applyProfileNameVisual(el,key){
   } else { el.style.setProperty('color','var(--paper)','important'); }
 }
 
-function setProfileBannerCollapsed(collapsed, root){
-  const el=root || document.getElementById('myProfileHead');
-  if(!el) return;
-  el.classList.toggle('banner-collapsed',!!collapsed);
-  const btn=el.querySelector('.profile-banner-toggle');
+function setProfileBannerPickerCollapsed(collapsed){
+  const picker=document.getElementById('profileBannerPicker'); if(!picker) return;
+  picker.classList.toggle('is-collapsed',!!collapsed);
+  const btn=document.getElementById('profileBannerPickerToggle');
   if(btn) btn.textContent=collapsed?'Развернуть':'Свернуть';
+  try{localStorage.setItem('gdplay_profile_banner_picker_collapsed',collapsed?'1':'0');}catch(_){}
 }
-function toggleOwnProfileBanner(){
-  const el=document.getElementById('myProfileHead'); if(!el) return;
-  const collapsed=!el.classList.contains('banner-collapsed');
-  setProfileBannerCollapsed(collapsed,el);
-  try{localStorage.setItem('gdplay_profile_banner_collapsed',collapsed?'1':'0');}catch(_){}
-}
-function togglePublicProfileBanner(btn){
-  const el=btn?.closest('.public-profile-head-v2'); if(!el) return;
-  setProfileBannerCollapsed(!el.classList.contains('banner-collapsed'),el);
+function toggleProfileBannerPicker(){
+  const picker=document.getElementById('profileBannerPicker'); if(!picker) return;
+  setProfileBannerPickerCollapsed(!picker.classList.contains('is-collapsed'));
 }
 
 function renderProfileCustomization(){
-  const ownHead=document.getElementById('myProfileHead');
-  if(ownHead){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_profile_banner_collapsed')==='1';}catch(_){} setProfileBannerCollapsed(collapsed,ownHead); }
+  const picker=document.getElementById('profileBannerPicker');
+  if(picker){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_profile_banner_picker_collapsed')==='1';}catch(_){} setProfileBannerPickerCollapsed(collapsed); }
   const frame=document.getElementById('profileAvatarFrame');
   const name=document.getElementById('profileName');
   const vipActive=isPremiumActive();
@@ -10985,7 +10973,6 @@ function handleButton(button, e){
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
-  if(action==='toggle-public-profile-banner'){ togglePublicProfileBanner(button); return; }
   if(action==='admin-money'){ adminMoney(button.dataset.uid, button.dataset.amount); return; }
   if(action==='admin-ban'){ adminBan(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-shadow'){ adminShadow(button.dataset.uid, button.dataset.val); return; }
@@ -11122,7 +11109,7 @@ if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
 document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
-document.getElementById('profileBannerToggle')?.addEventListener('click',toggleOwnProfileBanner);
+document.getElementById('profileBannerPickerToggle')?.addEventListener('click',toggleProfileBannerPicker);
 document.getElementById('profileNameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-name]');if(b&&!b.disabled)setProfileNameStyle(b.dataset.profileName);});
 document.getElementById('passwordBtn')?.addEventListener('click',setAccountPassword);
 document.getElementById('twoFactorToggle')?.addEventListener('click',toggleTwoFactor);
