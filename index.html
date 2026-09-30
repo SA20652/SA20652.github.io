@@ -5723,13 +5723,19 @@ function canonicalCubeValues(){
 }
 const CUBE_CANONICAL_VALUES = canonicalCubeValues();
 function customCubeImage(cube){
-  // Custom admin photos are exposed both in metadata and as cube.image by the API.
-  // Prefer the embedded data URL so the image works independently of Railway/Netlify paths.
+  // A custom admin photo is a server-side asset identified by the immutable
+  // cube id. This URL is the same for every device, so nobody relies on the
+  // administrator's local File/Blob/ObjectURL. Embedded data remains a fallback
+  // for old records and offline rendering.
+  const id=Number(cube?.id||0);
+  const base=String(window.__GDPLAY_API_BASE||API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,'');
+  const hasCustom=String(cube?.metadata?.custom_image_data||cube?.metadata?.custom_image||'').trim() ||
+                  /^data:image\//i.test(String(cube?.image||''));
+  if(id>0 && hasCustom) return base+'/api/cube-image/'+encodeURIComponent(String(id));
   const dataUrl=String(cube?.metadata?.custom_image_data||cube?.image||'').trim();
   if(/^data:image\/(?:jpeg|jpg|png|webp|gif);base64,/i.test(dataUrl)) return dataUrl;
   const u=String(cube?.metadata?.custom_image||cube?.image||'').trim();
   if(!/^\/assets\/uploads\/cubes\/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp|gif)$/i.test(u)) return '';
-  const base=String(window.__GDPLAY_API_BASE||API_BASE||'https://gdplay.up.railway.app').replace(/\/$/,'');
   return base+u;
 }
 function cubeImageMarkup(cube, cls){
