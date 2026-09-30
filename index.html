@@ -9147,7 +9147,7 @@ function renderMarketItems(){
     const rarity=x.cube_rarity||x.rarity||(x.key&&x.key.rarity)||'common';
     const m=RARITY_META[rarity]||RARITY_META.common;
     const name=x.cube_name||x.key_name||x.keyName||x.item_name||x.name||(x.key&&x.key.name)||(isKey?'Ключ':'Куб');
-    const cubePhoto=!isKey && window.getCubeIcon ? window.getCubeIcon(name) : null;
+    const cubePhoto=!isKey && x.image ? `${API_BASE}${x.image}` : (!isKey && window.getCubeIcon ? window.getCubeIcon(name) : null);
     const icon=(x.key&&x.key.icon)||x.icon||(isKey?'🗝️':m.icon);
     const iconMarkup=cubePhoto ? `<img class="market-cube-photo" src="${cubePhoto}" alt="" aria-hidden="true" draggable="false" loading="eager" decoding="sync">` : `<span class="inv-icon-fallback" style="color:${m.color}">${icon}</span>`;
     const currentUid = String(tgUserId()||'').trim();
@@ -10063,7 +10063,7 @@ async function openPublicProfile(userId, seed={}){
     const m=RARITY_META[rarity]||RARITY_META.common;
     const name=x.cube_name||x.key_name||x.keyName||x.item_name||x.name||(x.key&&x.key.name)||(isKey?'Ключ':'Куб');
     const icon=(x.key&&x.key.icon)||x.icon||(isKey?'🗝️':m.icon);
-    const marketExact=!isKey ? resolveEliteExactCubeImage(name) : ''; const cubeImage=!isKey ? (marketExact ? `<img class="public-market-cube-icon" src="${marketExact}" alt="" aria-hidden="true">` : (window.cubeIconMarkup?.(name,'public-market-cube-icon')||'')) : '';
+    const marketExact=!isKey ? resolveEliteExactCubeImage(name) : ''; const publicCustom=!isKey && x.image ? `${API_BASE}${x.image}` : ''; const cubeImage=!isKey ? (publicCustom ? `<img class="public-market-cube-icon" src="${publicCustom}" alt="" aria-hidden="true">` : (marketExact ? `<img class="public-market-cube-icon" src="${marketExact}" alt="" aria-hidden="true">` : (window.cubeIconMarkup?.(name,'public-market-cube-icon')||''))) : '';
     const canBuy=!myProfile && String(x.seller_name||'')!==String(data.username||'');
     return `<div class="public-market-card">
       <span class="inv-icon" style="color:${m.color};font-size:22px">${cubeImage||icon}</span>
