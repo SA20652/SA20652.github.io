@@ -10300,6 +10300,7 @@ function toggleProfileCustomize(){
 }
 
 function renderProfileCustomization(){
+  if(!Object.keys(window.PROFILE_BANNERS||{}).length && window.profileBannersReady){ window.profileBannersReady.then(function(){ try{ renderProfileCustomization(); }catch(_){} }); return; }
   const customize=document.getElementById('profileCustomize');
   if(customize){
     let collapsed=true;
