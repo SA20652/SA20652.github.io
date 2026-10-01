@@ -5398,7 +5398,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="customBannerModal"><div class="premium-modal-card custom-banner-modal"><div class="premium-modal-top"><div class="premium-modal-star">🖼️</div><div><div class="premium-modal-title">Свой баннер</div><div class="premium-modal-sub">Постоянная покупка · 5 ⭐ · баннер видят все игроки</div></div></div><div class="custom-banner-preview" id="customBannerPreview"><span>Здесь появится ваш баннер</span></div><div class="custom-banner-upload-row"><label class="btn-main custom-banner-file-label">Выбрать изображение<input id="customBannerFile" type="file" accept="image/*" hidden></label><span id="customBannerFileName" class="custom-banner-file-name">Файл не выбран</span></div><div class="custom-banner-controls"><label>Пропорции<select id="customBannerAspect"><option value="3:1">3:1</option><option value="4:1">4:1</option><option value="16:5">16:5</option><option value="5:2">5:2</option></select></label><label>Приближение<input id="customBannerZoom" type="range" min="0.5" max="2.5" step="0.01" value="1"></label><label>По горизонтали<input id="customBannerX" type="range" min="0" max="100" step="1" value="50"></label><label>По вертикали<input id="customBannerY" type="range" min="0" max="100" step="1" value="50"></label></div><div class="custom-banner-actions"><button type="button" class="btn-main" id="customBannerSaveBtn" disabled>Сохранить баннер</button><button type="button" class="btn-ghost" id="customBannerCloseBtn">Закрыть</button></div></div></div>
+<div class="modal-overlay" id="customBannerModal"><div class="premium-modal-card custom-banner-modal"><div class="premium-modal-top"><div class="premium-modal-star">🖼️</div><div><div class="premium-modal-title">Свой баннер</div><div class="premium-modal-sub">Постоянная покупка · 5 ⭐ · баннер видят все игроки</div></div></div><div class="custom-banner-preview" id="customBannerPreview"><span>Здесь появится ваш баннер</span></div><div class="custom-banner-upload-row"><label class="btn-main custom-banner-file-label">Выбрать изображение<input id="customBannerFile" type="file" accept="image/*" hidden></label><span id="customBannerFileName" class="custom-banner-file-name">Файл не выбран</span></div><label class="custom-banner-name-label">Название баннера<input id="customBannerName" class="custom-banner-name-input" type="text" maxlength="32" placeholder="Например: Мой баннер"></label><div class="custom-banner-controls"><label>Приближение<input id="customBannerZoom" type="range" min="0.5" max="2.5" step="0.01" value="1"></label><label>По горизонтали<input id="customBannerX" type="range" min="0" max="100" step="1" value="50"></label><label>По вертикали<input id="customBannerY" type="range" min="0" max="100" step="1" value="50"></label></div><div class="custom-banner-actions"><button type="button" class="btn-main custom-banner-pay-btn" id="customBannerSaveBtn" disabled>Оплатить</button><button type="button" class="btn-ghost" id="customBannerCloseBtn">Закрыть</button></div></div></div>
 <div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub" id="premiumModalSub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>20</b> игр в «Орб-Рывке» каждые 12 часов</span></div><div class="premium-perk">💣 <span><b>20</b> игр в «Минах» каждые 12 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">🎒 <span><b>Безлимит</b> слотов инвентаря</span></div><div class="premium-perk">🖼️ <span>Premium-рамка, баннеры профиля и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="section-sub" style="margin-top:12px">Выберите срок Premium</div><div class="premium-duration" id="premiumSelfDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Выбрано</span><span class="premium-price-value" id="premiumSelfPrice">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="premiumGiftModal"><div class="premium-modal-card premium-gift-card"><div class="premium-modal-top"><div class="premium-modal-star">🎁</div><div><div class="premium-modal-title">Подарить Premium</div><div class="premium-modal-sub">Выберите игрока — поиск по нику, ID или Telegram username</div></div></div><div class="premium-gift-search"><input id="premiumGiftSearch" class="input" type="search" placeholder="Ник, @username или ID"><button type="button" class="btn-ghost" id="premiumGiftSearchBtn">Найти</button></div><div id="premiumGiftSelected" class="premium-gift-selected">Игрок не выбран</div><div id="premiumGiftResults" class="premium-gift-results"><div class="premium-gift-empty">Введите запрос для поиска игроков</div></div><div class="section-sub" style="margin-top:12px">Выберите срок подарка</div><div class="premium-duration" id="premiumGiftDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Подарок</span><span class="premium-price-value" id="premiumGiftPrice">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action premium-gift-pay" id="premiumGiftPayBtn" disabled>Подарить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumGiftCloseBtn">Назад</button></div></div>
 <div class="modal-overlay" id="spinModal">
@@ -10362,8 +10362,9 @@ function renderProfileCustomization(){
   const grid=document.getElementById('profileBannerGrid');
   if(grid){
     const labels={tidal_wave:'Tidal Wave',orbit:'ORBIT',nullscapes:'Nullscapes',grief:'Grief',unleashed:'Unleashed',slaughterhouse:'Slaughterhouse'};
-    const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||'';
-    grid.innerHTML='<button type="button" class="profile-banner-btn '+(bannerKey==='default'?'active':'')+'" data-profile-banner="default"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type="button" class="profile-banner-btn ${bannerKey===k?'active':''}" data-profile-banner="${k}" ${vipActive?'':'disabled'}><img src="${window.PROFILE_BANNERS[k]}" alt="" loading="eager" decoding="async"><span>${labels[k]||k}</span></button>`).join('')+`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open"><div class="custom-banner-card-preview" ${customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customOwned?'Свой баннер · Настроить':(window.isAdmin?'Свой баннер · Бесплатно':'Свой баннер · Создать')}</span></button>`;
+    const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||''; const customName=String(data?.profileCustomBannerName||'Свой баннер').slice(0,32);
+    const customCard=`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open"><div class="custom-banner-card-preview" ${customOwned&&customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customOwned?customName+' · Настроить':(window.isAdmin?'Свой баннер · Бесплатно':'Свой баннер · Создать')}</span></button>`;
+    grid.innerHTML='<button type="button" class="profile-banner-btn '+(bannerKey==='default'?'active':'')+'" data-profile-banner="default"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type="button" class="profile-banner-btn ${bannerKey===k?'active':''}" data-profile-banner="${k}" ${vipActive?'':'disabled'}><img src="${window.PROFILE_BANNERS[k]}" alt="" loading="eager" decoding="async"><span>${labels[k]||k}</span></button>`).join('')+customCard;
   }
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
 }
@@ -10378,6 +10379,7 @@ async function refreshProfileAppearanceFromServer(){
       if(u.profile_custom_banner!==undefined) data.profileCustomBanner=String(u.profile_custom_banner||'');
       if(u.profile_custom_banner_settings!==undefined) data.profileCustomBannerSettings=u.profile_custom_banner_settings||{};
       if(u.profile_custom_banner_owned!==undefined) data.profileCustomBannerOwned=!!u.profile_custom_banner_owned;
+      if(u.profile_custom_banner_name!==undefined) data.profileCustomBannerName=String(u.profile_custom_banner_name||'Свой баннер');
       if(u.profile_name_style!==undefined){
         const serverStyle=String(u.profile_name_style||'default');
         const localStyle=String(data.profileNameStyle||'default');
@@ -10419,25 +10421,24 @@ function openCustomBannerEditor(){
   const f=document.getElementById('customBannerFile'); if(f) f.value='';
   const n=document.getElementById('customBannerFileName'); if(n) n.textContent=customBannerImageData?'Сохранённый баннер':'Файл не выбран';
   const st=data.profileCustomBannerSettings||{};
-  ['aspect','zoom','x','y'].forEach(k=>{const el=document.getElementById('customBanner'+k.charAt(0).toUpperCase()+k.slice(1)); if(el&&st[k]!=null) el.value=st[k];});
+  ['zoom','x','y'].forEach(k=>{const el=document.getElementById('customBanner'+k.charAt(0).toUpperCase()+k.slice(1)); if(el&&st[k]!=null) el.value=st[k];});
+  const nameEl=document.getElementById('customBannerName'); if(nameEl) nameEl.value=String(data?.profileCustomBannerName||'Свой баннер');
   updateCustomBannerPreview(); openModal('customBannerModal');
 }
 function updateCustomBannerPreview(){
   const p=document.getElementById('customBannerPreview'); if(!p)return;
   const img=customBannerImageData||data?.profileCustomBanner||'';
   const zoom=Number(document.getElementById('customBannerZoom')?.value||1); const x=Number(document.getElementById('customBannerX')?.value||50); const y=Number(document.getElementById('customBannerY')?.value||50);
-  p.style.backgroundImage=img?`url(\"${img}\")`:''; p.style.backgroundSize=img?`${zoom*100}%`:''; p.style.backgroundPosition=`${x}% ${y}%`; p.classList.toggle('has-image',!!img);
-  const save=document.getElementById('customBannerSaveBtn'); if(save){ save.disabled=!img; save.textContent=(data?.profileCustomBannerOwned||window.isAdmin)?'Сохранить баннер':'Оплатить 5 ⭐ и сохранить'; }
+  p.innerHTML=img?`<img class="custom-banner-preview-image" src="${img}" alt="">`:'<span>Здесь появится ваш баннер</span>'; const im=p.querySelector('img'); if(im){im.style.transform=`translate(${(x-50)/2}%, ${(y-50)/2}%) scale(${zoom})`;} p.classList.toggle('has-image',!!img);
+  const save=document.getElementById('customBannerSaveBtn'); if(save){ save.disabled=!img; save.textContent=window.isAdmin?'Создать бесплатно':'Оплатить'; }
 }
 async function prepareCustomBanner(file){
   if(!file)return;
   if(file.size>8*1024*1024) throw new Error('Файл слишком большой. Максимум 8 МБ.');
   const src=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
   const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
-  const aspect=(document.getElementById('customBannerAspect')?.value||'3:1').split(':').map(Number); const target=aspect[0]/aspect[1];
-  let w=Math.min(img.naturalWidth,1800), h=Math.round(w/target); if(h>700){h=700;w=Math.round(h*target);}
-  const c=document.createElement('canvas'); c.width=Math.max(600,w); c.height=Math.max(200,h); const ctx=c.getContext('2d'); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-  const scale=Math.max(c.width/img.naturalWidth,c.height/img.naturalHeight); const dw=img.naturalWidth*scale, dh=img.naturalHeight*scale; ctx.drawImage(img,(c.width-dw)/2,(c.height-dh)/2,dw,dh);
+  const maxSide=1800; const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight)); const w=Math.max(1,Math.round(img.naturalWidth*scale)); const h=Math.max(1,Math.round(img.naturalHeight*scale));
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.drawImage(img,0,0,w,h);
   customBannerImageData=c.toDataURL('image/webp',0.82); updateCustomBannerPreview();
 }
 async function startCustomBannerPayment(){
@@ -10467,7 +10468,7 @@ async function startCustomBannerPayment(){
 }
 async function saveCustomBanner(){
   try{
-    const settings={aspect:document.getElementById('customBannerAspect')?.value||'3:1',zoom:Number(document.getElementById('customBannerZoom')?.value||1),x:Number(document.getElementById('customBannerX')?.value||50),y:Number(document.getElementById('customBannerY')?.value||50)};
+    const settings={zoom:Number(document.getElementById('customBannerZoom')?.value||1),x:Number(document.getElementById('customBannerX')?.value||50),y:Number(document.getElementById('customBannerY')?.value||50)}; const bannerName=String(document.getElementById('customBannerName')?.value||'Свой баннер').trim().slice(0,32); if(!bannerName) throw new Error('Введите название баннера');
     const image=customBannerImageData||data?.profileCustomBanner||''; if(!image) throw new Error('Сначала выберите изображение');
     if(!data?.profileCustomBannerOwned && !window.isAdmin){
       const b=document.getElementById('customBannerSaveBtn'); if(b){b.disabled=true;b.textContent='Создаём счёт…';}
@@ -10475,10 +10476,10 @@ async function saveCustomBanner(){
       return;
     }
     const b=document.getElementById('customBannerSaveBtn'); if(b){b.disabled=true;b.textContent='Сохраняем…';}
-    const j=await apiFetch('/api/profile/custom-banner/save',{image,settings});
-    data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerOwned=true; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast(window.isAdmin?'🖼️ Баннер создан бесплатно и доступен всем игрокам':'🖼️ Баннер сохранён и доступен всем игрокам','success');
+    const j=await apiFetch('/api/profile/custom-banner/save',{image,settings,name:bannerName});
+    data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerName=String(j.profile_custom_banner_name||bannerName); data.profileCustomBannerOwned=true; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast(window.isAdmin?'🖼️ Баннер создан бесплатно и доступен всем игрокам':'🖼️ Баннер сохранён и доступен всем игрокам','success');
   }catch(e){showToast('❌ '+e.message,'error');}
-  finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent=(data?.profileCustomBannerOwned||window.isAdmin)?'Сохранить баннер':'Оплатить 5 ⭐ и сохранить';}}
+  finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent='Оплатить';}}
 }
 
 async function setProfileBanner(key){
@@ -11243,7 +11244,7 @@ if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
 document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const custom=e.target.closest('[data-custom-banner-action]'); if(custom){openCustomBannerEditor();return;} const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
 document.getElementById('customBannerFile')?.addEventListener('change',async e=>{try{const f=e.target.files?.[0]; if(f){document.getElementById('customBannerFileName').textContent=f.name;await prepareCustomBanner(f);}}catch(err){showToast('❌ '+(err.message||'Не удалось обработать изображение'),'error');}});
-['customBannerAspect','customBannerZoom','customBannerX','customBannerY'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateCustomBannerPreview));
+['customBannerZoom','customBannerX','customBannerY','customBannerName'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateCustomBannerPreview));
 document.getElementById('customBannerSaveBtn')?.addEventListener('click',saveCustomBanner);
 document.getElementById('customBannerCloseBtn')?.addEventListener('click',()=>closeModal('customBannerModal'));
 document.getElementById('profileBannerPickerToggle')?.addEventListener('click',toggleProfileBannerPicker);
@@ -12961,3 +12962,18 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .custom-banner-actions .btn-ghost{background:#2a2927!important;color:#c9c7c2!important;border-color:#484643!important;}
 </style>
 
+<style id="gdplay-custom-banner-v49-ui">
+.custom-banner-preview{position:relative;background:#242321!important;border:1px solid rgba(227,184,114,.38)!important;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.custom-banner-preview-image{display:block;position:absolute;left:50%;top:50%;width:100%;height:100%;object-fit:cover;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;}
+.custom-banner-name-label{display:grid;gap:6px;margin:10px 0;font-size:10px;color:var(--muted);font-weight:700;}
+.custom-banner-name-input{width:100%;box-sizing:border-box;background:#2a2927!important;color:#e8e5df!important;border:1px solid #c79a51!important;border-radius:10px;padding:10px 11px;outline:none;}
+.custom-banner-name-input:focus{border-color:#e3b872!important;box-shadow:0 0 0 2px rgba(227,184,114,.12);}
+.custom-banner-controls input[type=range]{appearance:none;-webkit-appearance:none;height:8px;border-radius:99px;background:#2a2927!important;border:1px solid #b98a43!important;outline:none;padding:0;}
+.custom-banner-controls input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:#30302e;border:0;}
+.custom-banner-controls input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:#30302e;border:0;}
+.custom-banner-controls input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#e3b872;border:2px solid #f1cf8b;box-shadow:0 1px 5px rgba(0,0,0,.45);margin-top:-6px;cursor:pointer;}
+.custom-banner-controls input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#e3b872;border:2px solid #f1cf8b;box-shadow:0 1px 5px rgba(0,0,0,.45);cursor:pointer;}
+.custom-banner-pay-btn{min-height:44px!important;border-radius:12px!important;background:linear-gradient(135deg,#e5bb70,#b77d32)!important;color:#17120d!important;border:1px solid rgba(255,226,164,.7)!important;box-shadow:0 5px 18px rgba(183,125,50,.22),inset 0 1px 0 rgba(255,255,255,.16);font-weight:900!important;letter-spacing:.1px;}
+.custom-banner-pay-btn:not(:disabled):active{transform:translateY(1px);}
+.custom-banner-pay-btn:disabled{opacity:.48;filter:saturate(.55);}
+</style>
