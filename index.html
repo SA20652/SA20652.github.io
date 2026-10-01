@@ -10022,8 +10022,7 @@ async function renderLeaderboard(sortBy='cases'){
     if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
-      <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? 'has-profile-banner':''}" ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `style="--lb-banner:url('${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}')"` : ''}>
-        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-art" aria-hidden="true"><img class="lb-banner-side lb-banner-side-left" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-center" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-side lb-banner-side-right" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""></div>`:''}
+      <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''}">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
