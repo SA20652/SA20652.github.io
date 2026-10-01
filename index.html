@@ -10427,7 +10427,7 @@ function updateCustomBannerPreview(){
   const p=document.getElementById('customBannerPreview'); if(!p)return;
   const img=customBannerImageData||data?.profileCustomBanner||'';
   const zoom=Number(document.getElementById('customBannerZoom')?.value||1); const x=Number(document.getElementById('customBannerX')?.value||50); const y=Number(document.getElementById('customBannerY')?.value||50);
-  p.innerHTML=img?`<img class="custom-banner-preview-image" src="${img}" alt="">`:'<span>Здесь появится ваш баннер</span>'; const im=p.querySelector('img'); if(im){im.style.objectPosition=`${x}% ${y}%`; im.style.transform=`scale(${zoom})`; } p.classList.toggle('has-image',!!img);
+  p.innerHTML=img?`<img class="custom-banner-preview-image" src="${img}" alt="" draggable="false">`:'<span>Здесь появится ваш баннер</span>'; const im=p.querySelector('img'); if(im){im.style.objectPosition=`${x}% ${y}%`; im.style.transform=`translate3d(0,0,0) scale(${zoom})`; } p.classList.toggle('has-image',!!img);
   const save=document.getElementById('customBannerSaveBtn'); if(save){ save.disabled=!img; save.textContent=window.isAdmin?'Создать бесплатно':'Оплатить'; }
 }
 async function prepareCustomBanner(file){
@@ -12962,7 +12962,7 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 
 <style id="gdplay-custom-banner-v49-ui">
 .custom-banner-preview{position:relative;background:#242321!important;border:1px solid rgba(227,184,114,.38)!important;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.custom-banner-preview-image{display:block;position:absolute;left:50%;top:50%;width:auto;height:auto;min-width:100%;min-height:100%;max-width:none;max-height:none;object-fit:cover;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;}
+.custom-banner-preview-image{display:block;position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:none;object-fit:cover;object-position:50% 50%;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;}
 .custom-banner-controls input[type=range]{appearance:none;-webkit-appearance:none;height:8px;border-radius:99px;background:#2a2927!important;border:1px solid #b98a43!important;outline:none;padding:0;}
 .custom-banner-controls input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:#30302e;border:0;}
 .custom-banner-controls input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:#30302e;border:0;}
