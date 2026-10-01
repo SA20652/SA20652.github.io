@@ -4606,6 +4606,27 @@ body.gdplay-fast-scroll #inventoryList .inv-item{
 <script>
 window.getInitData = window.getInitData || function(){ return window.Telegram?.WebApp?.initData || window.__telegramInitData || ''; };
 </script>
+<style id="top-old-interface-only">
+/* Restore the older, simpler Top interface. Only the Top page is affected. */
+#page-top .top-tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin:10px 0 12px!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;}
+#page-top .top-tab{display:block!important;border:1px solid var(--line)!important;background:var(--bg-3)!important;color:var(--muted)!important;border-radius:9px!important;padding:9px 6px!important;font-size:10.5px!important;font-weight:700!important;letter-spacing:normal!important;box-shadow:none!important;}
+#page-top .top-tab.active{background:rgba(217,162,83,.14)!important;border-color:var(--brass)!important;color:var(--brass-2)!important;}
+#page-top .top-tab-icon{display:inline!important;font-size:15px!important;line-height:1!important;}
+#page-top .lb-item{display:flex!important;align-items:center!important;gap:11px!important;background:var(--bg-2)!important;border:1px solid var(--line)!important;border-radius:12px!important;padding:10px 13px!important;margin-bottom:8px!important;box-shadow:none!important;overflow:visible!important;position:static!important;}
+#page-top .lb-item.me{border-color:var(--brass)!important;background:rgba(201,151,77,.08)!important;}
+#page-top .lb-item:nth-child(1),#page-top .lb-item:nth-child(2),#page-top .lb-item:nth-child(3){border-color:var(--line)!important;}
+#page-top .lb-item:nth-child(1)::after{display:none!important;}
+#page-top .lb-rank{width:26px!important;text-align:center!important;font-weight:700!important;font-family:'IBM Plex Mono',monospace!important;color:var(--muted)!important;position:static!important;}
+#page-top .lb-item:nth-child(1) .lb-rank{color:#e3b872!important;font-size:17px!important;}
+#page-top .lb-item:nth-child(2) .lb-rank{color:#c9c4bb!important;font-size:15px!important;}
+#page-top .lb-item:nth-child(3) .lb-rank{color:#c98f5e!important;font-size:15px!important;}
+#page-top .lb-avatar{position:static!important;box-shadow:none!important;}
+#page-top .lb-user{position:static!important;font-family:inherit!important;font-weight:600!important;font-size:13.5px!important;}
+#page-top .lb-sub{position:static!important;font-size:10.5px!important;color:var(--muted)!important;}
+#page-top .lb-score{position:static!important;background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;font-family:'IBM Plex Mono',monospace!important;color:var(--brass-2)!important;font-size:13px!important;font-weight:600!important;}
+/* Remove only banner/promo blocks if one is ever rendered inside Top. Profile remains untouched. */
+#page-top .mackros-promo-banner,#page-top .promo-banner,#page-top .top-banner,#page-top .top-promo-banner{display:none!important;}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
