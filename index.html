@@ -10363,7 +10363,7 @@ function renderProfileCustomization(){
   if(grid){
     const labels={tidal_wave:'Tidal Wave',orbit:'ORBIT',nullscapes:'Nullscapes',grief:'Grief',unleashed:'Unleashed',slaughterhouse:'Slaughterhouse'};
     const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||'';
-    grid.innerHTML='<button type="button" class="profile-banner-btn '+(bannerKey==='default'?'active':'')+'" data-profile-banner="default"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type="button" class="profile-banner-btn ${bannerKey===k?'active':''}" data-profile-banner="${k}" ${vipActive?'':'disabled'}><img src="${window.PROFILE_BANNERS[k]}" alt="" loading="eager" decoding="async"><span>${labels[k]||k}</span></button>`).join('')+`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open"><div class="custom-banner-card-preview" ${customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customOwned?'Свой баннер · Настроить':'Свой баннер · 5 ⭐'}</span></button>`;
+    grid.innerHTML='<button type="button" class="profile-banner-btn '+(bannerKey==='default'?'active':'')+'" data-profile-banner="default"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type="button" class="profile-banner-btn ${bannerKey===k?'active':''}" data-profile-banner="${k}" ${vipActive?'':'disabled'}><img src="${window.PROFILE_BANNERS[k]}" alt="" loading="eager" decoding="async"><span>${labels[k]||k}</span></button>`).join('')+`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open"><div class="custom-banner-card-preview" ${customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customOwned?'Свой баннер · Настроить':(window.isAdmin?'Свой баннер · Бесплатно':'Свой баннер · Создать')}</span></button>`;
   }
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
 }
@@ -10415,8 +10415,7 @@ function isPremiumActive(){
 let customBannerImageData='';
 function openCustomBannerEditor(){
   const modal=document.getElementById('customBannerModal'); if(!modal) return;
-  if(!data?.profileCustomBannerOwned){ return startCustomBannerPayment(); }
-  customBannerImageData=data.profileCustomBanner||'';
+  customBannerImageData=data?.profileCustomBanner||'';
   const f=document.getElementById('customBannerFile'); if(f) f.value='';
   const n=document.getElementById('customBannerFileName'); if(n) n.textContent=customBannerImageData?'Сохранённый баннер':'Файл не выбран';
   const st=data.profileCustomBannerSettings||{};
@@ -10428,7 +10427,7 @@ function updateCustomBannerPreview(){
   const img=customBannerImageData||data?.profileCustomBanner||'';
   const zoom=Number(document.getElementById('customBannerZoom')?.value||1); const x=Number(document.getElementById('customBannerX')?.value||50); const y=Number(document.getElementById('customBannerY')?.value||50);
   p.style.backgroundImage=img?`url(\"${img}\")`:''; p.style.backgroundSize=img?`${zoom*100}%`:''; p.style.backgroundPosition=`${x}% ${y}%`; p.classList.toggle('has-image',!!img);
-  const save=document.getElementById('customBannerSaveBtn'); if(save) save.disabled=!img;
+  const save=document.getElementById('customBannerSaveBtn'); if(save){ save.disabled=!img; save.textContent=(data?.profileCustomBannerOwned||window.isAdmin)?'Сохранить баннер':'Оплатить 5 ⭐ и сохранить'; }
 }
 async function prepareCustomBanner(file){
   if(!file)return;
@@ -10445,11 +10444,22 @@ async function startCustomBannerPayment(){
   try{
     if(!window.Telegram?.WebApp?.openInvoice) throw new Error('Оплата доступна только внутри Telegram');
     const j=await apiFetch('/api/profile/custom-banner/create',{});
-    if(j.owned){data.profileCustomBannerOwned=true;persistLocal();openCustomBannerEditor();return;}
+    if(j.owned){
+      data.profileCustomBannerOwned=true; persistLocal();
+      await saveCustomBanner();
+      return;
+    }
     if(!j.invoice) throw new Error('Не удалось создать счёт');
-    Telegram.WebApp.openInvoice(j.invoice,status=>{
-      if(status==='paid'){showToast('🖼️ Покупка успешна! Свой баннер разблокирован за 5 ⭐','success');setTimeout(async()=>{await loadMe();openCustomBannerEditor();},350);}
-      else if(status==='failed') showToast('❌ Оплата не прошла','error');
+    Telegram.WebApp.openInvoice(j.invoice,async status=>{
+      if(status==='paid'){
+        showToast('🖼️ Покупка баннера успешна!','success');
+        try{
+          await loadMe();
+          data.profileCustomBannerOwned=true;
+          persistLocal();
+          await saveCustomBanner();
+        }catch(e){ showToast('⚠️ Оплата прошла, но баннер нужно сохранить ещё раз','error'); }
+      }else if(status==='failed') showToast('❌ Оплата не прошла','error');
       else if(status==='cancelled') showToast('Оплата отменена','error');
       else if(status==='pending') showToast('⏳ Платёж ещё обрабатывается','success');
     });
@@ -10459,11 +10469,16 @@ async function saveCustomBanner(){
   try{
     const settings={aspect:document.getElementById('customBannerAspect')?.value||'3:1',zoom:Number(document.getElementById('customBannerZoom')?.value||1),x:Number(document.getElementById('customBannerX')?.value||50),y:Number(document.getElementById('customBannerY')?.value||50)};
     const image=customBannerImageData||data?.profileCustomBanner||''; if(!image) throw new Error('Сначала выберите изображение');
+    if(!data?.profileCustomBannerOwned && !window.isAdmin){
+      const b=document.getElementById('customBannerSaveBtn'); if(b){b.disabled=true;b.textContent='Создаём счёт…';}
+      await startCustomBannerPayment();
+      return;
+    }
     const b=document.getElementById('customBannerSaveBtn'); if(b){b.disabled=true;b.textContent='Сохраняем…';}
     const j=await apiFetch('/api/profile/custom-banner/save',{image,settings});
-    data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerOwned=true; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast('🖼️ Баннер сохранён и доступен всем игрокам','success');
+    data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerOwned=true; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast(window.isAdmin?'🖼️ Баннер создан бесплатно и доступен всем игрокам':'🖼️ Баннер сохранён и доступен всем игрокам','success');
   }catch(e){showToast('❌ '+e.message,'error');}
-  finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent='Сохранить баннер';}}
+  finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent=(data?.profileCustomBannerOwned||window.isAdmin)?'Сохранить баннер':'Оплатить 5 ⭐ и сохранить';}}
 }
 
 async function setProfileBanner(key){
