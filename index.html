@@ -4657,6 +4657,25 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 .lb-item.has-profile-banner>div{position:relative;z-index:2;}
 .lb-item.has-profile-banner .lb-banner-strip{display:none!important;}
 </style>
+
+<style id="gdplay-v45-banner-fix">
+/* v45: seamless banner field in leaderboard */
+.lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--lb-banner) center/cover no-repeat;}
+.lb-item.has-profile-banner .lb-banner-art::before{content:"";position:absolute;inset:-45px;background:var(--lb-banner) center/cover no-repeat;filter:blur(28px) saturate(.78);transform:scale(1.18);opacity:.96;}
+.lb-item.has-profile-banner .lb-banner-side{position:absolute;top:-35px;width:72%;height:calc(100% + 70px);object-fit:cover;filter:blur(25px) saturate(.78);opacity:.94;transform:scale(1.18);}
+.lb-item.has-profile-banner .lb-banner-side-left{left:-20%;object-position:center;}
+.lb-item.has-profile-banner .lb-banner-side-right{right:-20%;object-position:center;}
+.lb-item.has-profile-banner .lb-banner-center{position:absolute;left:50%;top:50%;width:58%;height:118%;transform:translate(-50%,-50%);object-fit:cover;object-position:center;opacity:.98;filter:saturate(.96) contrast(1.02);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);}
+.lb-item.has-profile-banner .lb-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,17,16,.42),rgba(20,17,16,.08) 30%,rgba(20,17,16,.08) 70%,rgba(20,17,16,.42)),linear-gradient(180deg,rgba(20,17,16,.18),rgba(20,17,16,.56));pointer-events:none;}
+.lb-item.has-profile-banner::before,.lb-item.has-profile-banner::after{border-radius:0!important;box-shadow:none!important;}
+.lb-item.top-sort-battles.has-profile-banner .lb-banner-art::after{background:linear-gradient(90deg,rgba(20,17,16,.56),rgba(20,17,16,.12) 32%,rgba(20,17,16,.12) 68%,rgba(20,17,16,.56)),linear-gradient(180deg,rgba(20,17,16,.34),rgba(20,17,16,.68));}
+/* v45: public profile banner is a zoomed image, no circular decoration */
+.public-profile-head-v2.has-public-profile-banner{border-radius:12px!important;overflow:hidden!important;}
+.public-profile-head-v2.has-public-profile-banner::before,.public-profile-head-v2.has-public-profile-banner::after{display:none!important;content:none!important;border-radius:0!important;box-shadow:none!important;}
+.public-profile-banner-art{border-radius:0!important;overflow:hidden!important;}
+.public-profile-banner-sharp{width:135%!important;height:135%!important;transform:translate(-50%,-50%) scale(1.08)!important;object-fit:cover!important;border-radius:0!important;}
+.public-profile-banner-blur{inset:-45px!important;width:calc(100% + 90px)!important;height:calc(100% + 90px)!important;filter:blur(28px)!important;transform:scale(1.16)!important;border-radius:0!important;}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
