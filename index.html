@@ -576,6 +576,19 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .profile-avatar-wrap{position:relative;width:86px;height:86px;display:flex;align-items:center;justify-content:center;}
 .profile-avatar-wrap .profile-avatar{position:relative;z-index:2;}
 .profile-avatar-frame{position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:1;box-sizing:border-box;}
+.profile-avatar-frame.custom-frame,.public-profile-avatar-frame.custom-frame,.lb-avatar-frame.custom-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:108%;height:108%;border:0!important;border-radius:0!important;box-shadow:none!important;background-repeat:no-repeat;background-position:center;background-size:cover;pointer-events:none;z-index:9;display:block!important;}
+.lb-avatar-frame.custom-frame{width:108%;height:108%;}
+.custom-frame-editor{width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 28px);overflow:auto;background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:16px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.55);}
+.custom-frame-preview{width:180px;height:180px;margin:6px auto 14px;position:relative;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-3);border:1px solid var(--line);overflow:visible;}
+.custom-frame-preview-avatar{width:112px;height:112px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--brass-2),var(--brass-dim));display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;color:#1c1509;position:relative;z-index:2;}
+.custom-frame-preview-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.custom-frame-preview-art{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:124%;height:124%;background:center/cover no-repeat;z-index:5;pointer-events:none;}
+.custom-frame-ratios{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 12px;}
+.custom-frame-ratio{border:1px solid var(--line);background:var(--bg-3);color:var(--muted);border-radius:9px;padding:8px 4px;font-size:10px;font-weight:700;cursor:pointer;}
+.custom-frame-ratio.active{border-color:var(--brass);color:var(--brass-2);background:rgba(201,151,77,.1);}
+.custom-frame-control{margin:10px 0;}.custom-frame-control label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;}.custom-frame-control input[type=range]{width:100%;accent-color:var(--brass);}
+.custom-frame-note{font-size:10px;color:var(--muted);line-height:1.45;margin:7px 0 12px;}
+
 
 .profile-avatar-frame.frame-gold{border:3px solid #e3b872;box-shadow:inset 0 0 0 2px rgba(255,235,174,.18),0 0 14px rgba(227,184,114,.25);}
 .profile-avatar-frame.frame-premium{border:3px solid #E89A79;box-shadow:inset 0 0 0 2px rgba(232,154,121,.22),0 0 18px rgba(232,154,121,.42);}
@@ -4417,6 +4430,7 @@ body{overflow-x:hidden;}
     function start(){
       // Full local asset warm-up: this is deliberately independent of the
       // server. The splash is cosmetic; these catalogs are static files.
+      document.querySelectorAll('img').forEach(function(img){img.loading='eager';});
       scan(document);
       preloadCatalog('cube_icons.html?v=elite-cubes-v14-h1kara-embedded',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('case_images.html?v=immediate',/src=\"(data:image\/[^\"]+)\"/g);
@@ -5187,7 +5201,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
     <div class="page" id="page-profile">
       <div class="profile-head" id="myProfileHead">
         <div class="profile-banner-bg" id="profileBannerBg" aria-hidden="true" style="display:none"></div>
-        <div class="profile-avatar-wrap"><div class="profile-avatar" id="profileAvatar">?</div><div class="profile-avatar-frame" id="profileAvatarFrame" aria-hidden="true" style="display:none"></div></div>
+        <div class="profile-avatar-wrap"><div class="profile-avatar" id="profileAvatar">?</div><div class="profile-avatar-frame" id="profileAvatarFrame" aria-hidden="true" style="display:none"></div><div class="profile-avatar-frame custom-frame" id="profileCustomFrame" aria-hidden="true" style="display:none"></div></div>
         <div class="profile-head-info">
           <div class="profile-name" id="profileName">—</div>
           <div id="profileBadges" class="profile-badges"></div>
@@ -5216,7 +5230,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
           <button type="button" class="profile-style-btn" data-profile-frame="ghost"><span class="style-dot" style="color:#b8b8ff"></span>Призрачная</button>
           <button type="button" class="profile-style-btn" data-profile-frame="cyan"><span class="style-dot" style="color:#25e6e6"></span>Циан</button>
           <button type="button" class="profile-style-btn" data-profile-frame="sapphire"><span class="style-dot" style="color:#4d8dff"></span>Сапфир</button>
-          <button type="button" class="profile-style-btn" data-profile-frame="aurora"><span class="style-dot" style="color:#8cffd1"></span>Аврора</button>
+          <button type="button" class="profile-style-btn" data-profile-frame="aurora"><span class="style-dot" style="color:#8cffd1"></span>Аврора</button><button type="button" class="profile-style-btn" data-profile-frame="custom"><span class="style-dot" style="border-style:dashed;color:var(--brass-2)"></span>Своя · 5⭐</button>
           
         </div>
         
@@ -5238,11 +5252,12 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
           <button type="button" class="profile-style-btn" data-profile-name="aurora"><span style="background:linear-gradient(90deg,#54f7d2,#8d7bff);-webkit-background-clip:text;color:transparent">Aa</span>Аврора</button>
         </div>
       </div>
+      <div class="profile-customize" id="customFrameCard"><div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Своя рамка</div><div class="profile-customize-sub">Загрузка и настройка · 5 ⭐ · видна всем игрокам</div></div><button type="button" class="btn-ghost" id="customFrameOpenBtn">Настроить</button></div><div id="customFrameStatus" class="profile-customize-sub" style="margin-top:9px">Можно выбрать пропорции, приближение и положение изображения.</div></div>
       <div class="profile-customize profile-banner-picker" id="profileBannerPicker">
         <div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Баннер профиля</div><div class="profile-customize-sub">Доступно только при активном Premium</div></div><div style="display:flex;align-items:center;gap:7px"><span class="profile-badge premium">Premium</span><button type="button" class="btn-ghost profile-banner-picker-toggle" id="profileBannerPickerToggle">Свернуть</button></div></div>
         <div class="profile-banner-grid" id="profileBannerGrid"></div>
       </div>
-      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 12 часов · 💣 10 игр в «Минах» каждые 12 часов · x0.85 продажа · +10% удачи · ∞ слотов в инвентаре · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
+      <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 12 часов · 💣 10 игр в «Минах» каждые 12 часов · x0.85 продажа · +10% удачи · ∞ слотов в инвентаре · баннеры профиля · ускоренные кейсы.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
       <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>3 000 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+3 000 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div><div class="referral-stat"><b id="referralDaily">0/10</b><span>сегодня</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать ссылку</button><button type="button" class="btn" id="referralShareBtn">Поделиться ссылкой</button></div><div class="referral-milestones" id="referralMilestones"><div class="referral-milestone" data-m="10"><b>10</b><span>Циановая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="50"><b>50</b><span>Сапфировая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="100"><b>100</b><span>Аврора</span><em>🔒</em></div></div><div class="referral-people-title">👤 Перешли по твоей ссылке</div><div class="referral-people" id="referralPeople"><div class="referral-empty">Пока никто не перешёл</div></div></div>
       <div class="tip-card"><div class="tip-title">💡 Совет хранителя</div><div class="tip-text" id="dailyTip">Не спеши тратить монеты — иногда выгоднее накопить на следующий редкий кейс.</div></div>
       <div class="section-title" style="margin-top:15px">🏆 Лучшие дропы</div>
@@ -5398,7 +5413,8 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub" id="premiumModalSub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>20</b> игр в «Орб-Рывке» каждые 12 часов</span></div><div class="premium-perk">💣 <span><b>20</b> игр в «Минах» каждые 12 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">🎒 <span><b>Безлимит</b> слотов инвентаря</span></div><div class="premium-perk">🖼️ <span>Premium-рамка и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="section-sub" style="margin-top:12px">Выберите срок Premium</div><div class="premium-duration" id="premiumSelfDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Выбрано</span><span class="premium-price-value" id="premiumSelfPrice">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
+<div class="modal-overlay" id="customFrameModal"><div class="custom-frame-editor"><div class="premium-modal-top"><div class="premium-modal-star">🖼️</div><div><div class="premium-modal-title">Своя рамка</div><div class="premium-modal-sub">Настрой изображение перед сохранением. Стоимость сохранения — 5 ⭐.</div></div></div><input id="customFrameFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="width:100%;margin:8px 0"><div class="custom-frame-preview" id="customFramePreview"><div class="custom-frame-preview-avatar" id="customFramePreviewAvatar">?</div><div class="custom-frame-preview-art" id="customFramePreviewArt"></div></div><div class="section-sub">Пропорции</div><div class="custom-frame-ratios" id="customFrameRatios"><button type="button" class="custom-frame-ratio active" data-ratio="1:1">1:1</button><button type="button" class="custom-frame-ratio" data-ratio="4:5">4:5</button><button type="button" class="custom-frame-ratio" data-ratio="5:4">5:4</button><button type="button" class="custom-frame-ratio" data-ratio="16:9">16:9</button></div><div class="custom-frame-control"><label><span>Приближение</span><b id="customFrameZoomValue">100%</b></label><input id="customFrameZoom" type="range" min="100" max="220" value="100"></div><div class="custom-frame-control"><label><span>По горизонтали</span><b id="customFrameXValue">0%</b></label><input id="customFrameX" type="range" min="-50" max="50" value="0"></div><div class="custom-frame-control"><label><span>По вертикали</span><b id="customFrameYValue">0%</b></label><input id="customFrameY" type="range" min="-50" max="50" value="0"></div><div class="custom-frame-note">После сохранения рамка хранится на сервере. Её увидят на своих устройствах профиль, публичный профиль и Топ.</div><div style="display:flex;gap:8px"><button type="button" class="btn-ghost" id="customFrameCloseBtn" style="flex:1">Отмена</button><button type="button" class="btn-main" id="customFrameSaveBtn" style="flex:1">Сохранить · 5 ⭐</button></div></div></div>
+<div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub" id="premiumModalSub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>20</b> игр в «Орб-Рывке» каждые 12 часов</span></div><div class="premium-perk">💣 <span><b>20</b> игр в «Минах» каждые 12 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">🎒 <span><b>Безлимит</b> слотов инвентаря</span></div><div class="premium-perk">🖼️ <span>Premium-рамка, баннеры и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="section-sub" style="margin-top:12px">Выберите срок Premium</div><div class="premium-duration" id="premiumSelfDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Выбрано</span><span class="premium-price-value" id="premiumSelfPrice">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="premiumGiftModal"><div class="premium-modal-card premium-gift-card"><div class="premium-modal-top"><div class="premium-modal-star">🎁</div><div><div class="premium-modal-title">Подарить Premium</div><div class="premium-modal-sub">Выберите игрока — поиск по нику, ID или Telegram username</div></div></div><div class="premium-gift-search"><input id="premiumGiftSearch" class="input" type="search" placeholder="Ник, @username или ID"><button type="button" class="btn-ghost" id="premiumGiftSearchBtn">Найти</button></div><div id="premiumGiftSelected" class="premium-gift-selected">Игрок не выбран</div><div id="premiumGiftResults" class="premium-gift-results"><div class="premium-gift-empty">Введите запрос для поиска игроков</div></div><div class="section-sub" style="margin-top:12px">Выберите срок подарка</div><div class="premium-duration" id="premiumGiftDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Подарок</span><span class="premium-price-value" id="premiumGiftPrice">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action premium-gift-pay" id="premiumGiftPayBtn" disabled>Подарить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumGiftCloseBtn">Назад</button></div></div>
 <div class="modal-overlay" id="spinModal">
   <div class="spin-modal">
@@ -5902,7 +5918,7 @@ function newUserData(username){
     wins: 0,
     battle_winnings: 0,
     vault_balance: 0,
-    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileBanner: 'default', profileOwnedFrames: [],
+    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileBanner: 'default', profileOwnedFrames: [], customFrameImage: '', customFrameConfig: {ratio:'1:1',zoom:1,x:0,y:0},
     created: Date.now()
   };
 }
@@ -6166,7 +6182,7 @@ function applyServerState(u){
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
-  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_banner !== undefined && String(u.profile_banner||'default') !== String(data.profileBanner||'default')){ data.profileBanner = String(u.profile_banner||'default'); changed = true; } if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
+  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_banner !== undefined && String(u.profile_banner||'default') !== String(data.profileBanner||'default')){ data.profileBanner = String(u.profile_banner||'default'); changed = true; } if(u.custom_frame_image !== undefined && String(u.custom_frame_image||'') !== String(data.customFrameImage||'')){ data.customFrameImage=String(u.custom_frame_image||''); changed=true; } if(u.custom_frame_config!==undefined){ data.customFrameConfig=u.custom_frame_config||data.customFrameConfig||{ratio:'1:1',zoom:1,x:0,y:0}; changed=true; } if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
   if(Array.isArray(u.buffs) && JSON.stringify(u.buffs)!==JSON.stringify(data.buffs)){ data.buffs=u.buffs; changed=true; }
   if(Array.isArray(u.best_drops) && JSON.stringify(u.best_drops)!==JSON.stringify(data.bestDrops)){ data.bestDrops=u.best_drops; changed=true; }
   if(Array.isArray(u.notifications)){
@@ -10001,6 +10017,7 @@ async function renderLeaderboard(sortBy='cases'){
       profile_frame: r.profile_frame || r.profileFrame || '',
       profile_name_style: r.profile_name_style || r.profileNameStyle || 'default',
       profile_banner: r.profile_banner || r.profileBanner || 'default',
+      custom_frame_image: r.custom_frame_image || '', custom_frame_config: r.custom_frame_config || {},
       best_drops: r.best_drops || r.bestDrops || [],
       text_color: r.text_color || r.name_color || '',
       buffs: Array.isArray(r.buffs) ? r.buffs : [],
@@ -10014,7 +10031,7 @@ async function renderLeaderboard(sortBy='cases'){
       user_id:r.key, username:r.username, avatar:r.avatar, balance:r.balance,
       cases_opened:r.cases, cube_count:r.cube_count, battles:Number(r.battles||0),
       wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge, profile_name_style:r.profile_name_style || 'default', profile_banner:r.profile_banner || 'default',
-      tester_badge:r.tester_badge, custom_status:r.custom_status || {}, profile_frame:r.profile_frame || '', best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
+      tester_badge:r.tester_badge, custom_status:r.custom_status || {}, profile_frame:r.profile_frame || '', custom_frame_image:r.custom_frame_image||'', custom_frame_config:r.custom_frame_config||{}, best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
       profile_name_style:r.profile_name_style || 'default',
       buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
     }; });
@@ -10024,7 +10041,7 @@ async function renderLeaderboard(sortBy='cases'){
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''}">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
-        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
+        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const custom=(f==='custom'&&r.custom_frame_image)?`<span class="lb-avatar-frame custom-frame" style="background-image:url('${String(r.custom_frame_image).replace(/'/g,'%27')}');background-size:${Math.max(100,Number(r.custom_frame_config?.zoom||1)*100)}% auto;background-position:${50+Number(r.custom_frame_config?.x||0)}% ${50+Number(r.custom_frame_config?.y||0)}%;"></span>`:''; const ok=f && f!=='default' && f!=='custom'; return custom || (ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'');})()}</div>
         <div style="min-width:0;flex:1">
           <div class="lb-user name-${String(r.profile_name_style||'default').toLowerCase()}" style="${r.text_color?`color:${String(r.text_color).replace(/"/g,'&quot;')};`:''}">${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
@@ -10170,12 +10187,13 @@ async function openPublicProfile(userId, seed={}){
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
   const publicFrame = String(p.profile_frame||'').toLowerCase();
+  const customFrameImage=String(p.custom_frame_image||''); const customFrameConfig=p.custom_frame_config||{};
   let publicBanner=String(p.profile_banner||'default').toLowerCase();
   const seedBanner=String(cached.profile_banner||seed.profile_banner||'default').toLowerCase();
   if(publicBanner==='default' && seedBanner!=='default' && p.premium_until && new Date(p.premium_until).getTime()>Date.now() && (window.PROFILE_BANNERS||{})[seedBanner]) publicBanner=seedBanner;
   const publicBannerSrc=(window.PROFILE_BANNERS||{})[publicBanner];
   const publicBannerStyle=(publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now())?`--public-banner:url(\"${publicBannerSrc}\");` : '';
-  const publicFrameHtml = publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '';
+  const publicFrameHtml = publicFrame==='custom'&&customFrameImage ? `<span class="public-profile-avatar-frame custom-frame" style="background-image:url('${customFrameImage.replace(/'/g,'%27')}');background-size:${Math.max(100,Number(customFrameConfig.zoom||1)*100)}% auto;background-position:${50+Number(customFrameConfig.x||0)}% ${50+Number(customFrameConfig.y||0)}%;"></span>` : (publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '');
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2 ${publicBannerStyle?'has-public-profile-banner':''}" style="${publicBannerStyle}">
       ${publicBannerStyle?`<div class="public-profile-banner-art" aria-hidden="true"><img class="public-profile-banner-blur" src="${publicBannerSrc}" alt=""><img class="public-profile-banner-sharp" src="${publicBannerSrc}" alt=""></div>`:''}
@@ -10303,12 +10321,8 @@ function renderProfileCustomization(){
   if(customize){
     let collapsed=true;
     try{
-      const marker='gdplay_profile_customize_default_collapsed_v43';
-      if(localStorage.getItem(marker)!=='1'){
-        localStorage.setItem('gdplay_profile_customize_collapsed','1');
-        localStorage.setItem(marker,'1');
-      }
-      collapsed=localStorage.getItem('gdplay_profile_customize_collapsed')!=='0';
+      const saved=localStorage.getItem('gdplay_profile_customize_collapsed');
+      collapsed=saved===null ? true : saved==='1';
     }catch(_){}
     setProfileCustomizeCollapsed(collapsed);
   }
@@ -10325,6 +10339,24 @@ function renderProfileCustomization(){
     if(selectedFrameOk) frame.classList.add('frame-'+selected);
     frame.style.display=selectedFrameOk?'block':'none';
   }
+  const customSrc=String(data?.customFrameImage||'');
+  if(customSrc && window.gdplayWarmImageSrc) window.gdplayWarmImageSrc(customSrc);
+  const customFrame=document.getElementById('profileCustomFrame');
+  if(customFrame){
+    const src=String(data?.customFrameImage||'');
+    const cfg=data?.customFrameConfig||{};
+    const ratio=String(cfg.ratio||'1:1'); const parts=ratio.split(':').map(Number);
+    const rw=parts[0]||1, rh=parts[1]||1; const base=86;
+    customFrame.className='profile-avatar-frame custom-frame';
+    customFrame.style.display=(selected==='custom'&&src)?'block':'none';
+    customFrame.style.backgroundImage=(selected==='custom'&&src)?`url("${src}")`:'';
+    customFrame.style.width=(base*Math.max(1,rw/rh)*1.08)+'px';
+    customFrame.style.height=(base*Math.max(1,rh/rw)*1.08)+'px';
+    customFrame.style.backgroundSize=Math.max(100,Number(cfg.zoom||1)*100)+'% auto';
+    customFrame.style.backgroundPosition=(50+Number(cfg.x||0))+'% '+(50+Number(cfg.y||0))+'%';
+  }
+  const customBtn=document.querySelector('[data-profile-frame=custom]');
+  if(customBtn){ customBtn.classList.toggle('active',selected==='custom'); customBtn.disabled=!data.customFrameImage; customBtn.title=data.customFrameImage?'Своя рамка':'Сначала настрой свою рамку'; }
   if(name){
     name.className='profile-name';
     if(nameStyle!=='default') name.classList.add(nameStyle+'-name');
@@ -10372,6 +10404,8 @@ async function refreshProfileAppearanceFromServer(){
     if(u){
       if(u.profile_frame!==undefined) data.profileFrame=String(u.profile_frame||'default');
       if(u.profile_banner!==undefined) data.profileBanner=String(u.profile_banner||'default');
+      if(u.custom_frame_image!==undefined) data.customFrameImage=String(u.custom_frame_image||'');
+      if(u.custom_frame_config!==undefined) data.customFrameConfig=u.custom_frame_config||data.customFrameConfig||{ratio:'1:1',zoom:1,x:0,y:0};
       if(u.profile_name_style!==undefined){
         const serverStyle=String(u.profile_name_style||'default');
         const localStyle=String(data.profileNameStyle||'default');
@@ -10384,6 +10418,41 @@ async function refreshProfileAppearanceFromServer(){
       renderProfileCustomization();
     }
   }catch(e){ /* сохранение уже выполнено сервером; повторная проверка необязательна */ }
+}
+let customFrameDraft={ratio:'1:1',zoom:1,x:0,y:0,image:''};
+function updateCustomFramePreview(){
+  const art=document.getElementById('customFramePreviewArt'); if(!art)return;
+  const z=Math.max(1,Number(customFrameDraft.zoom||1));
+  art.style.backgroundImage=customFrameDraft.image?`url("${customFrameDraft.image}")`:'';
+  art.style.backgroundSize=(z*100)+'% auto';
+  art.style.backgroundPosition=(50+Number(customFrameDraft.x||0))+'% '+(50+Number(customFrameDraft.y||0))+'%';
+  const parts=String(customFrameDraft.ratio||'1:1').split(':').map(Number); const rw=parts[0]||1,rh=parts[1]||1;
+  art.style.width=(124*Math.max(1,rw/rh))+'%'; art.style.height=(124*Math.max(1,rh/rw))+'%';
+  document.querySelectorAll('.custom-frame-ratio').forEach(b=>b.classList.toggle('active',b.dataset.ratio===customFrameDraft.ratio));
+  const zv=document.getElementById('customFrameZoomValue'); if(zv)zv.textContent=Math.round(z*100)+'%';
+  const xv=document.getElementById('customFrameXValue'); if(xv)xv.textContent=Math.round(Number(customFrameDraft.x||0))+'%';
+  const yv=document.getElementById('customFrameYValue'); if(yv)yv.textContent=Math.round(Number(customFrameDraft.y||0))+'%';
+}
+function openCustomFrameEditor(){
+  const modal=document.getElementById('customFrameModal'); if(!modal)return;
+  const cfg=data?.customFrameConfig||{};
+  customFrameDraft={ratio:String(cfg.ratio||'1:1'),zoom:Number(cfg.zoom||1),x:Number(cfg.x||0),y:Number(cfg.y||0),image:String(data?.customFrameImage||'')};
+  const file=document.getElementById('customFrameFile'); if(file)file.value='';
+  const z=document.getElementById('customFrameZoom'); if(z)z.value=Math.round(customFrameDraft.zoom*100);
+  const x=document.getElementById('customFrameX'); if(x)x.value=customFrameDraft.x;
+  const y=document.getElementById('customFrameY'); if(y)y.value=customFrameDraft.y;
+  modal.classList.add('open'); updateCustomFramePreview();
+}
+function closeCustomFrameEditor(){document.getElementById('customFrameModal')?.classList.remove('open');}
+async function saveCustomFrame(){
+  if(!customFrameDraft.image){showToast('Выбери изображение для рамки','error');return;}
+  const btn=document.getElementById('customFrameSaveBtn'); if(btn){btn.disabled=true;btn.textContent='Сохраняем…';}
+  try{
+    const j=await apiFetch('/api/profile/custom-frame',{image_data:customFrameDraft.image,config:{ratio:customFrameDraft.ratio,zoom:customFrameDraft.zoom,x:customFrameDraft.x,y:customFrameDraft.y}});
+    data.customFrameImage=String(j.custom_frame_image||''); data.customFrameConfig=j.custom_frame_config||customFrameDraft; data.profileFrame='custom';
+    data.stars=Number(j.stars??data.stars??0); persistLocal(); renderProfileCustomization(); renderProfile(); closeCustomFrameEditor(); showToast('Своя рамка сохранена · списано 5 ⭐','success');
+  }catch(e){showToast(e.message||'Не удалось сохранить рамку','error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Сохранить · 5 ⭐';}}
 }
 async function setProfileFrame(key){
   const info=profileFrameUnlock(key);
@@ -11165,6 +11234,14 @@ if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
 }
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
+document.getElementById('customFrameOpenBtn')?.addEventListener('click',openCustomFrameEditor);
+document.getElementById('customFrameCloseBtn')?.addEventListener('click',closeCustomFrameEditor);
+document.getElementById('customFrameSaveBtn')?.addEventListener('click',saveCustomFrame);
+document.getElementById('customFrameRatios')?.addEventListener('click',e=>{const b=e.target.closest('[data-ratio]');if(!b)return;customFrameDraft.ratio=b.dataset.ratio;updateCustomFramePreview();});
+document.getElementById('customFrameZoom')?.addEventListener('input',e=>{customFrameDraft.zoom=Number(e.target.value)/100;updateCustomFramePreview();});
+document.getElementById('customFrameX')?.addEventListener('input',e=>{customFrameDraft.x=Number(e.target.value);updateCustomFramePreview();});
+document.getElementById('customFrameY')?.addEventListener('input',e=>{customFrameDraft.y=Number(e.target.value);updateCustomFramePreview();});
+document.getElementById('customFrameFile')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>6*1024*1024){showToast('Файл слишком большой','error');e.target.value='';return;}const rd=new FileReader();rd.onload=()=>{customFrameDraft.image=String(rd.result||'');updateCustomFramePreview();};rd.readAsDataURL(f);});
 document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
 document.getElementById('profileBannerPickerToggle')?.addEventListener('click',toggleProfileBannerPicker);
 document.getElementById('profileCustomizeToggle')?.addEventListener('click',toggleProfileCustomize);
