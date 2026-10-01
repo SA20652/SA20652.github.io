@@ -10427,7 +10427,7 @@ function updateCustomBannerPreview(){
   const p=document.getElementById('customBannerPreview'); if(!p)return;
   const img=customBannerImageData||data?.profileCustomBanner||'';
   const zoom=Number(document.getElementById('customBannerZoom')?.value||1); const x=Number(document.getElementById('customBannerX')?.value||50); const y=Number(document.getElementById('customBannerY')?.value||50);
-  p.innerHTML=img?`<img class="custom-banner-preview-image" src="${img}" alt="" draggable="false">`:'<span>Здесь появится ваш баннер</span>'; const im=p.querySelector('img'); if(im){im.style.objectPosition=`${x}% ${y}%`; im.style.transform=`translate3d(0,0,0) scale(${zoom})`; } p.classList.toggle('has-image',!!img);
+  p.innerHTML=img?`<img class="custom-banner-preview-image" src="${img}" alt="" draggable="false">`:'<span>Здесь появится ваш баннер</span>'; const im=p.querySelector('img'); if(im){ const dx=(x-50)*1.5; const dy=(y-50)*1.5; im.style.objectPosition='50% 50%'; im.style.transform=`translate3d(${dx}%,${dy}%,0) scale(${zoom})`; } p.classList.toggle('has-image',!!img);
   const save=document.getElementById('customBannerSaveBtn'); if(save){ save.disabled=!img; save.textContent=window.isAdmin?'Создать бесплатно':'Оплатить'; }
 }
 async function prepareCustomBanner(file){
