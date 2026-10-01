@@ -4633,11 +4633,6 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 .profile-banner-picker.is-collapsed .profile-banner-grid{display:none;}
 .profile-customize.is-collapsed #profileFrameGrid,.profile-customize.is-collapsed #profileNameGrid{display:none;}
 .profile-customize-toggle,.profile-banner-picker-toggle{font-size:10px;padding:5px 8px;line-height:1;white-space:nowrap;}
-.lb-banner-strip{position:absolute;inset:0;z-index:0;overflow:hidden;border-radius:12px;pointer-events:none;background-image:var(--lb-banner);background-position:center;background-size:cover;filter:blur(16px);transform:scale(1.045);opacity:.58;}
-.lb-banner-strip::before{content:"";position:absolute;inset:0;background-image:var(--lb-banner);background-position:center;background-size:auto 100%;background-repeat:no-repeat;filter:none;opacity:1;}
-.lb-banner-strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,12,9,.78),rgba(15,12,9,.24),rgba(15,12,9,.78));}
-.lb-item.has-profile-banner{overflow:hidden;}
-.lb-item.has-profile-banner .lb-rank,.lb-item.has-profile-banner .lb-avatar,.lb-item.has-profile-banner>div:nth-child(3),.lb-item.has-profile-banner>.lb-score{position:relative;z-index:2;}
 .profile-head-info,.profile-avatar-wrap{position:relative;z-index:2;}
 .profile-banner-picker{margin-top:12px;}
 .profile-banner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px;}
@@ -4650,32 +4645,9 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 @media(max-width:380px){.profile-banner-grid{grid-template-columns:1fr;}}
 </style>
 
-<style id="gdplay-banner-top-v41">
-.lb-item.has-profile-banner{position:relative;overflow:hidden;background-image:linear-gradient(90deg,rgba(15,12,9,.62),rgba(15,12,9,.18),rgba(15,12,9,.62)),var(--lb-banner);background-size:100% 100%,auto 100%;background-position:center,center;background-repeat:no-repeat;}
-.lb-item.has-profile-banner::before{content:"";position:absolute;inset:-22px;z-index:0;pointer-events:none;background-image:var(--lb-banner);background-size:cover;background-position:center;background-repeat:no-repeat;filter:blur(20px);opacity:.72;transform:scale(1.06);}
-.lb-item.has-profile-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(15,12,9,.70),rgba(15,12,9,.20),rgba(15,12,9,.70)),linear-gradient(0deg,rgba(15,12,9,.55),rgba(15,12,9,.10));}
-.lb-item.has-profile-banner>div{position:relative;z-index:2;}
-.lb-item.has-profile-banner .lb-banner-strip{display:none!important;}
-</style>
+<style id="gdplay-banner-top-disabled">/* Profile banners are intentionally disabled in leaderboard cards. */</style>
 
-<style id="gdplay-v45-banner-fix">
-/* v45: seamless banner field in leaderboard */
-.lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--lb-banner) center/cover no-repeat;}
-.lb-item.has-profile-banner .lb-banner-art::before{content:"";position:absolute;inset:-45px;background:var(--lb-banner) center/cover no-repeat;filter:blur(28px) saturate(.78);transform:scale(1.18);opacity:.96;}
-.lb-item.has-profile-banner .lb-banner-side{position:absolute;top:-35px;width:72%;height:calc(100% + 70px);object-fit:cover;filter:blur(25px) saturate(.78);opacity:.94;transform:scale(1.18);}
-.lb-item.has-profile-banner .lb-banner-side-left{left:-20%;object-position:center;}
-.lb-item.has-profile-banner .lb-banner-side-right{right:-20%;object-position:center;}
-.lb-item.has-profile-banner .lb-banner-center{position:absolute;left:50%;top:50%;width:58%;height:118%;transform:translate(-50%,-50%);object-fit:cover;object-position:center;opacity:.98;filter:saturate(.96) contrast(1.02);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);}
-.lb-item.has-profile-banner .lb-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,17,16,.42),rgba(20,17,16,.08) 30%,rgba(20,17,16,.08) 70%,rgba(20,17,16,.42)),linear-gradient(180deg,rgba(20,17,16,.18),rgba(20,17,16,.56));pointer-events:none;}
-.lb-item.has-profile-banner::before,.lb-item.has-profile-banner::after{border-radius:0!important;box-shadow:none!important;}
-.lb-item.top-sort-battles.has-profile-banner .lb-banner-art::after{background:linear-gradient(90deg,rgba(20,17,16,.56),rgba(20,17,16,.12) 32%,rgba(20,17,16,.12) 68%,rgba(20,17,16,.56)),linear-gradient(180deg,rgba(20,17,16,.34),rgba(20,17,16,.68));}
-/* v45: public profile banner is a zoomed image, no circular decoration */
-.public-profile-head-v2.has-public-profile-banner{border-radius:12px!important;overflow:hidden!important;}
-.public-profile-head-v2.has-public-profile-banner::before,.public-profile-head-v2.has-public-profile-banner::after{display:none!important;content:none!important;border-radius:0!important;box-shadow:none!important;}
-.public-profile-banner-art{border-radius:0!important;overflow:hidden!important;}
-.public-profile-banner-sharp{width:135%!important;height:135%!important;transform:translate(-50%,-50%) scale(1.08)!important;object-fit:cover!important;border-radius:0!important;}
-.public-profile-banner-blur{inset:-45px!important;width:calc(100% + 90px)!important;height:calc(100% + 90px)!important;filter:blur(28px)!important;transform:scale(1.16)!important;border-radius:0!important;}
-</style>
+
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -10022,8 +9994,7 @@ async function renderLeaderboard(sortBy='cases'){
     if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
-      <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? 'has-profile-banner':''}" ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `style="--lb-banner:url('${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}')"` : ''}>
-        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-art" aria-hidden="true"><img class="lb-banner-side lb-banner-side-left" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-center" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-side lb-banner-side-right" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""></div>`:''}
+      <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''}>
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
@@ -12835,21 +12806,18 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 
 <style id="gdplay-banner-final-v44">
 /* Top banner: the ENTIRE card is filled. The center is sharp; both sides are copies of the same banner, blurred and softly blended into the card. */
-.lb-item.has-profile-banner{isolation:isolate;position:relative;overflow:hidden;background:var(--bg-2)!important;}
-.lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--lb-banner) center/cover no-repeat;}
-.lb-item.has-profile-banner .lb-banner-art::before{content:"";position:absolute;inset:-34px;background:var(--lb-banner) center/cover no-repeat;filter:blur(22px);transform:scale(1.16);opacity:.92;}
-.lb-item.has-profile-banner .lb-banner-side{position:absolute;top:-18px;width:55%;height:calc(100% + 36px);object-fit:cover;filter:blur(17px) saturate(.82);opacity:.88;transform:scale(1.13);}
-.lb-item.has-profile-banner .lb-banner-side-left{left:-8%;object-position:center;}
-.lb-item.has-profile-banner .lb-banner-side-right{right:-8%;object-position:center;}
-.lb-item.has-profile-banner .lb-banner-center{position:absolute;left:50%;top:50%;height:108%;width:48%;transform:translate(-50%,-50%) scale(1.04);object-fit:cover;object-position:center;opacity:.98;filter:saturate(.94) contrast(1.05);}
-.lb-item.has-profile-banner .lb-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,17,16,.38) 0%,rgba(20,17,16,.10) 15%,rgba(20,17,16,.02) 32%,rgba(20,17,16,.02) 68%,rgba(20,17,16,.10) 85%,rgba(20,17,16,.38) 100%),linear-gradient(180deg,rgba(20,17,16,.20),rgba(20,17,16,.56));}
-.lb-item.has-profile-banner::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(20,17,16,.46),rgba(20,17,16,.06) 34%,rgba(20,17,16,.06) 66%,rgba(20,17,16,.46));}
-.lb-item.has-profile-banner::after{display:none!important;content:none!important;background:none!important;border-radius:0!important;box-shadow:none!important;}
-.lb-item.has-profile-banner>div:not(.lb-banner-art){position:relative;z-index:2;}
-.lb-item.has-profile-banner .lb-banner-strip{display:none!important;}
+
+
+
+
+
+
+
+
+
+
 /* Battles tab is deliberately darker so the banner never washes out the card. */
-.lb-item.top-sort-battles.has-profile-banner .lb-banner-art::after{background:linear-gradient(90deg,rgba(20,17,16,.54),rgba(20,17,16,.12) 20%,rgba(20,17,16,.05) 50%,rgba(20,17,16,.12) 80%,rgba(20,17,16,.54)),linear-gradient(180deg,rgba(20,17,16,.30),rgba(20,17,16,.64));}
-.lb-item.top-sort-battles.has-profile-banner::before{background:linear-gradient(90deg,rgba(20,17,16,.58),rgba(20,17,16,.10) 38%,rgba(20,17,16,.10) 62%,rgba(20,17,16,.58));}
+
 
 /* Public profile opened from Top: zoom the banner itself, with no circular decoration. */
 
