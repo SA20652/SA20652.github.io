@@ -4130,7 +4130,7 @@ body{overflow-x:hidden;}
 <script id="gdplay-profile-banner-loader">
 (function(){
   window.PROFILE_BANNERS = window.PROFILE_BANNERS || {};
-  window.profileBannersReady = fetch('./profile_banners.html?v=profile-banners-v41',{cache:'no-store'})
+  window.profileBannersReady = fetch('./profile_banners.html?v=profile-banners-v43',{cache:'no-store'})
     .then(function(r){if(!r.ok)throw new Error('profile_banners.html '+r.status);return r.text();})
     .then(function(src){
       var m=src.match(/const\s+PROFILE_BANNERS\s*=\s*(\{[\s\S]*?\})\s*;/);
@@ -10004,7 +10004,7 @@ async function renderLeaderboard(sortBy='cases'){
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? 'has-profile-banner':''}" ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `style="--lb-banner:url('${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}')"` : ''}>
-        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-art"><img class="lb-banner-blur" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt="" aria-hidden="true"><img class="lb-banner-sharp" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt="" aria-hidden="true"></div>`:''}
+        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-art" aria-hidden="true"><img class="lb-banner-side lb-banner-side-left" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-center" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-side lb-banner-side-right" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""></div>`:''}
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
@@ -10104,7 +10104,7 @@ async function openPublicProfile(userId, seed={}){
   const paths=['/api/profile/view','/api/profile/get','/api/user/profile'];
   if(tgInitData()) for(const path of paths){
     try{
-      const j=await apiFetch(path,{user_id:Number(userId)});
+      const j=await apiFetch(path,{user_id:String(userId)});
       const remote=j && (j.user||j.profile);
       if(remote){
         p={...p,...Object.fromEntries(Object.entries(remote).filter(([,v])=>v!==undefined&&v!==null))};
@@ -10285,7 +10285,7 @@ function renderProfileCustomization(){
   if(customize){
     let collapsed=true;
     try{
-      const marker='gdplay_profile_customize_default_collapsed_v42';
+      const marker='gdplay_profile_customize_default_collapsed_v43';
       if(localStorage.getItem(marker)!=='1'){
         localStorage.setItem('gdplay_profile_customize_collapsed','1');
         localStorage.setItem(marker,'1');
@@ -12814,24 +12814,28 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 })();
 </script>
 
-<style id="gdplay-banner-final-v42">
-/* Premium profile banners: real image layers, no CSS data-URI background dependency. */
-.lb-item.has-profile-banner{isolation:isolate;background:linear-gradient(180deg,#211b17,#191512)!important;}
+<style id="gdplay-banner-final-v43">
+/* Top: one sharp banner in the center + two blurred copies on the sides. */
+.lb-item.has-profile-banner{isolation:isolate;position:relative;overflow:hidden;background:var(--bg-2)!important;}
 .lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.lb-item.has-profile-banner .lb-banner-blur{position:absolute;inset:-18px;width:calc(100% + 36px);height:calc(100% + 36px);object-fit:cover;filter:blur(22px);transform:scale(1.04);opacity:.48;}
-.lb-item.has-profile-banner .lb-banner-sharp{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 7%,#000 18%,#000 82%,rgba(0,0,0,.35) 93%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 7%,#000 18%,#000 82%,rgba(0,0,0,.35) 93%,transparent 100%);opacity:.88;}
-.lb-item.has-profile-banner::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(15,12,9,.78) 0%,rgba(15,12,9,.30) 22%,rgba(15,12,9,.18) 50%,rgba(15,12,9,.30) 78%,rgba(15,12,9,.78) 100%),linear-gradient(180deg,rgba(15,12,9,.28),rgba(15,12,9,.64));}
-.lb-item.has-profile-banner::after{content:"";position:absolute;inset:0;z-index:1;width:auto;height:auto;right:auto;top:auto;border-radius:0;background:linear-gradient(90deg,transparent 0%,rgba(15,12,9,.06) 50%,transparent 100%)!important;pointer-events:none;}
+.lb-item.has-profile-banner .lb-banner-side{position:absolute;top:-14px;width:54%;height:calc(100% + 28px);object-fit:cover;filter:blur(15px);opacity:.62;transform:scale(1.08);}
+.lb-item.has-profile-banner .lb-banner-side-left{left:-9%;object-position:center;}
+.lb-item.has-profile-banner .lb-banner-side-right{right:-9%;object-position:center;}
+.lb-item.has-profile-banner .lb-banner-center{position:absolute;left:50%;top:0;height:100%;width:68%;transform:translateX(-50%);object-fit:cover;object-position:center;opacity:.96;filter:saturate(.92) contrast(1.04);}
+.lb-item.has-profile-banner .lb-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg-2) 0%,rgba(20,17,16,.72) 7%,rgba(20,17,16,0) 22%,rgba(20,17,16,0) 78%,rgba(20,17,16,.72) 93%,var(--bg-2) 100%),linear-gradient(180deg,rgba(20,17,16,.16),rgba(20,17,16,.54));}
+.lb-item.has-profile-banner::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(20,17,16,.60),rgba(20,17,16,.08) 35%,rgba(20,17,16,.08) 65%,rgba(20,17,16,.60));}
+.lb-item.has-profile-banner::after{display:none!important;content:none!important;background:none!important;border-radius:0!important;}
 .lb-item.has-profile-banner>div:not(.lb-banner-art){position:relative;z-index:2;}
 .lb-item.has-profile-banner .lb-banner-strip{display:none!important;}
-/* Remove the medal-circle decoration from banner cards, including the Battle/Winnings tab. */
-.lb-item.has-profile-banner:nth-child(1)::after{width:auto;height:auto;right:auto;top:auto;border-radius:0;background:linear-gradient(90deg,transparent,rgba(15,12,9,.06),transparent)!important;}
 
-.public-profile-head-v2.has-public-profile-banner{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(180deg,#211b17,#191512)!important;}
+/* Public profile opened from Top: zoom the banner itself, with no circular decoration. */
+.public-profile-head-v2.has-public-profile-banner{position:relative;isolation:isolate;overflow:hidden;background:var(--bg-3)!important;}
 .public-profile-head-v2.has-public-profile-banner .profile-banner-bg{display:none!important;}
-.public-profile-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.public-profile-banner-blur{position:absolute;inset:-18px;width:calc(100% + 36px);height:calc(100% + 36px);object-fit:cover;filter:blur(20px);transform:scale(1.04);opacity:.42;}
-.public-profile-banner-sharp{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:.9;mask-image:linear-gradient(90deg,transparent 0%,#000 16%,#000 84%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 16%,#000 84%,transparent 100%);}
-.public-profile-head-v2.has-public-profile-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(15,12,9,.78),rgba(15,12,9,.28) 35%,rgba(15,12,9,.24) 65%,rgba(15,12,9,.78)),linear-gradient(180deg,rgba(15,12,9,.28),rgba(15,12,9,.64));}
+.public-profile-head-v2.has-public-profile-banner::before,
+.public-profile-head-v2.has-public-profile-banner::after{display:none!important;content:none!important;background:none!important;border-radius:0!important;}
+.public-profile-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--bg-3);}
+.public-profile-banner-blur{position:absolute;inset:-30px;width:calc(100% + 60px);height:calc(100% + 60px);object-fit:cover;filter:blur(24px);transform:scale(1.10);opacity:.34;}
+.public-profile-banner-sharp{position:absolute;left:50%;top:50%;width:118%;height:118%;transform:translate(-50%,-50%) scale(1.18);object-fit:cover;object-position:center;opacity:.88;filter:saturate(.94) contrast(1.03);}
+.public-profile-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,17,16,.64),rgba(20,17,16,.16) 32%,rgba(20,17,16,.16) 68%,rgba(20,17,16,.64)),linear-gradient(180deg,rgba(20,17,16,.18),rgba(20,17,16,.58));}
 .public-profile-head-v2.has-public-profile-banner>*:not(.public-profile-banner-art){position:relative;z-index:2;}
 </style>
