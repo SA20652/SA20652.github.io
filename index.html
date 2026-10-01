@@ -10004,7 +10004,7 @@ async function renderLeaderboard(sortBy='cases'){
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? 'has-profile-banner':''}" ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `style="--lb-banner:url('${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}')"` : ''}>
-        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-strip"></div>`:''}
+        ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-art"><img class="lb-banner-blur" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt="" aria-hidden="true"><img class="lb-banner-sharp" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt="" aria-hidden="true"></div>`:''}
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
@@ -10152,13 +10152,15 @@ async function openPublicProfile(userId, seed={}){
   }).join('') : '<div class="empty-state" style="padding:14px 6px">Сейчас ничего не продаёт.</div>';
 
   const publicFrame = String(p.profile_frame||'').toLowerCase();
-  const publicBanner=String(p.profile_banner||'default').toLowerCase();
+  let publicBanner=String(p.profile_banner||'default').toLowerCase();
+  const seedBanner=String(cached.profile_banner||seed.profile_banner||'default').toLowerCase();
+  if(publicBanner==='default' && seedBanner!=='default' && p.premium_until && new Date(p.premium_until).getTime()>Date.now() && (window.PROFILE_BANNERS||{})[seedBanner]) publicBanner=seedBanner;
   const publicBannerSrc=(window.PROFILE_BANNERS||{})[publicBanner];
   const publicBannerStyle=(publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now())?`--public-banner:url(\"${publicBannerSrc}\");` : '';
   const publicFrameHtml = publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '';
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2 ${publicBannerStyle?'has-public-profile-banner':''}" style="${publicBannerStyle}">
-      <div class="profile-banner-bg" id="publicProfileBannerBg" aria-hidden="true" style="${publicBannerStyle?'display:block':'display:none'}"></div>
+      ${publicBannerStyle?`<div class="public-profile-banner-art" aria-hidden="true"><img class="public-profile-banner-blur" src="${publicBannerSrc}" alt=""><img class="public-profile-banner-sharp" src="${publicBannerSrc}" alt=""></div>`:''}
       <div class="profile-avatar-wrap public-profile-avatar-wrap">
         <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
         ${publicFrameHtml}
@@ -10280,7 +10282,18 @@ function toggleProfileCustomize(){
 
 function renderProfileCustomization(){
   const customize=document.getElementById('profileCustomize');
-  if(customize){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_profile_customize_collapsed')==='1';}catch(_){} setProfileCustomizeCollapsed(collapsed); }
+  if(customize){
+    let collapsed=true;
+    try{
+      const marker='gdplay_profile_customize_default_collapsed_v42';
+      if(localStorage.getItem(marker)!=='1'){
+        localStorage.setItem('gdplay_profile_customize_collapsed','1');
+        localStorage.setItem(marker,'1');
+      }
+      collapsed=localStorage.getItem('gdplay_profile_customize_collapsed')!=='0';
+    }catch(_){}
+    setProfileCustomizeCollapsed(collapsed);
+  }
   const picker=document.getElementById('profileBannerPicker');
   if(picker){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_profile_banner_picker_collapsed')==='1';}catch(_){} setProfileBannerPickerCollapsed(collapsed); }
   const frame=document.getElementById('profileAvatarFrame');
@@ -12801,7 +12814,24 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 })();
 </script>
 
-<style id="gdplay-banner-final-v41">
-.public-profile-head-v2.has-public-profile-banner{background-image:linear-gradient(90deg,rgba(15,12,9,.84),rgba(15,12,9,.52),rgba(15,12,9,.32)),var(--public-banner);background-size:100% 100%,auto 100%;background-position:center,center;background-repeat:no-repeat;}
+<style id="gdplay-banner-final-v42">
+/* Premium profile banners: real image layers, no CSS data-URI background dependency. */
+.lb-item.has-profile-banner{isolation:isolate;background:linear-gradient(180deg,#211b17,#191512)!important;}
+.lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.lb-item.has-profile-banner .lb-banner-blur{position:absolute;inset:-18px;width:calc(100% + 36px);height:calc(100% + 36px);object-fit:cover;filter:blur(22px);transform:scale(1.04);opacity:.48;}
+.lb-item.has-profile-banner .lb-banner-sharp{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 7%,#000 18%,#000 82%,rgba(0,0,0,.35) 93%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 7%,#000 18%,#000 82%,rgba(0,0,0,.35) 93%,transparent 100%);opacity:.88;}
+.lb-item.has-profile-banner::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(15,12,9,.78) 0%,rgba(15,12,9,.30) 22%,rgba(15,12,9,.18) 50%,rgba(15,12,9,.30) 78%,rgba(15,12,9,.78) 100%),linear-gradient(180deg,rgba(15,12,9,.28),rgba(15,12,9,.64));}
+.lb-item.has-profile-banner::after{content:"";position:absolute;inset:0;z-index:1;width:auto;height:auto;right:auto;top:auto;border-radius:0;background:linear-gradient(90deg,transparent 0%,rgba(15,12,9,.06) 50%,transparent 100%)!important;pointer-events:none;}
+.lb-item.has-profile-banner>div:not(.lb-banner-art){position:relative;z-index:2;}
+.lb-item.has-profile-banner .lb-banner-strip{display:none!important;}
+/* Remove the medal-circle decoration from banner cards, including the Battle/Winnings tab. */
+.lb-item.has-profile-banner:nth-child(1)::after{width:auto;height:auto;right:auto;top:auto;border-radius:0;background:linear-gradient(90deg,transparent,rgba(15,12,9,.06),transparent)!important;}
+
+.public-profile-head-v2.has-public-profile-banner{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(180deg,#211b17,#191512)!important;}
 .public-profile-head-v2.has-public-profile-banner .profile-banner-bg{display:none!important;}
+.public-profile-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.public-profile-banner-blur{position:absolute;inset:-18px;width:calc(100% + 36px);height:calc(100% + 36px);object-fit:cover;filter:blur(20px);transform:scale(1.04);opacity:.42;}
+.public-profile-banner-sharp{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:.9;mask-image:linear-gradient(90deg,transparent 0%,#000 16%,#000 84%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 16%,#000 84%,transparent 100%);}
+.public-profile-head-v2.has-public-profile-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(15,12,9,.78),rgba(15,12,9,.28) 35%,rgba(15,12,9,.24) 65%,rgba(15,12,9,.78)),linear-gradient(180deg,rgba(15,12,9,.28),rgba(15,12,9,.64));}
+.public-profile-head-v2.has-public-profile-banner>*:not(.public-profile-banner-art){position:relative;z-index:2;}
 </style>
