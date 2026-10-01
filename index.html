@@ -10003,7 +10003,7 @@ async function renderLeaderboard(sortBy='cases'){
     if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
-      <div class="lb-item ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? 'has-profile-banner':''}" ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `style="--lb-banner:url('${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}')"` : ''}>
+      <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''} ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? 'has-profile-banner':''}" ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `style="--lb-banner:url('${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}')"` : ''}>
         ${r.profile_banner && r.profile_banner!=='default' && r.premium_until && new Date(r.premium_until).getTime()>Date.now() && window.PROFILE_BANNERS?.[String(r.profile_banner).toLowerCase()] ? `<div class="lb-banner-art" aria-hidden="true"><img class="lb-banner-side lb-banner-side-left" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-center" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""><img class="lb-banner-side lb-banner-side-right" src="${window.PROFILE_BANNERS[String(r.profile_banner).toLowerCase()]}" alt=""></div>`:''}
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
@@ -12814,19 +12814,25 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 })();
 </script>
 
-<style id="gdplay-banner-final-v43">
-/* Top: one sharp banner in the center + two blurred copies on the sides. */
+<style id="gdplay-banner-final-v44">
+/* Top banner: the ENTIRE card is filled. The center is sharp; both sides are copies of the same banner, blurred and softly blended into the card. */
 .lb-item.has-profile-banner{isolation:isolate;position:relative;overflow:hidden;background:var(--bg-2)!important;}
-.lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.lb-item.has-profile-banner .lb-banner-side{position:absolute;top:-14px;width:54%;height:calc(100% + 28px);object-fit:cover;filter:blur(15px);opacity:.62;transform:scale(1.08);}
-.lb-item.has-profile-banner .lb-banner-side-left{left:-9%;object-position:center;}
-.lb-item.has-profile-banner .lb-banner-side-right{right:-9%;object-position:center;}
-.lb-item.has-profile-banner .lb-banner-center{position:absolute;left:50%;top:0;height:100%;width:68%;transform:translateX(-50%);object-fit:cover;object-position:center;opacity:.96;filter:saturate(.92) contrast(1.04);}
-.lb-item.has-profile-banner .lb-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg-2) 0%,rgba(20,17,16,.72) 7%,rgba(20,17,16,0) 22%,rgba(20,17,16,0) 78%,rgba(20,17,16,.72) 93%,var(--bg-2) 100%),linear-gradient(180deg,rgba(20,17,16,.16),rgba(20,17,16,.54));}
-.lb-item.has-profile-banner::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(20,17,16,.60),rgba(20,17,16,.08) 35%,rgba(20,17,16,.08) 65%,rgba(20,17,16,.60));}
-.lb-item.has-profile-banner::after{display:none!important;content:none!important;background:none!important;border-radius:0!important;}
+.lb-item.has-profile-banner .lb-banner-art{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--lb-banner) center/cover no-repeat;}
+.lb-item.has-profile-banner .lb-banner-art::before{content:"";position:absolute;inset:-34px;background:var(--lb-banner) center/cover no-repeat;filter:blur(22px);transform:scale(1.16);opacity:.92;}
+.lb-item.has-profile-banner .lb-banner-side{position:absolute;top:-18px;width:55%;height:calc(100% + 36px);object-fit:cover;filter:blur(17px) saturate(.82);opacity:.88;transform:scale(1.13);}
+.lb-item.has-profile-banner .lb-banner-side-left{left:-8%;object-position:center;}
+.lb-item.has-profile-banner .lb-banner-side-right{right:-8%;object-position:center;}
+.lb-item.has-profile-banner .lb-banner-center{position:absolute;left:50%;top:50%;height:108%;width:48%;transform:translate(-50%,-50%) scale(1.04);object-fit:cover;object-position:center;opacity:.98;filter:saturate(.94) contrast(1.05);}
+.lb-item.has-profile-banner .lb-banner-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,17,16,.38) 0%,rgba(20,17,16,.10) 15%,rgba(20,17,16,.02) 32%,rgba(20,17,16,.02) 68%,rgba(20,17,16,.10) 85%,rgba(20,17,16,.38) 100%),linear-gradient(180deg,rgba(20,17,16,.20),rgba(20,17,16,.56));}
+.lb-item.has-profile-banner::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(20,17,16,.46),rgba(20,17,16,.06) 34%,rgba(20,17,16,.06) 66%,rgba(20,17,16,.46));}
+.lb-item.has-profile-banner::after{display:none!important;content:none!important;background:none!important;border-radius:0!important;box-shadow:none!important;}
 .lb-item.has-profile-banner>div:not(.lb-banner-art){position:relative;z-index:2;}
 .lb-item.has-profile-banner .lb-banner-strip{display:none!important;}
+/* Battles tab is deliberately darker so the banner never washes out the card. */
+.lb-item.top-sort-battles.has-profile-banner .lb-banner-art::after{background:linear-gradient(90deg,rgba(20,17,16,.54),rgba(20,17,16,.12) 20%,rgba(20,17,16,.05) 50%,rgba(20,17,16,.12) 80%,rgba(20,17,16,.54)),linear-gradient(180deg,rgba(20,17,16,.30),rgba(20,17,16,.64));}
+.lb-item.top-sort-battles.has-profile-banner::before{background:linear-gradient(90deg,rgba(20,17,16,.58),rgba(20,17,16,.10) 38%,rgba(20,17,16,.10) 62%,rgba(20,17,16,.58));}
+
+/* Public profile opened from Top: zoom the banner itself, with no circular decoration. */
 
 /* Public profile opened from Top: zoom the banner itself, with no circular decoration. */
 .public-profile-head-v2.has-public-profile-banner{position:relative;isolation:isolate;overflow:hidden;background:var(--bg-3)!important;}
