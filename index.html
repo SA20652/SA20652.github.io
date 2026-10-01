@@ -10362,8 +10362,8 @@ function renderProfileCustomization(){
   const grid=document.getElementById('profileBannerGrid');
   if(grid){
     const labels={tidal_wave:'Tidal Wave',orbit:'ORBIT',nullscapes:'Nullscapes',grief:'Grief',unleashed:'Unleashed',slaughterhouse:'Slaughterhouse'};
-    const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||'';
-    const customCard=`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open"><div class="custom-banner-card-preview" ${customOwned&&customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customOwned?'Свой баннер · Настроить':(window.isAdmin?'Свой баннер · Бесплатно':'Свой баннер · Создать')}</span></button>`;
+    const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||''; const customAvailable=vipActive;
+    const customCard=`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open" ${customAvailable?'':'disabled'}><div class="custom-banner-card-preview" ${customOwned&&customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customAvailable?(customOwned?'Свой баннер · Настроить':'Свой баннер · Создать · 5 ⭐'):'Свой баннер · Только Premium'}</span></button>`;
     grid.innerHTML='<button type="button" class="profile-banner-btn '+(bannerKey==='default'?'active':'')+'" data-profile-banner="default"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type="button" class="profile-banner-btn ${bannerKey===k?'active':''}" data-profile-banner="${k}" ${vipActive?'':'disabled'}><img src="${window.PROFILE_BANNERS[k]}" alt="" loading="eager" decoding="async"><span>${labels[k]||k}</span></button>`).join('')+customCard;
   }
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
@@ -10417,6 +10417,7 @@ function isPremiumActive(){
 let customBannerImageData='';
 function openCustomBannerEditor(){
   const modal=document.getElementById('customBannerModal'); if(!modal) return;
+  if(!isPremiumActive()){ showToast('🔒 Создание своего баннера доступно только с Premium','error'); return; }
   customBannerImageData=data?.profileCustomBanner||'';
   const f=document.getElementById('customBannerFile'); if(f) f.value='';
   const st=data.profileCustomBannerSettings||{};
@@ -10466,6 +10467,7 @@ async function startCustomBannerPayment(){
 }
 async function saveCustomBanner(){
   try{
+    if(!isPremiumActive()) throw new Error('Создание своего баннера доступно только с Premium');
     const settings={zoom:Number(document.getElementById('customBannerZoom')?.value||1),x:Number(document.getElementById('customBannerX')?.value||50),y:Number(document.getElementById('customBannerY')?.value||50)};
     const image=customBannerImageData||data?.profileCustomBanner||''; if(!image) throw new Error('Сначала выберите изображение');
     if(!data?.profileCustomBannerOwned && !window.isAdmin){
