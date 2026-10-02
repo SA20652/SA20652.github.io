@@ -626,6 +626,22 @@ let serverActionInFlight = 0;
 let serverBusyUntil = 0;
 async function syncToServer(){
   if(!currentUser || !data || !tgInitData()) return null;
+  // Always reconcile the local avatar with Telegram before sending state.
+  // If Telegram no longer exposes photo_url, clear a previously synced
+  // Telegram avatar instead of sending the stale URL back to the server.
+  try{
+    const tgUserNow = window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+    if(tgUserNow){
+      const livePhoto = String(tgUserNow.photo_url || '');
+      const currentAvatar = String(data.avatar || '');
+      const isTelegramAvatar = /^https:\/\/t\.me\/i\/userpic\//i.test(currentAvatar);
+      if(livePhoto){
+        if(!currentAvatar || isTelegramAvatar) data.avatar = livePhoto;
+      }else if(isTelegramAvatar){
+        data.avatar = '';
+      }
+    }
+  }catch(_){}
   syncInFlight = apiFetch('/api/sync', {
     state: {
       balance: Math.floor(Number(data.balance||0)),
@@ -1037,7 +1053,7 @@ async function boot(){
       currentUser=String(tgUser?.id||'telegram-user').toLowerCase();
       data=serverUserToGame({display_name:name,avatar:tgUser?.photo_url||'',user_id:tgUser?.id},name);
       data.username=name;
-      if(tgUser?.photo_url) data.avatar=tgUser.photo_url;
+      if(tgUser) data.avatar=String(tgUser.photo_url || '');
       showApp();
     }else{
       currentUser=null; data=null; showAuth();
@@ -1111,12 +1127,12 @@ async function bootSafe(){
       if(j && j.user){
         const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
         const tgName = String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ') || j.user.display_name || j.user.username || 'Игрок');
-        const tgAvatar = String(tgUser?.photo_url || j.user.avatar || '');
+        const tgAvatar = tgUser ? String(tgUser.photo_url || '') : String(j.user.avatar || '');
         currentUser = String(j.user.user_id || savedSession).toLowerCase();
         data = serverUserToGame(j.user, tgName);
         if(j.global_tech_break?.enabled && !j.is_admin) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
         data.username = tgName;
-        if(tgAvatar) data.avatar = tgAvatar;
+        // Keep the server's authoritative avatar; Telegram WebApp photo_url can be stale.
         window.isAdmin = !!j.is_admin;
       updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
@@ -1160,11 +1176,11 @@ async function bootSafe(){
     if(j && j.user){
       const tgUser = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
       const tgName = String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ') || j.user.display_name || j.user.username || 'Игрок');
-      const tgAvatar = String(tgUser?.photo_url || j.user.avatar || '');
+      const tgAvatar = tgUser ? String(tgUser.photo_url || '') : String(j.user.avatar || '');
       currentUser = String(j.user.user_id || tgUser?.id || 'telegram-user').toLowerCase();
       data = serverUserToGame(j.user, tgName);
       data.username = tgName;
-      if(tgAvatar) data.avatar = tgAvatar;
+      // Keep the server's authoritative avatar; Telegram WebApp photo_url can be stale.
       window.isAdmin = !!j.is_admin;
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
       showApp();
