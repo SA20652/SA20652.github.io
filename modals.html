@@ -626,6 +626,22 @@ let serverActionInFlight = 0;
 let serverBusyUntil = 0;
 async function syncToServer(){
   if(!currentUser || !data || !tgInitData()) return null;
+  // Always reconcile the local avatar with Telegram before sending state.
+  // If Telegram no longer exposes photo_url, clear a previously synced
+  // Telegram avatar instead of sending the stale URL back to the server.
+  try{
+    const tgUserNow = window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+    if(tgUserNow){
+      const livePhoto = String(tgUserNow.photo_url || '');
+      const currentAvatar = String(data.avatar || '');
+      const isTelegramAvatar = /^https:\/\/t\.me\/i\/userpic\//i.test(currentAvatar);
+      if(livePhoto){
+        if(!currentAvatar || isTelegramAvatar) data.avatar = livePhoto;
+      }else if(isTelegramAvatar){
+        data.avatar = '';
+      }
+    }
+  }catch(_){}
   syncInFlight = apiFetch('/api/sync', {
     state: {
       balance: Math.floor(Number(data.balance||0)),
