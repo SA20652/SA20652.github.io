@@ -6824,6 +6824,18 @@ async function waitForTelegramInitData(timeoutMs=12000){
   return tgInitData();
 }
 
+function applyImmediateTelegramAvatarFallback(){
+  if(!data || data.avatar) return;
+  try{
+    const photo=String(window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url||'').trim();
+    if(photo){
+      data.avatar=photo+(photo.includes('?')?'&':'?')+'gd_avatar='+Date.now();
+      persistLocal();
+      renderProfile();
+    }
+  }catch(_){ }
+}
+
 function startTelegramAvatarSync(){
   if(window.__gdAvatarSyncStarted || !tgInitData()) return;
   window.__gdAvatarSyncStarted = true;
@@ -6880,6 +6892,8 @@ async function bootSafe(){
         window.isAdmin = !!j.is_admin;
       updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+        applyImmediateTelegramAvatarFallback();
+        loadDailyStatus();
         await showApp();
         startTelegramAvatarSync();
         handleTelegramStartApp();
@@ -6933,6 +6947,8 @@ async function bootSafe(){
       data.username = tgName;
       window.isAdmin = !!j.is_admin;
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
+      applyImmediateTelegramAvatarFallback();
+      loadDailyStatus();
       await showApp();
       startTelegramAvatarSync();
       handleTelegramStartApp();
@@ -10748,7 +10764,7 @@ function updateDailyBonusVisibility(){
   card.classList.remove('daily-bonus-hidden');
 }
 async function loadDailyStatus(){
-  if(dailyStatusInFlight||!currentUser||!tgInitData()) return;
+  if(dailyStatusInFlight||!currentUser||(!tgInitData() && !storageGet(AUTH_TOKEN_KEY))) return;
   dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
