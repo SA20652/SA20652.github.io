@@ -10657,6 +10657,33 @@ document.addEventListener('click',(e)=>{
   if(share){e.preventDefault();e.stopPropagation();shareReferralLink();return;}
 },{passive:false});
 
+async function reconcileTelegramAvatarInBackground(){
+  // The first /api/me returns immediately. A short series of follow-up reads lets
+  // the background Bot API reconciliation update the UI without making startup
+  // wait for Telegram's network response.
+  for(let i=0;i<5;i++){
+    await new Promise(r=>setTimeout(r,1200));
+    try{
+      const j=await apiFetch('/api/me',{});
+      const av=String(j?.user?.avatar||'');
+      if(j?.user && av !== String(data?.avatar||'')){
+        const old=String(data?.avatar||'');
+        data.avatar=av;
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(_){}
+        renderProfile();
+        // Refresh the visible TOP from the server so every place uses the same
+        // canonical avatar stored in users.avatar.
+        if(typeof loadLeaderboard==='function') await loadLeaderboard(currentSortBy||'cases');
+        // If a public profile modal for this user is open, refresh it too.
+        if(window.__gdplayOpenProfileUserId && String(window.__gdplayOpenProfileUserId)===String(currentUser)){
+          try{ await openPublicProfile(window.__gdplayOpenProfileUserId, leaderboardProfileSeeds[String(window.__gdplayOpenProfileUserId)]||{}); }catch(_){}
+        }
+        if(old!==av) return;
+      }
+    }catch(_){}
+  }
+}
+
 function renderProfile(){
   loadReferralStats();
   const avatar=document.getElementById('profileAvatar');
