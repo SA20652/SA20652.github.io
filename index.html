@@ -9989,12 +9989,14 @@ async function renderLeaderboard(sortBy='cases'){
   try{
     // Топ считается на сервере по всем игрокам, а не только по этому браузеру
     const j = await apiFetch('/api/leaderboard', {sort_by: sortBy});
+    const myId = String(tgUserId()||'');
     const rows = (j.leaderboard||[]).map(r=>({
       username: r.username || ('Игрок ' + r.user_id),
       balance: Number(r.balance||0),
       cases: Number(r.cases_opened||0),
       winnings: Number(r.battle_winnings||0),
-      avatar: r.avatar || '',
+      // The current user's avatar comes from freshly synced local state.
+      avatar: String(r.user_id)===myId ? (data.avatar || '') : (r.avatar || ''),
       premium_until: r.premium_until || null,
       creator_badge: !!r.creator_badge,
       tester_badge: !!r.tester_badge,
@@ -10019,7 +10021,6 @@ async function renderLeaderboard(sortBy='cases'){
       profile_name_style:r.profile_name_style || 'default',
       buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
     }; });
-    const myId = String(tgUserId()||'');
     if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
