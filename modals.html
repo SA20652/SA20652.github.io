@@ -648,7 +648,6 @@ async function syncToServer(){
       cubes: data.cubes||[],
       cases_opened: Math.floor(Number(data.cases_opened||0)),
       battle_winnings: Math.floor(Number(data.battle_winnings||0)),
-      avatar: data.avatar || '',
       keys: data.keys || [],
       creator_badge: !!data.creatorBadge,
       tester_badge: !!data.testerBadge,
@@ -1051,9 +1050,9 @@ async function boot(){
       const tgUser=(()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
       const name=String([tgUser?.first_name,tgUser?.last_name].filter(Boolean).join(' ')||'Игрок');
       currentUser=String(tgUser?.id||'telegram-user').toLowerCase();
-      data=serverUserToGame({display_name:name,avatar:tgUser?.photo_url||'',user_id:tgUser?.id},name);
+      data=serverUserToGame({display_name:name,avatar:'',user_id:tgUser?.id},name);
       data.username=name;
-      if(tgUser) data.avatar=String(tgUser.photo_url || '');
+      
       showApp();
     }else{
       currentUser=null; data=null; showAuth();
@@ -4345,7 +4344,7 @@ document.getElementById('avatarInput')?.addEventListener('change',async function
       return;
     }
     try{
-      await apiFetch('/api/sync', {state:{avatar:data.avatar}});
+      await apiFetch('/api/sync', {state:{avatar:data.avatar,avatar_manual:1}});
       showToast('✅ Фото обновлено','success');
       renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort||'cases');
     }catch(e){
