@@ -5985,6 +5985,15 @@ function tgUserId(){
   try{return window.Telegram.WebApp.initDataUnsafe.user.id;}catch(e){return null;}
 }
 const TECH_BREAK_EXEMPT_UID='7491528121';
+const GDPLAY_ADMIN_UI_UID='7491528121';
+function detectLocalAdminUI(){
+  try{
+    const uid=String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'');
+    if(uid && uid===GDPLAY_ADMIN_UI_UID) window.isAdmin=true;
+  }catch(_){}
+  return !!window.isAdmin;
+}
+detectLocalAdminUI();
 function isTechBreakExempt(){ return String(tgUserId()||'')===TECH_BREAK_EXEMPT_UID; }
 function tgConfirm(message){
   return new Promise(resolve=>{
@@ -6021,7 +6030,7 @@ async function apiFetch(path, payload={}, _retry=false){
         const controller=typeof AbortController!=='undefined'?new AbortController():null;
         const timer=controller?setTimeout(()=>controller.abort(),8000):null;
         try{
-          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData,authToken:storageGet(AUTH_TOKEN_KEY)||''}),signal:controller?.signal});
+          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData}),signal:controller?.signal});
           const sj=await sr.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
           if(sr.ok && sj.adminSession){ adminSession=sj.adminSession; window.__GDPLAYAdminSession = adminSession; sessionError=null; break; }
           if(sr.status && sr.status<500) throw new Error(sj.error||'Нет доступа');
@@ -6251,18 +6260,17 @@ async function loadAdminUI(){
     root.querySelectorAll('.admin-dynamic-page, .admin-dynamic-modal').forEach(el=>el.remove());
     menu.querySelector('#adminMenuBtn')?.remove();
 
+    // Сначала вставляем встроенную копию админки. Это не зависит от
+    // отдельного запроса /api/admin/ui и поэтому панель появляется сразу.
     let html = '';
+    const tpl = document.getElementById('adminUiFallback');
+    if(tpl) html = tpl.innerHTML;
+    // Серверная версия может быть новее — если она доступна, заменяем shell ей.
     try{
       const j = await apiFetch('/api/admin/ui', {});
-      html = j && typeof j.html === 'string' ? j.html : '';
+      if(j && typeof j.html === 'string' && j.html.trim()) html = j.html;
     }catch(e){
-      console.warn('admin UI API unavailable, using built-in admin UI:', e);
-    }
-    // Встроенный fallback гарантирует, что панель добавится даже если
-    // admin_fragment.html временно недоступен на сервере.
-    if(!html){
-      const tpl = document.getElementById('adminUiFallback');
-      html = tpl ? tpl.innerHTML : '';
+      console.debug('admin UI API unavailable, using built-in admin UI');
     }
     if(!html) return false;
     const wrap = document.createElement('div');
@@ -6397,16 +6405,13 @@ function showModerationNotice(notice){
 }
 
 async function registerWithServer(){
-  // Не блокируем первый paint: этот запрос только актуализирует уже показанные
-  // локальные данные. Сессия/authToken тоже является валидным способом авторизации.
   if(!tgInitData() && !storageGet(AUTH_TOKEN_KEY)) return;
   try{
     const j = await apiFetch('/api/me', {});
     if(j.moderation_notice) showModerationNotice(j.moderation_notice);
     window.isAdmin = !!j.is_admin;
     updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
-    // Админский интерфейс не должен задерживать загрузку профиля игрока.
-    if(window.isAdmin) await loadAdminUI();
+    if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin UI warmup',e));
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
     if(j.user && j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
     if(j.user && j.user.vip !== undefined){ data.vip = !!j.user.vip; }
@@ -6552,9 +6557,6 @@ function mergeLocalSettings(game, key){
   return game;
 }
 
-// Быстрый первый paint: Telegram уже знает user.id, поэтому можем восстановить
-// последний локальный снимок до ответа /api/me. Сервер потом всё равно остаётся
-// источником истины и тихо обновляет этот снимок.
 function hydrateCachedSession(userId, fallbackName='Игрок'){
   try{
     const key=String(userId||'').toLowerCase();
@@ -6568,13 +6570,8 @@ function hydrateCachedSession(userId, fallbackName='Игрок'){
     if(!saved || typeof saved!=='object') return false;
     data=mergeLocalSettings({...saved},key);
     data.username=String(data.username||fallbackName);
-    data.serverSynced=false;
-    currentUser=key;
-    return true;
-  }catch(e){
-    console.debug('cached session restore skipped',e);
-    return false;
-  }
+    data.serverSynced=false; currentUser=key; return true;
+  }catch(e){ console.debug('cached session restore skipped',e); return false; }
 }
 
 function serverUserToGame(u,fallbackName){
@@ -6679,9 +6676,10 @@ async function showApp(skipServer=false){
   normalizeGameState();
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
-  if(!skipServer && (tgInitData() || storageGet(AUTH_TOKEN_KEY))){
-    // Серверная актуализация идёт после первого paint и не блокирует интерфейс.
-    registerWithServer().catch(e=>console.debug('background profile refresh',e));
+  if(!skipServer && tgInitData()){
+    // Сначала забираем серверный профиль, потом рисуем интерфейс.
+    // Это исключает показ/сохранение локального нового аккаунта поверх старого.
+    await registerWithServer();
   }
   // The splash is independent and lasts exactly 5 seconds. Start all
   // important loading immediately in the background so those 5 seconds are
@@ -6952,6 +6950,8 @@ async function bootSafe(){
   // а имя и фото берутся непосредственно из Telegram. Формы входа/регистрации
   // остаются в DOM и доступны для ручного входа в другой аккаунт.
   const initData = await waitForTelegramInitData(12000);
+  detectLocalAdminUI();
+  if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin shell warmup',e));
   const token = storageGet(AUTH_TOKEN_KEY);
   const savedSession = storageGet(SESSION_KEY);
 
@@ -6975,16 +6975,11 @@ async function bootSafe(){
         if(j.global_tech_break?.enabled && !j.is_admin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
         data.username = tgName;
         window.isAdmin = !!j.is_admin;
-        updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
-        // Восстанавливаем админ-панель и для сохранённой серверной сессии.
-        // Раньше этот путь сразу делал return после showApp(), поэтому у
-        // администратора меню могло исчезнуть после перезапуска приложения.
-        if(window.isAdmin) await loadAdminUI();
+      updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
         applyImmediateTelegramAvatarFallback();
-        await showApp(true);
-        // /api/me уже дал свежие данные; повторный запрос на старте не нужен.
         loadDailyStatus();
+        await showApp();
         startTelegramAvatarSync();
         handleTelegramStartApp();
         return;
@@ -7014,18 +7009,12 @@ async function bootSafe(){
     return;
   }
   try{
-    // Сначала показываем последний снимок пользователя. Это убирает ожидание
-    // /api/me из критического пути запуска.
     const tgUserEarly = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
     const earlyId=String(tgUserEarly?.id||'').toLowerCase();
     currentUser=earlyId || currentUser || String(savedSession||'').toLowerCase();
     const tgNameEarly=String([tgUserEarly?.first_name,tgUserEarly?.last_name].filter(Boolean).join(' ') || 'Игрок');
     const hadCached=hydrateCachedSession(currentUser,tgNameEarly);
-    if(hadCached){
-      applyImmediateTelegramAvatarFallback();
-      await showApp(true);
-    }
-
+    if(hadCached){ applyImmediateTelegramAvatarFallback(); await showApp(true); }
     let j=null, lastError=null;
     for(let attempt=0; attempt<4; attempt++){
       try{
@@ -7047,21 +7036,13 @@ async function bootSafe(){
       currentUser = String(j.user.user_id || tgUser?.id || 'telegram-user').toLowerCase();
       data = mergeLocalSettings(serverUserToGame(j.user, tgName), currentUser);
       data.username = tgName;
-      window.isAdmin = !!j.is_admin;
+      window.isAdmin = !!j.is_admin || String(tgUserEarly?.id||'')===GDPLAY_ADMIN_UI_UID;
+      if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin UI warmup',e));
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
       applyImmediateTelegramAvatarFallback();
-      if(!hadCached){
-        await showApp(true);
-      }else{
-        renderAll();
-      }
-      // /api/me уже ответил: применяем свежие серверные данные без повторного
-      // запроса и без блокировки первого экрана.
+      if(!hadCached) await showApp(true); else renderAll();
       applyServerState(j.user);
-      data.username=tgName;
-      data.serverSynced=true;
-      persistLocal();
-      renderAll();
+      data.username=tgName; data.serverSynced=true; persistLocal(); renderAll();
       loadDailyStatus();
       startTelegramAvatarSync();
       handleTelegramStartApp();
