@@ -5240,7 +5240,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
       </div>
       <div class="profile-customize profile-banner-picker" id="profileBannerPicker">
         <div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Баннер профиля</div><div class="profile-customize-sub">Доступно только при активном Premium</div></div><div style="display:flex;align-items:center;gap:7px"><span class="profile-badge premium">Premium</span><button type="button" class="btn-ghost profile-banner-picker-toggle" id="profileBannerPickerToggle">Свернуть</button></div></div>
-        <div class="profile-banner-grid" id="profileBannerGrid"></div><div class="public-banner-library" id="publicBannerLibrary"><div class="public-banner-library-head"><b>🌐 Общие баннеры</b><span class="section-sub">Для Premium</span></div><div class="profile-banner-grid" id="publicBannerGrid"><div class="section-sub">Загрузка…</div></div></div>
+        <div class="profile-banner-grid" id="profileBannerGrid"></div><div class="public-banner-library" id="publicBannerLibrary"><div class="public-banner-library-head"><b>🌐 Общие баннеры</b><div style="display:flex;align-items:center;gap:7px"><span class="section-sub">Для Premium</span><button type="button" class="btn-ghost public-banner-library-toggle" id="publicBannerLibraryToggle">Свернуть</button></div></div><div class="profile-banner-grid" id="publicBannerGrid"><div class="section-sub">Загрузка…</div></div></div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 12 часов · 💣 10 игр в «Минах» каждые 12 часов · x0.85 продажа · +10% удачи · ∞ слотов в инвентаре · ускоренные кейсы · баннеры профиля.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
       <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>3 000 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+3 000 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div><div class="referral-stat"><b id="referralDaily">0/10</b><span>сегодня</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать ссылку</button><button type="button" class="btn" id="referralShareBtn">Поделиться ссылкой</button></div><div class="referral-milestones" id="referralMilestones"><div class="referral-milestone" data-m="10"><b>10</b><span>Циановая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="50"><b>50</b><span>Сапфировая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="100"><b>100</b><span>Аврора</span><em>🔒</em></div></div><div class="referral-people-title">👤 Перешли по твоей ссылке</div><div class="referral-people" id="referralPeople"><div class="referral-empty">Пока никто не перешёл</div></div></div>
@@ -6676,10 +6676,11 @@ async function showApp(skipServer=false){
     preloadProfileImages(data)
   ]).then(()=>{
     try{
+      // Do not force the user back to Cases when the background asset warmup
+      // finishes. A user may already be on Profile/Top/etc. by then.
+      const tabBeforeWarmup=currentTab;
       renderAll();
-      currentTab='cases';
-      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='cases'));
-      document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-cases'));
+      if(tabBeforeWarmup && tabBeforeWarmup!=='cases') switchTab(tabBeforeWarmup);
       preloadAllRenderedImages();
       refreshGlobalTechBreak();
     }catch(_){}
@@ -10428,6 +10429,17 @@ function toggleProfileBannerPicker(){
   const picker=document.getElementById('profileBannerPicker'); if(!picker) return;
   setProfileBannerPickerCollapsed(!picker.classList.contains('is-collapsed'));
 }
+function setPublicBannerLibraryCollapsed(collapsed){
+  const box=document.getElementById('publicBannerLibrary'); if(!box) return;
+  box.classList.toggle('is-collapsed',!!collapsed);
+  const btn=document.getElementById('publicBannerLibraryToggle');
+  if(btn) btn.textContent=collapsed?'Развернуть':'Свернуть';
+  try{localStorage.setItem('gdplay_public_banner_library_collapsed',collapsed?'1':'0');}catch(_){}
+}
+function togglePublicBannerLibrary(){
+  const box=document.getElementById('publicBannerLibrary'); if(!box) return;
+  setPublicBannerLibraryCollapsed(!box.classList.contains('is-collapsed'));
+}
 function setProfileCustomizeCollapsed(collapsed){
   const box=document.getElementById('profileCustomize'); if(!box) return;
   box.classList.toggle('is-collapsed',!!collapsed);
@@ -10457,6 +10469,8 @@ function renderProfileCustomization(){
   }
   const picker=document.getElementById('profileBannerPicker');
   if(picker){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_profile_banner_picker_collapsed')==='1';}catch(_){} setProfileBannerPickerCollapsed(collapsed); }
+  const publicLibrary=document.getElementById('publicBannerLibrary');
+  if(publicLibrary){ let collapsed=false; try{collapsed=localStorage.getItem('gdplay_public_banner_library_collapsed')==='1';}catch(_){} setPublicBannerLibraryCollapsed(collapsed); }
   const frame=document.getElementById('profileAvatarFrame');
   const name=document.getElementById('profileName');
   const vipActive=isPremiumActive();
@@ -11461,6 +11475,7 @@ document.getElementById('customBannerSaveBtn')?.addEventListener('click',saveCus
 document.getElementById('customBannerPublishBtn')?.addEventListener('click',publishCustomBanner);
 document.getElementById('customBannerCloseBtn')?.addEventListener('click',()=>closeModal('customBannerModal'));
 document.getElementById('profileBannerPickerToggle')?.addEventListener('click',toggleProfileBannerPicker);
+document.getElementById('publicBannerLibraryToggle')?.addEventListener('click',togglePublicBannerLibrary);
 document.getElementById('profileCustomizeToggle')?.addEventListener('click',toggleProfileCustomize);
 document.getElementById('profileNameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-name]');if(b&&!b.disabled)setProfileNameStyle(b.dataset.profileName);});
 document.getElementById('passwordBtn')?.addEventListener('click',setAccountPassword);
@@ -13203,6 +13218,9 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .custom-banner-publish input{background:#2a2927!important;color:#eee!important;border:1px solid #484643!important;border-radius:10px;padding:10px;}
 #customBannerPublishBtn{min-height:42px;border:1px solid rgba(255,226,164,.78)!important;border-radius:12px!important;background:linear-gradient(135deg,#f0c76f 0%,#c58a35 100%)!important;color:#1d160d!important;font-weight:900!important;box-shadow:0 5px 18px rgba(197,138,53,.24),inset 0 1px 0 rgba(255,255,255,.2);}
 #customBannerPublishBtn:disabled{opacity:.55;}
+.profile-banner-picker.is-collapsed .public-banner-library{display:none!important;}
+.public-banner-library.is-collapsed #publicBannerGrid{display:none!important;}
+.public-banner-library-toggle{font-size:10px;padding:5px 8px;line-height:1;white-space:nowrap;}
 .custom-banner-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px;}
 .custom-banner-actions .custom-banner-pay-btn{order:1;margin:0;align-self:center;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;}
 .custom-banner-actions #customBannerCloseBtn{order:2;margin:0;}
