@@ -6825,11 +6825,20 @@ async function waitForTelegramInitData(timeoutMs=12000){
 }
 
 function applyImmediateTelegramAvatarFallback(){
-  if(!data || data.avatar) return;
+  if(!data) return;
   try{
-    const photo=String(window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url||'').trim();
-    if(photo){
+    const tgUser=window.Telegram?.WebApp?.initDataUnsafe?.user||null;
+    const photo=String(tgUser?.photo_url||'').trim();
+    const current=String(data.avatar||'').trim();
+    const isTelegramCurrent=current.startsWith('https://t.me/i/userpic/') || current.startsWith('/assets/uploads/avatars/tg_');
+    // Telegram's signed WebApp photo is the fastest source available. Only replace an
+    // empty/Telegram-managed avatar; never overwrite a manually uploaded custom avatar.
+    if(photo && (!current || isTelegramCurrent)){
       data.avatar=photo+(photo.includes('?')?'&':'?')+'gd_avatar='+Date.now();
+      persistLocal();
+      renderProfile();
+    }else if(!photo && isTelegramCurrent){
+      data.avatar='';
       persistLocal();
       renderProfile();
     }
