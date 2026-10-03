@@ -10028,6 +10028,32 @@ function animateBattleDice(result, myId){
 
 let leaderboardProfileSeeds = Object.create(null);
 
+
+async function refreshLeaderboardAvatarsOnce(sortBy){
+  try{
+    const list=document.getElementById('leaderboardList');
+    if(!list || !list.querySelector('.lb-avatar img') && !list.querySelector('.lb-item')) return;
+    const missing=[...list.querySelectorAll('.lb-avatar')].some(x=>!x.querySelector('img'));
+    if(!missing) return;
+    await new Promise(r=>setTimeout(r,1800));
+    const j=await apiFetch('/api/leaderboard',{sort_by:sortBy});
+    const rows=j.leaderboard||[];
+    if(rows.some(r=>r.avatar)){
+      const current=String(tgUserId()||'');
+      rows.forEach(r=>{
+        const el=[...document.querySelectorAll('.lb-item')].find(x=>x.querySelector('[data-profile-uid="'+String(r.user_id)+'"]'));
+        if(!el || !r.avatar) return;
+        const a=el.querySelector('.lb-avatar');
+        if(a && !a.querySelector('img')){
+          const frame=a.querySelector('.lb-avatar-frame');
+          a.innerHTML=`<img src="${String(r.avatar).replace(/"/g,'&quot;')}" alt="" loading="eager" decoding="async">`;
+          if(frame) a.appendChild(frame);
+        }
+      });
+      if(rows.some(r=>r.avatar && String(r.user_id)===current)) renderLeaderboard(sortBy);
+    }
+  }catch(_){}
+}
 async function renderLeaderboard(sortBy='cases'){
   const el = document.getElementById('leaderboardList');
   try{ if(window.profileBannersReady) await window.profileBannersReady; }catch(_){}
@@ -10082,6 +10108,7 @@ async function renderLeaderboard(sortBy='cases'){
         </div>
         <div class="lb-score mono">${sortBy==='balance' ? r.balance.toLocaleString('ru-RU') : sortBy==='winnings' ? r.winnings.toLocaleString('ru-RU') : r.cases}</div>
       </div>`).join('');
+    refreshLeaderboardAvatarsOnce(sortBy);
   }catch(e){
     el.innerHTML = `<div class="empty-state">${e.message||'Ошибка загрузки топа'}</div>`;
     console.error(e);
@@ -10157,6 +10184,21 @@ function profileBadgeHtml(p){
   if(p.tester_badge) a.push('<span class="profile-badge tester">🛡️ Тестер</span>');   const cs=p.custom_status; if(cs&&(cs.text||cs.emoji)){ const c1=/^#[0-9a-fA-F]{6}$/.test(cs.color1||'')?cs.color1:'#f0c674'; const c2=/^#[0-9a-fA-F]{6}$/.test(cs.color2||'')?cs.color2:'#ffffff'; const st=cs.gradient?'background:linear-gradient(90deg,'+c1+','+c2+','+c1+');background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;border-color:'+c1+'66;animation:gdplayStatusGradient 2.4s ease-in-out infinite':'color:'+c1+';border-color:'+c1+'73'; a.push('<span class="profile-badge" style="'+st+'">'+(cs.emoji||'')+' '+(cs.text||'')+'</span>'); }
   return a.join('');
 }
+
+async function refreshPublicProfileAvatarOnce(userId){
+  try{
+    await new Promise(r=>setTimeout(r,1800));
+    const j=await apiFetch('/api/profile/view',{user_id:String(userId)});
+    const p=j && j.user;
+    if(!p || !p.avatar) return;
+    const body=document.getElementById('publicProfileBody');
+    const img=body?.querySelector('.public-profile-avatar img');
+    const box=body?.querySelector('.public-profile-avatar');
+    if(box && !img){
+      box.innerHTML=`<img src="${String(p.avatar).replace(/"/g,'&quot;')}" alt="Аватар" loading="eager" decoding="async">`;
+    }
+  }catch(_){}
+}
 async function openPublicProfile(userId, seed={}){
   window.__gdplayOpenProfileUserId=String(userId||'');
   try{ if(window.profileBannersReady) await window.profileBannersReady; }catch(_){}
@@ -10165,6 +10207,7 @@ async function openPublicProfile(userId, seed={}){
   const cached=leaderboardProfileSeeds[String(userId)]||{};
   body.innerHTML='<div class="empty-state">Загрузка профиля…</div>';
   openModal('publicProfileModal');
+  refreshPublicProfileAvatarOnce(userId);
 
   let p={...cached,...seed,user_id:userId};
   const paths=['/api/profile/view','/api/profile/get','/api/user/profile'];
