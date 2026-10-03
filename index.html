@@ -6837,10 +6837,6 @@ function applyImmediateTelegramAvatarFallback(){
       data.avatar=photo+(photo.includes('?')?'&':'?')+'gd_avatar='+Date.now();
       persistLocal();
       renderProfile();
-    }else if(!photo && isTelegramCurrent){
-      data.avatar='';
-      persistLocal();
-      renderProfile();
     }
   }catch(_){ }
 }
@@ -6854,7 +6850,11 @@ function startTelegramAvatarSync(){
     try{
       const j = await apiFetch('/api/avatar-sync',{});
       const avatar = String(j?.avatar || '');
-      if(avatar !== String(data.avatar || '')){
+      const currentAvatar = String(data.avatar || '');
+      // Never replace a currently visible avatar with an empty response. Telegram
+      // WebView/auth races can briefly return no photo; an actual removal is handled
+      // by the server's Bot API reconciliation and arrives as a deliberate update.
+      if(avatar && avatar !== currentAvatar){
         data.avatar = avatar;
         persistLocal();
         renderProfile();
