@@ -6397,13 +6397,16 @@ function showModerationNotice(notice){
 }
 
 async function registerWithServer(){
-  if(!tgInitData()) return;
+  // Не блокируем первый paint: этот запрос только актуализирует уже показанные
+  // локальные данные. Сессия/authToken тоже является валидным способом авторизации.
+  if(!tgInitData() && !storageGet(AUTH_TOKEN_KEY)) return;
   try{
     const j = await apiFetch('/api/me', {});
     if(j.moderation_notice) showModerationNotice(j.moderation_notice);
     window.isAdmin = !!j.is_admin;
     updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
-    if(window.isAdmin) await loadAdminUI();
+    // Админский интерфейс не должен задерживать загрузку профиля игрока.
+    if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin UI warmup',e));
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
     if(j.user && j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
     if(j.user && j.user.vip !== undefined){ data.vip = !!j.user.vip; }
@@ -6549,6 +6552,31 @@ function mergeLocalSettings(game, key){
   return game;
 }
 
+// Быстрый первый paint: Telegram уже знает user.id, поэтому можем восстановить
+// последний локальный снимок до ответа /api/me. Сервер потом всё равно остаётся
+// источником истины и тихо обновляет этот снимок.
+function hydrateCachedSession(userId, fallbackName='Игрок'){
+  try{
+    const key=String(userId||'').toLowerCase();
+    if(!key) return false;
+    const users=loadUsers();
+    let saved=users?.[key]?.game;
+    if(!saved){
+      const backup=JSON.parse(storageGet(DEVICE_BACKUP_KEY)||'null');
+      if(backup && String(backup.user||'').toLowerCase()===key) saved=backup.game;
+    }
+    if(!saved || typeof saved!=='object') return false;
+    data=mergeLocalSettings({...saved},key);
+    data.username=String(data.username||fallbackName);
+    data.serverSynced=false;
+    currentUser=key;
+    return true;
+  }catch(e){
+    console.debug('cached session restore skipped',e);
+    return false;
+  }
+}
+
 function serverUserToGame(u,fallbackName){
   const cubes=Array.isArray(u?.cubes)?u.cubes:[];
   return {
@@ -6651,10 +6679,9 @@ async function showApp(skipServer=false){
   normalizeGameState();
   document.getElementById('authScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
-  if(!skipServer && tgInitData()){
-    // Сначала забираем серверный профиль, потом рисуем интерфейс.
-    // Это исключает показ/сохранение локального нового аккаунта поверх старого.
-    await registerWithServer();
+  if(!skipServer && (tgInitData() || storageGet(AUTH_TOKEN_KEY))){
+    // Серверная актуализация идёт после первого paint и не блокирует интерфейс.
+    registerWithServer().catch(e=>console.debug('background profile refresh',e));
   }
   // The splash is independent and lasts exactly 5 seconds. Start all
   // important loading immediately in the background so those 5 seconds are
@@ -6951,8 +6978,9 @@ async function bootSafe(){
       updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
         applyImmediateTelegramAvatarFallback();
+        await showApp(true);
+        // /api/me уже дал свежие данные; повторный запрос на старте не нужен.
         loadDailyStatus();
-        await showApp();
         startTelegramAvatarSync();
         handleTelegramStartApp();
         return;
@@ -6982,6 +7010,18 @@ async function bootSafe(){
     return;
   }
   try{
+    // Сначала показываем последний снимок пользователя. Это убирает ожидание
+    // /api/me из критического пути запуска.
+    const tgUserEarly = (()=>{try{return window.Telegram?.WebApp?.initDataUnsafe?.user||null;}catch(e){return null;}})();
+    const earlyId=String(tgUserEarly?.id||'').toLowerCase();
+    currentUser=earlyId || currentUser || String(savedSession||'').toLowerCase();
+    const tgNameEarly=String([tgUserEarly?.first_name,tgUserEarly?.last_name].filter(Boolean).join(' ') || 'Игрок');
+    const hadCached=hydrateCachedSession(currentUser,tgNameEarly);
+    if(hadCached){
+      applyImmediateTelegramAvatarFallback();
+      await showApp(true);
+    }
+
     let j=null, lastError=null;
     for(let attempt=0; attempt<4; attempt++){
       try{
@@ -7006,8 +7046,19 @@ async function bootSafe(){
       window.isAdmin = !!j.is_admin;
       if(j.moderation_notice) showModerationNotice(j.moderation_notice);
       applyImmediateTelegramAvatarFallback();
+      if(!hadCached){
+        await showApp(true);
+      }else{
+        renderAll();
+      }
+      // /api/me уже ответил: применяем свежие серверные данные без повторного
+      // запроса и без блокировки первого экрана.
+      applyServerState(j.user);
+      data.username=tgName;
+      data.serverSynced=true;
+      persistLocal();
+      renderAll();
       loadDailyStatus();
-      await showApp();
       startTelegramAvatarSync();
       handleTelegramStartApp();
       return;
