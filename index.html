@@ -5240,7 +5240,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
       </div>
       <div class="profile-customize profile-banner-picker" id="profileBannerPicker">
         <div class="profile-customize-head"><div><div class="profile-customize-title">🖼 Баннер профиля</div><div class="profile-customize-sub">Доступно только при активном Premium</div></div><div style="display:flex;align-items:center;gap:7px"><span class="profile-badge premium">Premium</span><button type="button" class="btn-ghost profile-banner-picker-toggle" id="profileBannerPickerToggle">Свернуть</button></div></div>
-        <div class="profile-banner-grid" id="profileBannerGrid"></div>
+        <div class="profile-banner-grid" id="profileBannerGrid"></div><div class="public-banner-library" id="publicBannerLibrary"><div class="public-banner-library-head"><b>🌐 Общие баннеры</b><span class="section-sub">Для Premium</span></div><div class="profile-banner-grid" id="publicBannerGrid"><div class="section-sub">Загрузка…</div></div></div>
       </div>
       <div class="profile-premium-open"><div class="title">⭐ Premium · 30 дней</div><div class="premium-time-left" id="premiumTimeLeft" style="margin-top:6px;color:var(--brass-2);font-size:12px;font-weight:700"></div><div class="desc">x2 ежедневный бонус · 🟡 10 игр в «Орб-Рывке» каждые 12 часов · 💣 10 игр в «Минах» каждые 12 часов · x0.85 продажа · +10% удачи · ∞ слотов в инвентаре · ускоренные кейсы · баннеры профиля.</div><button class="btn-main" id="buyPremiumBtn">Посмотреть Premium</button></div>
       <div class="referral-card" id="referralCard"><div class="referral-head"><div><div class="referral-title">👥 Реферальная программа</div><div class="referral-sub">Приглашай друзей и получай <b>3 000 💰</b> за каждого нового игрока.</div></div><span class="profile-badge premium">+3 000 💰</span></div><div class="referral-stats"><div class="referral-stat"><b id="referralCount">0</b><span>приглашено</span></div><div class="referral-stat"><b id="referralEarned">0</b><span>заработано 💰</span></div><div class="referral-stat"><b id="referralDaily">0/10</b><span>сегодня</span></div></div><div class="referral-link" id="referralLink">Загрузка ссылки…</div><div class="referral-actions"><button type="button" class="btn-ghost" id="referralCopyBtn">Копировать ссылку</button><button type="button" class="btn" id="referralShareBtn">Поделиться ссылкой</button></div><div class="referral-milestones" id="referralMilestones"><div class="referral-milestone" data-m="10"><b>10</b><span>Циановая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="50"><b>50</b><span>Сапфировая рамка</span><em>🔒</em></div><div class="referral-milestone" data-m="100"><b>100</b><span>Аврора</span><em>🔒</em></div></div><div class="referral-people-title">👤 Перешли по твоей ссылке</div><div class="referral-people" id="referralPeople"><div class="referral-empty">Пока никто не перешёл</div></div></div>
@@ -5398,7 +5398,7 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 </div>
 
 <div class="modal-overlay share-modal" id="shareOrbsModal"><div class="input-modal"><h3>Орбы</h3><div class="section-sub">Выберите игрока для перевода</div><input id="shareSearch" class="share-search" placeholder="Поиск по игрокам" autocomplete="off"><div id="onlineUsersList" class="online-users-list"></div><div id="shareSelected" class="share-selected"></div><div class="share-amount-row" id="shareAmountRow" style="display:none"><input id="shareAmount" type="number" min="1" step="1" placeholder="Сумма орбов"><button class="btn" id="shareSendBtn">Отправить</button></div><button class="btn-ghost" id="shareCloseBtn" style="width:100%;margin-top:10px">Закрыть</button></div></div>
-<div class="modal-overlay" id="customBannerModal"><div class="premium-modal-card custom-banner-modal"><div class="premium-modal-top"><div class="premium-modal-star">🖼️</div><div><div class="premium-modal-title">Свой баннер</div><div class="premium-modal-sub">Постоянная покупка · 5 ⭐</div></div></div><div class="custom-banner-preview" id="customBannerPreview"><span>Здесь появится ваш баннер</span></div><div class="custom-banner-upload-row"><label class="btn-main custom-banner-file-label">Загрузить<input id="customBannerFile" type="file" accept="image/*" hidden></label></div><div class="custom-banner-controls"><label>Приближение<input id="customBannerZoom" type="range" min="0.5" max="2.5" step="0.01" value="1"></label><label>По горизонтали<input id="customBannerX" type="range" min="0" max="100" step="1" value="50"></label><label>По вертикали<input id="customBannerY" type="range" min="0" max="100" step="1" value="50"></label></div><div class="custom-banner-actions"><button type="button" class="btn-main custom-banner-pay-btn" id="customBannerSaveBtn" disabled>Оплатить</button><button type="button" class="btn-ghost" id="customBannerCloseBtn">Закрыть</button></div></div></div>
+<div class="modal-overlay" id="customBannerModal"><div class="premium-modal-card custom-banner-modal"><div class="premium-modal-top"><div class="premium-modal-star">🖼️</div><div><div class="premium-modal-title">Свой баннер</div><div class="premium-modal-sub" id="customBannerModalSub">Постоянная покупка · 5 ⭐</div></div></div><div class="custom-banner-preview" id="customBannerPreview"><span>Здесь появится ваш баннер</span></div><div class="custom-banner-upload-row"><label class="btn-main custom-banner-file-label" id="customBannerFileLabel">Загрузить<input id="customBannerFile" type="file" accept="image/*" hidden></label></div><div class="custom-banner-controls" id="customBannerControls"><label>Приближение<input id="customBannerZoom" type="range" min="0.5" max="2.5" step="0.01" value="1"></label><label>По горизонтали<input id="customBannerX" type="range" min="0" max="100" step="1" value="50"></label><label>По вертикали<input id="customBannerY" type="range" min="0" max="100" step="1" value="50"></label></div><div class="custom-banner-publish" id="customBannerPublishBox"><div class="section-sub">После публикации баннер станет общедоступным для игроков с Premium и больше не сможет изменяться.</div><input id="customBannerPublishName" maxlength="48" placeholder="Название баннера"><button type="button" class="btn-main" id="customBannerPublishBtn">Опубликовать за 100 ⭐</button></div><div class="custom-banner-actions"><button type="button" class="btn-main custom-banner-pay-btn" id="customBannerSaveBtn" disabled>Оплатить</button><button type="button" class="btn-ghost" id="customBannerCloseBtn">Закрыть</button></div></div></div>
 <div class="modal-overlay" id="premiumModal"><div class="premium-modal-card"><div class="premium-modal-top"><div class="premium-modal-star">⭐</div><div><div class="premium-modal-title">Premium</div><div class="premium-modal-sub" id="premiumModalSub">30 дней · всё самое полезное в одном статусе</div></div></div><div class="premium-perks"><div class="premium-perk">🎁 <span><b>x2</b> ежедневный бонус</span></div><div class="premium-perk">🟡 <span><b>20</b> игр в «Орб-Рывке» каждые 12 часов</span></div><div class="premium-perk">💣 <span><b>20</b> игр в «Минах» каждые 12 часов</span></div><div class="premium-perk">💎 <span>Продажа кубов по <b>0.85x</b></span></div><div class="premium-perk">🍀 <span><b>+10%</b> удачи</span></div><div class="premium-perk">🎒 <span><b>Безлимит</b> слотов инвентаря</span></div><div class="premium-perk">🖼️ <span>Premium-рамка, баннеры профиля и ⭐ статус</span></div><div class="premium-perk">🛒 <span>Бонусы к покупкам</span></div></div><div class="section-sub" style="margin-top:12px">Выберите срок Premium</div><div class="premium-duration" id="premiumSelfDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Выбрано</span><span class="premium-price-value" id="premiumSelfPrice">20 ⭐ / 30 дней</span></div><div class="premium-choice-actions"><button type="button" class="btn-main premium-buy-action" id="premiumModalBuyBtn">Купить себе · 20 ⭐</button><button type="button" class="btn-ghost premium-gift-open" id="premiumGiftOpenBtn">Купить другому</button></div><button type="button" class="btn-ghost premium-close-action" id="premiumModalCloseBtn">Не сейчас</button></div></div>
 <div class="modal-overlay" id="premiumGiftModal"><div class="premium-modal-card premium-gift-card"><div class="premium-modal-top"><div class="premium-modal-star">🎁</div><div><div class="premium-modal-title">Подарить Premium</div><div class="premium-modal-sub">Выберите игрока — поиск по нику, ID или Telegram username</div></div></div><div class="premium-gift-search"><input id="premiumGiftSearch" class="input" type="search" placeholder="Ник, @username или ID"><button type="button" class="btn-ghost" id="premiumGiftSearchBtn">Найти</button></div><div id="premiumGiftSelected" class="premium-gift-selected">Игрок не выбран</div><div id="premiumGiftResults" class="premium-gift-results"><div class="premium-gift-empty">Введите запрос для поиска игроков</div></div><div class="section-sub" style="margin-top:12px">Выберите срок подарка</div><div class="premium-duration" id="premiumGiftDuration"><button type="button" class="premium-duration-btn selected" data-premium-days="30"><strong>30 дней</strong><span>20 ⭐</span><small>стандарт</small></button><button type="button" class="premium-duration-btn" data-premium-days="60"><strong>60 дней</strong><span>35 ⭐</span><small>-12,5%</small></button><button type="button" class="premium-duration-btn" data-premium-days="90"><strong>90 дней</strong><span>45 ⭐</span><small>-25%</small></button></div><div class="premium-price"><span class="premium-price-label">Подарок</span><span class="premium-price-value" id="premiumGiftPrice">20 ⭐ / 30 дней</span></div><button type="button" class="btn-main premium-buy-action premium-gift-pay" id="premiumGiftPayBtn" disabled>Подарить Premium · 20 ⭐</button><button type="button" class="btn-ghost premium-close-action" id="premiumGiftCloseBtn">Назад</button></div></div>
 <div class="modal-overlay" id="spinModal">
@@ -5917,7 +5917,7 @@ function newUserData(username){
     wins: 0,
     battle_winnings: 0,
     vault_balance: 0,
-    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileBanner: 'default', profileCustomBanner:'', profileCustomBannerSettings:{}, profileCustomBannerOwned:false, profileOwnedFrames: [],
+    creatorBadge: false, testerBadge: false, customStatus: null, vipUntil: null, profileFrame: 'default', profileNameStyle: 'default', profileBanner: 'default', profilePublicBanner:null, profileCustomBanner:'', profileCustomBannerSettings:{}, profileCustomBannerOwned:false, profileCustomBannerLocked:false, profileCustomBannerPublishedId:null, profileOwnedFrames: [],
     created: Date.now()
   };
 }
@@ -6180,7 +6180,7 @@ function applyServerState(u){
   if(u.premium_until !== data.premiumUntil){ data.premiumUntil = u.premium_until || null; changed = true; }
   if(u.vip_until !== undefined && u.vip_until !== data.vipUntil){ data.vipUntil = u.vip_until || null; changed = true; }
   if(u.creator_badge !== undefined && !!u.creator_badge !== !!data.creatorBadge){ data.creatorBadge = !!u.creator_badge; changed = true; }
-  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_banner !== undefined && String(u.profile_banner||'default') !== String(data.profileBanner||'default')){ data.profileBanner = String(u.profile_banner||'default'); changed = true; } if(u.profile_custom_banner !== undefined){ data.profileCustomBanner=String(u.profile_custom_banner||''); changed=true; } if(u.profile_custom_banner_settings!==undefined){ data.profileCustomBannerSettings=u.profile_custom_banner_settings||{}; changed=true; } if(u.profile_custom_banner_owned!==undefined){ data.profileCustomBannerOwned=!!u.profile_custom_banner_owned; changed=true; } if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
+  if(u.tester_badge !== undefined && !!u.tester_badge !== !!data.testerBadge){ data.testerBadge = !!u.tester_badge; changed = true; }   if(u.profile_banner !== undefined && String(u.profile_banner||'default') !== String(data.profileBanner||'default')){ data.profileBanner = String(u.profile_banner||'default'); changed = true; } if(u.profile_public_banner !== undefined){ data.profilePublicBanner=u.profile_public_banner||null; changed=true; } if(u.profile_custom_banner !== undefined){ data.profileCustomBanner=String(u.profile_custom_banner||''); changed=true; } if(u.profile_custom_banner_settings!==undefined){ data.profileCustomBannerSettings=u.profile_custom_banner_settings||{}; changed=true; } if(u.profile_custom_banner_owned!==undefined){ data.profileCustomBannerOwned=!!u.profile_custom_banner_owned; changed=true; } if(u.profile_custom_banner_locked!==undefined){ data.profileCustomBannerLocked=!!u.profile_custom_banner_locked; changed=true; } if(u.profile_custom_banner_published_id!==undefined){ data.profileCustomBannerPublishedId=u.profile_custom_banner_published_id||null; changed=true; } if(u.profile_frame !== undefined && String(u.profile_frame||'default') !== String(data.profileFrame||'default')){ data.profileFrame = String(u.profile_frame||'default'); changed = true; } if(u.profile_name_style !== undefined){ const serverStyle=String(u.profile_name_style||'default'); const localStyle=String(data.profileNameStyle||'default'); if(serverStyle!=='default' || localStyle==='default' || !isPremiumActive()){ if(serverStyle!==localStyle){ data.profileNameStyle=serverStyle; changed=true; } } } if(u.custom_status !== undefined && JSON.stringify(u.custom_status||null)!==JSON.stringify(data.customStatus||null)){ data.customStatus=u.custom_status||null; changed=true; }
   if(Array.isArray(u.buffs) && JSON.stringify(u.buffs)!==JSON.stringify(data.buffs)){ data.buffs=u.buffs; changed=true; }
   if(Array.isArray(u.best_drops) && JSON.stringify(u.best_drops)!==JSON.stringify(data.bestDrops)){ data.bestDrops=u.best_drops; changed=true; }
   if(Array.isArray(u.notifications)){
@@ -6524,7 +6524,7 @@ function serverUserToGame(u,fallbackName){
     battles:Number(u?.battles_played||0), wins:Number(u?.total_wins||0), battle_winnings:Number(u?.battle_winnings||0),
     spins:Number(u?.total_spins||0), losses:Number(u?.total_losses||0), biggestWin:Number(u?.biggest_win||0),
     vault_balance:Number(u?.vault_balance||0),
-    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, notificationSettings:u?.notification_settings&&typeof u.notification_settings==='object'?{...u.notification_settings}:null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
+    creatorBadge:!!u?.creator_badge,testerBadge:!!u?.tester_badge, premiumUntil:u?.premium_until||null, stars:Number(u?.stars||0), profileBanner:String(u?.profile_banner||'default'), profilePublicBanner:u?.profile_public_banner||null, profileCustomBanner:String(u?.profile_custom_banner||''), profileCustomBannerSettings:u?.profile_custom_banner_settings&&typeof u.profile_custom_banner_settings==='object'?{...u.profile_custom_banner_settings}:{}, profileCustomBannerOwned:!!u?.profile_custom_banner_owned, profileCustomBannerLocked:!!u?.profile_custom_banner_locked, profileCustomBannerPublishedId:u?.profile_custom_banner_published_id||null, profileCustomBannerName:String(u?.profile_custom_banner_name||'Свой баннер'), casePity:u?.case_pity&&typeof u.case_pity==='object'?{...u.case_pity}:{}, techBreakEnabled:!!u?.tech_break_enabled, techBreakReason:u?.tech_break_reason||'', customStatus:u?.custom_status||null, notificationSettings:u?.notification_settings&&typeof u.notification_settings==='object'?{...u.notification_settings}:null, settings:{sound:true,motion:true}, serverSynced:true, created:Date.now()
   };
 }
 
@@ -10090,6 +10090,7 @@ async function renderLeaderboard(sortBy='cases'){
       profile_frame: r.profile_frame || r.profileFrame || '',
       profile_name_style: r.profile_name_style || r.profileNameStyle || 'default',
       profile_banner: r.profile_banner || r.profileBanner || 'default',
+      profile_public_banner: r.profile_public_banner || null,
       best_drops: r.best_drops || r.bestDrops || [],
       text_color: r.text_color || r.name_color || '',
       buffs: Array.isArray(r.buffs) ? r.buffs : [],
@@ -10102,7 +10103,7 @@ async function renderLeaderboard(sortBy='cases'){
     rows.forEach(r=>{ leaderboardProfileSeeds[r.key] = {
       user_id:r.key, username:r.username, avatar:r.avatar, balance:r.balance,
       cases_opened:r.cases, cube_count:r.cube_count, battles:Number(r.battles||0),
-      wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge, profile_name_style:r.profile_name_style || 'default', profile_banner:r.profile_banner || 'default',
+      wins:r.wins, premium_until:r.premium_until, creator_badge:r.creator_badge, profile_name_style:r.profile_name_style || 'default', profile_banner:r.profile_banner || 'default', profile_public_banner:r.profile_public_banner || null,
       tester_badge:r.tester_badge, custom_status:r.custom_status || {}, profile_frame:r.profile_frame || '', best_drops:Array.isArray(r.best_drops)?r.best_drops:[],
       profile_name_style:r.profile_name_style || 'default',
       buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
@@ -10278,8 +10279,9 @@ async function openPublicProfile(userId, seed={}){
   let publicBanner=String(p.profile_banner||'default').toLowerCase();
   const seedBanner=String(cached.profile_banner||seed.profile_banner||'default').toLowerCase();
   if(publicBanner==='default' && seedBanner!=='default' && p.premium_until && new Date(p.premium_until).getTime()>Date.now() && (window.PROFILE_BANNERS||{})[seedBanner]) publicBanner=seedBanner;
-  const publicBannerSrc=publicBanner==='custom' ? (p.profile_custom_banner||'') : (window.PROFILE_BANNERS||{})[publicBanner];
-  const publicBannerStyle=(publicBanner==='custom' ? !!(publicBannerSrc&&p.profile_custom_banner_owned) : (publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now()))?`--public-banner:url(\"${publicBannerSrc}\");` : '';
+  const publicBannerObj=p.profile_public_banner || (cached.profile_public_banner||seed.profile_public_banner||null);
+  const publicBannerSrc=publicBanner==='custom' ? (p.profile_custom_banner||'') : (publicBanner.startsWith('public:') ? (publicBannerObj?.image||'') : (window.PROFILE_BANNERS||{})[publicBanner]);
+  const publicBannerStyle=(publicBanner==='custom' ? !!(publicBannerSrc&&p.profile_custom_banner_owned) : (publicBanner.startsWith('public:') ? !!(publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now()) : (publicBanner!=='default'&&publicBannerSrc&&p.premium_until&&new Date(p.premium_until).getTime()>Date.now())))?`--public-banner:url(\"${publicBannerSrc}\");` : '';
   const publicFrameHtml = publicFrame && publicFrame!=='default' ? `<span class="public-profile-avatar-frame frame-${publicFrame}"></span>` : '';
   body.innerHTML=`<div class="public-profile-shell">
     <div class="profile-head public-profile-head-v2 ${publicBannerStyle?'has-public-profile-banner':''}" style="${publicBannerStyle}">
@@ -10461,16 +10463,20 @@ function renderProfileCustomization(){
   });
   const bannerKey=String(data?.profileBanner||'default');
   const bannerBg=document.getElementById('profileBannerBg');
-  const bannerSrc=bannerKey==='custom' ? (data?.profileCustomBanner||'') : (window.PROFILE_BANNERS||{})[bannerKey];
+  const publicBanner=data?.profilePublicBanner||null;
+  const bannerSrc=bannerKey==='custom' ? (data?.profileCustomBanner||'') : (bannerKey.startsWith('public:') ? (publicBanner?.image||'') : (window.PROFILE_BANNERS||{})[bannerKey]);
   const bannerOwned=(bannerKey==='custom' && !!data?.profileCustomBannerOwned);
-  if(bannerBg){ bannerBg.style.backgroundImage=((bannerKey==='custom'&&bannerOwned&&bannerSrc)||(vipActive&&bannerKey!=='default'&&bannerSrc))?`url(\"${bannerSrc}\")`:''; bannerBg.style.backgroundSize='cover'; bannerBg.style.backgroundPosition=bannerKey==='custom'?`${Number(data?.profileCustomBannerSettings?.x??50)}% ${Number(data?.profileCustomBannerSettings?.y??50)}%`:''; bannerBg.style.display=((bannerKey==='custom'&&bannerOwned&&bannerSrc)||(vipActive&&bannerKey!=='default'&&bannerSrc))?'block':'none'; }
+  const bannerAllowed=(bannerKey==='custom' ? bannerOwned : (bannerKey.startsWith('public:') ? !!(vipActive&&bannerSrc) : (vipActive&&bannerKey!=='default'&&bannerSrc)));
+  if(bannerBg){ bannerBg.style.backgroundImage=(bannerAllowed&&bannerSrc)?`url(\"${bannerSrc}\")`:''; bannerBg.style.backgroundSize='cover'; const bs=bannerKey==='custom'?data?.profileCustomBannerSettings:(bannerKey.startsWith('public:')?(publicBanner?.settings||{}):{}); bannerBg.style.backgroundPosition=bs&&bs.x!=null?`${Number(bs.x)}% ${Number(bs.y??50)}%`:''; bannerBg.style.display=(bannerAllowed&&bannerSrc)?'block':'none'; }
   const grid=document.getElementById('profileBannerGrid');
   if(grid){
     const labels={tidal_wave:'Tidal Wave',orbit:'ORBIT',nullscapes:'Nullscapes',grief:'Grief',unleashed:'Unleashed',slaughterhouse:'Slaughterhouse'};
-    const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||''; const customAvailable=vipActive;
-    const customCard=`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open" ${customAvailable?'':'disabled'}><div class="custom-banner-card-preview" ${customOwned&&customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customAvailable?(customOwned?(customActive?'Свой баннер · Настроить':'Свой баннер · Установить'):'Свой баннер · Создать · 5 ⭐'):'Свой баннер · Только Premium'}</span></button>`;
+    const customOwned=!!data?.profileCustomBannerOwned; const customActive=bannerKey==='custom'; const customThumb=data?.profileCustomBanner||''; const customAvailable=vipActive||!!window.isAdmin; const locked=!!data?.profileCustomBannerLocked;
+    const customLabel=locked ? 'Опубликован · Настроить нельзя' : (customOwned?(customActive?'Свой баннер · Настроить':'Свой баннер · Установить'):'Свой баннер · Создать · 5 ⭐');
+    const customCard=`<button type="button" class="profile-banner-btn custom-banner-buy-card ${customActive?'active':''}" data-custom-banner-action="open" ${customAvailable?'':'disabled'}><div class="custom-banner-card-preview" ${customOwned&&customThumb?`style="background-image:url('${customThumb}')"`:''}></div><span>${customAvailable?customLabel:'Свой баннер · Только Premium'}</span></button>`;
     grid.innerHTML='<button type="button" class="profile-banner-btn '+(bannerKey==='default'?'active':'')+'" data-profile-banner="default"><span>Без баннера</span></button>'+Object.keys(window.PROFILE_BANNERS||{}).map(k=>`<button type="button" class="profile-banner-btn ${bannerKey===k?'active':''}" data-profile-banner="${k}" ${vipActive?'':'disabled'}><img src="${window.PROFILE_BANNERS[k]}" alt="" loading="eager" decoding="async"><span>${labels[k]||k}</span></button>`).join('')+customCard;
   }
+  loadPublicBannerLibrary();
   const st=document.getElementById('profileStyleStatus'); if(st) st.textContent=vipActive?'Premium оформление':'Базовое оформление';
 }
 async function refreshProfileAppearanceFromServer(){
@@ -10481,9 +10487,12 @@ async function refreshProfileAppearanceFromServer(){
     if(u){
       if(u.profile_frame!==undefined) data.profileFrame=String(u.profile_frame||'default');
       if(u.profile_banner!==undefined) data.profileBanner=String(u.profile_banner||'default');
+      if(u.profile_public_banner!==undefined) data.profilePublicBanner=u.profile_public_banner||null;
       if(u.profile_custom_banner!==undefined) data.profileCustomBanner=String(u.profile_custom_banner||'');
       if(u.profile_custom_banner_settings!==undefined) data.profileCustomBannerSettings=u.profile_custom_banner_settings||{};
       if(u.profile_custom_banner_owned!==undefined) data.profileCustomBannerOwned=!!u.profile_custom_banner_owned;
+      if(u.profile_custom_banner_locked!==undefined) data.profileCustomBannerLocked=!!u.profile_custom_banner_locked;
+      if(u.profile_custom_banner_published_id!==undefined) data.profileCustomBannerPublishedId=u.profile_custom_banner_published_id||null;
       if(u.profile_custom_banner_name!==undefined) data.profileCustomBannerName=String(u.profile_custom_banner_name||'Свой баннер');
       if(u.profile_name_style!==undefined){
         const serverStyle=String(u.profile_name_style||'default');
@@ -10520,13 +10529,37 @@ function isPremiumActive(){
   const t=Date.parse(raw); return Number.isFinite(t) && t>Date.now();
 }
 let customBannerImageData='';
+let publicBannerLibraryLoaded=false;
+async function loadPublicBannerLibrary(force=false){
+  const box=document.getElementById('publicBannerGrid'); if(!box) return;
+  if(!force && publicBannerLibraryLoaded && box.dataset.loaded==='1') return;
+  try{
+    const j=await apiFetch('/api/profile/public-banners',{});
+    const banners=Array.isArray(j.banners)?j.banners:[];
+    publicBannerLibraryLoaded=true; box.dataset.loaded='1';
+    if(!banners.length){ box.innerHTML='<div class="section-sub">Пока никто не опубликовал баннер.</div>'; return; }
+    box.innerHTML=banners.map(b=>{
+      const active=String(data?.profileBanner||'')==='public:'+b.id;
+      const canUse=!!(isPremiumActive()||window.isAdmin);
+      return `<button type="button" class="profile-banner-btn public-banner-card ${active?'active':''}" data-public-banner-id="${b.id}" ${canUse?'':'disabled'}><img src="${String(b.image||'').replace(/"/g,'&quot;')}" alt="" loading="lazy" decoding="async"><span>${String(b.name||'Баннер').replace(/[<>]/g,'')}</span><small>Автор: ${String(b.author_name||'Игрок').replace(/[<>]/g,'')}</small></button>`;
+    }).join('');
+  }catch(e){ box.innerHTML='<div class="section-sub">Не удалось загрузить общие баннеры.</div>'; }
+}
 function openCustomBannerEditor(){
   const modal=document.getElementById('customBannerModal'); if(!modal) return;
-  if(!isPremiumActive()){ showToast('🔒 Создание своего баннера доступно только с Premium','error'); return; }
+  if(!isPremiumActive() && !window.isAdmin){ showToast('🔒 Создание своего баннера доступно только с Premium','error'); return; }
+  if(data?.profileCustomBannerLocked){ showToast('🔒 Опубликованный баннер больше нельзя изменять','error'); return; }
   customBannerImageData=data?.profileCustomBanner||'';
   const f=document.getElementById('customBannerFile'); if(f) f.value='';
   const st=data.profileCustomBannerSettings||{};
   ['zoom','x','y'].forEach(k=>{const el=document.getElementById('customBanner'+k.charAt(0).toUpperCase()+k.slice(1)); if(el&&st[k]!=null) el.value=st[k];});
+  const locked=!!data?.profileCustomBannerLocked;
+  const controls=document.getElementById('customBannerControls'); const fileLabel=document.getElementById('customBannerFileLabel'); const sub=document.getElementById('customBannerModalSub'); const publishBox=document.getElementById('customBannerPublishBox'); const save=document.getElementById('customBannerSaveBtn');
+  if(controls) controls.style.display=locked?'none':'grid';
+  if(fileLabel) fileLabel.style.display=locked?'none':'flex';
+  if(sub) sub.textContent=locked?'Опубликованный баннер · изменения запрещены':'Постоянная покупка · 5 ⭐';
+  if(publishBox) publishBox.style.display=locked?'none':'grid';
+  if(save) save.style.display=locked?'none':'inline-flex';
   updateCustomBannerPreview(); openModal('customBannerModal');
 }
 function updateCustomBannerPreview(){
@@ -10570,6 +10603,39 @@ async function startCustomBannerPayment(){
     });
   }catch(e){showToast('❌ '+e.message,'error');}
 }
+async function publishCustomBanner(){
+  try{
+    if(data?.profileCustomBannerLocked) throw new Error('Этот баннер уже опубликован');
+    if(!data?.profileCustomBanner) throw new Error('Сначала создай и сохрани баннер');
+    if(!isPremiumActive() && !window.isAdmin) throw new Error('Публикация доступна только с Premium');
+    const name=String(document.getElementById('customBannerPublishName')?.value||'').trim();
+    if(name.length<2) throw new Error('Введи название баннера');
+    const btn=document.getElementById('customBannerPublishBtn'); if(btn){btn.disabled=true;btn.textContent=window.isAdmin?'Публикуем…':'Создаём счёт 100 ⭐…';}
+    const j=await apiFetch('/api/profile/custom-banner/publish',{name});
+    if(j.payment_required && j.invoice){
+      if(!window.Telegram?.WebApp?.openInvoice) throw new Error('Оплата Telegram Stars доступна только внутри Telegram');
+      closeModal('customBannerModal');
+      Telegram.WebApp.openInvoice(j.invoice,async status=>{
+        if(status==='paid'){
+          showToast('⏳ Оплата 100 ⭐ получена. Публикуем баннер…','success');
+          try{
+            await loadMe();
+            await loadPublicBannerLibrary(true);
+            if(data?.profileCustomBannerLocked){ renderProfileCustomization(); showToast('🌐 Баннер опубликован за 100 ⭐','success'); }
+            else showToast('⏳ Telegram подтвердил оплату. Баннер появится после обработки платежа.','success');
+          }catch(e){ showToast('⚠️ Оплата прошла, обнови профиль через несколько секунд','error'); }
+        }else if(status==='failed') showToast('❌ Оплата 100 ⭐ не прошла','error');
+        else if(status==='cancelled') showToast('Оплата отменена','error');
+        else if(status==='pending') showToast('⏳ Платёж ещё обрабатывается','success');
+      });
+      return;
+    }
+    data.profileCustomBannerLocked=true; data.profileCustomBannerPublishedId=Number(j.id||0)||null; data.profileBanner='public:'+String(j.id); data.profilePublicBanner={id:Number(j.id),name:String(j.name||name),image:String(j.image||data.profileCustomBanner),settings:j.settings||data.profileCustomBannerSettings,author_id:Number(tgUserId()||0),author_name:String(data.username||'Вы')}; if(j.stars!==undefined) data.stars=Number(j.stars||0);
+    persistLocal(); updateBalanceUI(); renderProfileCustomization(); loadPublicBannerLibrary(true); closeModal('customBannerModal'); showToast('🌐 Баннер опубликован бесплатно','success');
+  }catch(e){showToast('❌ '+(e.message||'Не удалось опубликовать баннер'),'error');}
+  finally{const b=document.getElementById('customBannerPublishBtn');if(b){b.disabled=false;b.textContent=window.isAdmin?'Опубликовать бесплатно':'Опубликовать за 100 ⭐';}}
+}
+
 async function saveCustomBanner(){
   try{
     if(!isPremiumActive()) throw new Error('Создание своего баннера доступно только с Premium');
@@ -10582,7 +10648,7 @@ async function saveCustomBanner(){
     }
     const b=document.getElementById('customBannerSaveBtn'); if(b){b.disabled=true;b.textContent='Сохраняем…';}
     const j=await apiFetch('/api/profile/custom-banner/save',{image,settings});
-    data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerName=''; data.profileCustomBannerOwned=true; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast(window.isAdmin?'🖼️ Баннер создан бесплатно':'🖼️ Баннер сохранён','success');
+    data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerName=''; data.profileCustomBannerOwned=true; data.profileCustomBannerLocked=false; data.profileCustomBannerPublishedId=null; data.profilePublicBanner=null; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast(window.isAdmin?'🖼️ Баннер создан бесплатно':'🖼️ Баннер сохранён','success');
   }catch(e){showToast('❌ '+e.message,'error');}
   finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent='Оплатить';}}
 }
@@ -10595,7 +10661,7 @@ async function setProfileBanner(key){
   data.profileBanner=key; persistLocal(); renderProfileCustomization();
   try{
     const j=await apiFetch('/api/profile/banner',{banner:key});
-    data.profileBanner=String(j.profile_banner||key);
+    data.profileBanner=String(j.profile_banner||key); if(j.profile_public_banner!==undefined) data.profilePublicBanner=j.profile_public_banner||null;
     if(j.premium_required) data.profileBanner='default';
     persistLocal(); renderProfileCustomization();
   }catch(e){ data.profileBanner=prev; persistLocal(); renderProfileCustomization(); showToast(e.message||'Не удалось сохранить баннер','error'); }
@@ -11347,10 +11413,12 @@ if(window.cubeIconsReady && typeof window.cubeIconsReady.then==='function'){
 }
 
 document.getElementById('profileFrameGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-profile-frame]');if(b&&!b.disabled)setProfileFrame(b.dataset.profileFrame);});
-document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const custom=e.target.closest('[data-custom-banner-action]'); if(custom){if(!isPremiumActive()){showToast('🔒 Создание своего баннера доступно только с Premium','error');return;} if(data?.profileCustomBannerOwned && String(data?.profileBanner||'default')!=='custom'){setProfileBanner('custom');return;} openCustomBannerEditor();return;} const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
+document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const custom=e.target.closest('[data-custom-banner-action]'); if(custom){if(!isPremiumActive()&&!window.isAdmin){showToast('🔒 Создание своего баннера доступно только с Premium','error');return;} if(data?.profileCustomBannerOwned && String(data?.profileBanner||'default')!=='custom' && !data?.profileCustomBannerLocked){setProfileBanner('custom');return;} if(data?.profileCustomBannerLocked){ if(data?.profileCustomBannerPublishedId) setProfileBanner('public:'+data.profileCustomBannerPublishedId); else showToast('🔒 Опубликованный баннер больше нельзя изменить','error'); return;} openCustomBannerEditor();return;} const b=e.target.closest('[data-profile-banner]');if(b&&!b.disabled)setProfileBanner(b.dataset.profileBanner);});
+document.getElementById('publicBannerGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-public-banner-id]');if(b&&!b.disabled)setProfileBanner('public:'+b.dataset.publicBannerId);});
 document.getElementById('customBannerFile')?.addEventListener('change',async e=>{try{const f=e.target.files?.[0]; if(f){await prepareCustomBanner(f);}}catch(err){showToast('❌ '+(err.message||'Не удалось обработать изображение'),'error');}});
 ['customBannerZoom','customBannerX','customBannerY'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateCustomBannerPreview));
 document.getElementById('customBannerSaveBtn')?.addEventListener('click',saveCustomBanner);
+document.getElementById('customBannerPublishBtn')?.addEventListener('click',publishCustomBanner);
 document.getElementById('customBannerCloseBtn')?.addEventListener('click',()=>closeModal('customBannerModal'));
 document.getElementById('profileBannerPickerToggle')?.addEventListener('click',toggleProfileBannerPicker);
 document.getElementById('profileCustomizeToggle')?.addEventListener('click',toggleProfileCustomize);
@@ -13078,4 +13146,15 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .custom-banner-pay-btn{min-height:44px!important;border-radius:12px!important;background:linear-gradient(135deg,#e5bb70,#b77d32)!important;color:#17120d!important;border:1px solid rgba(255,226,164,.7)!important;box-shadow:0 5px 18px rgba(183,125,50,.22),inset 0 1px 0 rgba(255,255,255,.16);font-weight:900!important;letter-spacing:.1px;}
 .custom-banner-pay-btn:not(:disabled):active{transform:translateY(1px);}
 .custom-banner-pay-btn:disabled{opacity:.48;filter:saturate(.55);}
+</style>
+
+<style id="gdplay-public-banners-v1">
+.public-banner-library{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+.public-banner-library-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;}
+.public-banner-card{min-width:0!important;position:relative;}
+.public-banner-card img{width:100%;height:72px;object-fit:cover;border-radius:9px;display:block;margin-bottom:5px;}
+.public-banner-card small{display:block;font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.custom-banner-publish{display:grid;gap:8px;margin-top:10px;padding:10px;border:1px solid rgba(227,184,114,.25);border-radius:12px;background:rgba(201,151,77,.05);}
+.custom-banner-publish input{background:#2a2927!important;color:#eee!important;border:1px solid #484643!important;border-radius:10px;padding:10px;}
+#customBannerPublishBtn{min-height:42px;}
 </style>
