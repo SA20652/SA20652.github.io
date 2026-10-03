@@ -13156,9 +13156,11 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 <style id="gdplay-public-banners-v1">
 .public-banner-library{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
 .public-banner-library-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;}
-.public-banner-card{min-width:0!important;position:relative;}
-.public-banner-card img{width:100%;height:72px;object-fit:cover;border-radius:9px;display:block;margin-bottom:5px;}
-.public-banner-card small{display:block;font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.public-banner-card{min-width:0!important;position:relative!important;display:block!important;min-height:0!important;padding:0 0 7px!important;overflow:hidden;}
+.public-banner-card::after{display:none!important;content:none!important;}
+.public-banner-card img{width:100%;height:72px;object-fit:cover;border-radius:9px;display:block;margin:0 0 6px;}
+.public-banner-card span{position:static!important;display:block!important;margin:0 7px 2px!important;font-size:10px!important;font-weight:800!important;text-shadow:none!important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.public-banner-card small{position:static!important;display:block;font-size:9px;color:var(--muted);margin:0 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
 .custom-banner-publish{display:grid;gap:8px;margin-top:10px;padding:10px;border:1px solid rgba(227,184,114,.25);border-radius:12px;background:rgba(201,151,77,.05);}
 .custom-banner-publish input{background:#2a2927!important;color:#eee!important;border:1px solid #484643!important;border-radius:10px;padding:10px;}
 #customBannerPublishBtn{min-height:42px;border:1px solid rgba(255,226,164,.78)!important;border-radius:12px!important;background:linear-gradient(135deg,#f0c76f 0%,#c58a35 100%)!important;color:#1d160d!important;font-weight:900!important;box-shadow:0 5px 18px rgba(197,138,53,.24),inset 0 1px 0 rgba(255,255,255,.2);}
