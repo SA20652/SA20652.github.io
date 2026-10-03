@@ -6021,7 +6021,7 @@ async function apiFetch(path, payload={}, _retry=false){
         const controller=typeof AbortController!=='undefined'?new AbortController():null;
         const timer=controller?setTimeout(()=>controller.abort(),8000):null;
         try{
-          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData}),signal:controller?.signal});
+          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData,authToken:storageGet(AUTH_TOKEN_KEY)||''}),signal:controller?.signal});
           const sj=await sr.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
           if(sr.ok && sj.adminSession){ adminSession=sj.adminSession; window.__GDPLAYAdminSession = adminSession; sessionError=null; break; }
           if(sr.status && sr.status<500) throw new Error(sj.error||'Нет доступа');
