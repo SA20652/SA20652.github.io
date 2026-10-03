@@ -6975,7 +6975,11 @@ async function bootSafe(){
         if(j.global_tech_break?.enabled && !j.is_admin && !isTechBreakExempt()) showTechBreak(j.global_tech_break.reason); else hideTechBreak();
         data.username = tgName;
         window.isAdmin = !!j.is_admin;
-      updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
+        updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
+        // Восстанавливаем админ-панель и для сохранённой серверной сессии.
+        // Раньше этот путь сразу делал return после showApp(), поэтому у
+        // администратора меню могло исчезнуть после перезапуска приложения.
+        if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin UI warmup', e));
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
         applyImmediateTelegramAvatarFallback();
         await showApp(true);
