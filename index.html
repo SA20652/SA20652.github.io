@@ -5523,6 +5523,20 @@ function bindCriticalAuth(){
 bindCriticalAuth();
 
 const API_BASE = "https://gdplay.up.railway.app";
+function avatarSrc(value, userId=''){
+  const raw=String(value||'').trim();
+  if(raw) {
+    if(raw.startsWith('/assets/')) return API_BASE.replace(/\/$/,'')+raw;
+    return raw;
+  }
+  const id=String(userId||'').trim();
+  return id ? API_BASE.replace(/\/$/,'')+'/api/avatar/'+encodeURIComponent(id) : '';
+}
+function avatarImg(value,userId,alt=''){
+  const src=avatarSrc(value,userId);
+  if(!src) return '';
+  return `<img src="${src.replace(/"/g,'&quot;')}" alt="${String(alt||'').replace(/"/g,'&quot;')}" loading="eager" decoding="async">`;
+}
 const API_BASES = [...new Set([
   API_BASE.replace(/\/$/, ''),
   (window.location?.origin && window.location.origin !== 'null') ? window.location.origin.replace(/\/$/, '') : ''
@@ -9970,7 +9984,7 @@ function animateBattleDice(result, myId){
     closeBtn.style.display='none';
     list.innerHTML = result.rolls.map(r=>`
       <div class="battle-dice-unit">
-        <div class="battle-dice-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.name||'?')[0].toUpperCase()}</div>
+        <div class="battle-dice-avatar">${avatarSrc(r.avatar,r.user) ? `<img src="${avatarSrc(r.avatar,r.user).replace(/"/g,'&quot;')}" alt="" loading="eager" decoding="async">` : (r.name||'?')[0].toUpperCase()}</div>
         <div class="battle-dice-name">${r.name}</div>
         <div id="dicewrap-${r.user}">${dice3dHtml()}</div>
       </div>`).join('');
@@ -10046,7 +10060,7 @@ async function refreshLeaderboardAvatarsOnce(sortBy){
         const a=el.querySelector('.lb-avatar');
         if(a && !a.querySelector('img')){
           const frame=a.querySelector('.lb-avatar-frame');
-          a.innerHTML=`<img src="${String(r.avatar).replace(/"/g,'&quot;')}" alt="" loading="eager" decoding="async">`;
+          a.innerHTML=`<img src="${avatarSrc(r.avatar,r.user_id).replace(/"/g,'&quot;')}" alt="" loading="eager" decoding="async">`;
           if(frame) a.appendChild(frame);
         }
       });
@@ -10098,7 +10112,7 @@ async function renderLeaderboard(sortBy='cases'){
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''}">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
-        <div class="lb-avatar">${r.avatar ? `<img src="${r.avatar}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
+        <div class="lb-avatar">${avatarSrc(r.avatar,r.key||r.user_id) ? `<img src="${avatarSrc(r.avatar,r.key||r.user_id).replace(/"/g,'&quot;')}" alt="" loading="eager" decoding="async">` : (r.username||'?')[0].toUpperCase()}${(()=>{const f=(r.profile_frame||((r.key===myId)?data.profileFrame:'default')); const ok=f && f!=='default'; return ok?`<span class="lb-avatar-frame frame-${f}"></span>`:'';})()}</div>
         <div style="min-width:0;flex:1">
           <div class="lb-user name-${String(r.profile_name_style||'default').toLowerCase()}" style="${r.text_color?`color:${String(r.text_color).replace(/"/g,'&quot;')};`:''}">${r.username}${r.key===myId?' (ты)':''}</div>
           ${buffBadgeHtml(r)}
@@ -10195,7 +10209,7 @@ async function refreshPublicProfileAvatarOnce(userId){
     const img=body?.querySelector('.public-profile-avatar img');
     const box=body?.querySelector('.public-profile-avatar');
     if(box && !img){
-      box.innerHTML=`<img src="${String(p.avatar).replace(/"/g,'&quot;')}" alt="Аватар" loading="eager" decoding="async">`;
+      box.innerHTML=avatarSrc(p.avatar,p.user_id)?`<img src="${avatarSrc(p.avatar,p.user_id).replace(/"/g,'&quot;')}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase();
     }
   }catch(_){}
 }
@@ -10271,7 +10285,7 @@ async function openPublicProfile(userId, seed={}){
     <div class="profile-head public-profile-head-v2 ${publicBannerStyle?'has-public-profile-banner':''}" style="${publicBannerStyle}">
       ${publicBannerStyle?`<div class="public-profile-banner-art" aria-hidden="true"><img class="public-profile-banner-blur" src="${publicBannerSrc}" alt=""><img class="public-profile-banner-sharp" src="${publicBannerSrc}" alt=""></div>`:''}
       <div class="profile-avatar-wrap public-profile-avatar-wrap">
-        <div class="profile-avatar public-profile-avatar">${p.avatar?`<img src="${p.avatar}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
+        <div class="profile-avatar public-profile-avatar">${avatarSrc(p.avatar,p.user_id)?`<img src="${avatarSrc(p.avatar,p.user_id).replace(/"/g,'&quot;')}" alt="Аватар" loading="eager" decoding="async">`:(p.username||'?')[0].toUpperCase()}</div>
         ${publicFrameHtml}
       </div>
       <div class="profile-head-info">
@@ -10632,7 +10646,7 @@ function renderReferralPeople(people){
     const name=String(p.name||'Игрок').replace(/[<>]/g,'');
     const status=String(p.status||'pending')==='active'?'Активирован':'Перешёл';
     const avatar=String(p.avatar||'');
-    const avatarHtml=avatar?`<img class="referral-person-avatar" src="${avatar.replace(/"/g,'&quot;')}" alt="" loading="eager">`:'<div class="referral-person-avatar">👤</div>';
+    const avatarHtml=avatarSrc(avatar,p.referred_id)?`<img class="referral-person-avatar" src="${avatarSrc(avatar,p.referred_id).replace(/"/g,'&quot;')}" alt="" loading="eager">`:'<div class="referral-person-avatar">👤</div>';
     return `<div class="referral-person">${avatarHtml}<div class="referral-person-main"><div class="referral-person-name">${name}</div><div class="referral-person-meta">${String(p.created_at||'').slice(0,16)}</div></div><span class="referral-person-status">${status}</span></div>`;
   }).join('');
 }
@@ -11117,7 +11131,7 @@ function renderAll(){
 
 let shareTarget=null;
 async function openShareOrbs(){shareTarget=null;document.getElementById('shareSelected').textContent='';document.getElementById('shareAmountRow').style.display='none';document.getElementById('shareAmount').value='';openModal('shareOrbsModal');await loadOnlineUsers();}
-async function loadOnlineUsers(){const list=document.getElementById('onlineUsersList');if(!list)return;list.innerHTML='<div class="section-sub">Загрузка…</div>';try{const j=await apiFetch('/api/all-users',{search:document.getElementById('shareSearch')?.value||''});const users=j.users||[];list.innerHTML=users.length?users.map(u=>{const n=(u.display_name||u.username||'Игрок').replace(/"/g,'&quot;');const av=u.avatar?`<img src="${u.avatar}" alt="" loading="eager" decoding="async">`:(n[0]||'И');return `<div class="online-user-row"><div class="online-user-avatar">${av}</div><div class="online-user-name">${n}</div><button class="btn-ghost" data-share-user="${u.user_id}">Отправить</button></div>`}).join(''):'<div class="section-sub">Игроки не найдены</div>';}catch(e){list.innerHTML='<div class="section-sub">❌ '+(e.message||'Не удалось загрузить игроков')+'</div>';}}
+async function loadOnlineUsers(){const list=document.getElementById('onlineUsersList');if(!list)return;list.innerHTML='<div class="section-sub">Загрузка…</div>';try{const j=await apiFetch('/api/all-users',{search:document.getElementById('shareSearch')?.value||''});const users=j.users||[];list.innerHTML=users.length?users.map(u=>{const n=(u.display_name||u.username||'Игрок').replace(/"/g,'&quot;');const av=avatarSrc(u.avatar,u.user_id)?`<img src="${avatarSrc(u.avatar,u.user_id).replace(/"/g,'&quot;')}" alt="" loading="eager" decoding="async">`:(n[0]||'И');return `<div class="online-user-row"><div class="online-user-avatar">${av}</div><div class="online-user-name">${n}</div><button class="btn-ghost" data-share-user="${u.user_id}">Отправить</button></div>`}).join(''):'<div class="section-sub">Игроки не найдены</div>';}catch(e){list.innerHTML='<div class="section-sub">❌ '+(e.message||'Не удалось загрузить игроков')+'</div>';}}
 function selectShareUser(uid,name){shareTarget={uid:Number(uid),name};document.getElementById('shareSelected').textContent='Получатель: '+name;document.getElementById('shareAmountRow').style.display='flex';document.getElementById('shareAmount').focus();}
 async function sendOrbs(){if(!shareTarget)return;const amount=Number(document.getElementById('shareAmount').value);if(!Number.isInteger(amount)||amount<1){toast('Введите целое число орбов');return;}const btn=document.getElementById('shareSendBtn');btn.disabled=true;try{const j=await apiFetch('/api/orbs/transfer',{user_id:shareTarget.uid,amount});data.balance=Number(j.balance||0);persistLocal();updateBalanceUI();
 const recipientName=String(shareTarget.name||'Игрок');
