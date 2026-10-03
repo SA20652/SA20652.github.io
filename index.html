@@ -10541,7 +10541,7 @@ async function loadPublicBannerLibrary(force=false){
     box.innerHTML=banners.map(b=>{
       const active=String(data?.profileBanner||'')==='public:'+b.id;
       const canUse=!!(isPremiumActive()||window.isAdmin);
-      return `<button type="button" class="profile-banner-btn public-banner-card ${active?'active':''}" data-public-banner-id="${b.id}" ${canUse?'':'disabled'}><img src="${String(b.image||'').replace(/"/g,'&quot;')}" alt="" loading="lazy" decoding="async"><span>${String(b.name||'Баннер').replace(/[<>]/g,'')}</span><small>Автор: ${String(b.author_name||'Игрок').replace(/[<>]/g,'')}</small></button>`;
+      return `<button type="button" class="profile-banner-btn public-banner-card ${active?'active':''}" data-public-banner-id="${b.id}" ${canUse?'':'disabled'}><div class="public-banner-card-art"><img src="${String(b.image||'').replace(/"/g,'&quot;')}" alt="" loading="lazy" decoding="async"><span>${String(b.name||'Баннер').replace(/[<>]/g,'')}</span></div><small>Автор: ${String(b.author_name||'Игрок').replace(/[<>]/g,'')}</small></button>`;
     }).join('');
   }catch(e){ box.innerHTML='<div class="section-sub">Не удалось загрузить общие баннеры.</div>'; }
 }
@@ -13158,9 +13158,11 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .public-banner-library-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;}
 .public-banner-card{min-width:0!important;position:relative!important;display:block!important;min-height:0!important;padding:0 0 7px!important;overflow:hidden;}
 .public-banner-card::after{display:none!important;content:none!important;}
-.public-banner-card img{width:100%;height:72px;object-fit:cover;border-radius:9px;display:block;margin:0 0 6px;}
-.public-banner-card span{position:static!important;display:block!important;margin:0 7px 2px!important;font-size:10px!important;font-weight:800!important;text-shadow:none!important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.public-banner-card small{position:static!important;display:block;font-size:9px;color:var(--muted);margin:0 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
+.public-banner-card-art{position:relative;width:100%;height:72px;overflow:hidden;border-radius:9px;margin:0 0 6px;}
+.public-banner-card img{width:100%;height:100%;object-fit:cover;border-radius:9px;display:block;margin:0;}
+.public-banner-card-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.58));pointer-events:none;}
+.public-banner-card span{position:absolute!important;left:8px;right:8px;bottom:7px;z-index:2;display:block!important;margin:0!important;font-size:11px!important;font-weight:900!important;color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.9)!important;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;}
+.public-banner-card small{position:static!important;display:block;font-size:9px;color:var(--muted);margin:0 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;text-align:left;}
 .custom-banner-publish{display:grid;gap:8px;margin-top:10px;padding:10px;border:1px solid rgba(227,184,114,.25);border-radius:12px;background:rgba(201,151,77,.05);}
 .custom-banner-publish input{background:#2a2927!important;color:#eee!important;border:1px solid #484643!important;border-radius:10px;padding:10px;}
 #customBannerPublishBtn{min-height:42px;border:1px solid rgba(255,226,164,.78)!important;border-radius:12px!important;background:linear-gradient(135deg,#f0c76f 0%,#c58a35 100%)!important;color:#1d160d!important;font-weight:900!important;box-shadow:0 5px 18px rgba(197,138,53,.24),inset 0 1px 0 rgba(255,255,255,.2);}
