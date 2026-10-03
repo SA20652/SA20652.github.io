@@ -6250,7 +6250,13 @@ window.__gdplayRefreshAdminPublicBanners = async function(){
 };
 
 async function loadAdminUI(){
-  if(!window.isAdmin || window.adminUIReady) return true;
+  if(!window.isAdmin) return false;
+  if(window.adminUIReady) return true;
+  // Multiple startup/tab hooks can call this at the same time. Serialize the
+  // first load so two copies of the admin menu/page can never be injected.
+  if(window.__adminUILoadPromise) return window.__adminUILoadPromise;
+  window.__adminUILoadPromise = (async()=>{
+  
   const root = document.getElementById('adminDynamicRoot');
   const menu = document.getElementById('menuPanel');
   if(!root || !menu) return false;
@@ -6319,7 +6325,11 @@ async function loadAdminUI(){
   }catch(e){
     console.error('admin UI load error', e);
     return false;
+  } finally {
+    window.__adminUILoadPromise = null;
   }
+  })();
+  return window.__adminUILoadPromise;
 }
 
 let techBreakFrame=null;
