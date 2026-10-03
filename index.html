@@ -4745,7 +4745,161 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
   <div class="app-shell">
     <div id="techBreakHost" aria-hidden="true"></div>
     <div id="adminDynamicRoot"></div>
+<template id="adminUiFallback"><button id="adminMenuBtn" type="button" class="menu-item" data-menu-tab="admin">Админ-панель</button>
+<div class="page" id="page-admin">
+  <div class="section-title">Админ-панель</div>
+  <div class="section-sub">Управление игроками и сервером</div>
+  <div class="admin-grid">
+    <div class="admin-card">
+      <h3>Статистика</h3>
+      <div id="adminStats" class="admin-log">Загрузка…</div>
+    </div>
+  </div>
+  <div class="admin-card" style="margin-top:10px">
+    <button type="button" class="btn-ghost" id="adminOnlinePlayersToggle" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center">
+      <span>👥 Игроки онлайн (<b id="adminOnlineCount">0</b>)</span><span id="adminOnlinePlayersArrow">▸</span>
+    </button>
+    <div id="adminOnlinePlayersBody" style="display:none;margin-top:10px"><div id="adminOnlinePlayersList" style="display:grid;gap:7px"></div></div>
+  </div>
+  <div class="admin-card" style="margin-top:10px">
+    <button type="button" class="btn-ghost" id="adminPlayersToggle" style="width:100%;display:flex;justify-content:space-between;align-items:center">
+      <span>👥 Управление игроками и поиск</span><span id="adminPlayersArrow">▸</span>
+    </button>
+    <div id="adminPlayersBody" style="display:none;margin-top:10px">
+      <div class="admin-search">
+        <input id="adminSearch" type="search" placeholder="Ник или Telegram ID">
+        <button id="adminSearchBtn" type="button" class="btn">Найти</button>
+      </div>
+      <div id="adminUsersList" style="margin-top:10px"><div class="admin-log">Загрузка…</div></div>
+    </div>
+  </div>
+  <div class="admin-card" style="margin-top:10px">
+    <h3>Промокоды</h3>
+    <div class="promo-admin-form" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:7px">
+      <input id="promoAdminCode" placeholder="Промокод" autocomplete="off">
+      <select id="promoAdminReward">
+        <option value="coins">Монеты</option>
+        <option value="vip">VIP</option>
+        <option value="coins_vip">Монеты + VIP</option>
+      </select>
+      <input id="promoAdminCoins" type="number" min="0" value="0" placeholder="Монеты">
+      <input id="promoAdminVipDays" type="number" min="0" value="0" placeholder="VIP дней">
+      <input id="promoAdminMaxUses" type="number" min="1" value="1" placeholder="Макс. активаций">
+      <button id="promoAdminCreateBtn" type="button" class="btn" style="grid-column:1/-1">Создать промокод</button>
+    </div>
+    <div id="promoAdminMessage" class="admin-log" style="margin-top:7px"></div>
+    <div id="promoAdminList" class="promo-admin-list"><div class="admin-log">Загрузка промокодов…</div></div>
+  </div>
 
+  <div class="admin-card" style="margin-top:10px">
+    <h3>IP-блокировка</h3>
+    <input id="adminIp" class="admin-input" placeholder="IP-адрес" style="width:100%;box-sizing:border-box;margin:4px 0">
+    <input id="adminIpReason" class="admin-input" placeholder="Причина" style="width:100%;box-sizing:border-box;margin:4px 0">
+    <input id="adminIpMinutes" class="admin-input" type="number" min="1" value="60" placeholder="Минут" style="width:100%;box-sizing:border-box;margin:4px 0">
+    <label style="display:block;margin:6px 0;font-size:12px"><input id="adminIpPermanent" type="checkbox"> Навсегда</label>
+    <div class="admin-user-actions">
+      <button type="button" class="btn-ghost" data-action="admin-ip-ban">Заблокировать IP</button>
+      <button type="button" class="btn-ghost" data-action="admin-ip-unban">Снять блок IP</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminAccountModal">
+  <div class="input-modal">
+    <h3>Аккаунт #<span id="adminAccountUid"></span></h3>
+    <input id="adminAccountNick" placeholder="Ник">
+    <button id="adminAccountNickBtn" class="btn" style="width:100%;margin-top:7px">Изменить ник</button>
+    <input id="adminAccountPassword" type="password" placeholder="Новый пароль" style="margin-top:7px">
+    <button id="adminAccountPasswordBtn" class="btn" style="width:100%;margin-top:7px">Изменить пароль</button>
+    <input id="adminAccountBalance" type="number" placeholder="Баланс" style="margin-top:7px">
+    <button id="adminAccountBalanceBtn" class="btn" style="width:100%;margin-top:7px">Установить баланс</button>
+    <input id="adminAccountVault" type="number" min="0" placeholder="Сейф" style="margin-top:7px">
+    <button id="adminAccountVaultBtn" class="btn" style="width:100%;margin-top:7px">🏦 Установить сейф</button>
+    <input id="adminAccountCases" type="number" min="0" placeholder="Кейсы в топе" style="margin-top:7px">
+    <button id="adminAccountCasesBtn" class="btn" style="width:100%;margin-top:7px">📦 Установить кейсы в топе</button>
+    <input id="adminAccountLevel" type="number" placeholder="Уровень" style="margin-top:7px">
+    <button id="adminAccountLevelBtn" class="btn" style="width:100%;margin-top:7px">Установить уровень</button>
+    <div class="admin-avatar-row">
+      <div id="adminAccountAvatarPreview" class="admin-avatar-preview">?</div>
+      <div class="admin-avatar-controls"><button id="adminAccountAvatarClear" class="btn-ghost" type="button">Убрать аватар</button></div>
+    </div>
+    <div class="admin-user-actions">
+      <button id="adminAccount2faBtn" class="btn-ghost" type="button">🔐 2FA</button>
+      <button id="adminAccountSessionsBtn" class="btn-ghost" type="button">Завершить сессии</button>
+      <button id="adminAccountRemovePremiumBtn" class="btn-ghost danger-admin" type="button">⭐ Снять Premium + Premium-баффы</button>
+      <button id="adminAccountClearBuffsBtn" class="btn-ghost" type="button">Удалить баффы</button>
+      <button id="adminAccountClearDropsBtn" class="btn-ghost" type="button">Очистить дропы</button>
+      <button id="adminAccountCheckBtn" class="btn-ghost" type="button">Проверить пароль</button>
+    </div>
+    <div class="input-modal-actions"><button id="adminAccountCloseBtn" class="btn-ghost" type="button">Закрыть</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminCustomStatusModal">
+  <div class="input-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+      <h3 style="margin:0">🏷️ Свой статус</h3>
+      <button type="button" class="btn-ghost" id="adminCustomStatusCloseBtn" style="flex-shrink:0">✕ Закрыть</button>
+    </div>
+    <p class="section-sub" style="margin:0 0 10px">Игрок ID: <span id="adminCustomStatusUid" class="mono"></span></p>
+    <div style="display:grid;gap:8px">
+      <input id="adminCustomStatusEmoji" maxlength="8" placeholder="Эмодзи, например 👑">
+      <input id="adminCustomStatusText" maxlength="32" placeholder="Текст статуса, например VIP+">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px">
+        <span><b>Переливание цвета</b><small style="display:block;opacity:.65">Плавно переливать статус между 2 цветами</small></span>
+        <label class="upgrade-switch" style="flex:0 0 auto">
+          <input id="adminCustomStatusGradient" type="checkbox">
+          <span class="upgrade-switch-track"><span class="upgrade-switch-thumb"></span></span>
+        </label>
+      </div>
+      <div id="adminCustomStatusColors" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <label class="section-sub">Цвет 1<input id="adminCustomStatusColor1" type="color" value="#f0c674" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
+        <label class="section-sub">Цвет 2<input id="adminCustomStatusColor2" type="color" value="#ffffff" style="display:block;width:100%;height:42px;margin-top:5px;padding:2px"></label>
+      </div>
+      <div class="section-sub">Если переливание выключено, используется обычный цвет статуса. Пустое поле текста удаляет текущий статус.</div>
+      <div class="input-modal-actions">
+        <button class="btn" id="adminCustomStatusAccept">Выдать статус</button>
+        <button class="btn-ghost" id="adminCustomStatusClear">Снять статус</button>
+        <button class="btn-ghost" id="adminCustomStatusCancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminCasesModal">
+  <div class="input-modal">
+    <h3>📦 Выдать открытые кейсы</h3>
+    <p>Игрок: <b id="adminCasesUid"></b></p>
+    <input id="adminCasesAmount" type="number" min="1" value="100" placeholder="Количество кейсов">
+    <div class="input-modal-actions">
+      <button id="adminCasesCancel" class="btn-ghost" type="button">Отмена</button>
+      <button id="adminCasesAccept" class="btn" type="button">Выдать</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminCubeModal">
+  <div class="input-modal">
+    <h3>Выдать куб</h3><p>Игрок: <b id="adminCubeUid"></b></p>
+    <input id="adminCubeName" placeholder="Название">
+    <select id="adminCubeRarity" style="width:100%;margin-top:7px"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпохальный</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option><option value="divine">Божественный</option><option value="emerald">Изумрудный</option></select>
+    <input id="adminCubeValue" type="number" min="0" placeholder="Стоимость" style="margin-top:7px">
+    <label class="btn-ghost" for="adminCubeImage" style="cursor:pointer;display:block;text-align:center;margin-top:7px">📷 Выбрать фото из галереи</label>
+    <input id="adminCubeImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+    <div id="adminCubeImagePreview" style="display:none;margin-top:8px;text-align:center"><img id="adminCubeImagePreviewImg" alt="" style="width:76px;height:76px;object-fit:contain;border-radius:12px"><div class="section-sub">Фото выбрано</div></div>
+    <div class="input-modal-actions"><button id="adminCubeCancel" class="btn-ghost" type="button">Отмена</button><button id="adminCubeAccept" class="btn" type="button">Выдать</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminBuffModal">
+  <div class="input-modal">
+    <h3>Выдать бафф</h3><p>Игрок: <b id="adminBuffUid"></b></p>
+    <select id="adminBuffType" style="width:100%"><option value="master">Master Boost</option><option value="fortune">Fortune</option><option value="drop">Drop Boost</option></select>
+    <input id="adminBuffHours" type="number" min="1" max="720" value="24" style="margin-top:7px">
+    <div class="input-modal-actions"><button id="adminBuffCancel" class="btn-ghost" type="button">Отмена</button><button id="adminBuffAccept" class="btn" type="button">Выдать</button></div>
+  </div>
+</div>
+</template>
 
     <header>
       <div class="brand">
@@ -5867,7 +6021,7 @@ async function apiFetch(path, payload={}, _retry=false){
         const controller=typeof AbortController!=='undefined'?new AbortController():null;
         const timer=controller?setTimeout(()=>controller.abort(),8000):null;
         try{
-          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData,authToken}),signal:controller?.signal});
+          const sr=await fetch(base+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData}),signal:controller?.signal});
           const sj=await sr.json().catch(()=>({error:'Сервер вернул некорректный ответ'}));
           if(sr.ok && sj.adminSession){ adminSession=sj.adminSession; window.__GDPLAYAdminSession = adminSession; sessionError=null; break; }
           if(sr.status && sr.status<500) throw new Error(sj.error||'Нет доступа');
@@ -6092,40 +6246,45 @@ async function loadAdminUI(){
   const menu = document.getElementById('menuPanel');
   if(!root || !menu) return false;
   try{
+    // Сначала очищаем только динамическую админскую часть, чтобы повторная
+    // загрузка после истечения сессии не создавала дубликаты.
     root.querySelectorAll('.admin-dynamic-page, .admin-dynamic-modal').forEach(el=>el.remove());
     menu.querySelector('#adminMenuBtn')?.remove();
 
-    // Админка загружается только с сервера после проверки admin-сессии.
-    // Не держим интерфейс на встроенной копии HTML: она могла устареть и
-    // одновременно раскрывала разметку админки клиенту.
-    const j = await apiFetch('/api/admin/ui', {});
-    const html = j && typeof j.html === 'string' ? j.html : '';
-    if(!html) throw new Error('Сервер не вернул интерфейс админ-панели');
-
+    let html = '';
+    try{
+      const j = await apiFetch('/api/admin/ui', {});
+      html = j && typeof j.html === 'string' ? j.html : '';
+    }catch(e){
+      console.warn('admin UI API unavailable, using built-in admin UI:', e);
+    }
+    // Встроенный fallback гарантирует, что панель добавится даже если
+    // admin_fragment.html временно недоступен на сервере.
+    if(!html){
+      const tpl = document.getElementById('adminUiFallback');
+      html = tpl ? tpl.innerHTML : '';
+    }
+    if(!html) return false;
     const wrap = document.createElement('div');
     wrap.innerHTML = html;
+    // <script> tags set via innerHTML never execute (browser spec), so pull them
+    // out before moving nodes into the live DOM and re-create them manually —
+    // this is what actually runs refreshAdminStats()/button handlers/etc.
+    // Without this, the whole admin_fragment.html script (online counter,
+    // notification/IP-ban/promo buttons, and the delete-recent-users button)
+    // is silently dead code.
     const scripts = Array.from(wrap.querySelectorAll('script'));
     scripts.forEach(el=>el.remove());
-
     const menuItem = wrap.querySelector('#adminMenuBtn');
-    if(menuItem){
-      menuItem.classList.add('admin-dynamic-menu');
-      menu.insertBefore(menuItem, null);
-    }
+    if(menuItem){ menuItem.classList.add('admin-dynamic-menu'); menu.insertBefore(menuItem, null); }
     const page = wrap.querySelector('#page-admin');
-    if(page){
-      page.classList.add('admin-dynamic-page');
-      root.appendChild(page);
-    }
-    wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>{
-      el.classList.add('admin-dynamic-modal');
-      root.appendChild(el);
-    });
-
+    if(page){ page.classList.add('admin-dynamic-page'); root.appendChild(page); }
+    wrap.querySelectorAll('.modal-overlay[id^="admin"]').forEach(el=>{ el.classList.add('admin-dynamic-modal'); root.appendChild(el); });
     window.adminUIReady = !!(menu.querySelector('#adminMenuBtn') && root.querySelector('#page-admin'));
-    if(!window.adminUIReady) throw new Error('Разметка админ-панели неполная');
-
-    if(!window.__adminFragmentScriptsRan){
+    if(window.adminUIReady && !window.__adminFragmentScriptsRan){
+      // Run once: admin_fragment.html's own script re-attaches its listeners
+      // via $('id')?.addEventListener each time it runs, and its setInterval
+      // for refreshAdminStats should not be duplicated on repeat loadAdminUI() calls.
       window.__adminFragmentScriptsRan = true;
       scripts.forEach(old=>{
         const s = document.createElement('script');
@@ -6133,16 +6292,24 @@ async function loadAdminUI(){
         document.body.appendChild(s);
       });
     }
-
-    try{ setTimeout(()=>window.__gdplayRefreshAdminPublicBanners?.(),0); }catch(_){ }
-    try{
-      const tb = await apiFetch('/api/me', {});
-      updateAdminTechBreakPromoButton(!!tb?.global_tech_break?.enabled);
-    }catch(_){ }
-    return true;
+    if(window.adminUIReady){
+      // Public banners use a dedicated lightweight metadata+image flow. Run it
+      // independently after injection so the moderation card cannot remain on
+      // the static loading placeholder if another optional admin script fails.
+      try{ setTimeout(()=>window.__gdplayRefreshAdminPublicBanners?.(),0); }catch(_){}
+      // The fragment is injected after the initial /api/me call, so apply the
+      // current state to the newly created tech-break button as well.
+      try{
+        const tb = await apiFetch('/api/me',{});
+        updateAdminTechBreakPromoButton(!!tb?.global_tech_break?.enabled);
+      }catch(_){}
+    }
+    // Обработчик кнопок админки подключается ниже через единый делегированный
+    // listener. Здесь ничего дополнительно не навешиваем, чтобы при повторной
+    // загрузке admin_fragment.html не появлялись дубли обработчиков.
+    return window.adminUIReady;
   }catch(e){
     console.error('admin UI load error', e);
-    window.adminUIReady = false;
     return false;
   }
 }
@@ -6239,7 +6406,7 @@ async function registerWithServer(){
     window.isAdmin = !!j.is_admin;
     updateAdminTechBreakPromoButton(!!j.global_tech_break?.enabled);
     // Админский интерфейс не должен задерживать загрузку профиля игрока.
-    if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin UI warmup',e));
+    if(window.isAdmin) await loadAdminUI();
     if(j.user && j.user.premium_until !== undefined){ data.premiumUntil = j.user.premium_until || null; }
     if(j.user && j.user.vip_until !== undefined){ data.vipUntil = j.user.vip_until || null; }
     if(j.user && j.user.vip !== undefined){ data.vip = !!j.user.vip; }
@@ -6812,7 +6979,7 @@ async function bootSafe(){
         // Восстанавливаем админ-панель и для сохранённой серверной сессии.
         // Раньше этот путь сразу делал return после showApp(), поэтому у
         // администратора меню могло исчезнуть после перезапуска приложения.
-        if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin UI warmup', e));
+        if(window.isAdmin) await loadAdminUI();
         if(j.moderation_notice) showModerationNotice(j.moderation_notice);
         applyImmediateTelegramAvatarFallback();
         await showApp(true);
