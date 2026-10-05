@@ -6639,14 +6639,8 @@ async function preloadProfileImages(user){
   try{
     const urls=new Set();
     const own=String(user?.avatar||'').trim(); if(own) urls.add(own);
-    // Fetch all three leaderboard views in parallel once at startup so switching
-    // between Top tabs/profile never causes a burst of avatar requests.
-    const sorts=['cases','balance','winnings'];
-    const results=await Promise.allSettled(sorts.map(sort_by=>apiFetch('/api/leaderboard',{sort_by})));
-    for(const r of results){
-      if(r.status!=='fulfilled') continue;
-      for(const row of (r.value?.leaderboard||[])){ const a=String(row.avatar||'').trim(); if(a) urls.add(a); }
-    }
+    // Do not fetch all three rankings during startup. The selected Top is
+    // loaded on demand and then kept in a short-lived cache.
     await Promise.all(Array.from(urls).map(src=>new Promise(resolve=>{
       const img=new Image(); img.decoding='async'; img.onload=img.onerror=()=>resolve(); img.src=src;
     })));
@@ -10123,7 +10117,25 @@ function animateBattleDice(result, myId){
 }
 
 let leaderboardProfileSeeds = Object.create(null);
+// Top cache/request guard: switching tabs must never allow an older response
+// to overwrite the currently selected ranking.
+const leaderboardCache = new Map();
+const leaderboardInflight = new Map();
+let leaderboardRenderSeq = 0;
+const LEADERBOARD_CACHE_TTL = 20000;
 
+async function fetchLeaderboardCached(sortBy){
+  const key=String(sortBy||'cases');
+  const cached=leaderboardCache.get(key);
+  const now=Date.now();
+  if(cached && (now-cached.ts)<LEADERBOARD_CACHE_TTL) return cached.data;
+  if(leaderboardInflight.has(key)) return leaderboardInflight.get(key);
+  const promise=apiFetch('/api/leaderboard',{sort_by:key})
+    .then(j=>{ leaderboardCache.set(key,{ts:Date.now(),data:j}); return j; })
+    .finally(()=>leaderboardInflight.delete(key));
+  leaderboardInflight.set(key,promise);
+  return promise;
+}
 
 async function refreshLeaderboardAvatarsOnce(sortBy){
   try{
@@ -10132,7 +10144,7 @@ async function refreshLeaderboardAvatarsOnce(sortBy){
     const missing=[...list.querySelectorAll('.lb-avatar')].some(x=>!x.querySelector('img'));
     if(!missing) return;
     await new Promise(r=>setTimeout(r,1800));
-    const j=await apiFetch('/api/leaderboard',{sort_by:sortBy});
+    const j=await fetchLeaderboardCached(sortBy);
     const rows=j.leaderboard||[];
     if(rows.some(r=>r.avatar)){
       const current=String(tgUserId()||'');
@@ -10152,11 +10164,18 @@ async function refreshLeaderboardAvatarsOnce(sortBy){
 }
 async function renderLeaderboard(sortBy='cases'){
   const el = document.getElementById('leaderboardList');
-  try{ if(window.profileBannersReady) await window.profileBannersReady; }catch(_){}
-  document.querySelectorAll('.top-tab').forEach(b=>b.classList.toggle('active',b.dataset.topSort===sortBy));
+  const requestedSort=String(sortBy||'cases');
+  const renderSeq=++leaderboardRenderSeq;
+  // Never wait for the banner catalog before showing ranking data. Banner
+  // metadata is decorative and must not block the Top itself.
+  document.querySelectorAll('.top-tab').forEach(b=>b.classList.toggle('active',b.dataset.topSort===requestedSort));
   try{
-    // Топ считается на сервере по всем игрокам, а не только по этому браузеру
-    const j = await apiFetch('/api/leaderboard', {sort_by: sortBy});
+    // Топ считается на сервере по всем игрокам, а результат кэшируется на
+    // короткое время. Это делает повторное переключение между вкладками мгновенным.
+    const j = await fetchLeaderboardCached(requestedSort);
+    // A slower request from a previous tab is not allowed to paint over the
+    // ranking the user selected most recently.
+    if(renderSeq!==leaderboardRenderSeq || currentTab!=='top' || document.querySelector('.top-tab.active')?.dataset.topSort!==requestedSort) return;
     const myId = String(tgUserId()||'');
     const rows = (j.leaderboard||[]).map(r=>({
       username: r.username || ('Игрок ' + r.user_id),
