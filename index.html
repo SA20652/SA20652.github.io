@@ -10123,15 +10123,46 @@ const leaderboardCache = new Map();
 const leaderboardInflight = new Map();
 let leaderboardRenderSeq = 0;
 const LEADERBOARD_CACHE_TTL = 20000;
+const LEADERBOARD_STORAGE_KEY = 'gdplay_leaderboard_last_good_v1';
+
+function loadLeaderboardPersistent(sortBy){
+  try{
+    const all=JSON.parse(storageGet(LEADERBOARD_STORAGE_KEY)||'{}')||{};
+    const v=all[String(sortBy||'cases')];
+    return v && Array.isArray(v.leaderboard) ? v : null;
+  }catch(_){ return null; }
+}
+function saveLeaderboardPersistent(sortBy,data){
+  try{
+    if(!data || !Array.isArray(data.leaderboard) || !data.leaderboard.length) return;
+    const all=JSON.parse(storageGet(LEADERBOARD_STORAGE_KEY)||'{}')||{};
+    all[String(sortBy||'cases')]={ts:Date.now(),data};
+    storageSet(LEADERBOARD_STORAGE_KEY,JSON.stringify(all));
+  }catch(_){}
+}
 
 async function fetchLeaderboardCached(sortBy){
   const key=String(sortBy||'cases');
   const cached=leaderboardCache.get(key);
+  const persisted=loadLeaderboardPersistent(key);
   const now=Date.now();
+  // Stale-while-refresh: show the last good ranking immediately, then refresh.
   if(cached && (now-cached.ts)<LEADERBOARD_CACHE_TTL) return cached.data;
+  if(persisted?.data && (!cached || persisted.ts>cached.ts)) leaderboardCache.set(key,{ts:Number(persisted.ts||0),data:persisted.data});
+  if(leaderboardCache.has(key)) {
+    const fast=leaderboardCache.get(key).data;
+    if(leaderboardInflight.has(key)) return fast;
+    // Start background refresh without making the user wait for the Top.
+    const refresh=apiFetch('/api/leaderboard',{sort_by:key})
+      .then(j=>{ if(Array.isArray(j?.leaderboard) && j.leaderboard.length){ leaderboardCache.set(key,{ts:Date.now(),data:j}); saveLeaderboardPersistent(key,j); return j; } return fast; })
+      .catch(()=>fast)
+      .finally(()=>leaderboardInflight.delete(key));
+    leaderboardInflight.set(key,refresh);
+    return fast;
+  }
   if(leaderboardInflight.has(key)) return leaderboardInflight.get(key);
   const promise=apiFetch('/api/leaderboard',{sort_by:key})
-    .then(j=>{ leaderboardCache.set(key,{ts:Date.now(),data:j}); return j; })
+    .then(j=>{ if(Array.isArray(j?.leaderboard) && j.leaderboard.length){ leaderboardCache.set(key,{ts:Date.now(),data:j}); saveLeaderboardPersistent(key,j); } return j; })
     .finally(()=>leaderboardInflight.delete(key));
   leaderboardInflight.set(key,promise);
   return promise;
@@ -10209,7 +10240,19 @@ async function renderLeaderboard(sortBy='cases'){
       profile_name_style:r.profile_name_style || 'default',
       buffs:Array.isArray(r.buffs)?r.buffs:[], text_color:r.text_color || ''
     }; });
-    if(!rows.length){ el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return; }
+    if(!rows.length){
+      const fallback=loadLeaderboardPersistent(requestedSort);
+      const fallbackRows=Array.isArray(fallback?.leaderboard)?fallback.leaderboard:[];
+      if(fallbackRows.length){
+        const cached=leaderboardCache.get(requestedSort);
+        if(!cached || !Array.isArray(cached.data?.leaderboard) || !cached.data.leaderboard.length) leaderboardCache.set(requestedSort,{ts:Number(fallback.ts||0),data:fallback});
+        // Keep the last known-good ranking instead of flashing an empty Top
+        // when a transient/redeploy response contains zero rows.
+        renderLeaderboard(requestedSort);
+        return;
+      }
+      el.innerHTML = '<div class="empty-state">Пока нет игроков</div>'; return;
+    }
     const medals = ['🥇','🥈','🥉'];
     el.innerHTML = rows.map((r,i)=>`
       <div class="lb-item top-sort-${sortBy} ${r.key===myId?'me':''}">
@@ -10226,6 +10269,19 @@ async function renderLeaderboard(sortBy='cases'){
       </div>`).join('');
     refreshLeaderboardAvatarsOnce(sortBy);
   }catch(e){
+    // If the API is temporarily unavailable during a deploy/restart, never
+    // replace a previously valid TOP with an error/empty screen. Reuse the
+    // last good per-category snapshot and retry silently in the background.
+    const fallback = loadLeaderboardPersistent(requestedSort);
+    if(Array.isArray(fallback?.leaderboard) && fallback.leaderboard.length){
+      leaderboardCache.set(requestedSort,{ts:Date.now(),data:fallback});
+      console.warn('Leaderboard refresh failed; using last known-good snapshot',e);
+      // The cached snapshot is now fresh, so the retry renders immediately
+      // without another network request and cannot be overwritten by an older
+      // category because renderLeaderboardSeq is advanced by this call.
+      renderLeaderboard(requestedSort);
+      return;
+    }
     el.innerHTML = `<div class="empty-state">${e.message||'Ошибка загрузки топа'}</div>`;
     console.error(e);
   }
