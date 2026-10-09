@@ -4964,6 +4964,11 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
         <div class="channel-bonus-actions"><button class="btn" id="channelSubscribeBtn" type="button">Подписаться</button></div>
         <button class="channel-bonus-close" id="channelBonusClose" type="button" aria-label="Скрыть бонус">×</button>
       </div>
+      <div class="advent-launch-card" id="adventLaunchCard">
+        <div class="advent-launch-art">🎁</div>
+        <div class="advent-launch-copy"><div class="advent-launch-title">Адвент-календарь</div><div class="advent-launch-sub" id="adventLaunchSub">21 секретная награда · открытие 11 октября</div><div class="advent-launch-timer" id="adventLaunchTimer">Загрузка таймера…</div></div>
+        <button class="btn" id="adventOpenBtn" type="button">Открыть</button>
+      </div>
       <div class="daily-card cases-bonus-card" id="dailyBonusCard" style="margin:0 0 12px">
         <div class="cases-bonus-main"><div class="title">🎁 Бонус</div><div class="desc" id="dailyDesc">Забери свои орбы</div></div>
         <button class="btn" id="dailyBtn">Забрать</button>
@@ -5456,6 +5461,16 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
   <button type="button" class="btn-ghost" id="notificationsCloseBtn" style="width:100%;margin-top:10px">Закрыть</button>
 </div></div>
 <div id="toastBox"></div>
+<div class="modal-overlay" id="adventCalendarModal" aria-hidden="true">
+  <div class="input-modal advent-modal">
+    <div class="advent-modal-head"><div><h3>🎁 Адвент-календарь</h3><p class="section-sub" id="adventModalSubtitle">21 день — 21 награда</p></div><button type="button" class="btn-ghost" id="adventCloseBtn" aria-label="Закрыть">✕</button></div>
+    <div class="advent-countdown" id="adventCountdown" hidden></div>
+    <div class="advent-admin-row" id="adventAdminRow" hidden><span>Админ-режим: все награды разблокированы</span><button type="button" class="btn-ghost" id="adventResetBtn">Сбросить</button></div>
+    <div class="advent-grid" id="adventGrid"><div class="advent-loading">Загрузка календаря…</div></div>
+    <div class="section-sub advent-footnote" id="adventFootnote">Новая ячейка открывается каждые 24 часа. Последняя награда — 1 ноября.</div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="privacyPolicyModal" aria-hidden="true">
   <div class="input-modal privacy-policy-modal">
     <div class="notification-head"><div><h3 style="margin:0">Политика конфиденциальности</h3><div class="section-sub" style="margin-top:3px">GDPLAY · информация об обработке данных</div></div><button type="button" class="btn-ghost" id="privacyPolicyClose">Закрыть</button></div>
@@ -5483,6 +5498,13 @@ window.getInitData = window.getInitData || function(){ return window.Telegram?.W
 </div>
 
 
+<style id="gdplay-advent-calendar-styles">
+.advent-launch-card{display:flex;align-items:center;gap:11px;margin:0 0 12px;padding:12px;border-radius:15px;border:1px solid rgba(227,184,114,.28);background:radial-gradient(circle at 0 0,rgba(227,184,114,.14),transparent 52%),linear-gradient(135deg,var(--bg-2),var(--bg-3));box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.advent-launch-art{width:43px;height:43px;flex:0 0 43px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(227,184,114,.12);border:1px solid rgba(227,184,114,.22)}
+.advent-launch-copy{min-width:0;flex:1}.advent-launch-title{font-size:13px;font-weight:900;color:var(--paper)}.advent-launch-sub{font-size:10.5px;color:var(--muted);margin-top:3px}.advent-launch-timer{font-size:10px;font-weight:800;color:var(--brass-2);margin-top:5px;font-variant-numeric:tabular-nums}.advent-launch-card .btn{flex:0 0 auto;padding:9px 11px;font-size:11px}
+.advent-modal{width:min(520px,94vw);max-height:86vh;max-height:86dvh;overflow:auto;box-sizing:border-box;background:radial-gradient(circle at 100% 0,rgba(227,184,114,.10),transparent 40%),var(--bg-2)}.advent-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}.advent-modal-head h3{margin:0 0 4px}.advent-modal-head .section-sub{margin:0}.advent-modal-head .btn-ghost{flex:0 0 auto;padding:6px 10px}.advent-countdown{border:1px solid rgba(227,184,114,.28);background:rgba(227,184,114,.08);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;color:var(--brass-2);font-weight:900;font-variant-numeric:tabular-nums}.advent-admin-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;margin-bottom:10px;border:1px solid rgba(227,184,114,.25);border-radius:11px;font-size:11px;font-weight:700}.advent-admin-row[hidden],.advent-countdown[hidden]{display:none}.advent-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.advent-cell{min-width:0;min-height:105px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;padding:9px 5px;border:1px solid var(--line);border-radius:13px;background:var(--bg-3);box-sizing:border-box}.advent-cell.unlocked{border-color:rgba(227,184,114,.38);background:linear-gradient(145deg,rgba(227,184,114,.10),var(--bg-3))}.advent-cell.claimed{border-color:rgba(100,190,140,.38);background:rgba(70,140,100,.09)}.advent-cell-number{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase}.advent-cell-icon{font-size:25px;line-height:1.1}.advent-cell-reward{font-size:10px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}.advent-cell-state{font-size:9px;color:var(--muted)}.advent-cell button{width:100%;padding:7px 4px;font-size:10px}.advent-cell button:disabled{opacity:.45}.advent-loading{grid-column:1/-1;padding:25px;text-align:center;color:var(--muted)}.advent-footnote{margin-top:12px;text-align:center;font-size:10px}
+@media(min-width:420px){.advent-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.advent-cell{min-height:112px}}@media(max-width:360px){.advent-launch-card{gap:8px;padding:9px}.advent-launch-art{width:36px;height:36px;flex-basis:36px}.advent-launch-card .btn{padding:8px}.advent-cell{min-height:96px}}
+</style>
 <script>
 (function(){
 "use strict";
@@ -11735,6 +11757,63 @@ window.addEventListener('unhandledrejection', e=>{
   }
 });
 
+// Advent calendar UI and countdown. All rewards and claim eligibility come from the server.
+const adventState = {status:null, timer:null, refreshTimer:null, busy:false};
+const adventFmt = (seconds)=>{let n=Math.max(0,Math.floor(Number(seconds)||0));const d=Math.floor(n/86400);n%=86400;const h=Math.floor(n/3600);n%=3600;const m=Math.floor(n/60);const s=n%60;return `${d?d+' д ':''}${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;};
+const adventEscape = (v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function adventNowCountdown(){
+  const st=adventState.status;if(!st)return;
+  const now=Math.floor(Date.now()/1000);
+  const card=document.getElementById('adventLaunchTimer');
+  const sub=document.getElementById('adventLaunchSub');
+  const countdown=document.getElementById('adventCountdown');
+  if(st.removed){document.getElementById('adventLaunchCard')?.setAttribute('hidden','');return;}
+  document.getElementById('adventLaunchCard')?.removeAttribute('hidden');
+  if(st.is_admin){if(card)card.textContent='Админ-режим · все ячейки доступны';if(sub)sub.textContent='Все 21 награда разблокирована';if(countdown){countdown.hidden=true;}return;}
+  if(now<st.opens_at){const left=st.opens_at-now;if(card)card.textContent='До открытия: '+adventFmt(left);if(sub)sub.textContent='Открытие 11 октября в 12:00 МСК';if(countdown){countdown.hidden=false;countdown.textContent='До открытия календаря: '+adventFmt(left);}return;}
+  const first=Number(st.first_cell_at||0);if(now<first){const left=first-now;if(card)card.textContent='Первая ячейка через '+adventFmt(left);if(sub)sub.textContent='Календарь открыт · первая награда 12 октября';if(countdown){countdown.hidden=false;countdown.textContent='Первая ячейка откроется через '+adventFmt(left);}return;}
+  if(card)card.textContent='Забирай награды каждые 24 часа';if(sub)sub.textContent='21 секретная награда · последняя 1 ноября';if(countdown){countdown.hidden=true;}
+}
+function renderAdvent(st){
+  adventState.status=st;adventNowCountdown();
+  const card=document.getElementById('adventLaunchCard');if(!st.active){card?.setAttribute('hidden','');return;}
+  const adminRow=document.getElementById('adventAdminRow');if(adminRow)adminRow.hidden=!st.is_admin;
+  const subtitle=document.getElementById('adventModalSubtitle');if(subtitle)subtitle.textContent=st.is_admin?'Админ-режим · все награды сразу доступны':'21 день · новая ячейка каждые 24 часа';
+  const grid=document.getElementById('adventGrid');if(!grid)return;
+  grid.innerHTML='';
+  (st.cells||[]).forEach(cell=>{
+    const reward=cell.reward||null;const isClaimed=!!cell.claimed;const unlocked=!!cell.unlocked;
+    const item=document.createElement('div');item.className='advent-cell'+(unlocked?' unlocked':'')+(isClaimed?' claimed':'');
+    const number=document.createElement('div');number.className='advent-cell-number';number.textContent='Ячейка '+cell.index;item.appendChild(number);
+    const icon=document.createElement('div');icon.className='advent-cell-icon';icon.textContent=reward?(reward.icon||'🎁'):(unlocked?'🎁':'🔒');item.appendChild(icon);
+    const title=document.createElement('div');title.className='advent-cell-reward';title.textContent=reward?reward.name:'Секретная награда';item.appendChild(title);
+    const state=document.createElement('div');state.className='advent-cell-state';state.textContent=isClaimed?'Получено':(cell.can_claim?'Можно забрать':(unlocked?'Ожидает получения':'Закрыто'));item.appendChild(state);
+    if(cell.can_claim){const btn=document.createElement('button');btn.type='button';btn.className='btn';btn.textContent='Забрать';btn.disabled=adventState.busy;btn.addEventListener('click',()=>claimAdventCell(cell.index));item.appendChild(btn);}
+    grid.appendChild(item);
+  });
+}
+async function loadAdvent(){
+  try{const st=await apiFetch('/api/advent/status',{});if(!st?.ok)throw new Error(st?.error||'Не удалось загрузить календарь');renderAdvent(st);}
+  catch(e){const grid=document.getElementById('adventGrid');if(grid)grid.innerHTML='<div class="advent-loading">'+adventEscape(e.message||'Ошибка загрузки')+'</div>';console.warn('Advent calendar status:',e);}
+}
+async function claimAdventCell(index){
+  if(adventState.busy)return;adventState.busy=true;
+  try{const result=await apiFetch('/api/advent/claim',{cell_index:index});if(!result?.ok)throw new Error(result?.error||'Не удалось забрать награду');showToast('Получено: '+(result.reward?.name||'награда'),'purchase');try{await refreshFromServer();}catch(_){}await loadAdvent();}
+  catch(e){showToast(e.message||'Не удалось забрать награду','error');await loadAdvent();}
+  finally{adventState.busy=false;}
+}
+async function resetAdventCalendar(){
+  if(!adventState.status?.is_admin)return;
+  if(!await tgConfirm('Сбросить Адвент-календарь для всех игроков? Все отметки получения будут сброшены. Уже выданные награды у игроков останутся.'))return;
+  try{const result=await apiFetch('/api/advent/reset',{});if(!result?.ok)throw new Error(result?.error||'Не удалось сбросить календарь');showToast('Адвент-календарь сброшен');await loadAdvent();}
+  catch(e){showToast(e.message||'Ошибка сброса','error');}
+}
+document.getElementById('adventOpenBtn')?.addEventListener('click',async()=>{openModal('adventCalendarModal');await loadAdvent();});
+document.getElementById('adventCloseBtn')?.addEventListener('click',()=>closeModal('adventCalendarModal'));
+document.getElementById('adventCalendarModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal('adventCalendarModal');});
+document.getElementById('adventResetBtn')?.addEventListener('click',resetAdventCalendar);
+adventState.timer=setInterval(adventNowCountdown,1000);
+adventState.refreshTimer=setInterval(()=>{if(document.getElementById('adventCalendarModal')?.classList.contains('open'))loadAdvent();else if(adventState.status)loadAdvent();},60000);
 window.apiFetch = apiFetch;
 
 // Start local image warmup before server/auth work. This is deliberately
@@ -11746,7 +11825,7 @@ try{
   ]);
 }catch(_){ }
 
-boot().catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
+boot().then(()=>loadAdvent()).catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
 
 })();
 </script>
