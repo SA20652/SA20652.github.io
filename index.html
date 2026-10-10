@@ -8016,7 +8016,7 @@ function tradeCubeLabel(c){return `${c.name||'Куб'} · ${Number(c.value||0).t
 function tradeCubeImage(c,cls='trade-cube-image'){const custom=String(c?.image||'');if(custom&&(custom.startsWith('https://')||custom.startsWith('http://')||custom.startsWith('data:image/')))return `<img class="${cls}" src="${tradeEsc(custom)}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'trade-cube-fallback',textContent:'?'}))">`;return window.cubeIconMarkup?.(c?.name,cls)||'<span class="trade-cube-fallback">?</span>';}
 function tradeCubeCardMarkup(c){return `${tradeCubeImage(c)}<span class="trade-cube-trigger-copy"><b>${tradeEsc(c?.name||'Куб')}</b><small>${tradeEsc(c?.rarity||'Обычный')} · ${Number(c?.value||0).toLocaleString('ru-RU')} орбов</small></span>`;}
 function tradeSelectedIds(key){const el=document.getElementById(key==='offer'?'tradeOfferCubeIds':'tradeRequestCubeIds');return el?String(el.value||'').split(',').map(Number).filter(Boolean):[];}
-function tradeCubePickerMarkup(key,cubes,placeholder,disabled=false){const selected=tradeSelectedIds(key);const chosen=(cubes||[]).filter(c=>selected.includes(Number(c.id)));const label=chosen.length?`${chosen.length}/4 кубов выбрано`:placeholder;return `<div class="trade-cube-picker" data-trade-picker="${key}"><input type="hidden" id="${key==='offer'?'tradeOfferCubeIds':'tradeRequestCubeIds'}" value="${selected.join(',')}"><button type="button" class="trade-cube-trigger" data-trade-action="toggle-picker" data-picker-key="${key}" ${disabled?'disabled':''}><span class="trade-cube-fallback">?</span><span class="trade-cube-trigger-copy"><b>${tradeEsc(label)}</b><small>${chosen.length?chosen.map(c=>tradeEsc(c.name)).join(', '):(disabled?'Сначала выбери игрока':'Выбери до 4 кубов')}</small></span><span class="trade-cube-chevron">⌄</span></button><div class="trade-selected-cubes">${chosen.map(c=>`<span class="trade-selected-cube">${tradeCubeImage(c)}${tradeEsc(c.name)} <button type="button" aria-label="Убрать" data-trade-cube-select="${key}" data-cube-id="${Number(c.id)}">×</button></span>`).join('')}</div><div class="trade-cube-menu" id="trade${key==='offer'?'Offer':'Request'}CubeMenu" hidden>${(cubes||[]).length?(cubes||[]).map(c=>`<button type="button" class="trade-cube-option" data-trade-cube-select="${key}" data-cube-id="${Number(c.id)}">${tradeCubeImage(c)}<span class="trade-cube-option-copy"><b>${selected.includes(Number(c.id))?'✓ ':''}${tradeEsc(c.name||'Куб')}</b><small>${tradeEsc(c.rarity||'Обычный')}</small></span><span class="trade-cube-value">${Number(c.value||0).toLocaleString('ru-RU')} 💰</span></button>`).join(''):`<div class="trade-search-status">${disabled?'Сначала выбери игрока':'Нет доступных кубов'}</div>`}</div></div>`;}
+function tradeCubePickerMarkup(key,cubes,placeholder,disabled=false){const selected=tradeSelectedIds(key);const chosen=(cubes||[]).filter(c=>selected.includes(Number(c.id)));const label=chosen.length?`${chosen.length}/4 кубов выбрано`:placeholder;return `<div class="trade-cube-picker" data-trade-picker="${key}"><input type="hidden" id="${key==='offer'?'tradeOfferCubeIds':'tradeRequestCubeIds'}" value="${selected.join(',')}"><button type="button" class="trade-cube-trigger" data-trade-action="toggle-picker" data-picker-key="${key}" ${disabled?'disabled':''}><span class="trade-cube-fallback">?</span><span class="trade-cube-trigger-copy"><b>${tradeEsc(label)}</b><small>${chosen.length?chosen.map(c=>tradeEsc(c.name)).join(', '):(disabled?'Сначала выбери игрока':'Выбери до 4 кубов')}</small></span><span class="trade-cube-chevron">⌄</span></button><div class="trade-selected-cubes">${chosen.map(c=>`<span class="trade-selected-cube">${tradeCubeImage(c)}${tradeEsc(c.name)} <button type="button" aria-label="Убрать" data-trade-cube-select="${key}" data-cube-id="${Number(c.id)}">×</button></span>`).join('')}</div><div class="trade-cube-menu" id="trade${key==='offer'?'Offer':'Request'}CubeMenu" hidden><div class="trade-cube-search-wrap"><span>⌕</span><input type="search" class="trade-input trade-cube-search" data-trade-cube-search="${key}" placeholder="Поиск куба по названию…" autocomplete="off"></div><div class="trade-cube-options">${(cubes||[]).length?(cubes||[]).map(c=>`<button type="button" class="trade-cube-option" data-trade-cube-select="${key}" data-cube-id="${Number(c.id)}" data-cube-name="${tradeEsc(String(c.name||'Куб').toLowerCase())}" data-cube-rarity="${tradeEsc(String(c.rarity||'').toLowerCase())}">${tradeCubeImage(c)}<span class="trade-cube-option-copy"><b>${selected.includes(Number(c.id))?'✓ ':''}${tradeEsc(c.name||'Куб')}</b><small>${tradeEsc(c.rarity||'Обычный')}</small></span><span class="trade-cube-value">${Number(c.value||0).toLocaleString('ru-RU')} 💰</span></button>`).join(''):`<div class="trade-search-status">${disabled?'Сначала выбери игрока':'Нет доступных кубов'}</div>`}</div></div></div>`;}
 function tradeChooseCube(key,id){
  const list=key==='offer'?tradeOwnedCubes:tradeTargetCubes;
  const cube=list.find(c=>Number(c.id)===Number(id));if(!cube)return;
@@ -8070,7 +8070,7 @@ async function renderTradePage(forceRefresh=false){
 }
 async function searchTradePlayers(query){
  const results=document.getElementById('tradePlayerResults');if(!results)return;
- const q=String(query||'').trim();const seq=++tradeSearchSequence;
+ const q=String(query||'').trim().replace(/^@+/, '');const seq=++tradeSearchSequence;
  if(!q){results.hidden=true;results.innerHTML='';return;}
  results.hidden=false;results.innerHTML='<div class="trade-search-status">Ищем игроков…</div>';
  try{const r=await apiFetch('/api/community/search-users',{search:q});if(seq!==tradeSearchSequence)return;const users=Array.isArray(r.users)?r.users:[];
@@ -8104,7 +8104,7 @@ async function tradePageAction(button){
 }
 const tradePageRoot=document.getElementById('page-trades');
 tradePageRoot?.addEventListener('click',e=>{const player=e.target.closest('[data-trade-player-id]');if(player){e.preventDefault();selectTradePlayer(player);return;}const cube=e.target.closest('[data-trade-cube-select]');if(cube){e.preventDefault();tradeChooseCube(cube.dataset.tradeCubeSelect,Number(cube.dataset.cubeId||0));return;}const action=e.target.closest('[data-trade-action]');if(action){e.preventDefault();if(action.dataset.tradeAction==='toggle-picker'){tradeToggleCubeMenu(action.dataset.pickerKey);return;}tradePageAction(action);}});
-tradePageRoot?.addEventListener('input',e=>{if(e.target?.id==='tradePlayerSearch'){document.getElementById('tradeTargetId').value='';document.getElementById('tradeSelectedPlayer').hidden=true;clearTimeout(tradeSearchTimer);tradeSearchTimer=setTimeout(()=>searchTradePlayers(e.target.value),140);}});
+tradePageRoot?.addEventListener('input',e=>{if(e.target?.id==='tradePlayerSearch'){document.getElementById('tradeTargetId').value='';document.getElementById('tradeSelectedPlayer').hidden=true;clearTimeout(tradeSearchTimer);tradeSearchTimer=setTimeout(()=>searchTradePlayers(e.target.value),140);return;}const search=e.target.closest('[data-trade-cube-search]');if(search){const q=String(search.value||'').trim().toLocaleLowerCase();const menu=search.closest('.trade-cube-menu');menu?.querySelectorAll('.trade-cube-option').forEach(option=>{const name=String(option.dataset.cubeName||'');const rarity=String(option.dataset.cubeRarity||'');option.hidden=!!q&&!name.includes(q)&&!rarity.includes(q);});}});
 document.addEventListener('click',e=>{if(!e.target.closest('.trade-search-wrap')){const r=document.getElementById('tradePlayerResults');if(r)r.hidden=true;}if(!e.target.closest('.trade-cube-picker'))document.querySelectorAll('.trade-cube-menu').forEach(m=>m.hidden=true);});
 
 function switchTab(tab){
@@ -13883,4 +13883,20 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .trade-selected-cubes{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
 .trade-selected-cube{min-width:0;overflow-wrap:anywhere}
 .trade-selected-cube .trade-cube-image{width:30px;height:30px;object-fit:contain}
+</style>
+
+<style id="trade-final-centering-and-search-v3">
+/* Center the circled trade icons vertically instead of offsetting them upward. */
+.trade-hero{align-items:center!important}
+.trade-hero-icon,.trade-section-icon,.trade-refresh{transform:none!important;position:relative;top:0!important;align-self:center!important;margin-top:0!important}
+.trade-section-head{align-items:center!important}
+.trade-section-head>div{padding-top:0!important}
+.trade-refresh{display:grid;place-items:center;line-height:1!important}
+.trade-cube-menu{padding:8px!important}
+.trade-cube-search-wrap{position:sticky;top:-8px;z-index:2;display:flex;align-items:center;gap:8px;padding:5px 4px 9px;background:var(--bg-2);border-bottom:1px solid var(--line);margin-bottom:5px}
+.trade-cube-search-wrap>span{color:var(--brass-2);font-size:21px;line-height:1;flex:0 0 20px;text-align:center}
+.trade-cube-search{min-height:40px!important;padding:9px 10px!important;font-size:12px!important}
+.trade-cube-options{contain:layout style}
+.trade-cube-option[hidden]{display:none!important}
+.trade-cube-option{content-visibility:visible!important;contain:layout paint}
 </style>
