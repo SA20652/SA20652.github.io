@@ -5331,8 +5331,8 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 </div>
     <div class="page" id="page-community">
       <div class="section-title" style="font-size:20px">Сообщество GDPLAY</div>
-      <div class="section-sub">Коллекция, сезонный рейтинг, секреты и безопасный обмен кубами.</div>
-      <div class="community-tabs" role="tablist"><button class="community-tab active" data-community-tab="collection">🏆 Коллекция</button><button class="community-tab" data-community-tab="season">⚡ Сезон</button><button class="community-tab" data-community-tab="secrets">🔎 Секреты</button><button class="community-tab" data-community-tab="trades">🔁 Обмен</button></div>
+      <div class="section-sub">Коллекция, сезонный рейтинг и безопасный обмен кубами.</div>
+      <div class="community-tabs" role="tablist"><button type="button" class="community-tab active" data-community-tab="collection">🏆 Коллекция</button><button type="button" class="community-tab" data-community-tab="season">⚡ Сезон</button><button type="button" class="community-tab" data-community-tab="trades">🔁 Обмен</button></div>
       <div id="communityContent"><div class="empty-state">Загрузка сообщества…</div></div>
     </div>
 <div class="page" id="page-settings">
@@ -8006,6 +8006,81 @@ function ensureCasesFirstPaint(){
     },120);
   }catch(_){}
 }
+let communityActiveTab='collection';
+let communityOverviewCache=null;
+let communityOwnedCubes=[];
+function communityEsc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function communityCubeLabel(c){return `${c.name||'Куб'} · ${Number(c.value||0).toLocaleString('ru-RU')} орбов${c.rarity?` · ${c.rarity}`:''}`;}
+function communitySetTab(tab){
+  if(!['collection','season','trades'].includes(tab)) tab='collection';
+  communityActiveTab=tab;
+  document.querySelectorAll('#page-community [data-community-tab]').forEach(b=>{
+    const active=b.dataset.communityTab===tab;
+    b.classList.toggle('active',active); b.setAttribute('aria-selected',active?'true':'false');
+  });
+  renderCommunityPanel();
+}
+async function renderCommunity(forceRefresh=false){
+  const root=document.getElementById('communityContent'); if(!root)return;
+  root.innerHTML='<div class="empty-state">Загружаем сообщество…</div>';
+  try{
+    if(forceRefresh || !communityOverviewCache){
+      const response=await apiFetch('/api/community/overview',{});
+      if(!response?.ok) throw new Error(response?.error||'Не удалось загрузить сообщество');
+      communityOverviewCache=response;
+      communityOwnedCubes=Array.isArray(response.owned_cubes)?response.owned_cubes:[];
+    }
+    renderCommunityPanel();
+  }catch(err){
+    root.innerHTML=`<div class="community-card"><b>Не удалось загрузить сообщество</b><div class="community-muted">${communityEsc(err?.message||'Ошибка соединения')}</div><button type="button" class="btn-main community-action" data-community-action="refresh">Повторить</button></div>`;
+  }
+}
+function renderCommunityPanel(){
+ const root=document.getElementById('communityContent'); const d=communityOverviewCache; if(!root||!d)return;
+ if(communityActiveTab==='collection'){
+  const c=d.collection||{}; const catalog=Array.isArray(c.catalog)?c.catalog:[]; const owned=c.owned||{};
+  root.innerHTML=`<div class="community-card"><div class="community-row-title">Твоя коллекция</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:10px"><b>${Number(c.owned_unique||0).toLocaleString('ru-RU')} из ${Number(c.total_unique||0).toLocaleString('ru-RU')} кубов</b><b>${Number(c.percent||0).toLocaleString('ru-RU')}%</b></div><div class="community-progress"><i style="width:${Math.max(0,Math.min(100,Number(c.percent)||0))}%"></i></div><div class="community-muted">Учитываются уникальные названия кубов, которыми ты владеешь.</div></div><div class="community-card"><div class="community-row-title">Каталог кубов (${catalog.length})</div>${catalog.length?catalog.map(item=>{const count=Number(owned[item.name]||0);return `<div class="community-row"><div class="community-row-main"><div class="community-row-title">${communityEsc(item.name)}</div><div class="community-muted">${communityEsc(item.rarity||'common')} · ${Number(item.value||0).toLocaleString('ru-RU')} орбов</div></div><span title="${count?'Есть в коллекции':'Пока не найден'}">${count?'✅':'🔒'}${count>1?` ×${count}`:''}</span></div>`}).join(''):'<div class="community-muted">Каталог пока пуст.</div>'}</div>`;
+ }else if(communityActiveTab==='season'){
+  const season=d.season||{}; const ranking=Array.isArray(season.ranking)?season.ranking:[];
+  root.innerHTML=`<div class="community-card"><div class="community-row-title">⚡ Сезон ${communityEsc(season.title||season.key||'')}</div><div class="community-muted">Очки начисляются за зарегистрированную активность. Рейтинг обновляется при загрузке.</div></div><div class="community-card"><div class="community-row-title">Топ игроков</div>${ranking.length?ranking.map((u,i)=>`<div class="community-row"><div style="width:30px;font-weight:900">${i+1}.</div><div class="community-row-main"><div class="community-row-title">${communityEsc(u.username||('Игрок '+u.user_id))}</div><div class="community-muted">ID: ${Number(u.user_id)||'—'}</div></div><b>${Number(u.points||0).toLocaleString('ru-RU')} очк.</b></div>`).join(''):'<div class="community-muted">Пока нет результатов.</div>'}</div>`;
+ }else{
+  const trades=Array.isArray(d.trades)?d.trades:[];
+  const options=communityOwnedCubes.map(c=>`<option value="${Number(c.id)}">${communityEsc(communityCubeLabel(c))} · ID ${Number(c.id)}</option>`).join('');
+  root.innerHTML=`<div class="community-card"><div class="community-row-title">🔁 Предложить обмен</div><div class="community-muted">Укажи Telegram ID игрока, выбери свой куб, затем загрузи кубы второго игрока и выбери желаемый предмет.</div><label class="community-muted" for="communityTargetId">ID второго игрока</label><input class="community-input" id="communityTargetId" inputmode="numeric" placeholder="Например, 123456789"><button type="button" class="btn-ghost community-action" data-community-action="load-target-cubes">Показать кубы игрока</button><label class="community-muted" for="communityOfferCube">Твой куб</label><select class="community-input" id="communityOfferCube"><option value="">Выбери свой куб</option>${options}</select><label class="community-muted" for="communityRequestCube">Куб, который хочешь получить</label><select class="community-input" id="communityRequestCube"><option value="">Сначала загрузи кубы игрока</option></select><button type="button" class="btn-main community-action" data-community-action="create-trade">Отправить предложение</button></div><div class="community-card"><div class="community-row-title">Активные предложения</div>${trades.length?trades.map(t=>{const incoming=Number(t.to_user_id)===Number(t.from_user_id)?false:true;const isRecipient=Number(t.to_user_id)===Number(tgUserId()||0);return `<div class="community-row"><div class="community-row-main"><div class="community-row-title">${communityEsc(t.from_username||('Игрок '+t.from_user_id))} предлагает обмен</div><div class="community-muted">Отдаёт: ${communityEsc(t.offered_name||'Куб')} → получает: ${communityEsc(t.requested_name||'Куб')}</div><div class="community-muted">Предложение №${Number(t.id)}</div></div><div style="display:flex;flex-direction:column;gap:5px">${isRecipient?`<button type="button" class="btn-ghost" data-community-action="resolve-trade" data-id="${Number(t.id)}" data-decision="accept">Принять</button><button type="button" class="btn-ghost" data-community-action="resolve-trade" data-id="${Number(t.id)}" data-decision="reject">Отклонить</button>`:`<button type="button" class="btn-ghost" data-community-action="resolve-trade" data-id="${Number(t.id)}" data-decision="cancel">Отменить</button>`}</div></div>`}).join(''):'<div class="community-muted">Активных предложений пока нет.</div>'}</div>`;
+ }
+}
+async function communityAction(button){
+ const action=button?.dataset?.communityAction; if(!action)return;
+ try{
+  if(action==='refresh'){communityOverviewCache=null;await renderCommunity(true);return;}
+  if(action==='load-target-cubes'){
+    const target=Number(document.getElementById('communityTargetId')?.value||0); if(!target)throw new Error('Укажи ID игрока');
+    button.disabled=true; const r=await apiFetch('/api/community/user-cubes',{user_id:target});
+    const select=document.getElementById('communityRequestCube'); if(!r.ok)throw new Error(r.error||'Не удалось загрузить кубы');
+    select.innerHTML='<option value="">Выбери куб</option>'+(r.cubes||[]).map(c=>`<option value="${Number(c.id)}">${communityEsc(communityCubeLabel(c))} · ID ${Number(c.id)}</option>`).join('');
+    if(!(r.cubes||[]).length)select.innerHTML='<option value="">У игрока нет доступных кубов</option>';
+    showToast(`Найдено кубов: ${(r.cubes||[]).length}`,'success');return;
+  }
+  if(action==='create-trade'){
+    const target=Number(document.getElementById('communityTargetId')?.value||0), offered=Number(document.getElementById('communityOfferCube')?.value||0), requested=Number(document.getElementById('communityRequestCube')?.value||0);
+    if(!target||!offered||!requested)throw new Error('Заполни ID игрока и выбери оба куба');
+    button.disabled=true; await apiFetch('/api/community/trade/create',{target_user_id:target,offered_cube_id:offered,requested_cube_id:requested});
+    showToast('Предложение обмена отправлено','success'); communityOverviewCache=null; await renderCommunity(true); return;
+  }
+  if(action==='resolve-trade'){
+    const tradeId=Number(button.dataset.id||0),decision=button.dataset.decision; if(!tradeId||!decision)throw new Error('Не удалось определить предложение');
+    button.disabled=true; await apiFetch('/api/community/trade/resolve',{trade_id:tradeId,decision});
+    showToast(decision==='accept'?'Обмен завершён':decision==='reject'?'Предложение отклонено':'Предложение отменено','success'); communityOverviewCache=null; await renderCommunity(true); return;
+  }
+ }catch(err){showToast(err?.message||'Не удалось выполнить действие','error');}
+ finally{if(button?.isConnected)button.disabled=false;}
+}
+const communityTabsRoot=document.getElementById('page-community');
+communityTabsRoot?.addEventListener('click',e=>{
+ const tab=e.target.closest('[data-community-tab]'); if(tab){e.preventDefault();e.stopPropagation();communitySetTab(tab.dataset.communityTab);return;}
+ const action=e.target.closest('[data-community-action]'); if(action){e.preventDefault();e.stopPropagation();communityAction(action);}
+});
+
 function switchTab(tab){
   if(document.getElementById('battleDiceModal')?.classList.contains('open')) closeBattleDiceModal();
   currentTab = tab;
