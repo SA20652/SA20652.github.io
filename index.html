@@ -11275,7 +11275,7 @@ function updateDailyBonusVisibility(){
 }
 async function loadDailyStatus(){
   if(dailyStatusInFlight||!currentUser||(!tgInitData() && !storageGet(AUTH_TOKEN_KEY))) return;
-  dailyStatusInFlight=true; dailyState.lastPoll=Date.now();
+  dailyStatusInFlight=true;
   try{
     const j=await apiFetch('/api/daily/status',{});
     dailyState.nextAt=Number(j.waiting ? (j.available_at||j.next_daily||0) : (j.expires_at||j.next_daily||0)); dailyState.availableAt=Number(j.available_at||0); dailyState.streak=Number(j.streak||0); dailyState.claims=Number(j.claims_in_day||0); dailyState.reward=Number(j.reward||0); dailyState.premium=!!j.premium; dailyState.available=!!j.available; dailyState.waiting=!!j.waiting; dailyState.completed=!!j.completed; dailyState.maintenance=!!j.maintenance; dailyState.loaded=true; dailyState.retry=0; dailyState.error='';
@@ -11305,7 +11305,7 @@ function updateDailyUI(){
   const progressLabel=streak+'/14';
   const desc=document.getElementById('dailyDesc');if(desc)desc.textContent=(dailyState.completed||streak>=14)?'Все 14 наград получены':'Следующий бонус: '+reward.toLocaleString('ru-RU')+' 💰';
   const btn=document.getElementById('dailyBtn');if(btn){btn.disabled=!can;btn.classList.toggle('disabled',!can);btn.setAttribute('aria-disabled',String(!can));}
-  const timer=document.getElementById('dailyTimer');if(timer){if(!dailyState.loaded) timer.textContent='Загружаем бонус…'; else if(dailyState.completed || streak>=14) timer.textContent='Все 14 наград получены'; else if(can){const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(dailyState.error){timer.textContent=dailyState.error;} else if(dailyState.waiting){const target=Number(dailyState.availableAt||nextAt||0); if(target>Date.now()){const left=target-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else {timer.textContent='Проверяем доступность бонуса…'; if(btn){btn.disabled=true;btn.classList.add('disabled');btn.setAttribute('aria-disabled','true');}}} else if(dailyState.loaded && dailyState.maintenance){timer.textContent='Технический перерыв · бонус заморожен';} else if(dailyState.loaded && !dailyState.available){timer.textContent='Бонус сейчас недоступен · обновляем статус…';} else {timer.textContent='Проверяем доступность бонуса…';}}
+  const timer=document.getElementById('dailyTimer');if(timer){if(!dailyState.loaded) timer.textContent='Загружаем бонус…'; else if(dailyState.completed || streak>=14) timer.textContent='Все 14 наград получены'; else if(can){const left=Math.max(0,nextAt-Date.now()),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Забрать в течение: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(nextAt&&nextAt>Date.now()){const left=nextAt-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000);timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else if(dailyState.maintenance){timer.textContent='Бонус временно заморожен на время технического перерыва';} else if(dailyState.error){timer.textContent=dailyState.error;} else if(dailyState.waiting){const target=Number(dailyState.availableAt||nextAt||0); if(target>Date.now()){const left=target-Date.now(),h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000),sec=Math.floor(left%60000/1000); timer.textContent='Следующая награда через: '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');} else {timer.textContent='Проверяем доступность бонуса…'; if(btn){btn.disabled=true;btn.classList.add('disabled');btn.setAttribute('aria-disabled','true');}}} else if(dailyState.loaded && !dailyState.available){timer.textContent='Бонус сейчас недоступен · обновляем статус…';} else {timer.textContent='Проверяем доступность бонуса…';}}
   const txt=document.getElementById('dailyStreakText');if(txt)txt.textContent=progressLabel;
   const fill=document.getElementById('dailyStreakFill');if(fill)fill.style.width=((streak/14*100))+'%';
 }
@@ -11733,7 +11733,7 @@ async function refreshGlobalTechBreak(){
 // чтобы включение/завершение перерыва быстро отображалось у всех игроков.
 setInterval(()=>{ if(!document.hidden) refreshGlobalTechBreak(); }, 15000);
 setInterval(()=>{ if(document.hidden) return; if(data) renderBuffs(); }, 30000);
-setInterval(()=>{ if(document.hidden) return; if(data){ updateDailyUI(); if(dailyState.loaded && dailyState.nextAt && Date.now()>=dailyState.nextAt && !dailyStatusInFlight) loadDailyStatus(); if(dailyState.loaded && !dailyState.available && !dailyState.waiting && !dailyState.completed && !dailyState.error && !dailyStatusInFlight && Date.now()-Number(dailyState.lastPoll||0)>=5000) loadDailyStatus(); } }, 1000);
+setInterval(()=>{ if(document.hidden) return; if(data){ updateDailyUI(); if(dailyState.loaded && dailyState.nextAt && Date.now()>=dailyState.nextAt && !dailyStatusInFlight) loadDailyStatus(); } }, 1000);
 
 // Быстрый и безопасный ввод для iOS/Telegram WebView.
 // Действие запускаем на pointerup, чтобы не ждать запаздывающий click в iOS.
@@ -13671,8 +13671,8 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
     renderReel(node,results[i],false);node.classList.add('is-stopped');await new Promise(r=>setTimeout(r,170));
    }
    const won=!!j.won;
-   if(won){for(let i=0;i<3;i++)el('slotReel'+i).classList.add('is-winning');msg.className='slot-message win';msg.textContent='🎉 ТРИ В РЯД! '+(j.reward?.name||results[0].name)+' добавлен в инвентарь · стоимость '+fmt(j.reward?.value)+' 💰';}
-   else{msg.className='slot-message loss';msg.textContent='Не повезло — комбинация не совпала. Потрачено '+fmt(j.cost)+' 💰. Попробуй ещё раз!';}
+   if(won){for(let i=0;i<3;i++)el('slotReel'+i).classList.add('is-winning');msg.className='slot-message win';const count=Number(j.reward_count||((Number(j.match_count)===3)?3:1));const match=Number(j.match_count||2);msg.textContent=(match===3?'🎉 ТРИ В РЯД! ':'✨ ДВА В РЯД! ')+(j.reward?.name||results[0].name)+' ×'+count+' добавлено в инвентарь · стоимость одного куба '+fmt(j.reward?.value)+' 💰';}
+   else{msg.className='slot-message loss';msg.textContent='Комбинация не дала награду. Потрачено '+fmt(j.cost)+' 💰.';}
    if(Array.isArray(j.cubes)){try{if(typeof data!=='undefined'&&data)data.cubes=j.cubes;}catch(_){} }
    try{if(typeof renderInventory==='function'&&document.getElementById('page-inventory')?.classList.contains('active'))renderInventory();}catch(_){}
   }catch(e){msg.className='slot-message loss';msg.textContent='❌ '+(e?.message||'Ошибка игры');}
