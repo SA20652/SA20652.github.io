@@ -8013,7 +8013,7 @@ let tradeSearchTimer=null;
 let tradeSearchSequence=0;
 function tradeEsc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function tradeCubeLabel(c){return `${c.name||'Куб'} · ${Number(c.value||0).toLocaleString('ru-RU')} орбов${c.rarity?` · ${c.rarity}`:''}`;}
-function tradeCubeImage(c,cls='trade-cube-image'){const custom=String(c?.image||'');if(custom&&(custom.startsWith('https://')||custom.startsWith('http://')||custom.startsWith('data:image/')))return `<img class="${cls}" src="${tradeEsc(custom)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'trade-cube-fallback',textContent:'?'}))">`;return window.cubeIconMarkup?.(c?.name,cls)||'<span class="trade-cube-fallback">?</span>';}
+function tradeCubeImage(c,cls='trade-cube-image'){const custom=String(c?.image||'');if(custom&&(custom.startsWith('https://')||custom.startsWith('http://')||custom.startsWith('data:image/')))return `<img class="${cls}" src="${tradeEsc(custom)}" alt="" loading="lazy" decoding="async" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'trade-cube-fallback',textContent:'?'}))">`;return window.cubeIconMarkup?.(c?.name,cls)||'<span class="trade-cube-fallback">?</span>';}
 function tradeCubeCardMarkup(c){return `${tradeCubeImage(c)}<span class="trade-cube-trigger-copy"><b>${tradeEsc(c?.name||'Куб')}</b><small>${tradeEsc(c?.rarity||'Обычный')} · ${Number(c?.value||0).toLocaleString('ru-RU')} орбов</small></span>`;}
 function tradeSelectedIds(key){const el=document.getElementById(key==='offer'?'tradeOfferCubeIds':'tradeRequestCubeIds');return el?String(el.value||'').split(',').map(Number).filter(Boolean):[];}
 function tradeCubePickerMarkup(key,cubes,placeholder,disabled=false){const selected=tradeSelectedIds(key);const chosen=(cubes||[]).filter(c=>selected.includes(Number(c.id)));const label=chosen.length?`${chosen.length}/4 кубов выбрано`:placeholder;return `<div class="trade-cube-picker" data-trade-picker="${key}"><input type="hidden" id="${key==='offer'?'tradeOfferCubeIds':'tradeRequestCubeIds'}" value="${selected.join(',')}"><button type="button" class="trade-cube-trigger" data-trade-action="toggle-picker" data-picker-key="${key}" ${disabled?'disabled':''}><span class="trade-cube-fallback">?</span><span class="trade-cube-trigger-copy"><b>${tradeEsc(label)}</b><small>${chosen.length?chosen.map(c=>tradeEsc(c.name)).join(', '):(disabled?'Сначала выбери игрока':'Выбери до 4 кубов')}</small></span><span class="trade-cube-chevron">⌄</span></button><div class="trade-selected-cubes">${chosen.map(c=>`<span class="trade-selected-cube">${tradeCubeImage(c)}${tradeEsc(c.name)} <button type="button" aria-label="Убрать" data-trade-cube-select="${key}" data-cube-id="${Number(c.id)}">×</button></span>`).join('')}</div><div class="trade-cube-menu" id="trade${key==='offer'?'Offer':'Request'}CubeMenu" hidden>${(cubes||[]).length?(cubes||[]).map(c=>`<button type="button" class="trade-cube-option" data-trade-cube-select="${key}" data-cube-id="${Number(c.id)}">${tradeCubeImage(c)}<span class="trade-cube-option-copy"><b>${selected.includes(Number(c.id))?'✓ ':''}${tradeEsc(c.name||'Куб')}</b><small>${tradeEsc(c.rarity||'Обычный')}</small></span><span class="trade-cube-value">${Number(c.value||0).toLocaleString('ru-RU')} 💰</span></button>`).join(''):`<div class="trade-search-status">${disabled?'Сначала выбери игрока':'Нет доступных кубов'}</div>`}</div></div>`;}
@@ -8034,9 +8034,9 @@ async function renderTradePage(forceRefresh=false){
      <div class="trade-exchange-mark">⇄</div>
      <div class="trade-field"><label>Куб, который хочешь получить</label>${tradeCubePickerMarkup('request',tradeTargetCubes,'Сначала выбери игрока',true)}</div>
      <div id="tradeCreateMessage" class="trade-help">У каждого куба показаны изображение, редкость и стоимость. Проверь оба предмета перед отправкой.</div>
-     <button type="button" class="btn-main trade-submit" data-trade-action="create">⇄ Отправить предложение</button></div>
+     <button type="button" class="btn-main trade-submit" data-trade-action="create">Отправить предложение</button></div>
      <div class="trade-card"><div class="trade-section-head"><span class="trade-section-icon">⇄</span><div><b>Активные предложения</b><small>Входящие и исходящие обмены</small></div><button type="button" class="trade-refresh" data-trade-action="refresh" aria-label="Обновить">↻</button></div>
-     ${offers.length?offers.map(t=>{const isRecipient=Number(t.to_user_id)===current;const otherName=isRecipient?(t.from_display_name||t.from_username||('Игрок '+t.from_user_id)):(t.to_display_name||t.to_username||('Игрок '+t.to_user_id));const otherUsername=isRecipient?t.from_username:t.to_username;const avatar=isRecipient?t.from_avatar:t.to_avatar;const aa=Array.isArray(t.offered_cubes)&&t.offered_cubes.length?t.offered_cubes:[{name:t.offered_name||'Куб',value:t.offered_value,rarity:t.offered_rarity,image:t.offered_image}];const bb=Array.isArray(t.requested_cubes)&&t.requested_cubes.length?t.requested_cubes:[{name:t.requested_name||'Куб',value:t.requested_value,rarity:t.requested_rarity,image:t.requested_image}];return `<div class="trade-offer-row"><div class="trade-offer-avatar">${tradeAvatar({display_name:otherName,username:otherUsername,avatar})}</div><div class="trade-offer-main"><b>${tradeEsc(otherName)}</b><small>${otherUsername?'@'+tradeEsc(otherUsername)+' · ':''}Предложение №${Number(t.id)}</small><div class="trade-offer-cubes"><div class="trade-offer-cube-group">${aa.map(a=>`<div class="trade-offer-cube">${tradeCubeImage(a)}<b>${tradeEsc(a.name)}</b><small>${Number(a.value||0).toLocaleString('ru-RU')} 💰</small></div>`).join('')}</div><div class="trade-offer-swap">⇄</div><div class="trade-offer-cube-group">${bb.map(b=>`<div class="trade-offer-cube">${tradeCubeImage(b)}<b>${tradeEsc(b.name)}</b><small>${Number(b.value||0).toLocaleString('ru-RU')} 💰</small></div>`).join('')}</div></div></div><div class="trade-offer-actions">${isRecipient?`<button type="button" class="trade-mini-btn accept" data-trade-action="resolve" data-id="${Number(t.id)}" data-decision="accept">Принять</button><button type="button" class="trade-mini-btn" data-trade-action="resolve" data-id="${Number(t.id)}" data-decision="reject">Отклонить</button>`:`<button type="button" class="trade-mini-btn" data-trade-action="resolve" data-id="${Number(t.id)}" data-decision="cancel">Отменить</button>`}</div></div>`}).join(''):'<div class="trade-empty"><span>⇄</span><b>Пока нет предложений</b><small>Когда кто-то предложит обмен, он появится здесь.</small></div>'}</div>`;
+     ${offers.length?offers.map(t=>{const isRecipient=Number(t.to_user_id)===current;const otherName=isRecipient?(t.from_display_name||t.from_username||('Игрок '+t.from_user_id)):(t.to_display_name||t.to_username||('Игрок '+t.to_user_id));const otherUsername=isRecipient?t.from_username:t.to_username;const avatar=isRecipient?t.from_avatar:t.to_avatar;const aa=Array.isArray(t.offered_cubes)&&t.offered_cubes.length?t.offered_cubes:[{name:t.offered_name||'Куб',value:t.offered_value,rarity:t.offered_rarity,image:t.offered_image}];const bb=Array.isArray(t.requested_cubes)&&t.requested_cubes.length?t.requested_cubes:[{name:t.requested_name||'Куб',value:t.requested_value,rarity:t.requested_rarity,image:t.requested_image}];return `<div class="trade-offer-row"><div class="trade-offer-avatar">${tradeAvatar({display_name:otherName,username:otherUsername,avatar})}</div><div class="trade-offer-main"><b>${tradeEsc(otherName)}</b><small>${otherUsername?'@'+tradeEsc(otherUsername)+' · ':''}Предложение №${Number(t.id)}</small><div class="trade-offer-cubes"><div class="trade-offer-cube-group trade-offer-cube-group-${aa.length}">${aa.map(a=>`<div class="trade-offer-cube">${tradeCubeImage(a)}<b>${tradeEsc(a.name)}</b><small>${Number(a.value||0).toLocaleString('ru-RU')} 💰</small></div>`).join('')}</div><div class="trade-offer-swap">⇄</div><div class="trade-offer-cube-group trade-offer-cube-group-${bb.length}">${bb.map(b=>`<div class="trade-offer-cube">${tradeCubeImage(b)}<b>${tradeEsc(b.name)}</b><small>${Number(b.value||0).toLocaleString('ru-RU')} 💰</small></div>`).join('')}</div></div></div><div class="trade-offer-actions">${isRecipient?`<button type="button" class="trade-mini-btn accept" data-trade-action="resolve" data-id="${Number(t.id)}" data-decision="accept">Принять</button><button type="button" class="trade-mini-btn" data-trade-action="resolve" data-id="${Number(t.id)}" data-decision="reject">Отклонить</button>`:`<button type="button" class="trade-mini-btn" data-trade-action="resolve" data-id="${Number(t.id)}" data-decision="cancel">Отменить</button>`}</div></div>`}).join(''):'<div class="trade-empty"><span>⇄</span><b>Пока нет предложений</b><small>Когда кто-то предложит обмен, он появится здесь.</small></div>'}</div>`;
  }catch(err){root.innerHTML=`<div class="trade-card"><b>Не удалось загрузить трейды</b><div class="trade-help">${tradeEsc(err?.message||'Ошибка соединения')}</div><button type="button" class="btn-main trade-submit" data-trade-action="refresh">Повторить</button></div>`;}
 }
 async function searchTradePlayers(query){
@@ -13793,3 +13793,53 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 <style>.trade-search-icon{display:flex;align-items:center;justify-content:center;top:0;bottom:0;height:100%;line-height:1;transform:none}.trade-search-wrap{display:flex;align-items:center}.trade-search-wrap #tradePlayerSearch{line-height:1.35;min-height:48px}.trade-cube-fallback{font-weight:900;font-size:24px;color:var(--brass-2)}.trade-cube-option{min-height:62px}.trade-offer-cubes{width:100%;box-sizing:border-box}.trade-offer-row{width:100%;box-sizing:border-box}.trade-offer-main{min-width:0;max-width:100%}.trade-offer-cubes{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr)}.trade-selected-cubes{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.trade-selected-cube{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:8px;padding:4px 7px;font-size:10px}.trade-selected-cube button{border:0;background:transparent;color:var(--brass-2);font-weight:900}</style>
 
 <style>.trade-offer-cube-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;min-width:0}.trade-offer-cubes{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);width:100%;align-items:center}.trade-offer-cube{width:100%;box-sizing:border-box}.trade-search-icon{position:absolute;left:12px;top:0;bottom:0;height:100%;display:flex;align-items:center;justify-content:center;line-height:1;transform:none}</style>
+
+<style id="trade-ui-polish-v2">
+/* Keep trade header icons/buttons aligned to the top line and away from baseline drift */
+.trade-section-head{align-items:flex-start;gap:10px}
+.trade-section-icon,.trade-refresh{margin-top:0;align-self:flex-start;flex-shrink:0}
+.trade-section-head>div{padding-top:1px}
+.trade-search-wrap{position:relative;display:block}
+.trade-search-icon{position:absolute;left:12px;top:0;bottom:0;height:auto;display:flex;align-items:center;justify-content:center;line-height:1;transform:none}
+.trade-search-wrap #tradePlayerSearch{padding-left:40px;min-height:48px;line-height:1.35}
+.trade-submit,.trade-submit:focus,.trade-submit:hover,.trade-submit:active{
+  width:100%!important; min-height:56px; margin-top:8px; padding:15px 18px!important;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(237,169,91,.85)!important;border-radius:14px!important;
+  background:linear-gradient(135deg,#e6a34f 0%,#c66a2d 100%)!important;
+  color:#24160e!important;font-size:16px!important;font-weight:900!important;
+  line-height:1.25;box-shadow:inset 0 1px rgba(255,255,255,.2),0 7px 18px rgba(0,0,0,.18)!important;
+  text-shadow:none!important;transform:none!important
+}
+.trade-submit::before,.trade-submit::after{content:none!important;display:none!important}
+/* Sent trade cards use the full available width; each side gets as many columns as selected cubes */
+.trade-offer-cubes{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  gap:8px!important;width:100%;align-items:stretch;margin-top:10px
+}
+.trade-offer-swap{order:0;text-align:center;line-height:1;padding:1px 0}
+.trade-offer-cube-group{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important;
+  width:100%;min-width:0;align-items:stretch
+}
+.trade-offer-cube-group-1{grid-template-columns:minmax(0,1fr)!important}
+.trade-offer-cube-group-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.trade-offer-cube-group-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.trade-offer-cube-group-4{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.trade-offer-cube{min-width:0;width:100%;box-sizing:border-box;padding:10px 8px!important;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.trade-offer-cube .trade-cube-image,.trade-offer-cube .cube-icon-inline,.trade-offer-cube .trade-cube-fallback{width:clamp(38px,11vw,64px)!important;height:clamp(38px,11vw,64px)!important;flex:0 0 auto!important;object-fit:contain}
+.trade-offer-cube b{font-size:11px!important;line-height:1.35;overflow-wrap:anywhere}
+.trade-offer-cube small{font-size:10px!important;overflow-wrap:anywhere}
+.trade-offer-row{align-items:flex-start}
+.trade-offer-main{min-width:0;width:100%}
+.trade-offer-actions{align-self:flex-start}
+.trade-cube-menu{max-height:min(48vh,360px);overscroll-behavior:contain}
+.trade-cube-option{min-height:54px}
+.trade-cube-option img{object-fit:contain;flex-shrink:0}
+@media(max-width:380px){
+ .trade-card{padding:12px}
+ .trade-offer-cube-group-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .trade-offer-cube{padding:8px 5px!important}
+ .trade-offer-cube b{font-size:10px!important}
+}
+</style>
