@@ -13944,3 +13944,22 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 #page-trades .trade-card:nth-child(2) .trade-refresh:active{transform:rotate(35deg) scale(.94);background:rgba(220,170,91,.2)}
 @media(max-width:420px){#page-trades .trade-hero{padding:16px 14px;gap:10px}#page-trades .trade-hero-title{font-size:20px}#page-trades #tradePageContent>.trade-card:first-child{padding:14px}#page-trades .trade-cube-trigger{padding:10px;gap:8px}}
 </style>
+
+<style id="gdplay-trade-icon-glyph-alignment-v1">
+/* Nudge glyphs upward inside outlined trade icons without moving their frames. */
+#page-trades .trade-hero-icon,
+#page-trades .trade-section-icon,
+#page-trades .trade-refresh,
+#page-trades .trade-cube-trigger .trade-cube-chevron,
+#page-trades .trade-selected-cube button {
+  line-height: 1;
+}
+#page-trades .trade-hero-icon > *,
+#page-trades .trade-section-icon > *,
+#page-trades .trade-refresh,
+#page-trades .trade-cube-trigger .trade-cube-chevron,
+#page-trades .trade-selected-cube button {
+  position: relative;
+  top: -2px;
+}
+</style>
