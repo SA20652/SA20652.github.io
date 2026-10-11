@@ -6296,8 +6296,15 @@ async function apiFetch(path, payload={}, _retry=false){
       }
       if(j.farm_action){ showToast(j.farm_action.permanent?'⛔ Античит: бан навсегда':`⛔ Античит: временный бан (${j.farm_action.strike||1}-е нарушение)`,'error'); }
       if(!r.ok){
-        if(r.status>=500){ lastNetworkError=new Error(j.error||`Сервер недоступен (${r.status})`); continue; }
-        throw new Error(j.error||'Ошибка сервера');
+        // Try the next configured API origin when this host does not expose
+        // the endpoint (404/405) or is temporarily failing (5xx). A frontend
+        // host can answer 404 while the actual API is healthy on API_BASE.
+        if(r.status===404 || r.status===405 || r.status>=500){
+          lastNetworkError=new Error(j.error||`API ${r.status} на ${base}`);
+          continue;
+        }
+        // Authentication/validation errors are real responses, not outages.
+        throw new Error(j.error||`Ошибка сервера (${r.status})`);
       }
       return j;
     }catch(e){
@@ -7061,7 +7068,13 @@ async function boot(){
     currentUser=null;
     data=null;
     try{showAuth();}catch(_){ }
-    try{showAuthError('Не удалось загрузить профиль с сервера. Обнови приложение и попробуй ещё раз.');}catch(_){ }
+    // Do not claim the server is down for every boot exception. Surface the
+    // actual API/auth error so a live server with an auth problem is not
+    // misdiagnosed as an outage.
+    const bootMessage = /подключиться|недоступен|NetworkError|Failed to fetch|Load failed|AbortError/i.test(String(e?.message||''))
+      ? 'Не удалось связаться с API. Проверь адрес сервера и соединение, затем повтори попытку.'
+      : `Не удалось войти: ${String(e?.message||'неизвестная ошибка')}`;
+    try{showAuthError(bootMessage);}catch(_){ }
   });
 
   const hideSplash=()=>{
