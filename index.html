@@ -4744,6 +4744,21 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
     <div class="startup-loader-progress" aria-hidden="true"><div class="startup-loader-progress-fill"></div></div>
   </div>
 </div><script>
+// Independent splash watchdog: release the startup overlay even if the main
+// bootstrap is delayed by Telegram WebView or a slow API response.
+(function(){
+  const releaseSplash = () => {
+    const loader = document.getElementById('startupLoader');
+    if (loader) { loader.classList.add('hide'); loader.setAttribute('aria-hidden','true'); }
+    const app = document.getElementById('appScreen');
+    const auth = document.getElementById('authScreen');
+    if (app && auth && getComputedStyle(app).display === 'none' && getComputedStyle(auth).display === 'none') {
+      auth.style.display = 'flex';
+    }
+  };
+  // The normal boot() still controls the regular path; this is only a fallback.
+  setTimeout(releaseSplash, 9000);
+})();
 (function(){
   const loader=document.getElementById('startupLoader');
   const card=loader&&loader.querySelector('.startup-loader-card');
