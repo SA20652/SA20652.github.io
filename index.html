@@ -11088,7 +11088,7 @@ function updateCustomBannerPreview(){
   const img=customBannerImageData||data?.profileCustomBanner||'';
   const zoom=Number(document.getElementById('customBannerZoom')?.value||1); const x=Number(document.getElementById('customBannerX')?.value||50); const y=Number(document.getElementById('customBannerY')?.value||50);
   p.innerHTML=img?`<img class="custom-banner-preview-image" src="${img}" alt="" draggable="false">`:'<span>Здесь появится ваш баннер</span>'; const im=p.querySelector('img'); if(im){ const dx=(x-50)*1.5; const dy=(y-50)*1.5; im.style.objectPosition='50% 50%'; im.style.transform=`translate3d(${dx}%,${dy}%,0) scale(${zoom})`; } p.classList.toggle('has-image',!!img);
-  const save=document.getElementById('customBannerSaveBtn'); if(save){ save.disabled=!img; save.textContent='Оплатить 5 ⭐'; }
+  const save=document.getElementById('customBannerSaveBtn'); if(save){ const owned=!!data?.profileCustomBannerOwned; save.disabled=!img; save.textContent=owned?'Сохранить':'Оплатить 5 ⭐'; }
 }
 async function prepareCustomBanner(file){
   if(!file)return;
@@ -11174,7 +11174,7 @@ async function saveCustomBanner(){
     const j=await apiFetch('/api/profile/custom-banner/save',{image,settings});
     data.profileCustomBanner=String(j.profile_custom_banner||image); data.profileCustomBannerSettings=j.profile_custom_banner_settings||settings; data.profileCustomBannerName=''; data.profileCustomBannerOwned=true; data.profileCustomBannerLocked=false; data.profileCustomBannerPublishedId=null; data.profilePublicBanner=null; data.profileBanner='custom'; persistLocal(); renderProfileCustomization(); closeModal('customBannerModal'); showToast('🖼️ Баннер сохранён','success');
   }catch(e){showToast('❌ '+e.message,'error');}
-  finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent='Оплатить 5 ⭐';}}
+  finally{const b=document.getElementById('customBannerSaveBtn');if(b){b.disabled=!customBannerImageData&&!data?.profileCustomBanner;b.textContent=data?.profileCustomBannerOwned?'Сохранить':'Оплатить 5 ⭐';}}
 }
 
 async function setProfileBanner(key){
@@ -11942,6 +11942,8 @@ document.getElementById('profileBannerGrid')?.addEventListener('click',e=>{const
 document.getElementById('publicBannerGrid')?.addEventListener('click',e=>{const b=e.target.closest('[data-public-banner-id]');if(b&&!b.disabled)setProfileBanner('public:'+b.dataset.publicBannerId);});
 document.getElementById('customBannerFile')?.addEventListener('change',async e=>{try{const f=e.target.files?.[0]; if(f){await prepareCustomBanner(f);}}catch(err){showToast('❌ '+(err.message||'Не удалось обработать изображение'),'error');}});
 ['customBannerZoom','customBannerX','customBannerY'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateCustomBannerPreview));
+// Drag the image directly in the preview; keep sliders synchronized.
+(()=>{const p=document.getElementById('customBannerPreview');if(!p||p.dataset.dragBound)return;p.dataset.dragBound='1';let drag=null;p.style.touchAction='none';p.addEventListener('pointerdown',e=>{if(!p.querySelector('img'))return;const xEl=document.getElementById('customBannerX'),yEl=document.getElementById('customBannerY');drag={sx:e.clientX,sy:e.clientY,x:Number(xEl?.value||50),y:Number(yEl?.value||50),rect:p.getBoundingClientRect()};p.setPointerCapture?.(e.pointerId);e.preventDefault();});p.addEventListener('pointermove',e=>{if(!drag)return;const xEl=document.getElementById('customBannerX'),yEl=document.getElementById('customBannerY');if(xEl)xEl.value=String(Math.max(0,Math.min(100,drag.x+(e.clientX-drag.sx)/Math.max(1,drag.rect.width)*100)));if(yEl)yEl.value=String(Math.max(0,Math.min(100,drag.y+(e.clientY-drag.sy)/Math.max(1,drag.rect.height)*100)));updateCustomBannerPreview();});const end=()=>{drag=null};p.addEventListener('pointerup',end);p.addEventListener('pointercancel',end);})();
 document.getElementById('customBannerSaveBtn')?.addEventListener('click',saveCustomBanner);
 document.getElementById('customBannerPublishBtn')?.addEventListener('click',publishCustomBanner);
 document.getElementById('customBannerCloseBtn')?.addEventListener('click',()=>closeModal('customBannerModal'));
@@ -13766,7 +13768,7 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 .public-banner-library.is-collapsed #publicBannerGrid{display:none!important;}
 .public-banner-library-toggle{font-size:10px;padding:5px 8px;line-height:1;white-space:nowrap;}
 .custom-banner-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px;}
-.custom-banner-actions .custom-banner-pay-btn{order:1;margin:0;align-self:center;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;}
+.custom-banner-actions .custom-banner-pay-btn{order:1;margin:0;align-self:center;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;min-width:148px;padding-left:24px!important;padding-right:24px!important;}
 .custom-banner-actions #customBannerCloseBtn{order:2;margin:0;}
 .custom-banner-actions.has-publish{align-items:center;}
 .custom-banner-actions.has-publish .custom-banner-pay-btn{position:static;transform:none;}
