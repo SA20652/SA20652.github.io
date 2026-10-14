@@ -8349,11 +8349,17 @@ let CASE_IMAGE_PRELOADED = {};
 let caseImagesPromise = null;
 function caseImage(caseId, alt=''){
   const key=String(caseId);
-  const direct=CASES.find(c=>String(c.id)===key)?.icon;
+  const direct=String(CASES.find(c=>String(c.id)===key)?.icon||'').trim();
   const aliases={legend:'legendary',icon:'iconic'};
-  const src=(String(direct||'').startsWith('data:image/') ? direct : '') || CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || '';
-  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" loading="eager" decoding="async">` : '';
+  // Prefer the catalog's embedded image, but retain valid server/local URLs as fallback.
+  const catalog=CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || '';
+  const src=(catalog && String(catalog).startsWith('data:image/') ? catalog : '') ||
+    (direct && (/^(data:image\/|https?:\/\/|\/)/i.test(direct)) ? direct : '') || catalog || '';
+  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" loading="eager" decoding="async" onerror="this.onerror=null;this.style.opacity='0';this.style.visibility='hidden';this.closest('.rad-case-art')?.classList.add('case-image-failed')">` : '';
 }
+window.addEventListener('gdplay-case-images-ready',()=>{
+  try{ if(typeof renderCases==='function' && document.getElementById('page-cases')?.classList.contains('active')) renderCases(); }catch(_){}
+});
 function ensureCaseImages(){
   if(Object.keys(CASE_IMAGES).length && Object.keys(CASE_IMAGE_PRELOADED).length >= Object.keys(CASE_IMAGES).length) return Promise.resolve();
   if(caseImagesPromise) return caseImagesPromise;
@@ -8379,7 +8385,7 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=prime-case-v1',{cache:'force-cache'}).then(r=>{
+    fetch('case_images.html?v=prime-case-v2',{cache:'no-cache'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -8390,13 +8396,13 @@ function ensureCaseImages(){
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=prime-case-v1';
+      iframe.src='case_images.html?v=prime-case-v2';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
       iframe.onload=()=>{try{finish(iframe.contentWindow.CASE_IMAGES);}catch(e){}};
       document.body.appendChild(iframe);
-      setTimeout(()=>{if(!done){CASE_IMAGES={};CASE_IMAGE_PRELOADED={};window.CASE_IMAGES_READY=false;resolve();iframe.remove();}},5000);
+      setTimeout(()=>{if(!done){CASE_IMAGES={};CASE_IMAGE_PRELOADED={};window.CASE_IMAGES_READY=false;caseImagesPromise=null;resolve();iframe.remove();}},5000);
     });
   });
   return caseImagesPromise;
