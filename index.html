@@ -7083,7 +7083,7 @@ async function boot(){
       void releaseProgressFill.offsetWidth;
       releaseProgressFill.classList.add('run');
     }
-    await new Promise(resolve=>setTimeout(resolve,5000));
+    await new Promise(resolve=>setTimeout(resolve,4000));
     storageSet(RELEASE_KEY,'1');
     if(releaseScreen){
       releaseScreen.classList.add('leaving');
@@ -7093,9 +7093,9 @@ async function boot(){
   }
 
   // Startup splash is deliberately independent from server/auth. It always
-  // runs for 5 seconds while bootSafe() and the asset warmup continue in the
+  // runs for 4 seconds while bootSafe() and the asset warmup continue in the
   // background. This gives the app a fixed, predictable startup time.
-  await new Promise(resolve=>setTimeout(resolve,5000));
+  await new Promise(resolve=>setTimeout(resolve,4000));
 
   // Always expose a real screen before removing the splash. If bootSafe() has
   // not finished yet, show the normal auth screen as a safe fallback.
@@ -7116,7 +7116,7 @@ async function boot(){
   }catch(_){ }
   return serverBoot;
 }
-async function waitForTelegramInitData(timeoutMs=12000){
+async function waitForTelegramInitData(timeoutMs=2500){
   // Telegram WebApp иногда отдаёт initData не в тот же момент, когда загружается DOM.
   // Ждём его немного, чтобы автоматический вход не падал после перезахода/перезагрузки.
   const started=Date.now();
@@ -7184,7 +7184,7 @@ async function bootSafe(){
   // не обязательны. Сервер сам создаёт/находит игрока по проверенному initData,
   // а имя и фото берутся непосредственно из Telegram. Формы входа/регистрации
   // остаются в DOM и доступны для ручного входа в другой аккаунт.
-  const initData = await waitForTelegramInitData(12000);
+  const initData = await waitForTelegramInitData(2500);
   detectLocalAdminUI();
   if(window.isAdmin) loadAdminUI().catch(e=>console.debug('admin shell warmup',e));
   const token = storageGet(AUTH_TOKEN_KEY);
@@ -7234,7 +7234,7 @@ async function bootSafe(){
   if(!telegramInitData){
     // One last recovery pass. This specifically covers rare Telegram WebView
     // races where initData appears only after the first page lifecycle tick.
-    telegramInitData = await waitForTelegramInitData(12000);
+    telegramInitData = await waitForTelegramInitData(1500);
   }
   if(!telegramInitData){
     currentUser = null;
