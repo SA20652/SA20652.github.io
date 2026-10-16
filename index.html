@@ -8420,6 +8420,18 @@ function ensureCaseImages(){
           done=true;
           window.CASE_IMAGES_READY=true;
           window.dispatchEvent(new CustomEvent('gdplay-case-images-ready'));
+          // The first render can happen before the async case catalog arrives.
+          // Repaint the visible case list as soon as the images are available,
+          // without requiring the user to switch tabs and come back.
+          requestAnimationFrame(()=>{
+            try{
+              const page=document.getElementById('page-cases');
+              if(page && page.classList.contains('active') && typeof renderCases==='function'){
+                renderCases();
+                preloadAllRenderedImages?.();
+              }
+            }catch(_){}
+          });
           resolve();
         });
       }
