@@ -4453,7 +4453,7 @@ body{overflow-x:hidden;}
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
       preloadCatalog('cube_icons.html?v=prime-cubes-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
-      preloadCatalog('case_images.html?v=immediate-v2',/src=\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('case_images.html?v=immediate-v3',/src=\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('profile_banners.html?v=profile-banners-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -8412,7 +8412,7 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=prime-case-v2',{cache:'force-cache'}).then(r=>{
+    fetch('case_images.html?v=prime-case-v3',{cache:'force-cache'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -8424,7 +8424,7 @@ function ensureCaseImages(){
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=prime-case-v2';
+      iframe.src='case_images.html?v=prime-case-v3';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
@@ -10573,12 +10573,12 @@ function giveawayEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&am
 function giveawayDate(v){try{return new Date(String(v).replace(' ','T')+'Z').toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return String(v||'');}}
 
 let giveawayTicketState={tickets:0,seconds_to_next:1800};
-async function refreshGiveawayTickets(active=false){try{const j=await apiFetch('/api/giveaways/tickets/heartbeat',{active});giveawayTicketState={tickets:Number(j.tickets||0),seconds_to_next:Number(j.seconds_to_next||1800)};const el=document.getElementById('giveawayTicketCount');if(el)el.textContent=String(giveawayTicketState.tickets);const timer=document.getElementById('giveawayTicketTimer');if(timer){const sec=giveawayTicketState.seconds_to_next;timer.textContent=`До следующего билета: ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;}return j;}catch(_){return null;}}
-setInterval(()=>{const active=document.visibilityState==='visible'&&document.hasFocus();refreshGiveawayTickets(active);},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshGiveawayTickets(true);});
+async function refreshGiveawayTickets(active=(document.visibilityState==='visible')){try{const j=await apiFetch('/api/giveaways/tickets/heartbeat',{active});giveawayTicketState={tickets:Number(j.tickets||0),seconds_to_next:Number(j.seconds_to_next||1800)};const el=document.getElementById('giveawayTicketCount');if(el)el.textContent=String(giveawayTicketState.tickets);const timer=document.getElementById('giveawayTicketTimer');if(timer){const sec=giveawayTicketState.seconds_to_next;timer.textContent=`До следующего билета: ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;}return j;}catch(_){return null;}}
+setInterval(()=>{refreshGiveawayTickets(document.visibilityState==='visible');},15000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshGiveawayTickets(true);});
 async function renderGiveawaysMain(){
   const box=document.getElementById('mainGiveawaysPanel'); if(!box)return;
   box.innerHTML='<div class="empty-state">Загружаем розыгрыши…</div>';
-  await refreshGiveawayTickets(false);
+  await refreshGiveawayTickets(document.visibilityState==='visible');
   try{
     const j=await apiFetch('/api/giveaways',{}), gs=Array.isArray(j.giveaways)?j.giveaways:[];
     const ticketHeader=`<div class="giveaway-ticket-box"><b>Билеты: <span id="giveawayTicketCount">${giveawayTicketState.tickets}</span></b><div class="section-sub" id="giveawayTicketTimer" style="margin-top:5px">До следующего билета: ${Math.floor(giveawayTicketState.seconds_to_next/60)}:${String(giveawayTicketState.seconds_to_next%60).padStart(2,'0')}</div><div class="section-sub">За каждые 30 минут активной игры начисляется 1 билет. Прогресс сохраняется, если выйти из приложения.</div></div>`;
@@ -10607,7 +10607,7 @@ async function renderGiveaways(){
     }).join('');
   }catch(e){box.innerHTML=`<div class="empty-state">Не удалось загрузить розыгрыши: ${giveawayEscape(e.message||'ошибка')}</div>`;}
 }
-async function joinGiveaway(button){button.disabled=true;try{const gid=Number(button.dataset.giveawayId),input=document.querySelector(`[data-giveaway-ticket-input=\"${gid}\"]`),tickets=Number(input?.value||1);if(!Number.isInteger(tickets)||tickets<1)throw new Error('Поставь минимум 1 билет');await apiFetch('/api/giveaways/join',{giveaway_id:gid,tickets});showToast('Участие подтверждено','success');await refreshGiveawayTickets(false);await renderGiveawaysMain();}catch(e){showToast(e.message||'Не удалось участвовать','error');button.disabled=false;}}
+async function joinGiveaway(button){button.disabled=true;try{const gid=Number(button.dataset.giveawayId),input=document.querySelector(`[data-giveaway-ticket-input=\"${gid}\"]`),tickets=Number(input?.value||1);if(!Number.isInteger(tickets)||tickets<1)throw new Error('Поставь минимум 1 билет');await apiFetch('/api/giveaways/join',{giveaway_id:gid,tickets});showToast('Участие подтверждено','success');await refreshGiveawayTickets(document.visibilityState==='visible');await renderGiveawaysMain();}catch(e){showToast(e.message||'Не удалось участвовать','error');button.disabled=false;}}
 async function renderLeaderboard(sortBy='cases'){
   const el = document.getElementById('leaderboardList');
   const requestedSort=String(sortBy||'cases');
