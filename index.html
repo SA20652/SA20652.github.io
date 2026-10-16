@@ -1941,6 +1941,11 @@ nav{position:sticky;top:78px;z-index:45;display:grid;grid-template-columns:repea
 
 /* ===== TOP / LEADERBOARD V2 ===== */
 .top-tabs{background:var(--bg-3);padding:5px;border-radius:14px;border:1px solid var(--line);gap:4px;}
+/* Fill the whole outlined top switcher evenly; preserve the original pill-style layout. */
+#topTabs.top-tabs{display:flex!important;width:100%;box-sizing:border-box;align-items:stretch;}
+#topTabs .top-tab{flex:1 1 0!important;min-width:0!important;width:0;justify-content:center;white-space:nowrap;padding-left:4px;padding-right:4px;}
+#topTabs .top-tab-icon{display:flex;align-items:center;justify-content:center;}
+
 
 
 .top-tab{display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:11px;padding:9px 4px;font-size:9.5px;font-weight:700;letter-spacing:.1px;}
@@ -8382,13 +8387,14 @@ let CASE_IMAGES = {};
 let CASE_IMAGE_PRELOADED = {};
 let caseImagesPromise = null;
 function caseImage(caseId, alt=''){
-  const key=String(caseId);
-  const direct=CASES.find(c=>String(c.id)===key)?.icon;
+  const key=String(caseId??'').trim().toLowerCase();
+  const direct=CASES.find(c=>String(c.id).trim().toLowerCase()===key)?.icon;
   const aliases={legend:'legendary',icon:'iconic',elite:'elite_exact',elitecase:'elite_exact',elite_case:'elite_exact',legendary_case:'legendary',case_elite:'elite_exact',prime:'prime',vault_case:'vault'};
-  const caseObj=CASES.find(c=>String(c.id)===key)||{};
+  const caseObj=CASES.find(c=>String(c.id).trim().toLowerCase()===key)||{};
   const normalized=String(caseObj.name||caseObj.title||'').toLowerCase();
   const inferred=(/элит|дорог|максим|ultimate|elite/.test(normalized)?(CASE_IMAGES.elite_exact||CASE_IMAGES.elite||CASE_IMAGES.legendary):'');
-  const src=(String(direct||'').startsWith('data:image/') ? direct : '') || CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || inferred || '';
+  const nameAlias=(/элит|дорог|максим|ultimate|elite/.test(normalized)?(CASE_IMAGES.elite_exact||CASE_IMAGES.elite||''):'');
+  const src=(String(direct||'').startsWith('data:image/') ? direct : '') || CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || nameAlias || inferred || '';
   return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" loading="eager" decoding="async">` : '';
 }
 function ensureCaseImages(){
@@ -8416,19 +8422,19 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=prime-case-v5',{cache:'force-cache'}).then(r=>{
+    fetch('case_images.html?v=prime-case-v6',{cache:'no-store'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
       const images={};
       const re=/<img\b([^>]*)>/gi;
       let m;
-      while((m=re.exec(html))){const attrs=m[1],id=attrs.match(/\bdata-case-id="([^"]+)"/i),src=attrs.match(/\bsrc="([^"]+)"/i);if(id&&src&&src[1].startsWith('data:image/'))images[id[1]]=src[1];}
+      while((m=re.exec(html))){const attrs=m[1],id=attrs.match(/\bdata-case-id=["\']([^"\']+)["\']/i),src=attrs.match(/\bsrc=["\']([^"\']+)["\']/i);if(id&&src&&src[1].startsWith('data:image/'))images[id[1].trim().toLowerCase()]=src[1];}
       if(images.elite_exact) ELITE_EXACT_CASE_IMAGE=images.elite_exact;
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=prime-case-v5';
+      iframe.src='case_images.html?v=prime-case-v6';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
