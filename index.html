@@ -5022,6 +5022,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
       <button class="nav-btn" data-tab="top"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12v4a6 6 0 0 1-12 0zM9 19h6M12 15v4M4 6v2a4 4 0 0 0 4 4M20 6v2a4 4 0 0 1-4 4"/></svg></span>Топ</button>
       <button class="nav-btn" data-tab="trades"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-3-3M20 7l-3 3M17 17H4l3 3M4 17l3-3"/></svg></span>Трейды</button>
       <button class="nav-btn" data-tab="vault"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v6M9 12h6"/></svg></span>Сейф</button>
+      <button class="nav-btn" data-tab="giveaways"><span class="nav-icon" aria-hidden="true" style="font-size:22px">🎁</span>Розыгрыши</button>
     </nav>
 
     <!-- CASES -->
@@ -5241,6 +5242,13 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
       </div>
       <div id="leaderboardList"></div>
       <div id="giveawaysPanel" style="display:none"></div>
+    </div>
+
+    <!-- GIVEAWAYS -->
+    <div class="page" id="page-giveaways">
+      <div class="section-title">🎁 Розыгрыши</div>
+      <div class="section-sub">Участвуй в розыгрышах и забирай призы!</div>
+      <div id="mainGiveawaysPanel"><div class="empty-state">Загружаем розыгрыши…</div></div>
     </div>
 
     <!-- VAULT (СЕЙФ) -->
@@ -8159,6 +8167,7 @@ function switchTab(tab){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id === 'page-'+tab));
   if(tab==='settings') updateSettingsUI();
+   if(tab==='giveaways') renderGiveawaysMain();
   requestAnimationFrame(()=>{
     if(token!==tabRenderToken) return;
     if(tab==='top') renderLeaderboard(document.querySelector('.top-tab.active')?.dataset.topSort || 'cases');
@@ -10560,6 +10569,22 @@ async function refreshLeaderboardAvatarsOnce(sortBy){
 }
 function giveawayEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function giveawayDate(v){try{return new Date(String(v).replace(' ','T')+'Z').toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return String(v||'');}}
+
+async function renderGiveawaysMain(){
+  const box=document.getElementById('mainGiveawaysPanel'); if(!box)return;
+  box.innerHTML='<div class="empty-state">Загружаем розыгрыши…</div>';
+  try{
+    const j=await apiFetch('/api/giveaways',{}), gs=Array.isArray(j.giveaways)?j.giveaways:[];
+    if(!gs.length){box.innerHTML='<div class="empty-state">🎁 Розыгрышей пока нету, приходите позже!</div>';return;}
+    box.innerHTML=gs.map(g=>{
+      const active=g.status==='active', now=Date.now(), start=new Date(String(g.start_at).replace(' ','T')+'Z').getTime(), end=new Date(String(g.end_at).replace(' ','T')+'Z').getTime(), canJoin=active&&now>=start&&now<end;
+      const prizes=(g.prizes||[]).map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;margin-top:6px">${p.image?`<img src="${giveawayEscape(p.image)}" style="width:54px;height:54px;object-fit:contain">`:''}<span>${giveawayEscape(p.title||p.name||'Приз')}</span></div>`).join('');
+      return `<div class="promo-card" style="margin:12px 0"><div class="section-title">${giveawayEscape(g.title||'Розыгрыш')}</div><div class="section-sub">${giveawayEscape(g.description||'')}</div>${prizes}<div style="margin-top:10px;color:var(--muted)">Окончание: ${giveawayEscape(g.end_at||'')}</div>${canJoin?`<button class="btn" data-giveaway-id="${Number(g.id)}" onclick="joinGiveawayMain(this)" style="width:100%;margin-top:10px">🎟️ Участвовать</button>`:`<div class="section-sub" style="margin-top:10px">${active?'Розыгрыш ещё не начался или уже завершён.':'Розыгрыш завершён'}</div>`}</div>`;
+    }).join('');
+  }catch(e){box.innerHTML='<div class="empty-state">Не удалось загрузить розыгрыши. Попробуйте позже.</div>';}
+}
+async function joinGiveawayMain(button){button.disabled=true;try{await apiFetch('/api/giveaways/join',{giveaway_id:Number(button.dataset.giveawayId)});showToast('🎟️ Ты участвуешь в розыгрыше!','success');await renderGiveawaysMain();}catch(e){showToast('❌ '+(e.message||'Не удалось участвовать'),'error');button.disabled=false;}}
+
 async function renderGiveaways(){
   const box=document.getElementById('giveawaysPanel'); if(!box)return;
   box.innerHTML='<div class="empty-state">Загружаем розыгрыши…</div>';
