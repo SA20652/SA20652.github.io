@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>GDPLAY</title>
-<script>window.GDPLAY_PREMIUM_IMAGE_DATA_URI = './embedded_assets/embedded_01.png';</script>
+<script>window.GDPLAY_PREMIUM_IMAGE_DATA_URI = './embedded_01.png';</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -877,11 +877,11 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .elite-wheel-loading{height:100%;display:flex;align-items:center;justify-content:center;color:rgba(226,184,109,.82);font:800 12px 'IBM Plex Mono',monospace;letter-spacing:.8px;}
 </style>
 <script>
-const PROMO_IMAGE_DATA_URI = "./embedded_assets/embedded_02.webp";
-const GDPLAY_PREMIUM_IMAGE_DATA_URI = './embedded_assets/embedded_01.png';
+const PROMO_IMAGE_DATA_URI = "./embedded_02.webp";
+const GDPLAY_PREMIUM_IMAGE_DATA_URI = './embedded_01.png';
 window.PROMO_IMAGE_DATA_URI = PROMO_IMAGE_DATA_URI;
 window.GDPLAY_PREMIUM_IMAGE_DATA_URI = GDPLAY_PREMIUM_IMAGE_DATA_URI;
-const PROMO_ATTASHA_IMAGE_DATA_URI = "./embedded_assets/embedded_03.webp";
+const PROMO_ATTASHA_IMAGE_DATA_URI = "./embedded_03.webp";
 </script>
 
 <style>
@@ -4174,6 +4174,13 @@ body{overflow-x:hidden;}
       if(!m) throw new Error('CUBE_ICONS not found');
       var parsed=JSON.parse(m[1]);
       window.CUBE_ICONS=parsed;
+      // Elite-case cube photos live in cube_icons.html, not in index.html or separate files.
+      try {
+        const eliteNames={"Spu7nix":"__elite_Spunix","w3rty":"__elite_w3rty","Roze":"__elite_Roze","Sunix":"__elite_Sunix","SerVax":"__elite_SerVax","Bacon":"__elite_Bacon","Muni":"__elite_Muni","tvink3n":"__elite_tvink3n","Ad3usgmd":"__elite_Ad3usgmd","ItzKiba":"__elite_ItzKiba"};
+        if(window.__ELITE_EXACT_IMAGES) Object.keys(eliteNames).forEach(n=>{if(parsed[eliteNames[n]]) window.__ELITE_EXACT_IMAGES[n]=parsed[eliteNames[n]];});
+        window.__GDPLAY_ELITE_CUBE_DATA=eliteNames;
+      } catch(_) {}
+
       // The catalog calls this cube "squezzy", while the supplied icon is "Squeeze".
       // Keep both aliases so the real 2D image is shown everywhere.
       if(parsed['Squeeze']){ parsed['squezzy']=parsed['Squeeze']; parsed['squeezy']=parsed['Squeeze']; }
@@ -4738,7 +4745,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 <body>
 <div id="startupLoader" aria-hidden="false">
   <div class="startup-loader-card">
-    <img id="startupLoaderLogo" class="startup-loader-logo" src="./embedded_assets/embedded_04.webp" alt="GDPLAY" decoding="async" fetchpriority="high">
+    <img id="startupLoaderLogo" class="startup-loader-logo" src="./embedded_04.webp" alt="GDPLAY" decoding="async" fetchpriority="high">
     <div class="startup-loader-brand">GD<span>PLAY</span></div>
     <div class="startup-loader-sub">Загрузка…</div>
     <div class="startup-loader-progress" aria-hidden="true"><div class="startup-loader-progress-fill"></div></div>
@@ -4765,7 +4772,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 })();
 </script><div id="releaseScreen" aria-hidden="true">
   <div class="release-card">
-    <img class="release-logo" src="./embedded_assets/embedded_04.webp" alt="GDPLAY" loading="eager" decoding="async">
+    <img class="release-logo" src="./embedded_04.webp" alt="GDPLAY" loading="eager" decoding="async">
     <div class="release-title">Мы вышли в релиз!</div>
     <div class="release-sub">Самая первая версия находится перед вами!<br>17.08.2026</div>
     <div class="release-progress" aria-hidden="true"><div id="releaseProgressFill" class="release-progress-fill"></div></div>
@@ -4775,7 +4782,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authScreen">
   <div class="auth-card auth-cube-only">
-    <div class="auth-logo"><img src="./embedded_assets/embedded_04.webp" alt="GDPLAY" loading="eager" decoding="async"><span>GD<span>PLAY</span></span></div>
+    <div class="auth-logo"><img src="./embedded_04.webp" alt="GDPLAY" loading="eager" decoding="async"><span>GD<span>PLAY</span></span></div>
     <div class="auth-tag">Хранилище редких кубов</div>
     <div class="auth-tabs">
       <button class="auth-tab active" data-form="login" type="button">Вход</button>
@@ -4961,7 +4968,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 
     <header>
       <div class="brand">
-        <div class="brand-mark"><img src="./embedded_assets/embedded_04.webp" alt="GD" loading="eager" decoding="async"></div>
+        <div class="brand-mark"><img src="./embedded_04.webp" alt="GD" loading="eager" decoding="async"></div>
         <div class="brand-name" onclick="handleSecretTap()">GDPLAY</div>
       </div>
       <div class="header-right">
@@ -5006,7 +5013,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 <path fill-rule="evenodd" clip-rule="evenodd" d="M11.707 5.707L13.123 4.29101L14.5354 5.70706L15.9532 4.28917L14.539 2.87495L13.123 4.28733L11.7106 2.87495L10.2928 4.29279L9 3L7.74293 4.25707C7.19135 4.08989 6.60617 4 6 4C2.68629 4 0 6.68629 0 10C0 13.3137 2.68629 16 6 16C9.31371 16 12 13.3137 12 10C12 9.39383 11.9101 8.80865 11.7429 8.25707L13 7L11.707 5.707ZM6 8C4.89543 8 4 8.89543 4 10H2C2 7.79086 3.79086 6 6 6V8Z"/>
 <path d="M11.7107 0.0428467L13.1248 1.45706L11.707 2.87495L10.2928 1.45706L11.7107 0.0428467Z"/>
 </svg></span>Мины</button>
-      <button class="nav-btn" data-tab="slots"><span class="nav-icon nav-slot-svg"><img src="./embedded_assets/embedded_05.svg" alt="" aria-hidden="true" style="width:24px;height:24px;display:block;object-fit:contain"></span>Кубо-слоты</button>
+      <button class="nav-btn" data-tab="slots"><span class="nav-icon nav-slot-svg"><img src="./embedded_05.svg" alt="" aria-hidden="true" style="width:24px;height:24px;display:block;object-fit:contain"></span>Кубо-слоты</button>
       <button class="nav-btn" data-tab="top"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12v4a6 6 0 0 1-12 0zM9 19h6M12 15v4M4 6v2a4 4 0 0 0 4 4M20 6v2a4 4 0 0 1-4 4"/></svg></span>Топ</button>
       <button class="nav-btn" data-tab="trades"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13l-3-3M20 7l-3 3M17 17H4l3 3M4 17l3-3"/></svg></span>Трейды</button>
       <button class="nav-btn" data-tab="vault"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v6M9 12h6"/></svg></span>Сейф</button>
@@ -5521,7 +5528,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 
 <div class="mackros-promo-overlay" id="mackrosPromoOverlay" aria-hidden="true">
   <div class="mackros-promo-card" role="dialog" aria-modal="true" aria-labelledby="mackrosPromoTitle">
-    <img class="mackros-promo-image" id="mackrosPromoImage" alt="MackrosHelper" src="./embedded_assets/embedded_06.jpg">
+    <img class="mackros-promo-image" id="mackrosPromoImage" alt="MackrosHelper" src="./embedded_06.jpg">
     <div class="mackros-promo-content">
       <h3 class="mackros-promo-title" id="mackrosPromoTitle">Промокод активирован</h3>
       <p class="mackros-promo-text">Вы активировали данный промокод! Для промокода с наградой зайдите в этого бота и нажмите старт!</p>
@@ -5644,7 +5651,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 
 /* Replace every visible currency emoji in the Mini App with the user's orb photo. */
 (function installOrbPhotoCurrency(){
-  const orbPhoto = './embedded_assets/embedded_07.png';
+  const orbPhoto = './embedded_07.png';
   const excluded = 'SCRIPT,STYLE,NOSCRIPT,TEXTAREA,INPUT,OPTION';
   function convertTextNode(node){
     if(!node || node.nodeType!==Node.TEXT_NODE || !node.nodeValue || !node.nodeValue.includes('💰')) return;
@@ -5693,7 +5700,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
       return NodeFilter.FILTER_ACCEPT;
     }});
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    nodes.forEach(node=>{const parts=node.nodeValue.split('💰');if(parts.length<2)return;const frag=document.createDocumentFragment();parts.forEach((part,i)=>{if(part)frag.appendChild(document.createTextNode(part));if(i<parts.length-1){const img=document.createElement('img');img.src='./embedded_assets/embedded_07.png';img.alt='Орбы';img.className='gdplay-orb-coin';img.draggable=false;frag.appendChild(img);}});node.parentNode&&node.parentNode.replaceChild(frag,node);});
+    nodes.forEach(node=>{const parts=node.nodeValue.split('💰');if(parts.length<2)return;const frag=document.createDocumentFragment();parts.forEach((part,i)=>{if(part)frag.appendChild(document.createTextNode(part));if(i<parts.length-1){const img=document.createElement('img');img.src='./embedded_07.png';img.alt='Орбы';img.className='gdplay-orb-coin';img.draggable=false;frag.appendChild(img);}});node.parentNode&&node.parentNode.replaceChild(frag,node);});
   }
   function run(){replaceOrbEmoji(document.body)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
@@ -5940,17 +5947,17 @@ const CASES = [
     {name:"nSwish",rarity:"divine",value:3900000,chance:3.2687},
     {name:"Kuro",rarity:"emerald",value:5600000,chance:0.608},{name:"squezzy",rarity:"common",value:400000,chance:12.1209}
   ]},
-  {id:"elite",name:"Элитный Кейс",price:1500000,icon:"./embedded_assets/embedded_08.webp",items:[
-    {name:"Spu7nix",image:"./embedded_assets/embedded_09.png",rarity:"common",value:360000,chance:16.6772},
-    {name:"w3rty",image:"./embedded_assets/embedded_10.png",rarity:"common",value:540000,chance:14.8251},
-    {name:"Roze",image:"./embedded_assets/embedded_11.png",rarity:"rare",value:720000,chance:17.2053},
-    {name:"Sunix",image:"./embedded_assets/embedded_12.png",rarity:"rare",value:864000,chance:14.749},
-    {name:"SerVax",image:"./embedded_assets/embedded_13.png",rarity:"epic",value:1152000,chance:11.8457},
-    {name:"Bacon",image:"./embedded_assets/embedded_14.png",rarity:"epic",value:1728000,chance:9.468},
-    {name:"Muni",image:"./embedded_assets/embedded_15.png",rarity:"legendary",value:2520000,chance:7.2349},
-    {name:"tvink3n",image:"./embedded_assets/embedded_16.png",rarity:"mythic",value:3960000,chance:4.9126},
-    {name:"Ad3usgmd",image:"./embedded_assets/embedded_17.png",rarity:"emerald",value:10800000,chance:0.5811},
-    {name:"ItzKiba",image:"./embedded_assets/embedded_18.png",rarity:"divine",value:6480000,chance:2.501}
+  {id:"elite",name:"Элитный Кейс",price:1500000,icon:"./embedded_08.webp",items:[
+    {name:"Spu7nix",image:"./embedded_09.png",rarity:"common",value:360000,chance:16.6772},
+    {name:"w3rty",image:"./embedded_10.png",rarity:"common",value:540000,chance:14.8251},
+    {name:"Roze",image:"./embedded_11.png",rarity:"rare",value:720000,chance:17.2053},
+    {name:"Sunix",image:"./embedded_12.png",rarity:"rare",value:864000,chance:14.749},
+    {name:"SerVax",image:"./embedded_13.png",rarity:"epic",value:1152000,chance:11.8457},
+    {name:"Bacon",image:"./embedded_14.png",rarity:"epic",value:1728000,chance:9.468},
+    {name:"Muni",image:"./embedded_15.png",rarity:"legendary",value:2520000,chance:7.2349},
+    {name:"tvink3n",image:"./embedded_16.png",rarity:"mythic",value:3960000,chance:4.9126},
+    {name:"Ad3usgmd",image:"./embedded_17.png",rarity:"emerald",value:10800000,chance:0.5811},
+    {name:"ItzKiba",image:"./embedded_18.png",rarity:"divine",value:6480000,chance:2.501}
   ]},
 
   {id:"prime",name:"Кейс Прайм",price:3000000,icon:'prime',items:[
@@ -5970,14 +5977,15 @@ const CASES = [
 // ЖЁСТКАЯ ПРИВЯЗКА ФОТО ЭЛИТНОГО КЕЙСА.
 // Снимок берётся из исходного каталога до серверной синхронизации и сохраняется
 // отдельно, поэтому API/кэш/общий каталог не могут подменить фотографию.
-const ELITE_EXACT_IMAGES = {"Spu7nix":"./embedded_assets/embedded_19.png","w3rty":"./embedded_assets/embedded_09.png","Roze":"./embedded_assets/embedded_10.png","Sunix":"./embedded_assets/embedded_11.png","SerVax":"./embedded_assets/embedded_17.png","Bacon":"./embedded_assets/embedded_12.png","Muni":"./embedded_assets/embedded_13.png","tvink3n":"./embedded_assets/embedded_16.png","Ad3usgmd":"./embedded_assets/embedded_15.png","ItzKiba":"./embedded_assets/embedded_14.png"};
-const ELITE_EXACT_CASE_IMAGE = "./embedded_assets/embedded_18.png";
+const ELITE_EXACT_IMAGES = {"Spu7nix":"./embedded_19.png","w3rty":"./embedded_09.png","Roze":"./embedded_10.png","Sunix":"./embedded_11.png","SerVax":"./embedded_17.png","Bacon":"./embedded_12.png","Muni":"./embedded_13.png","tvink3n":"./embedded_16.png","Ad3usgmd":"./embedded_15.png","ItzKiba":"./embedded_14.png"};
+const ELITE_EXACT_CASE_IMAGE = "./embedded_18.png";
 const ELITE_CUBE_IMAGES = Object.freeze({...ELITE_EXACT_IMAGES});
 
 // Elite cube images are authoritative everywhere in the app, not only in the case reel.
 // Inventory, upgrader, profile, market and drop lists must use the exact images
 // supplied for the Elite Case instead of the older global cube catalog.
 window.__ELITE_EXACT_IMAGES = ELITE_EXACT_IMAGES;
+try { if(window.CUBE_ICONS) Object.entries({"Spu7nix":"__elite_Spunix","w3rty":"__elite_w3rty","Roze":"__elite_Roze","Sunix":"__elite_Sunix","SerVax":"__elite_SerVax","Bacon":"__elite_Bacon","Muni":"__elite_Muni","tvink3n":"__elite_tvink3n","Ad3usgmd":"__elite_Ad3usgmd","ItzKiba":"__elite_ItzKiba"}).forEach(([n,k])=>{if(window.CUBE_ICONS[k]) ELITE_EXACT_IMAGES[n]=window.CUBE_ICONS[k];}); } catch(_) {}
 window.__ELITE_EXACT_IMAGES_NORMALIZED = Object.freeze(Object.keys(ELITE_EXACT_IMAGES).reduce((m,k)=>{m[k.trim().toLocaleLowerCase('ru-RU')]=ELITE_EXACT_IMAGES[k];return m;},{}));
 function resolveEliteExactCubeImage(name){
   const key=String(name??'').trim();
@@ -8388,6 +8396,7 @@ function ensureCaseImages(){
       const re=/<img\s+data-case-id="([^"]+)"[^>]*\ssrc="([^"]+)"/g;
       let m;
       while((m=re.exec(html))) images[m[1]]=m[2];
+      if(images.elite_exact) ELITE_EXACT_CASE_IMAGE=images.elite_exact;
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
@@ -12116,7 +12125,7 @@ function renderAdvent(st){
     const item=document.createElement('div');item.className='advent-cell'+(unlocked?' unlocked':'')+(isClaimed?' claimed':'');
     const number=document.createElement('div');number.className='advent-cell-number';number.textContent='Ячейка '+cell.index;item.appendChild(number);
     const icon=document.createElement('div');icon.className='advent-cell-icon';
-    if(reward?.type==='orbs'){const img=document.createElement('img');img.src='./embedded_assets/embedded_07.png';img.alt='Орбы';img.className='advent-reward-image advent-orbs-image';img.draggable=false;icon.appendChild(img);}
+    if(reward?.type==='orbs'){const img=document.createElement('img');img.src='./embedded_07.png';img.alt='Орбы';img.className='advent-reward-image advent-orbs-image';img.draggable=false;icon.appendChild(img);}
     else if(reward?.type==='premium'){const img=document.createElement('img');img.src=window.GDPLAY_PREMIUM_IMAGE_DATA_URI||'';img.alt='Premium';img.className='advent-reward-image advent-premium-image';img.draggable=false;icon.appendChild(img);}
     else if(reward?.type==='cube'&&reward.name){const src=(typeof window.getCubeIcon==='function'?window.getCubeIcon(reward.name):null);if(src){const img=document.createElement('img');img.src=src;img.alt=adventEscape(reward.name);img.className='advent-reward-image advent-cube-image';img.draggable=false;icon.appendChild(img);}else icon.textContent=reward.icon||'🎁';}
     else icon.textContent=reward?(reward.icon||'🎁'):(unlocked?'🎁':'🔒');item.appendChild(icon);
