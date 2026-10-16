@@ -4458,7 +4458,7 @@ body{overflow-x:hidden;}
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
       preloadCatalog('cube_icons.html?v=prime-cubes-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
-      preloadCatalog('case_images.html?v=immediate-v5',/src=\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('case_images.html?v=casefix-v30',/src=\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('profile_banners.html?v=profile-banners-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -8394,8 +8394,10 @@ function caseImage(caseId, alt=''){
   const normalized=String(caseObj.name||caseObj.title||'').toLowerCase();
   const inferred=(/элит|дорог|максим|ultimate|elite/.test(normalized)?(CASE_IMAGES.elite_exact||CASE_IMAGES.elite||CASE_IMAGES.legendary):'');
   const nameAlias=(/элит|дорог|максим|ultimate|elite/.test(normalized)?(CASE_IMAGES.elite_exact||CASE_IMAGES.elite||''):'');
-  const src=(String(direct||'').startsWith('data:image/') ? direct : '') || CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || nameAlias || inferred || '';
-  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" loading="eager" decoding="async">` : '';
+  const normalizedKey=key.replace(/[^a-z0-9а-яё]/gi,'');
+  const byNormalized=Object.entries(CASE_IMAGES).find(([k])=>String(k).toLowerCase().replace(/[^a-z0-9а-яё]/gi,'')===normalizedKey)?.[1]||'';
+  const src=(String(direct||'').startsWith('data:image/') ? direct : '') || CASE_IMAGES[key] || CASE_IMAGES[aliases[key]] || byNormalized || nameAlias || inferred || '';
+  return src ? `<img src="${src}" class="case-icon-image" alt="" draggable="false" loading="eager" decoding="async" onerror="this.onerror=null;this.style.display='none';">` : '';
 }
 function ensureCaseImages(){
   if(Object.keys(CASE_IMAGES).length && Object.keys(CASE_IMAGE_PRELOADED).length >= Object.keys(CASE_IMAGES).length) return Promise.resolve();
@@ -8422,7 +8424,7 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=prime-case-v6',{cache:'no-store'}).then(r=>{
+    fetch('case_images.html?v=casefix-v30',{cache:'no-store'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -8434,7 +8436,7 @@ function ensureCaseImages(){
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=prime-case-v6';
+      iframe.src='case_images.html?v=casefix-v30';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
