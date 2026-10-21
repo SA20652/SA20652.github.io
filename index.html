@@ -4769,6 +4769,20 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 .gdplay-switch input:focus-visible+.gdplay-switch-track{outline:2px solid #f4d27b;outline-offset:3px}
 .admin-player-restriction-status{font-size:11px;color:var(--muted);min-height:0}.admin-player-restriction-status:not(:empty){padding-top:5px}
 </style>
+<style id="gdplay-admin-compact-fix">
+/* Compact player restriction controls and reset button */
+.admin-player-restrictions{margin:4px 0!important;padding:4px 9px!important;border-radius:10px!important}
+.admin-player-restriction-row{padding:4px 0!important;gap:8px!important;min-height:30px}
+.admin-player-restriction-row b{font-size:12px!important;line-height:1.2}
+.admin-player-restriction-row small{font-size:10px!important;line-height:1.2;margin-top:1px!important}
+.gdplay-switch{flex-basis:38px!important;width:38px!important;height:22px!important}
+.gdplay-switch-track:after{width:14px!important;height:14px!important;left:3px!important;top:3px!important}
+.gdplay-switch input:checked+.gdplay-switch-track:after{transform:translateX(16px)!important}
+.admin-player-restriction-status{font-size:10px!important}
+.admin-user-actions button[data-action="admin-reset"]{padding:5px 9px!important;min-height:28px!important;font-size:11px!important;line-height:1.15!important}
+.rush-chart{touch-action:pan-y}
+.rush-svg{overflow:hidden}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
