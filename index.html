@@ -4458,7 +4458,7 @@ body{overflow-x:hidden;}
       // server. The splash is cosmetic; these catalogs are static files.
       scan(document);
       preloadCatalog('cube_icons.html?v=prime-cubes-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
-      preloadCatalog('case_images.html?v=casefix-v30',/src=\"(data:image\/[^\"]+)\"/g);
+      preloadCatalog('case_images.html?v=casefix-v37',/src=\"(data:image\/[^\"]+)\"/g);
       preloadCatalog('profile_banners.html?v=profile-banners-v1',/\"(?:[^\"]+)\"\s*:\s*\"(data:image\/[^\"]+)\"/g);
       setTimeout(function(){scan(document);},100);
       setTimeout(function(){scan(document);},500);
@@ -7653,6 +7653,8 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
+          <button type="button" class="btn-ghost ${u.trade_blocked?'danger-admin':''}" data-action="admin-player-restriction" data-key="trade_blocked" data-uid="${u.user_id}" data-enabled="${u.trade_blocked?0:1}">${u.trade_blocked?'🔒 Трейды запрещены':'🔓 Запретить трейды'}</button>
+          <button type="button" class="btn-ghost ${u.orb_transfer_blocked?'danger-admin':''}" data-action="admin-player-restriction" data-key="orb_transfer_blocked" data-uid="${u.user_id}" data-enabled="${u.orb_transfer_blocked?0:1}">${u.orb_transfer_blocked?'🔒 Переводы запрещены':'🔓 Запретить переводы орбов'}</button>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
           <button type="button" class="btn-ghost" onclick="adminGrantCases(${u.user_id})">📦 Выдать кейсы</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
@@ -8289,10 +8291,11 @@ function rushMultiplierAt(ms){const sec=Math.min(29,Math.max(0,ms/1000));const i
 function rushRiskAt(mult){if(mult>=7.5)return 100;for(let i=0;i<RUSH_RISK.length-1;i++){const [m1,r1]=RUSH_RISK[i],[m2,r2]=RUSH_RISK[i+1];if(mult<=m2){const f=(mult-m1)/(m2-m1);return r1+(r2-r1)*Math.max(0,Math.min(1,f));}}return 100;}
 function drawRushPoint(mult,elapsedMs){const line=document.getElementById('rushLine'),area=document.getElementById('rushArea'),dot=document.getElementById('rushDot');if(!line||!area||!dot)return;const t=Math.min(1,Math.max(0,elapsedMs/29000)),x=6+t*88,m=Math.min(7.5,Math.max(1,Number(mult)||1)),norm=(m-1)/6.5,y=92-norm*72,old=line.getAttribute('points')||'6,92',pts=old.split(' ').filter(Boolean);const last=pts[pts.length-1]||'6,92',[lx,ly]=last.split(',').map(Number),nx=Math.max(lx,x),ny=Math.min(ly,y);if(!pts.length||Math.abs(Number(pts[pts.length-1].split(',')[0])-nx)>0.05)pts.push(`${nx.toFixed(2)},${ny.toFixed(2)}`);line.setAttribute('points',pts.join(' '));area.setAttribute('points',`${pts.join(' ')} ${nx.toFixed(2)},92 6,92`);dot.setAttribute('cx',nx.toFixed(2));dot.setAttribute('cy',ny.toFixed(2));const multEl=document.getElementById('rushMultiplier');if(multEl){multEl.textContent=rushDisplayMultiplier(m);multEl.className='rush-mult active';}const cash=document.getElementById('rushCashoutBtn');if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=!rushRound||rushRound.status!=='active';}const status=document.getElementById('rushStatus');if(status)status.textContent=`Риск срыва: ${rushRiskAt(m).toFixed(0)}%`;
 }
+function drawRushCrashPoint(mult,elapsedMs){const line=document.getElementById('rushLine'),area=document.getElementById('rushArea'),dot=document.getElementById('rushDot');if(!line||!area||!dot)return;const pts=(line.getAttribute('points')||'6,92').split(' ').filter(Boolean);const last=pts[pts.length-1]||'6,92';const [lx,ly]=last.split(',').map(Number);const t=Math.min(1,Math.max(0,elapsedMs/29000)),x=Math.max(lx,6+t*88),m=Math.min(7.5,Math.max(1,Number(mult)||1)),y=92-((m-1)/6.5)*72;const next=pts.slice();if(Math.abs(x-lx)>0.01||Math.abs(y-ly)>0.01)next.push(`${x.toFixed(2)},${y.toFixed(2)}`);line.setAttribute('points',next.join(' '));area.setAttribute('points',`${next.join(' ')} ${x.toFixed(2)},92 6,92`);dot.setAttribute('cx',x.toFixed(2));dot.setAttribute('cy',y.toFixed(2));const el=document.getElementById('rushMultiplier');if(el){el.textContent=rushDisplayMultiplier(m);el.className='rush-mult crashed';}const cash=document.getElementById('rushCashoutBtn');if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=true;}}
 function setRushState(status,mult,payout=0){const m=Math.min(7.5,Math.max(1,Number(mult)||1)),el=document.getElementById('rushMultiplier'),statusEl=document.getElementById('rushStatus'),result=document.getElementById('rushResult'),cash=document.getElementById('rushCashoutBtn'),start=document.getElementById('rushStartBtn');if(el){el.textContent=rushDisplayMultiplier(m);el.className='rush-mult '+(status==='crashed'?'crashed':status==='cashed'?'cashed':'active');}if(cash){cash.textContent=`Забрать ${rushDisplayMultiplier(m)}`;cash.disabled=status!=='active';}if(start)start.disabled=status==='active';if(statusEl)statusEl.textContent=status==='active'?`Риск срыва: ${rushRiskAt(m).toFixed(0)}%`:status==='crashed'?'💥 Ставка потеряна':status==='cashed'?`Орбы забраны · ${rushDisplayMultiplier(m)}`:'Нажми «Начать»';if(result){if(status==='crashed'){result.className='rush-result loss';result.textContent='💥 Раунд завершён — ставка потеряна';}else if(status==='cashed'){result.className='rush-result win';result.textContent=`+${Number(payout||0).toLocaleString('ru-RU')} 💰 орбов · ${rushDisplayMultiplier(m)}`;}else{result.className='rush-result';result.textContent='';}}}
 function stopRushTimers(){if(rushAnimTimer){cancelAnimationFrame(rushAnimTimer);rushAnimTimer=null;}if(rushPollTimer){clearInterval(rushPollTimer);rushPollTimer=null;}}
 let rushPollTimer=null;
-function startRushAnimation(){stopRushTimers();if(rushPollTimer)clearInterval(rushPollTimer);const startAt=rushRound.startedAt;const tick=()=>{if(!rushRound||rushRound.status!=='active')return;const elapsed=Math.max(0,Date.now()+rushClockOffsetMs-startAt),m=rushMultiplierAt(elapsed);drawRushPoint(m,elapsed);if(elapsed>=29000){cashoutRush(true);return;}rushAnimTimer=requestAnimationFrame(tick);};tick();rushPollTimer=setInterval(async()=>{if(!rushRound||rushRound.status!=='active')return;try{const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();clearInterval(rushPollTimer);rushPollTimer=null;drawRushPoint(Number(j.multiplier||1),Math.max(0,Date.now()-startAt));setRushState('crashed',Number(j.multiplier||1),0);}}catch(e){}},350);}
+function startRushAnimation(){stopRushTimers();if(rushPollTimer)clearInterval(rushPollTimer);const startAt=rushRound.startedAt;const tick=()=>{if(!rushRound||rushRound.status!=='active')return;const elapsed=Math.max(0,Date.now()+rushClockOffsetMs-startAt),m=rushMultiplierAt(elapsed);drawRushPoint(m,elapsed);if(elapsed>=29000){cashoutRush(true);return;}rushAnimTimer=requestAnimationFrame(tick);};tick();rushPollTimer=setInterval(async()=>{if(!rushRound||rushRound.status!=='active')return;try{const j=await apiFetch('/api/game/rush/status',{round_id:rushRound.roundId});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();clearInterval(rushPollTimer);rushPollTimer=null;drawRushCrashPoint(Number(j.multiplier||1),Math.max(0,Date.now()+rushClockOffsetMs-startAt));setRushState('crashed',Number(j.multiplier||1),0);}}catch(e){}},120);}
 
 async function updateGameLimits(){
   try{
@@ -8331,7 +8334,7 @@ setInterval(()=>{ if(!document.hidden) updateGameLimits(); }, 30000);
 
 
 async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushClockOffsetMs=Number(j.server_now_ms||Date.now())-Date.now(); rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()+rushClockOffsetMs),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
-async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;const cash=document.getElementById('rushCashoutBtn');if(cash)cash.disabled=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance??data.balance??0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier!==undefined&&j.multiplier!==null?j.multiplier:rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);animateRushCrash(m,elapsed);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');if(cash&&rushRound?.status==='active')cash.disabled=false;}finally{rushBusy=false;}}
+async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;const cash=document.getElementById('rushCashoutBtn');if(cash)cash.disabled=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance??data.balance??0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier!==undefined&&j.multiplier!==null?j.multiplier:rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushCrashPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');if(cash&&rushRound?.status==='active')cash.disabled=false;}finally{rushBusy=false;}}
 function animateRushCrash(mult,elapsed){const line=document.getElementById('rushLine'),area=document.getElementById('rushArea'),dot=document.getElementById('rushDot');if(!line||!area||!dot)return;const pts=(line.getAttribute('points')||'6,92').split(' ').filter(Boolean);const last=pts[pts.length-1]||'6,92';const [x,y]=last.split(',').map(Number);const endY=Math.min(96,y+24);const start=performance.now(),duration=260;function frame(now){const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3),cy=y+(endY-y)*ease;const next=pts.concat(`${x.toFixed(2)},${cy.toFixed(2)}`);line.setAttribute('points',next.join(' '));area.setAttribute('points',`${next.join(' ')} ${x.toFixed(2)},92 6,92`);dot.setAttribute('cx',x.toFixed(2));dot.setAttribute('cy',cy.toFixed(2));if(t<1)requestAnimationFrame(frame);}requestAnimationFrame(frame); }
 function renderPlinko(){setRushBet(rushBetValue);if(!rushRound){resetRushChart();setRushState('idle',1);}}
 
@@ -8429,7 +8432,7 @@ function ensureCaseImages(){
               const page=document.getElementById('page-cases');
               if(page && page.classList.contains('active') && typeof renderCases==='function'){
                 renderCases();
-                preloadAllRenderedImages?.();
+                if(typeof preloadAllRenderedImages==='function') preloadAllRenderedImages();
               }
             }catch(_){}
           });
@@ -8437,7 +8440,7 @@ function ensureCaseImages(){
         });
       }
     };
-    fetch('case_images.html?v=casefix-v30',{cache:'no-store'}).then(r=>{
+    fetch('case_images.html?v=casefix-v37',{cache:'no-store'}).then(r=>{
       if(!r.ok) throw new Error('case image catalog unavailable');
       return r.text();
     }).then(html=>{
@@ -8449,7 +8452,7 @@ function ensureCaseImages(){
       finish(images);
     }).catch(()=>{
       const iframe=document.createElement('iframe');
-      iframe.src='case_images.html?v=casefix-v30';
+      iframe.src='case_images.html?v=casefix-v37';
       iframe.title='';
       iframe.setAttribute('aria-hidden','true');
       iframe.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
@@ -8460,6 +8463,12 @@ function ensureCaseImages(){
   });
   return caseImagesPromise;
 }
+window.addEventListener('gdplay-case-images-ready',()=>{
+  requestAnimationFrame(()=>{
+    try{const page=document.getElementById('page-cases');if(page&&page.classList.contains('active')&&typeof renderCases==='function')renderCases();}
+    catch(e){console.warn('case image repaint failed',e);}
+  });
+});
 function renderCases(){
   const renderVersion = ++casesRenderVersion;
   const el=document.getElementById('casesList');
@@ -11912,7 +11921,7 @@ function handleButton(button, e){
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
   if(action==='cancel-battle'){ cancelBattle(button.dataset.cancelBattle); return; }
-  if(action==='admin-money'){ adminMoney(button.dataset.uid, button.dataset.amount); return; }
+  if(action==='admin-player-restriction'){const uid=Number(button.dataset.uid),key=String(button.dataset.key||''),enabled=String(button.dataset.enabled)==='1';apiFetch('/api/admin/player-restriction',{user_id:uid,key,enabled}).then(()=>{showToast(enabled?'Ограничение включено':'Ограничение снято','success');loadAdminUsers(document.getElementById('adminSearch')?.value||'')}).catch(e=>showToast(e.message||'Не удалось изменить ограничение','error'));return;} if(action==='admin-money'){ adminMoney(button.dataset.uid, button.dataset.amount); return; }
   if(action==='admin-ban'){ adminBan(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-shadow'){ adminShadow(button.dataset.uid, button.dataset.val); return; }
   if(action==='admin-reset'){ tgConfirm('Точно сбросить весь прогресс этого игрока?').then(ok=>{ if(ok) adminReset(button.dataset.uid); }); return; }
