@@ -4754,6 +4754,21 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 @media(max-width:370px){.slot-reel img{width:60px!important;height:60px!important;}}
 </style>
 
+
+<style id="gdplay-player-restrictions-v38">
+.admin-player-restrictions{width:100%;box-sizing:border-box;margin:8px 0;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.14);display:flex;flex-direction:column;gap:0}
+.admin-player-restriction-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0}
+.admin-player-restriction-row+.admin-player-restriction-row{border-top:1px solid var(--line)}
+.admin-player-restriction-row b{display:block;font-size:13px}.admin-player-restriction-row small{display:block;margin-top:3px;color:var(--muted);font-size:11px;line-height:1.35}
+.gdplay-switch{position:relative;display:inline-flex;flex:0 0 46px;width:46px;height:27px;cursor:pointer;align-items:center}
+.gdplay-switch input{position:absolute;opacity:0;width:1px;height:1px}
+.gdplay-switch-track{position:absolute;inset:0;border-radius:99px;background:#62564d;border:1px solid #8a7765;transition:background .16s,border-color .16s;box-sizing:border-box}
+.gdplay-switch-track:after{content:"";position:absolute;left:3px;top:3px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0006;transition:transform .16s}
+.gdplay-switch input:checked+.gdplay-switch-track{background:#b68a2f;border-color:#e2bd62}
+.gdplay-switch input:checked+.gdplay-switch-track:after{transform:translateX(19px)}
+.gdplay-switch input:focus-visible+.gdplay-switch-track{outline:2px solid #f4d27b;outline-offset:3px}
+.admin-player-restriction-status{font-size:11px;color:var(--muted);min-height:0}.admin-player-restriction-status:not(:empty){padding-top:5px}
+</style>
 </head>
 <body>
 <div id="startupLoader" aria-hidden="false">
@@ -6944,9 +6959,20 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
-  // Render the app immediately. Server cases, cube icons, profile photos and
-  // case images continue warming up in the background; automatic image loading
-  // is intentionally preserved and does not block the first screen.
+  // Finish the first-screen data and image warmup while the startup loader is
+  // still visible. This prevents case covers, cube icons and bonus timers from
+  // appearing only after the app has already opened.
+  const assetWarmup=Promise.allSettled([
+    loadServerCases(),
+    ensureCaseImages(),
+    window.cubeIconsReady || Promise.resolve(),
+    preloadProfileImages(data),
+    loadDailyStatus(),
+    loadAdvent()
+  ]);
+  window.gdplayAssetWarmup=assetWarmup;
+  await assetWarmup;
+
   renderAll();
   // Cases are the normal landing page after every regular app launch.
   // Explicit Telegram start parameters are handled separately below.
@@ -6954,25 +6980,8 @@ async function showApp(skipServer=false){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='cases'));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-cases'));
   try{ ensureCasesFirstPaint(); }catch(_){}
+  try{ preloadAllRenderedImages(); }catch(_){}
   refreshGlobalTechBreak();
-
-  const assetWarmup=Promise.allSettled([
-    loadServerCases(),
-    ensureCaseImages(),
-    window.cubeIconsReady || Promise.resolve(),
-    preloadProfileImages(data)
-  ]).then(()=>{
-    try{
-      // Do not force the user back to Cases when the background asset warmup
-      // finishes. A user may already be on Profile/Top/etc. by then.
-      const tabBeforeWarmup=currentTab;
-      renderAll();
-      if(tabBeforeWarmup && tabBeforeWarmup!=='cases') switchTab(tabBeforeWarmup);
-      preloadAllRenderedImages();
-      refreshGlobalTechBreak();
-    }catch(_){}
-  });
-  window.gdplayAssetWarmup=assetWarmup;
 
 }
 
@@ -7123,10 +7132,10 @@ async function boot(){
   // starts immediately in parallel; if it is still running after 4 seconds,
   // expose the normal auth screen as a fallback and let async work continue.
   const splashMin = new Promise(resolve=>setTimeout(resolve,4000));
-  await Promise.race([
-    Promise.all([serverBoot, splashMin]),
-    new Promise(resolve=>setTimeout(resolve,4000))
-  ]);
+  // Keep the loader on screen until startup/auth and the app's initial asset
+  // warmup are complete. The splash minimum still applies, but no fixed timeout
+  // may uncover the app while its first-screen images or timers are missing.
+  await Promise.all([serverBoot, splashMin]);
 
   // Always expose a real screen before removing the splash. If bootSafe() has
   // not finished yet, show the normal auth screen as a safe fallback.
@@ -7653,8 +7662,11 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-money" data-uid="${u.user_id}" data-amount="-500">-500 💰</button>
           <button type="button" class="btn-ghost" data-action="admin-ban" data-uid="${u.user_id}" data-val="${u.banned?0:1}">${u.banned?'Разбанить':'Забанить'}</button>
           <button type="button" class="btn-ghost" data-action="admin-shadow" data-uid="${u.user_id}" data-val="${u.shadow_banned?0:1}">${u.shadow_banned?'Разбанить (теневой)':'Теневой бан'}</button>
-          <button type="button" class="btn-ghost ${u.trade_blocked?'danger-admin':''}" data-action="admin-player-restriction" data-key="trade_blocked" data-uid="${u.user_id}" data-enabled="${u.trade_blocked?0:1}">${u.trade_blocked?'🔒 Трейды запрещены':'🔓 Запретить трейды'}</button>
-          <button type="button" class="btn-ghost ${u.orb_transfer_blocked?'danger-admin':''}" data-action="admin-player-restriction" data-key="orb_transfer_blocked" data-uid="${u.user_id}" data-enabled="${u.orb_transfer_blocked?0:1}">${u.orb_transfer_blocked?'🔒 Переводы запрещены':'🔓 Запретить переводы орбов'}</button>
+          <div class="admin-player-restrictions" aria-label="Ограничения игрока">
+            <div class="admin-player-restriction-row"><span><b>Запретить трейды</b><small>Игрок не сможет отправлять и получать предложения обмена</small></span><label class="gdplay-switch"><input type="checkbox" data-admin-player-restriction="trade_blocked" data-uid="${u.user_id}" ${u.trade_blocked?'checked':''}><span class="gdplay-switch-track"></span></label></div>
+            <div class="admin-player-restriction-row"><span><b>Запретить переводы орбов</b><small>Игрок не сможет отправлять и получать орбы</small></span><label class="gdplay-switch"><input type="checkbox" data-admin-player-restriction="orb_transfer_blocked" data-uid="${u.user_id}" ${u.orb_transfer_blocked?'checked':''}><span class="gdplay-switch-track"></span></label></div>
+            <div class="admin-player-restriction-status" aria-live="polite"></div>
+          </div>
           <button type="button" class="btn-ghost" data-action="admin-reset" data-uid="${u.user_id}">Сбросить прогресс</button>
           <button type="button" class="btn-ghost" onclick="adminGrantCases(${u.user_id})">📦 Выдать кейсы</button>
           <button type="button" class="btn-ghost" data-action="admin-grant-cube" data-uid="${u.user_id}">Выдать куб</button>
@@ -14119,3 +14131,27 @@ html.gdplay-backgrounded canvas{visibility:hidden!important}
 #page-trades .trade-cube-options{contain:content;content-visibility:auto}
 #page-trades .trade-cube-option{min-height:54px;contain:layout paint}
 </style>
+
+<script id="gdplay-player-restrictions-v38-js">
+(function(){
+  document.addEventListener('change', async function(ev){
+    const input=ev.target && ev.target.closest ? ev.target.closest('input[data-admin-player-restriction][data-uid]') : null;
+    if(!input) return;
+    const row=input.closest('.admin-player-restrictions');
+    const status=row && row.querySelector('.admin-player-restriction-status');
+    const previous=!input.checked;
+    input.disabled=true;
+    if(status) status.textContent='Сохраняю…';
+    try{
+      const result=await apiFetch('/api/admin/player-restriction',{user_id:Number(input.dataset.uid),key:String(input.dataset.adminPlayerRestriction),enabled:!!input.checked});
+      input.checked=!!result.enabled;
+      if(status) status.textContent=result.enabled?'Ограничение включено':'Ограничение снято';
+      const cached=window.adminUsersCache;
+      if(Array.isArray(cached)){const user=cached.find(x=>String(x.user_id)===String(input.dataset.uid));if(user)user[input.dataset.adminPlayerRestriction]=result.enabled?1:0;}
+    }catch(err){
+      input.checked=previous;
+      if(status) status.textContent='Не удалось сохранить: '+(err.message||'ошибка сервера');
+    }finally{input.disabled=false;}
+  });
+})();
+</script>
