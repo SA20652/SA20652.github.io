@@ -710,10 +710,10 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .rush-chart{position:relative;height:280px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 25% 85%,rgba(201,151,77,.18),transparent 42%),radial-gradient(circle at 90% 10%,rgba(63,138,112,.08),transparent 40%),#171411;border:1px solid rgba(255,255,255,.055);}
 .rush-chart::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 28%,rgba(0,0,0,.10));pointer-events:none;}
 .rush-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(236,228,211,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(236,228,211,.045) 1px,transparent 1px);background-size:25% 25%;opacity:.65;}
-.rush-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:visible;}
+.rush-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:hidden;preserveAspectRatio:xMidYMid meet;}
 .rush-line{fill:none;stroke:var(--brass-2);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px rgba(227,184,114,.38));}
 .rush-area{fill:url(#rushFill);opacity:.18;}
-.rush-dot{fill:var(--brass-2);stroke:#fff0c8;stroke-width:1.2;filter:drop-shadow(0 0 8px rgba(227,184,114,.9));}
+.rush-dot{fill:var(--brass-2);stroke:#fff0c8;stroke-width:1.2;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 8px rgba(227,184,114,.9));}
 .rush-mult{position:absolute;left:0;right:0;top:42%;z-index:4;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:38px;letter-spacing:-1px;text-shadow:0 4px 18px rgba(0,0,0,.65);}
 .rush-mult.crashed{color:var(--danger);}.rush-mult.cashed{color:var(--success);}.rush-mult.active{color:var(--paper);}
 .rush-status{text-align:center;font-size:11px;color:var(--muted);min-height:18px;margin:10px 0 8px;}
@@ -3600,10 +3600,10 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .rush-chart{position:relative;height:280px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 25% 85%,rgba(201,151,77,.18),transparent 42%),radial-gradient(circle at 90% 10%,rgba(63,138,112,.08),transparent 40%),#171411;border:1px solid rgba(255,255,255,.055);}
 .rush-chart::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 28%,rgba(0,0,0,.10));pointer-events:none;}
 .rush-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(236,228,211,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(236,228,211,.045) 1px,transparent 1px);background-size:25% 25%;opacity:.65;}
-.rush-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:visible;}
+.rush-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:hidden;preserveAspectRatio:xMidYMid meet;}
 .rush-line{fill:none;stroke:var(--brass-2);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px rgba(227,184,114,.38));}
 .rush-area{fill:url(#rushFill);opacity:.18;}
-.rush-dot{fill:var(--brass-2);stroke:#fff0c8;stroke-width:1.2;filter:drop-shadow(0 0 8px rgba(227,184,114,.9));}
+.rush-dot{fill:var(--brass-2);stroke:#fff0c8;stroke-width:1.2;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 8px rgba(227,184,114,.9));}
 .rush-mult{position:absolute;left:0;right:0;top:42%;z-index:4;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:38px;letter-spacing:-1px;text-shadow:0 4px 18px rgba(0,0,0,.65);}
 .rush-mult.crashed{color:var(--danger);}.rush-mult.cashed{color:var(--success);}.rush-mult.active{color:var(--paper);}
 .rush-status{text-align:center;font-size:11px;color:var(--muted);min-height:18px;margin:10px 0 8px;}
@@ -5096,11 +5096,11 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
         <div class="limit-box" id="rushLimitBox" style="display:none">🚀 <b>Лимит Орб-Рывка</b><br><span>🎯 Осталось попыток: <b id="rushAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="rushLimitTimer">1ч 00м</b></span></div>
         <div class="rush-chart" id="rushChart" aria-label="График Орб-Рывка">
           <div class="rush-grid"></div>
-          <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
             <defs><linearGradient id="rushFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e3b872"/><stop offset="100%" stop-color="#c9974d" stop-opacity="0"/></linearGradient></defs>
             <polygon class="rush-area" id="rushArea" points="6,92 6,92 94,92"></polygon>
             <polyline class="rush-line" id="rushLine" points="6,92 6,92"></polyline>
-            <ellipse class="rush-dot" id="rushDot" cx="6" cy="92" rx="1.9" ry="2.35"></ellipse>
+            <circle class="rush-dot" id="rushDot" cx="6" cy="92" r="2.2"></circle>
           </svg>
           <div class="rush-mult active" id="rushMultiplier">x1.00</div>
         </div>
@@ -7667,10 +7667,6 @@ async function loadAdminUsers(search){
           <button type="button" class="btn-ghost" data-action="admin-toggle-cubes" data-uid="${u.user_id}">Кубы (${u.cube_count||0})</button>
           <button type="button" class="btn-ghost" data-action="admin-account" data-uid="${u.user_id}">⚙️ Аккаунт</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:10px">
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--danger)" ${u.trade_blocked?'checked':''} onchange="adminSetRestriction(${u.user_id},'trade_blocked',this.checked)"> Запретить отправку трейдов</label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--danger)" ${u.transfer_blocked?'checked':''} onchange="adminSetRestriction(${u.user_id},'transfer_blocked',this.checked)"> Запретить отправку орбов</label>
-        </div>
         <div id="adminCubes-${u.user_id}" style="display:none;margin-top:8px">${cubesHtml}</div>
       </div>`;
     }).join('');
@@ -8000,10 +7996,6 @@ async function adminPremium(uid){
 async function adminRemoveCube(uid){
   try{ await apiFetch('/api/admin/remove-cube',{user_id:Number(uid)}); showToast('🧊 Куб удалён','success'); loadAdminUsers(document.getElementById('adminSearch')?.value||''); }
   catch(e){ showToast('❌ '+e.message,'error'); }
-}
-async function adminSetRestriction(uid, action, enabled){
-  try{await apiFetch('/api/admin/account',{user_id:Number(uid),action,enabled:!!enabled});showToast(enabled?'🚫 Ограничение включено':'✅ Ограничение снято', 'success');loadAdminUsers(document.getElementById('adminSearch')?.value||'');}
-  catch(e){showToast('❌ '+e.message,'error');loadAdminUsers(document.getElementById('adminSearch')?.value||'');}
 }
 async function adminMoney(uid, amount){
   try{
@@ -8339,7 +8331,8 @@ setInterval(()=>{ if(!document.hidden) updateGameLimits(); }, 30000);
 
 
 async function startRush(){if(rushBusy||rushRound?.status==='active')return;rushBusy=true;resetRushChart();const bet=clampRushBet(document.getElementById('rushBet')?.value);setRushBet(bet);if(rushMoney()<bet){showToast('Недостаточно орбов для ставки','error');rushBusy=false;return;}try{const round_id='r_'+crypto.randomUUID().replaceAll('-','');const j=await apiFetch('/api/game/rush/start',{round_id,bet});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();updateGameLimits();rushClockOffsetMs=Number(j.server_now_ms||Date.now())-Date.now(); rushRound={status:'active',startedAt:Number(j.started_at_ms||Date.now()+rushClockOffsetMs),bet:Number(j.bet||bet),roundId:j.round_id};setRushState('active',1);startRushAnimation();}catch(e){showToast(e.message||'Не удалось начать раунд','error');}finally{rushBusy=false;}}
-async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;const clickedElapsed=Math.max(0,Date.now()+rushClockOffsetMs-rushRound.startedAt);const clickedMultiplier=Math.min(7.5,Math.max(1,Number(rushMultiplierAt(clickedElapsed))||1));rushBusy=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId,multiplier:clickedMultiplier});data.balance=Number(j.balance||data.balance||0);updateBalanceUI();const elapsed=Math.max(0,Date.now()+rushClockOffsetMs-rushRound.startedAt);const m=Number(j.multiplier||clickedMultiplier);if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');}finally{rushBusy=false;}}
+async function cashoutRush(auto=false){if(!rushRound||rushRound.status!=='active'||rushBusy)return;rushBusy=true;const cash=document.getElementById('rushCashoutBtn');if(cash)cash.disabled=true;try{const j=await apiFetch('/api/game/rush/cashout',{round_id:rushRound.roundId});data.balance=Number(j.balance??data.balance??0);updateBalanceUI();const elapsed=Date.now()-rushRound.startedAt;const m=Number(j.multiplier!==undefined&&j.multiplier!==null?j.multiplier:rushMultiplierAt(elapsed));if(j.status==='crashed'){rushRound.status='crashed';stopRushTimers();drawRushPoint(m,Math.min(29000,elapsed));setRushState('crashed',m,0);animateRushCrash(m,elapsed);}else{rushRound.status='cashed';stopRushTimers();drawRushPoint(m,elapsed);setRushState('cashed',m,Number(j.payout||0));}}catch(e){if(!auto)showToast(e.message||'Не удалось забрать выигрыш','error');if(cash&&rushRound?.status==='active')cash.disabled=false;}finally{rushBusy=false;}}
+function animateRushCrash(mult,elapsed){const line=document.getElementById('rushLine'),area=document.getElementById('rushArea'),dot=document.getElementById('rushDot');if(!line||!area||!dot)return;const pts=(line.getAttribute('points')||'6,92').split(' ').filter(Boolean);const last=pts[pts.length-1]||'6,92';const [x,y]=last.split(',').map(Number);const endY=Math.min(96,y+24);const start=performance.now(),duration=260;function frame(now){const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3),cy=y+(endY-y)*ease;const next=pts.concat(`${x.toFixed(2)},${cy.toFixed(2)}`);line.setAttribute('points',next.join(' '));area.setAttribute('points',`${next.join(' ')} ${x.toFixed(2)},92 6,92`);dot.setAttribute('cx',x.toFixed(2));dot.setAttribute('cy',cy.toFixed(2));if(t<1)requestAnimationFrame(frame);}requestAnimationFrame(frame); }
 function renderPlinko(){setRushBet(rushBetValue);if(!rushRound){resetRushChart();setRushState('idle',1);}}
 
 const CASE_KEY_REQUIREMENTS = {
