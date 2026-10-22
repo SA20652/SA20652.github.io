@@ -7148,16 +7148,14 @@ async function boot(){
     return serverBoot;
   }
 
-  // Keep the built-in startup splash visible for 3.7 seconds. Server/auth work
-  // starts immediately in parallel; if it is still running after 4 seconds,
-  // expose the normal auth screen as a fallback and let async work continue.
+  // Keep the built-in splash for 3.7 seconds, but NEVER wait indefinitely
+  // for network/auth startup. Slow or unavailable API must not trap Telegram
+  // Mini App on the splash screen; serverBoot continues in the background.
   const splashMin = new Promise(resolve=>setTimeout(resolve,3700));
-  // Keep only a short visual transition. Authentication remains awaited, but
-  // optional image/catalog warmups no longer block the first interactive screen.
-  await Promise.all([serverBoot, splashMin]);
+  await splashMin;
 
-  // Always expose a real screen before removing the splash. If bootSafe() has
-  // not finished yet, show the normal auth screen as a safe fallback.
+  // Always expose a real screen before removing the splash. If bootSafe() is
+  // still waiting on the server, show auth as a fallback and let it continue.
   const authEl=document.getElementById('authScreen');
   const appEl=document.getElementById('appScreen');
   const authVisible=!!authEl && getComputedStyle(authEl).display!=='none';
