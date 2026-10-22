@@ -6353,6 +6353,13 @@ async function apiFetch(path, payload={}, _retry=false){
       }
       if(j.farm_action){ showToast(j.farm_action.permanent?'⛔ Античит: бан навсегда':`⛔ Античит: временный бан (${j.farm_action.strike||1}-е нарушение)`,'error'); }
       if(!r.ok){
+        // A stale API deployment may return a proxy-generated HTTP 405 for this
+        // route. If the app is also hosted on the current origin, try that origin
+        // before failing; it may already point at the updated backend.
+        if(r.status===405 && path==='/api/admin/player-restriction' && API_BASES.indexOf(base)<API_BASES.length-1){
+          lastNetworkError=new Error(j.error||'Маршрут сохранения ограничений недоступен на основном API; пробую текущий сервер.');
+          continue;
+        }
         if(r.status>=500){ lastNetworkError=new Error(j.error||`Сервер недоступен (${r.status})`); continue; }
         throw new Error(j.error||'Ошибка сервера');
       }
