@@ -1068,7 +1068,7 @@ async function boot(){
       void releaseProgressFill.offsetWidth;
       releaseProgressFill.classList.add('run');
     }
-    await new Promise(resolve=>setTimeout(resolve,5000));
+    await new Promise(resolve=>setTimeout(resolve,3700));
     storageSet(RELEASE_KEY,'1');
     if(releaseScreen){
       releaseScreen.classList.add('leaving');
@@ -1077,8 +1077,8 @@ async function boot(){
     return serverBoot;
   }
 
-  // Все последующие запуски: ровно 4 секунды локальной загрузки.
-  await new Promise(resolve=>setTimeout(resolve,4000));
+  // Встроенная загрузка длится ровно 3,7 секунды.
+  await new Promise(resolve=>setTimeout(resolve,3700));
   if(startupLoader) startupLoader.classList.add('hide');
   return serverBoot;
 }

@@ -822,7 +822,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .release-sub{color:var(--muted);font-size:13px;}
 .release-progress{width:min(300px,82vw);height:6px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
 .release-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);transform-origin:left center;}
-.release-progress-fill.run{animation:releaseProgress 5s linear forwards;}
+.release-progress-fill.run{animation:releaseProgress 3.7s linear forwards;}
 @keyframes releaseProgress{from{width:0%;}to{width:100%;}}
 @keyframes releaseIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 
@@ -3712,7 +3712,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after{
 .release-sub{color:var(--muted);font-size:13px;}
 .release-progress{width:min(300px,82vw);height:6px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
 .release-progress-fill{height:100%;width:0%;border-radius:inherit;background:var(--paper);transform-origin:left center;}
-.release-progress-fill.run{animation:releaseProgress 5s linear forwards;}
+.release-progress-fill.run{animation:releaseProgress 3.7s linear forwards;}
 @keyframes releaseProgress{from{width:0%;}to{width:100%;}}
 @keyframes releaseIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 
@@ -4549,7 +4549,7 @@ img { content-visibility: visible !important; }
 <style id="gdplay-startup-autohide-v13">
 /* Startup splash is controlled by boot(): never hide it while the app is still blank. */
 #startupLoader{animation:none!important;}
-#startupLoader .startup-loader-progress-fill{animation:startupProgressWait 5s linear forwards!important;}
+#startupLoader .startup-loader-progress-fill{animation:startupProgressWait 3.7s linear forwards!important;}
 @keyframes startupProgressWait{0%{width:0%}82%{width:88%}100%{width:100%;}}
 #startupLoader .startup-loader-sub{min-height:16px;}
 </style>
@@ -6980,21 +6980,20 @@ async function showApp(skipServer=false){
     // Это исключает показ/сохранение локального нового аккаунта поверх старого.
     await registerWithServer();
   }
-  // Finish the first-screen data and image warmup while the startup loader is
-  // still visible. This prevents case covers, cube icons and bonus timers from
-  // appearing only after the app has already opened.
+  // Paint the app immediately from the local catalog. Do not keep the Telegram
+  // Mini App splash open while downloading/decoding the entire image catalog.
+  // Large case/cube catalogs are warmed in the background after first paint.
+  renderAll();
   const assetWarmup=Promise.allSettled([
-    loadServerCases(),
-    ensureCaseImages(),
+    loadServerCases(), ensureCaseImages(),
     window.cubeIconsReady || Promise.resolve(),
-    preloadProfileImages(data),
-    loadDailyStatus(),
-    loadAdvent()
+    preloadProfileImages(data), loadDailyStatus(), loadAdvent()
   ]);
   window.gdplayAssetWarmup=assetWarmup;
-  await assetWarmup;
-
-  renderAll();
+  assetWarmup.then(()=>{
+    try { renderAll(); } catch(_) {}
+    try { ensureCasesFirstPaint(); } catch(_) {}
+  });
   // Cases are the normal landing page after every regular app launch.
   // Explicit Telegram start parameters are handled separately below.
   currentTab='cases';
@@ -7140,7 +7139,7 @@ async function boot(){
       void releaseProgressFill.offsetWidth;
       releaseProgressFill.classList.add('run');
     }
-    await new Promise(resolve=>setTimeout(resolve,5000));
+    await new Promise(resolve=>setTimeout(resolve,3700));
     storageSet(RELEASE_KEY,'1');
     if(releaseScreen){
       releaseScreen.classList.add('leaving');
@@ -7149,13 +7148,12 @@ async function boot(){
     return serverBoot;
   }
 
-  // Keep the built-in startup splash visible for 4 seconds. Server/auth work
+  // Keep the built-in startup splash visible for 3.7 seconds. Server/auth work
   // starts immediately in parallel; if it is still running after 4 seconds,
   // expose the normal auth screen as a fallback and let async work continue.
-  const splashMin = new Promise(resolve=>setTimeout(resolve,4000));
-  // Keep the loader on screen until startup/auth and the app's initial asset
-  // warmup are complete. The splash minimum still applies, but no fixed timeout
-  // may uncover the app while its first-screen images or timers are missing.
+  const splashMin = new Promise(resolve=>setTimeout(resolve,3700));
+  // Keep only a short visual transition. Authentication remains awaited, but
+  // optional image/catalog warmups no longer block the first interactive screen.
   await Promise.all([serverBoot, splashMin]);
 
   // Always expose a real screen before removing the splash. If bootSafe() has
@@ -12310,10 +12308,13 @@ window.apiFetch = apiFetch;
 // Start local image warmup before server/auth work. This is deliberately
 // independent of the server so case photos are ready on the very first visit.
 try{
-  window.gdplayLocalAssetWarmup = Promise.allSettled([
-    ensureCaseImages(),
-    window.cubeIconsReady || Promise.resolve()
-  ]);
+  // Yield to the first interactive frame before loading the multi-megabyte
+  // case/cube image catalogs. Telegram's launch button should feel immediate.
+  window.gdplayLocalAssetWarmup = new Promise(resolve=>{
+    const run=()=>Promise.allSettled([ensureCaseImages(), window.cubeIconsReady || Promise.resolve()]).then(resolve);
+    if ('requestIdleCallback' in window) requestIdleCallback(run,{timeout:1800});
+    else setTimeout(run,900);
+  });
 }catch(_){ }
 
 boot().then(()=>loadAdvent()).catch(e=>console.error('GDPLAY fatal bootstrap error:',e));
