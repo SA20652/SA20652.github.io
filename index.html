@@ -5182,7 +5182,7 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
           <span class="inv-toolbar-label">Итого в инвентаре</span>
           <span class="inv-total mono"><span id="invTotalValue">0</span> 💰</span>
         </div>
-        <button class="btn-sell-all" id="sellAllBtn">Продать всё</button>
+        <button class="btn-sell-all" id="inventorySelectModeBtn" type="button">Выбрать</button><button class="btn-sell-all" id="sellSelectedBtn" type="button" style="display:none">Продать выбранные</button><button class="btn-sell-all" id="sellAllBtn">Продать всё</button>
       </div>
       <div id="inventoryList"></div>
     </div>
@@ -7148,14 +7148,16 @@ async function boot(){
     return serverBoot;
   }
 
-  // Keep the built-in splash for 3.7 seconds, but NEVER wait indefinitely
-  // for network/auth startup. Slow or unavailable API must not trap Telegram
-  // Mini App on the splash screen; serverBoot continues in the background.
+  // Keep the built-in startup splash visible for 3.7 seconds. Server/auth work
+  // starts immediately in parallel; if it is still running after 4 seconds,
+  // expose the normal auth screen as a fallback and let async work continue.
   const splashMin = new Promise(resolve=>setTimeout(resolve,3700));
-  await splashMin;
+  // Keep only a short visual transition. Authentication remains awaited, but
+  // optional image/catalog warmups no longer block the first interactive screen.
+  await Promise.all([serverBoot, splashMin]);
 
-  // Always expose a real screen before removing the splash. If bootSafe() is
-  // still waiting on the server, show auth as a fallback and let it continue.
+  // Always expose a real screen before removing the splash. If bootSafe() has
+  // not finished yet, show the normal auth screen as a safe fallback.
   const authEl=document.getElementById('authScreen');
   const appEl=document.getElementById('appScreen');
   const authVisible=!!authEl && getComputedStyle(authEl).display!=='none';
@@ -9130,6 +9132,7 @@ async function openCaseBatch(c, qty, useKey=false){
       const requestId=(crypto?.randomUUID?crypto.randomUUID():`open-${Date.now()}-${Math.random().toString(36).slice(2)}`);
       // Показатель гаранта меняется сразу при начале открытия, не после ответа сервера.
       advanceCasePityLive(c.id, qty);
+      data._cubeIdsBeforeOpen=(data.cubes||[]).map(x=>x.id).filter(x=>x!=null);
       const j=await apiFetch('/api/cube/open-batch',{case_id:c.id,qty,use_key:!!useKey,request_id:requestId});
       if(!Array.isArray(j.drops)||j.drops.length!==qty) throw new Error('Сервер вернул некорректные результаты кейсов');
       j.drops.forEach(d=>wins.push({id:Number(d.id)||0,name:String(d.name),rarity:String(d.rarity),value:Math.floor(Number(d.value)||0),source_case_id:String(d.case_id||c.id)}));
@@ -9137,6 +9140,16 @@ async function openCaseBatch(c, qty, useKey=false){
       if(Array.isArray(j.cubes)) data.cubes=j.cubes.map(x=>({...x, ...(resolveEliteExactCubeImage(x?.name)?{image:resolveEliteExactCubeImage(x.name)}:{})}));
       if(Array.isArray(j.keys)) data.keys=j.keys.map(x=>({...x}));
       if(Array.isArray(j.keys_added)) j.keys_added.forEach(k=>{if(k) showToast('🗝️ Дополнительно найден ключ «'+k.name+'»','success');});
+      // Auto-sell is a user preference; sales still go through the server's atomic sell endpoint.
+      try{
+        const autoRules=getAutoSellRules();
+        const ruleKeys=new Set(autoRules.filter(r=>String(r.case_id)===String(c.id)).map(r=>String(r.name)+'|'+String(r.rarity||'common')));
+        if(ruleKeys.size && Array.isArray(j.cubes)){
+          const beforeIds=new Set((data._cubeIdsBeforeOpen||[]).map(String));
+          const newWon=(j.cubes||[]).filter(x=>x&&x.id!=null&&!beforeIds.has(String(x.id))&&ruleKeys.has(String(x.name)+'|'+String(x.rarity||'common'))&&!x.metadata?.locked);
+          for(const cube of newWon){try{const sold=await apiFetch('/api/cube/sell',{cube_id:cube.id});data.balance=Number(sold.balance)||data.balance;if(Array.isArray(sold.cubes))data.cubes=sold.cubes;showToast('Автопродажа: '+cube.name+' · +'+Number(sold.gain||0).toLocaleString('ru-RU')+' 💰','success')}catch(err){console.warn('Auto-sell failed',err);}}
+        }
+      }catch(autoErr){console.warn('Auto-sell skipped',autoErr)}
       data.cases_opened=j.cases_opened!=null?j.cases_opened:(data.cases_opened||0)+qty;
       if(j.case_pity && typeof j.case_pity==='object'){ applyLiveCasePity(c.id,j.case_pity); }
       if(j.guarantee_triggered===true) resetCasePityLive(c.id);
@@ -9523,9 +9536,22 @@ function collectSpinReward(){
 }
 
 const expandedCubeStacks = new Set();
+const inventorySelectedCubeIds = new Set();
+let inventorySelectionMode = false;
+function getAutoSellRules(){try{return JSON.parse(localStorage.getItem('GDPLAY_AUTO_SELL_RULES')||'[]')}catch(_){return []}}
+function setAutoSellRule(cube, caseId, enabled){
+  const key=String(caseId||'')+'|'+String(cube?.name||'')+'|'+String(cube?.rarity||'common');
+  let rules=getAutoSellRules().filter(x=>x.key!==key);
+  if(enabled) rules.push({key,case_id:String(caseId||''),name:String(cube?.name||''),rarity:String(cube?.rarity||'common')});
+  localStorage.setItem('GDPLAY_AUTO_SELL_RULES',JSON.stringify(rules));
+}
+function isAutoSellRule(cube, caseId){const key=String(caseId||'')+'|'+String(cube?.name||'')+'|'+String(cube?.rarity||'common');return getAutoSellRules().some(x=>x.key===key)}
 function renderInventory(){
   normalizeGameState();
   const list=document.getElementById('inventoryList');
+  const selectModeBtn=document.getElementById('inventorySelectModeBtn'), selectedBtn=document.getElementById('sellSelectedBtn');
+  if(selectModeBtn) selectModeBtn.textContent=inventorySelectionMode?'Отменить выбор':'Выбрать';
+  if(selectedBtn){selectedBtn.style.display=inventorySelectionMode?'':'none';selectedBtn.textContent=`Продать выбранные (${inventorySelectedCubeIds.size})`}
   const total=data.cubes.reduce((s,c)=>s+Number(c.value||0),0);
   document.getElementById('invTotalValue').textContent=total.toLocaleString('ru-RU');
   const isPremium=data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now();
@@ -9583,10 +9609,15 @@ function renderInventory(){
   };
   stackedCubes.sort(compare);
   const cubeLockButton=(c,i)=>`<button type="button" class="btn-ghost cube-lock-btn" title="${c.metadata?.locked?'Разблокировать':'Заморозить'}" aria-label="${c.metadata?.locked?'Разблокировать':'Заморозить'}" data-action="toggle-cube-lock" data-index="${i}">${c.metadata?.locked?'🔓':'❄️'}</button>`;
-  const cubeItemActions=(c,i)=>`
+  const cubeItemActions=(c,i)=>{
+    const caseId=cubeSourceCaseId(c);
+    const auto=isAutoSellRule(c,caseId);
+    const selectBox=inventorySelectionMode?`<label class="inv-bulk-select"><input type="checkbox" data-action="inventory-select-cube" data-index="${i}" ${inventorySelectedCubeIds.has(String(c.id))?'checked':''} ${c.metadata?.locked?'disabled':''}> Выбрать</label>`:'';
+    return `${selectBox}<button type="button" class="btn-sell" data-action="toggle-auto-sell" data-index="${i}" title="Автопродажа для кейса ${caseId||'не определён'}">${auto?'Автопродажа ✓':'Автопродажа'}</button>
        <button type="button" class="btn-sell" data-action="sell-item" data-index="${i}" ${c.metadata?.locked?'disabled':''}>💰 Продать</button>
        <button type="button" class="btn-sell" data-action="open-upgrade" data-index="${i}" data-kind="cube" ${c.metadata?.locked?'disabled':''}>⬆️ Апгрейд</button>
        <button type="button" class="btn-sell" data-action="market-list" data-index="${i}" ${c.metadata?.locked?'disabled':''}>🏷️ На продажу</button>`;
+  };
   const itSafeId=(cube,fallback)=>{ const n=Number(cube?.id); return Number.isFinite(n)&&n>0 ? n : (Number(fallback)+1); };
   const renderStack = ({cube:c,count,indices})=>{
     const m=RARITY_META[c.rarity]||RARITY_META.common;
@@ -9703,6 +9734,25 @@ async function sellItem(index){
   }catch(e){
     showToast('❌ '+e.message, 'error');
   }finally{ serverActionInFlight=Math.max(0,serverActionInFlight-1); serverBusyUntil=Date.now()+100; }
+}
+
+async function sellSelectedCubes(){
+  const ids=new Set([...inventorySelectedCubeIds].map(String));
+  const cubes=(data.cubes||[]).filter(c=>c&&c.id!=null&&ids.has(String(c.id))&&!c.metadata?.locked);
+  if(!cubes.length){showToast('Выбери незамороженные кубы для продажи','error');return;}
+  if(!await tgConfirm(`Продать ${cubes.length} выбранных кубов?`))return;
+  try{
+    if(tgInitData()){
+      // IDs are immutable server-side identifiers; each sale is atomic and cannot duplicate a reward.
+      for(const cube of cubes){const result=await apiFetch('/api/cube/sell',{cube_id:cube.id});data.balance=Number(result.balance)||data.balance;if(Array.isArray(result.cubes))data.cubes=result.cubes;}
+    }else{
+      const idsNow=new Set(cubes.map(c=>String(c.id)));
+      const ratio=data.premiumUntil&&new Date(data.premiumUntil).getTime()>Date.now()?.85:.7;
+      data.balance+=(data.cubes||[]).filter(c=>idsNow.has(String(c.id))).reduce((sum,c)=>sum+Math.floor(Number(c.value||0)*ratio),0);
+      data.cubes=(data.cubes||[]).filter(c=>!idsNow.has(String(c.id)));
+    }
+    inventorySelectedCubeIds.clear();inventorySelectionMode=false;persistLocal();updateBalanceUI();renderInventory();showToast(`Продано кубов: ${cubes.length}`,'success');
+  }catch(e){showToast('Не удалось продать выбранные кубы: '+(e.message||'ошибка'),'error');}
 }
 
 async function sellAll(){
@@ -11927,6 +11977,17 @@ function handleButton(button, e){
     }
     return;
   }
+  if(action==='inventory-select-cube'){
+    const idx=Number(button.dataset.index), cube=data.cubes[idx];
+    if(cube?.id!=null){const id=String(cube.id);if(inventorySelectedCubeIds.has(id))inventorySelectedCubeIds.delete(id);else inventorySelectedCubeIds.add(id);}
+    renderInventory();return;
+  }
+  if(action==='toggle-auto-sell'){
+    const cube=data.cubes[Number(button.dataset.index)];if(!cube)return;
+    const caseId=(cube.source_case_id||cube.metadata?.source_case_id||(()=>{const hit=CASES.find(cc=>cc.items.some(it=>String(it.name)===String(cube.name)&&String(it.rarity||'common')===String(cube.rarity||'common')&&Number(it.value)===Number(cube.value)));return hit?.id||''})());
+    if(!caseId){showToast('Не удалось определить кейс для этого куба','error');return;}
+    setAutoSellRule(cube,caseId,!isAutoSellRule(cube,caseId));showToast(isAutoSellRule(cube,caseId)?'Автопродажа включена для '+cube.name:'Автопродажа выключена для '+cube.name,'success');renderInventory();return;
+  }
   if(action==='toggle-stack'){ const sid=button.dataset.stackId||''; if(sid){ if(expandedCubeStacks.has(sid)) expandedCubeStacks.delete(sid); else expandedCubeStacks.add(sid); renderInventory(); } return; }
   if(action==='market-list'){ listCubeForSale(Number(button.dataset.index)); return; }
     if(action==='open-upgrade'){ openUpgradeModal(button.dataset.index, button.dataset.kind||'cube'); return; }
@@ -11981,6 +12042,8 @@ function handleButton(button, e){
     case 'createBattleBtn': createBattle(); break;
     case 'dailyBtn': claimDaily(); break;
     case 'sellAllBtn': sellAll(); break;
+     case 'inventorySelectModeBtn': inventorySelectionMode=!inventorySelectionMode;if(!inventorySelectionMode)inventorySelectedCubeIds.clear();renderInventory();break;
+     case 'sellSelectedBtn': sellSelectedCubes();break;
     case 'sellConfirmAccept': acceptSellAll(); break;
     case 'sellConfirmReject': rejectSellAll(); break;
     case 'spinCloseBtn': collectSpinReward(); break;
@@ -11993,6 +12056,15 @@ function handleButton(button, e){
   }
 }
 
+
+document.addEventListener('change',e=>{
+  const input=e.target?.closest?.('input[data-action="inventory-select-cube"]');
+  if(!input)return;
+  const cube=data.cubes[Number(input.dataset.index)];
+  if(!cube||cube.id==null)return;
+  const id=String(cube.id);if(input.checked)inventorySelectedCubeIds.add(id);else inventorySelectedCubeIds.delete(id);
+  const selectedBtn=document.getElementById('sellSelectedBtn');if(selectedBtn)selectedBtn.textContent=`Продать выбранные (${inventorySelectedCubeIds.size})`;
+});
 
 window.addEventListener('message',e=>{
   if(e.source!==techBreakFrame?.contentWindow) return;

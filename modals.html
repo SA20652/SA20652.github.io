@@ -1033,6 +1033,18 @@ async function boot(){
   const startupLoaderLogo=document.getElementById('startupLoaderLogo');
   const firstLaunch=storageGet(RELEASE_KEY)!=='1';
 
+  // Независимый аварийный таймер: заставка не должна зависеть от API,
+  // ожидания bootSafe() или ошибки локального хранилища.
+  setTimeout(()=>{
+    try{ startupLoader?.classList.add('hide'); }catch(e){}
+    try{
+      if(releaseScreen){
+        releaseScreen.classList.add('leaving');
+        setTimeout(()=>releaseScreen.classList.remove('show','leaving'),700);
+      }
+    }catch(e){}
+  },3700);
+
   // Для загрузки используем УЖЕ ВСТРОЕННУЮ в страницу картинку куба.
   // Ничего внешнего не загружаем: берём тот же src, который используется
   // на releaseScreen, поэтому куб гарантированно доступен до запуска API.
@@ -1074,13 +1086,13 @@ async function boot(){
       releaseScreen.classList.add('leaving');
       setTimeout(()=>releaseScreen.classList.remove('show','leaving'),700);
     }
-    return serverBoot;
+    return;
   }
 
   // Встроенная загрузка длится ровно 3,7 секунды.
   await new Promise(resolve=>setTimeout(resolve,3700));
   if(startupLoader) startupLoader.classList.add('hide');
-  return serverBoot;
+  return;
 }
 
 async function waitForTelegramInitData(timeoutMs=4000){
