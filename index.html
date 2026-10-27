@@ -7035,6 +7035,7 @@ async function handleTelegramStartApp(){
     // finished.
     await waitForStartupSplashToFinish();
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
+    if(raw==='inventory'){ switchTab('inventory'); return; }
     const promoRaw=raw.startsWith('promo_') ? raw.slice(6).trim().toUpperCase() : '';
     if(promoRaw){
       pendingPromoScroll=true;
