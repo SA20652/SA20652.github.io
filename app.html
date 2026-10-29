@@ -177,7 +177,6 @@
       <button class="nav-btn" data-tab="inventory"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5-8 4.5-8-4.5z"/><path d="m4 12 8 4.5 8-4.5M4 16.5 12 21l8-4.5"/></svg></span>Кубы</button>
       <button class="nav-btn" data-tab="market"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16l-1 11H5z"/><path d="M6 9 8 4h8l2 5M9 13v3M15 13v3"/></svg></span>Магазин</button>
       <button class="nav-btn" data-tab="battles"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l6 6-2.2 2.2-6-6z"/><path d="M19 4l-6 6 2.2 2.2 6-6z"/><path d="M8.8 12.2l-3.4 3.4"/><path d="M15.2 12.2l3.4 3.4"/><path d="M4.2 18.5l2.8-2.8"/><path d="M19.8 18.5L17 15.7"/></g></svg></span>Батлы</button>
-      <button class="nav-btn" data-tab="plinko"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v10M7 12h10M9 9l6 6M15 9l-6 6"/></svg></span>Орб-Рывок</button>
       <button class="nav-btn" data-tab="mines"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="5.2" fill="currentColor" opacity=".16"/><circle cx="12" cy="13" r="5.2"/><path d="M12 7.8V4"/><path d="M12 22v-3.8"/><path d="M6.8 13H3"/><path d="M21 13h-3.8"/><path d="M8.3 9.3 5.6 6.6"/><path d="m18.4 19.4-2.7-2.7"/><path d="m15.7 9.3 2.7-2.7"/><path d="m5.6 19.4 2.7-2.7"/><path d="M15.5 4.5 17 2.5"/><path d="M8.5 4.5 7 2.5"/></g></svg></span>Мины</button>
       <button class="nav-btn" data-tab="top"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h12v4a6 6 0 0 1-12 0zM9 19h6M12 15v4M4 6v2a4 4 0 0 0 4 4M20 6v2a4 4 0 0 1-4 4"/></svg></span>Топ</button>
       <button class="nav-btn" data-tab="vault"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v6M9 12h6"/></svg></span>Сейф</button>
@@ -218,49 +217,6 @@
       <div id="bomberGame"></div>
     </div>
 
-    <!-- ORB RUSH -->
-    <div class="page" id="page-plinko">
-      <div class="rush-head">
-        <div>
-          <div class="section-title" style="margin-bottom:3px">Орб-Рывок</div>
-          <div class="section-sub" style="margin:0">Коэффициент растёт плавно до ×7.50. Забирай выигрыш в любой момент.</div>
-        </div>
-      </div>
-      <div class="rush-card">
-        <div class="limit-box" id="rushLimitBox" style="display:none">🚀 <b>Лимит Орб-Рывка</b><br><span>🎯 Осталось попыток: <b id="rushAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="rushLimitTimer">6ч 00м</b></span></div>
-        <div class="rush-chart" id="rushChart" aria-label="График Орб-Рывка">
-          <div class="rush-grid"></div>
-          <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <defs><linearGradient id="rushFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e3b872"/><stop offset="100%" stop-color="#c9974d" stop-opacity="0"/></linearGradient></defs>
-            <polygon class="rush-area" id="rushArea" points="6,92 6,92 94,92"></polygon>
-            <polyline class="rush-line" id="rushLine" points="6,92 6,92"></polyline>
-            <ellipse class="rush-dot" id="rushDot" cx="6" cy="92" rx="1.9" ry="2.35"></ellipse>
-          </svg>
-          <div class="rush-mult active" id="rushMultiplier">x1.00</div>
-        </div>
-        <div class="rush-status" id="rushStatus">Выбери ставку и запускай игру</div>
-        <div class="rush-result" id="rushResult"></div>
-        <div class="rush-bet-row">
-          <button class="rush-step" data-rush-bet="-10">−10</button>
-          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="1000" aria-label="Ставка орбов">
-          <button class="rush-step" data-rush-bet="10">+10</button>
-        </div>
-        <div class="rush-presets">
-          <button class="btn-ghost rush-preset" data-rush-preset="1">1</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="10">10</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="25">25</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="100">100</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="1000">1000</button>
-        </div>
-        <div class="rush-actions">
-          <button class="btn" id="rushStartBtn">Начать</button>
-          <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
-        </div>
-        <div class="rush-note">Ставка списывается с баланса орбов. Выигрыш возвращается по коэффициенту.</div>
-      </div>
-    </div>
-
-    <!-- INVENTORY -->
     <div class="page" id="page-inventory">
       <div class="section-title">Твои кубы</div>
       <div class="inv-search-wrap">

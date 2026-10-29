@@ -5040,16 +5040,6 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 <path fill-rule="evenodd" clip-rule="evenodd" d="M10 0H0V10H10V0ZM3 4C3.55228 4 4 3.55228 4 3C4 2.44772 3.55228 2 3 2C2.44772 2 2 2.44772 2 3C2 3.55228 2.44772 4 3 4ZM8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6.44772 6 7 6C7.55228 6 8 6.44772 8 7Z"/>
 <path d="M6 16V12H12V6H16V16H6Z"/>
 </svg></span>Батлы</button>
-      <button class="nav-btn" data-tab="plinko"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>rocket</title>
-    <g id="Page-1" stroke-width="1" fill-rule="evenodd">
-        <g id="icon" transform="translate(42.666667, 64.000000)">
-            <path d="M405.333333,1.42108547e-14 C396.316305,122.794806 364.316305,211.683695 309.333333,266.666667 C299.582265,276.417735 288.905446,285.33185 277.302879,293.409011 L277.302464,341.234872 L213.302464,405.234872 L174.248,336.891 L68.525,231.157 L7.10542736e-15,192 L64,128 L112.079613,128.000404 C120.083859,116.387258 128.94621,105.720457 138.666667,96 C193.649638,41.0170286 282.538527,9.01702859 405.333333,1.42108547e-14 Z M357.333333,47.9786667 L348.203556,49.3631108 C266.32942,62.2476147 206.763982,88.2424635 168.836556,126.169889 C146.004433,149.002012 128.637057,178.732412 116.876114,215.881246 L116.096,218.389333 L187.584,289.877333 L191.120585,288.76541 C224.531258,277.548675 251.975141,261.807487 273.818948,241.632769 L279.163444,236.496777 C317.09087,198.569351 343.085719,139.003914 355.970222,57.1297769 L357.333333,47.9786667 Z M75.9901363,269.368015 L30.7353023,314.622849 L0.565412939,284.452959 L45.8202469,239.198125 L75.9901363,269.368015 Z M121.24497,314.622849 L45.8202469,390.047572 L15.6503576,359.877683 L91.0750809,284.452959 L121.24497,314.622849 Z M136.329915,329.707793 L166.499804,359.877683 L121.24497,405.132517 L91.0750809,374.962627 L136.329915,329.707793 Z M245.333333,128 C263.006445,128 277.333333,142.326888 277.333333,160 C277.333333,177.673112 263.006445,192 245.333333,192 C227.660221,192 213.333333,177.673112 213.333333,160 C213.333333,142.326888 227.660221,128 245.333333,128 Z" id="Combined-Shape">
-
-</path>
-        </g>
-    </g>
-</svg></span>Орб-Рывок</button>
       <button class="nav-btn" data-tab="mines"><span class="nav-icon"><svg class="nav-supplied-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.9569 1.45706L14.539 2.87495L13.1248 1.45706L14.5427 0.0428467L15.9569 1.45706Z"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M11.707 5.707L13.123 4.29101L14.5354 5.70706L15.9532 4.28917L14.539 2.87495L13.123 4.28733L11.7106 2.87495L10.2928 4.29279L9 3L7.74293 4.25707C7.19135 4.08989 6.60617 4 6 4C2.68629 4 0 6.68629 0 10C0 13.3137 2.68629 16 6 16C9.31371 16 12 13.3137 12 10C12 9.39383 11.9101 8.80865 11.7429 8.25707L13 7L11.707 5.707ZM6 8C4.89543 8 4 8.89543 4 10H2C2 7.79086 3.79086 6 6 6V8Z"/>
@@ -5113,49 +5103,6 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
       <div id="bomberGame"></div>
     </div>
 
-    <!-- ORB RUSH -->
-    <div class="page" id="page-plinko">
-      <div class="rush-head">
-        <div>
-          <div class="section-title" style="margin-bottom:3px">Орб-Рывок</div>
-          <div class="section-sub" style="margin:0">Коэффициент растёт плавно до ×7.50. Забирай выигрыш в любой момент.</div>
-        </div>
-      </div>
-      <div class="rush-card">
-        <div class="limit-box" id="rushLimitBox" style="display:none">🚀 <b>Лимит Орб-Рывка</b><br><span>🎯 Осталось попыток: <b id="rushAttempts">5 / 5</b></span><br><span>⏳ Обновление лимита через: <b id="rushLimitTimer">1ч 00м</b></span></div>
-        <div class="rush-chart" id="rushChart" aria-label="График Орб-Рывка">
-          <div class="rush-grid"></div>
-          <svg class="rush-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-            <defs><linearGradient id="rushFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e3b872"/><stop offset="100%" stop-color="#c9974d" stop-opacity="0"/></linearGradient></defs>
-            <polygon class="rush-area" id="rushArea" points="0.8,95 0.8,95 94,95"></polygon>
-            <polyline class="rush-line" id="rushLine" points="0.8,95 0.8,95"></polyline>
-            <circle class="rush-dot" id="rushDot" cx="0.8" cy="95" r="2.2"></circle>
-          </svg>
-          <div class="rush-mult active" id="rushMultiplier">x1.00</div>
-        </div>
-        <div class="rush-status" id="rushStatus">Выбери ставку и запускай игру</div>
-        <div class="rush-result" id="rushResult"></div>
-        <div class="rush-bet-row">
-          <button class="rush-step" data-rush-bet="-10">−10</button>
-          <input id="rushBet" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="1000" aria-label="Ставка орбов">
-          <button class="rush-step" data-rush-bet="10">+10</button>
-        </div>
-        <div class="rush-presets">
-          <button class="btn-ghost rush-preset" data-rush-preset="1">1</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="10">10</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="25">25</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="100">100</button>
-          <button class="btn-ghost rush-preset" data-rush-preset="1000">1000</button>
-        </div>
-        <div class="rush-actions">
-          <button class="btn" id="rushStartBtn">Начать</button>
-          <button class="btn-ghost" id="rushCashoutBtn" disabled>Забрать x1.00</button>
-        </div>
-        <div class="rush-note">Ставка списывается с баланса орбов. Выигрыш возвращается по коэффициенту.</div>
-      </div>
-    </div>
-
-    <!-- INVENTORY -->
     <div class="page" id="page-inventory">
       <div class="section-title">Твои кубы</div>
       <div class="inv-search-wrap">
@@ -7035,7 +6982,6 @@ async function handleTelegramStartApp(){
     // finished.
     await waitForStartupSplashToFinish();
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
-    if(raw==='inventory'){ switchTab('inventory'); return; }
     const promoRaw=raw.startsWith('promo_') ? raw.slice(6).trim().toUpperCase() : '';
     if(promoRaw){
       pendingPromoScroll=true;
