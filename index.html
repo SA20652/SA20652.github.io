@@ -4783,7 +4783,15 @@ try{new MutationObserver(bindPremiumImages).observe(document.documentElement,{ch
 .rush-chart{touch-action:pan-y}
 .rush-svg{overflow:hidden}
 </style>
-<style id="roulette-ui-style">.roulette-wheel-wrap{display:flex;justify-content:center;padding:14px 0}.roulette-wheel{width:190px;height:190px;border-radius:50%;border:8px solid #c8a45b;box-shadow:0 0 0 4px #392b18,0 8px 24px #0008;position:relative;background:conic-gradient(#17834c 0deg 9.73deg,#b82d35 9.73deg 19.46deg,#17191d 19.46deg 29.19deg,#b82d35 29.19deg 38.92deg,#17191d 38.92deg 48.65deg,#b82d35 48.65deg 58.38deg,#17191d 58.38deg 68.11deg,#b82d35 68.11deg 77.84deg,#17191d 77.84deg 87.57deg,#b82d35 87.57deg 97.3deg,#17191d 97.3deg 107.03deg,#b82d35 107.03deg 116.76deg,#17191d 116.76deg 126.49deg,#b82d35 126.49deg 136.22deg,#17191d 136.22deg 145.95deg,#b82d35 145.95deg 155.68deg,#17191d 155.68deg 165.41deg,#b82d35 165.41deg 175.14deg,#17191d 175.14deg 184.87deg,#b82d35 184.87deg 194.6deg,#17191d 194.6deg 204.33deg,#b82d35 204.33deg 214.06deg,#17191d 214.06deg 223.79deg,#b82d35 223.79deg 233.52deg,#17191d 233.52deg 243.25deg,#b82d35 243.25deg 252.98deg,#17191d 252.98deg 262.71deg,#b82d35 262.71deg 272.44deg,#17191d 272.44deg 282.17deg,#b82d35 282.17deg 291.9deg,#17191d 291.9deg 301.63deg,#b82d35 301.63deg 311.36deg,#17191d 311.36deg 321.09deg,#b82d35 321.09deg 330.82deg,#17191d 330.82deg 340.55deg,#b82d35 340.55deg 350.28deg,#17191d 350.28deg 360deg);transition:transform 4.2s cubic-bezier(.12,.72,.08,1)}.roulette-wheel:after{content:'GD';position:absolute;inset:37%;border-radius:50%;background:radial-gradient(circle,#e8c77b,#78552a);border:4px solid #f0d99b;display:grid;place-items:center;color:#241a0b;font-weight:900;font-size:19px}.roulette-wheel.spinning{transform:rotate(1800deg)}.roulette-result{margin-top:10px;padding:11px;border-radius:12px;background:var(--bg-3);text-align:center;line-height:1.7}</style>
+<style id="roulette-ui-style">
+.roulette-wheel-wrap{display:flex;justify-content:center;position:relative;padding:28px 0 14px}
+.roulette-pointer{position:absolute;z-index:3;top:5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:22px solid #f3d27a;filter:drop-shadow(0 2px 3px #0009)}
+.roulette-wheel{width:190px;height:190px;border-radius:50%;border:8px solid #c8a45b;box-shadow:0 0 0 4px #392b18,0 8px 24px #0008;position:relative;background:var(--wheel-bg,conic-gradient(#b82d35 0 51.428%,#17191d 51.428% 100%));transform:rotate(var(--wheel-rotation,0deg))}
+.roulette-wheel:after{content:'GD';position:absolute;inset:37%;border-radius:50%;background:radial-gradient(circle,#e8c77b,#78552a);border:4px solid #f0d99b;display:grid;place-items:center;color:#241a0b;font-weight:900;font-size:19px}
+.roulette-wheel.spinning{animation:roulette-spin 4.5s cubic-bezier(.10,.72,.08,1) forwards}@keyframes roulette-spin{from{transform:rotate(0deg)}to{transform:rotate(var(--wheel-rotation,1440deg))}}
+.roulette-result{margin-top:10px;padding:11px;border-radius:12px;background:var(--bg-3);text-align:center;line-height:1.7}
+.roulette-player-matches{display:grid;gap:6px;margin-top:6px}.roulette-player-option{padding:10px 12px;border-radius:10px;background:var(--bg-3);border:1px solid var(--border);text-align:left;color:var(--text);width:100%}.roulette-player-option.selected{border-color:var(--accent)}
+</style>
 
 <style id="gdplay-orb-currency-size-fix">
 img.gdplay-orb-coin{width:15px!important;height:15px!important;max-width:15px!important;max-height:15px!important;min-width:15px!important;min-height:15px!important;object-fit:contain!important;display:inline-block!important;vertical-align:-3px!important;flex:0 0 15px!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0 2px!important;}
@@ -5101,10 +5109,14 @@ img.gdplay-orb-coin{width:15px!important;height:15px!important;max-width:15px!im
 
     <div class="page" id="page-roulette">
       <div class="section-title" style="margin-top:24px">Рулетка</div>
-      <div class="section-sub">Европейская рулетка · 18 красных · 18 чёрных · зеро</div>
+      <div class="section-sub">Найди игрока по username или имени в GDPLAY, выбери его и отправь приглашение. Запрос действует 1 час.</div>
       <div class="battle-form">
-        <label>Ставка каждого игрока</label><input id="rouletteStake" type="number" min="1" step="1" value="100">
-        <button class="btn" id="rouletteCreateBtn" style="width:100%;margin-top:10px">Создать раунд</button>
+        <label>Игрок</label>
+        <input id="roulettePlayerSearch" type="search" autocomplete="off" placeholder="Начни вводить @username или никнейм…">
+        <div id="roulettePlayerMatches" class="roulette-player-matches"></div>
+        <input id="rouletteSelectedPlayer" type="hidden">
+        <label style="margin-top:12px">Ставка каждого игрока</label><input id="rouletteStake" type="number" min="1" step="1" value="100">
+        <button class="btn" id="rouletteCreateBtn" style="width:100%;margin-top:10px" disabled>Выбери игрока</button>
       </div>
       <div id="rouletteRounds"></div>
     </div>
@@ -6962,7 +6974,7 @@ async function handleTelegramStartApp(){
     // finished.
     await waitForStartupSplashToFinish();
     const raw=String(window.Telegram?.WebApp?.initDataUnsafe?.start_param||'').trim();
-    if(raw==='roulette' || new URLSearchParams(window.location.search||'').get('tab')==='roulette'){ switchTab('roulette'); return; }
+    if(raw==='roulette' || raw.startsWith('roulette_') || new URLSearchParams(window.location.search||'').get('tab')==='roulette'){ switchTab('roulette'); const rid=raw.startsWith('roulette_')?raw.slice(9):''; if(rid){setTimeout(()=>{renderRoulette().then(()=>document.getElementById('roulette-round-'+rid)?.scrollIntoView({behavior:'smooth',block:'center'}));},350);} return; }
     const promoRaw=raw.startsWith('promo_') ? raw.slice(6).trim().toUpperCase() : '';
     if(promoRaw){
       pendingPromoScroll=true;
@@ -10250,39 +10262,18 @@ async function buyMarketItem(id){
 
 const rouletteSeenResults = new Set();
 const rouletteNames = {red:'🔴 Красный',black:'⚫ Чёрный',green:'🟢 Зелёный'};
+let rouletteSelectedPlayer=null, rouletteSearchTimer=null;const rouletteAnimatedResults=new Set();
 function rouletteSafe(s){return String(s||'Игрок').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-async function renderRoulette(){
- const el=document.getElementById('rouletteRounds'); if(!el)return;
- try{
-  const j=await apiFetch('/api/mp/roulette',{}); if(j.balance!=null){data.balance=Number(j.balance);updateBalanceUI();persistLocal();}
-  const me=String(tgUserId()||''); const rounds=j.rounds||[];
-  if(!rounds.length){el.innerHTML='<div class="empty-state">Пока нет раундов. Создай первый!</div>';return;}
-  el.innerHTML=rounds.map(r=>{
-   const mine=String(r.creator_id)===me, opponent=String(r.opponent_id||'')===me;
-   const creator=rouletteSafe(r.creator_name||r.creator_username||('Игрок '+r.creator_id));
-   const opp=rouletteSafe(r.opponent_name||r.opponent_username||(r.opponent_id?'Игрок '+r.opponent_id:'Ожидает соперника'));
-   const colors=mine?r.creator_color:(opponent?r.opponent_color:null);
-   let controls='';
-   if(r.status==='waiting'&&!mine) controls=`<button class="btn" data-action="roulette-join" data-round="${r.id}" style="width:100%;margin-top:9px">Внести ${Number(r.stake).toLocaleString('ru-RU')} орбов и играть</button>`;
-   if(r.status==='waiting'&&mine) controls=`<div class="section-sub">Ожидаем второго игрока…</div><button class="btn-ghost" data-action="roulette-cancel" data-round="${r.id}">Отменить и вернуть ставку</button>`;
-   if(r.status==='active'&&(mine||opponent)&&!colors) controls=`<div class="section-sub">Выбери свой цвет:</div><div style="display:flex;gap:7px;margin-top:8px">${[['red','🔴'],['black','⚫'],['green','🟢']].map(([c,e])=>`<button class="btn" data-action="roulette-color" data-round="${r.id}" data-color="${c}" style="flex:1">${e}</button>`).join('')}</div>`;
-   if(r.status==='active'&&colors) controls='<div class="section-sub">Твой выбор: '+rouletteNames[colors]+' · Ожидаем соперника</div>';
-   if(r.status==='active'&&(mine||opponent)) controls += `<button class="btn-ghost" data-action="roulette-leave" data-round="${r.id}" style="margin-top:8px">Выйти и вернуть обе ставки</button>`;
-   let result=''; if(r.status==='completed'){
-    const res=r.result||{}; result=`<div class="roulette-result">🎯 Выпало: <b>${res.number}</b> · ${rouletteNames[res.color]||res.color}<br>Твоя выплата: <b>${Number((res.payouts||{})[me]||0).toLocaleString('ru-RU')} орбов</b></div>`;
-    if((mine||opponent)&&!rouletteSeenResults.has(r.id)){rouletteSeenResults.add(r.id);setTimeout(()=>showToast(`🎡 Рулетка: ${res.number} · ${rouletteNames[res.color]||res.color}`,'success'),250);}
-   }
-   const status=r.status==='waiting'?'Ожидает игрока':r.status==='active'?'Выбор цвета':r.status==='completed'?'Завершён':r.status==='expired'?'Истёк':'Отменён';
-   return `<div class="battle-card" style="margin-top:12px"><div class="roulette-wheel-wrap"><div class="roulette-wheel ${r.status==='completed'?'spinning':''}"></div></div><div class="battle-top"><div><div class="battle-title">🎡 Раунд ${rouletteSafe(r.id.slice(-6))}</div><div class="battle-meta">${status} · ставка ${Number(r.stake).toLocaleString('ru-RU')} орбов</div></div><div class="battle-prize">${(Number(r.stake)*2).toLocaleString('ru-RU')} 💰</div></div><div class="battle-player"><span>${creator}</span><b>${rouletteNames[r.creator_color]||'Не выбрал'}</b></div><div class="battle-player"><span>${opp}</span><b>${rouletteNames[r.opponent_color]||'Не выбрал'}</b></div>${controls}${result}</div>`;
-  }).join('');
- }catch(e){el.innerHTML='<div class="empty-state">Не удалось загрузить раунды рулетки</div>';}
-}
-async function createRoulette(){const stake=Math.floor(Number(document.getElementById('rouletteStake')?.value));if(!Number.isSafeInteger(stake)||stake<1){showToast('Укажи корректную ставку','error');return;}try{const j=await apiFetch('/api/mp/roulette/create',{stake});data.balance=j.balance;persistLocal();updateBalanceUI();await renderRoulette();showToast('Раунд создан. Ждём соперника!','success');}catch(e){showToast('❌ '+e.message,'error');}}
-async function joinRoulette(id){try{const j=await apiFetch('/api/mp/roulette/join',{round_id:id});data.balance=j.balance;persistLocal();updateBalanceUI();await renderRoulette();showToast('Ставка внесена. Выбирай цвет!','success');}catch(e){showToast('❌ '+e.message,'error');}}
-async function chooseRoulette(id,color,btn){if(btn)btn.disabled=true;try{const j=await apiFetch('/api/mp/roulette/choose',{round_id:id,color});if(j.balance!=null){data.balance=j.balance;persistLocal();updateBalanceUI();}if(j.result?.status==='completed'){const r=j.result;showToast(`🎡 Выпало ${r.number} · ${rouletteNames[r.color]}. Выплата: ${Number((r.payouts||{})[String(tgUserId())]||0).toLocaleString('ru-RU')} орбов`,'success');}else showToast('Цвет выбран. Ждём соперника!','success');await renderRoulette();}catch(e){showToast('❌ '+e.message,'error');if(btn)btn.disabled=false;}}
-async function leaveRoulette(id){try{const j=await apiFetch('/api/mp/roulette/leave',{round_id:id});data.balance=j.balance;persistLocal();updateBalanceUI();await renderRoulette();showToast('Раунд отменён, обе ставки возвращены','success');}catch(e){showToast('❌ '+e.message,'error');}}
-async function cancelRoulette(id){try{const j=await apiFetch('/api/mp/roulette/cancel',{round_id:id});data.balance=j.balance;persistLocal();updateBalanceUI();await renderRoulette();showToast('Ставка возвращена','success');}catch(e){showToast('❌ '+e.message,'error');}}
-setInterval(()=>{if(currentTab==='roulette')renderRoulette();},5000);
+function rouletteTrack(r){let t=Array.isArray(r.animation_track)?r.animation_track:[];if(t.length!==7||t.filter(x=>x==='red').length!==3||t.filter(x=>x==='black').length!==3||t.filter(x=>x==='green').length!==1)t=['red','black','red','black','green','red','black'];return t;}
+function rouletteWheelMarkup(r){const t=rouletteTrack(r), colors={red:'#b82d35',black:'#17191d',green:'#17834c'};let angle=0,stops=[];t.forEach(c=>{stops.push(`${colors[c]} ${angle}deg ${angle+360/7}deg`);angle+=360/7;});const idx=Number((r.result||{}).stop_index??0);const rotation=r.status==='completed'?(1440-(idx+.5)*360/7):0;const animate=r.status==='completed'&&!rouletteAnimatedResults.has(r.id);if(animate)rouletteAnimatedResults.add(r.id);return `<div class="roulette-wheel-wrap"><div class="roulette-pointer"></div><div class="roulette-wheel ${animate?'spinning':''}" style="--wheel-bg:conic-gradient(${stops.join(',')});--wheel-rotation:${rotation}deg"></div></div>`;}
+async function searchRoulettePlayers(){const input=document.getElementById('roulettePlayerSearch'),box=document.getElementById('roulettePlayerMatches'),btn=document.getElementById('rouletteCreateBtn');if(!input||!box)return;const q=input.value.trim();rouletteSelectedPlayer=null;document.getElementById('rouletteSelectedPlayer').value='';btn.disabled=true;btn.textContent='Выбери игрока';if(!q){box.innerHTML='';return;}try{const j=await apiFetch('/api/mp/roulette/search',{q});box.innerHTML=(j.players||[]).map(u=>`<button type="button" class="roulette-player-option" data-roulette-player="${u.id}"><b>${rouletteSafe(u.name)}</b>${u.username?` <span class="section-sub">@${rouletteSafe(u.username)}</span>`:''}</button>`).join('')||'<div class="section-sub">Совпадений не найдено</div>'; }catch(e){box.innerHTML='<div class="section-sub">Не удалось найти игроков</div>';}}
+async function renderRoulette(){const el=document.getElementById('rouletteRounds');if(!el)return;try{const j=await apiFetch('/api/mp/roulette',{});if(j.balance!=null){data.balance=Number(j.balance);updateBalanceUI();persistLocal();}const me=String(tgUserId()||''),rounds=j.rounds||[];if(!rounds.length){el.innerHTML='<div class="empty-state">У тебя пока нет приглашений и раундов.</div>';return;}el.innerHTML=rounds.map(r=>{const mine=String(r.creator_id)===me,opponent=String(r.opponent_id||'')===me;const creator=rouletteSafe(r.creator_name||r.creator_username||('Игрок '+r.creator_id));const opp=rouletteSafe(r.opponent_name||r.opponent_username||(r.opponent_id?'Игрок '+r.opponent_id:'Игрок'));let controls='';if(r.status==='challenge'&&opponent)controls=`<button class="btn" data-action="roulette-accept" data-round="${r.id}" style="width:100%;margin-top:9px">Принять приглашение</button>`;if(r.status==='challenge'&&mine)controls='<div class="section-sub">Приглашение отправлено. Оно действует 1 час.</div>';const colors=mine?r.creator_color:(opponent?r.opponent_color:null);if(r.status==='active'&&!colors)controls=`<div class="section-sub">Выбери цвет:</div><div style="display:flex;gap:7px;margin-top:8px">${[['red','🔴'],['black','⚫'],['green','🟢']].map(([c,e])=>`<button class="btn" data-action="roulette-color" data-round="${r.id}" data-color="${c}" style="flex:1">${e}</button>`).join('')}</div>`;if(r.status==='active'&&colors)controls='<div class="section-sub">Твой выбор: '+rouletteNames[colors]+'</div>';let result='';if(r.status==='completed'){const res=r.result||{};result=`<div class="roulette-result">Выпало: <b>${res.number}</b> · ${rouletteNames[res.color]||res.color}<br>Твоя выплата: <b>${Number((res.payouts||{})[me]||0).toLocaleString('ru-RU')} орбов</b></div>`;if(!rouletteSeenResults.has(r.id)){rouletteSeenResults.add(r.id);setTimeout(()=>showToast(`Рулетка: ${res.number} · ${rouletteNames[res.color]||res.color}`,'success'),250);}}const status=r.status==='challenge'?'Приглашение':r.status==='active'?'Выбор цвета':r.status==='completed'?'Завершён':r.status==='expired'?'Истёк':r.status==='rejected'?'Отклонён':'Отменён';return `<div class="battle-card" id="roulette-round-${rouletteSafe(r.id)}" style="margin-top:12px">${rouletteWheelMarkup(r)}<div class="battle-top"><div><div class="battle-title">Раунд ${rouletteSafe(r.id.slice(-6))}</div><div class="battle-meta">${status} · ставка ${Number(r.stake).toLocaleString('ru-RU')} орбов</div></div><div class="battle-prize">${(Number(r.stake)*2).toLocaleString('ru-RU')} орбов</div></div><div class="battle-player"><span>${creator}</span><b>${rouletteNames[r.creator_color]||'Не выбрал'}</b></div><div class="battle-player"><span>${opp}</span><b>${rouletteNames[r.opponent_color]||'Не выбрал'}</b></div>${controls}${result}</div>`;}).join('');}catch(e){el.innerHTML='<div class="empty-state">Не удалось загрузить рулетку</div>';}}
+async function createRoulette(){const stake=Math.floor(Number(document.getElementById('rouletteStake')?.value)),opponent_id=Number(rouletteSelectedPlayer);if(!opponent_id){showToast('Сначала выбери игрока','error');return;}if(!Number.isSafeInteger(stake)||stake<1){showToast('Укажи корректную ставку','error');return;}try{const j=await apiFetch('/api/mp/roulette/challenge',{stake,opponent_id});data.balance=j.balance;persistLocal();updateBalanceUI();rouletteSelectedPlayer=null;document.getElementById('roulettePlayerSearch').value='';document.getElementById('roulettePlayerMatches').innerHTML='';document.getElementById('rouletteCreateBtn').disabled=true;document.getElementById('rouletteCreateBtn').textContent='Выбери игрока';await renderRoulette();showToast('Приглашение отправлено в личные сообщения','success');}catch(e){showToast('❌ '+e.message,'error');}}
+async function acceptRoulette(id){try{const j=await apiFetch('/api/mp/roulette/accept',{round_id:id});if(j.balance!=null){data.balance=j.balance;persistLocal();updateBalanceUI();}await renderRoulette();document.getElementById('roulette-round-'+id)?.scrollIntoView({behavior:'smooth',block:'center'});showToast('Приглашение принято. Выбирайте цвет!','success');}catch(e){showToast('❌ '+e.message,'error');}}
+async function chooseRoulette(id,color,btn){if(btn)btn.disabled=true;try{const j=await apiFetch('/api/mp/roulette/choose',{round_id:id,color});if(j.balance!=null){data.balance=j.balance;persistLocal();updateBalanceUI();}await renderRoulette();}catch(e){showToast('❌ '+e.message,'error');if(btn)btn.disabled=false;}}
+async function leaveRoulette(id){try{const j=await apiFetch('/api/mp/roulette/leave',{round_id:id});data.balance=j.balance;persistLocal();updateBalanceUI();await renderRoulette();}catch(e){showToast('❌ '+e.message,'error');}}
+async function cancelRoulette(id){try{const j=await apiFetch('/api/mp/roulette/cancel',{round_id:id});data.balance=j.balance;persistLocal();updateBalanceUI();await renderRoulette();}catch(e){showToast('❌ '+e.message,'error');}}
+setInterval(()=>{if(currentTab==='roulette')renderRoulette();},3000);
 
 const seenBattleResults = new Set();
 
@@ -11917,6 +11908,7 @@ function handleButton(button, e){
   if(button.id==='adminTechBreakPromoBtn'){ adminGlobalTechBreakToggle(); return; }
   if(action==='join-battle'){ joinBattle(button.dataset.joinBattle); return; }
   if(action==='play-battle'){ playBattle(button.dataset.playBattle); return; }
+  if(action==='roulette-accept'){ acceptRoulette(button.dataset.round); return; }
   if(action==='roulette-join'){ joinRoulette(button.dataset.round); return; }
   if(action==='roulette-cancel'){ cancelRoulette(button.dataset.round); return; }
   if(action==='roulette-leave'){ leaveRoulette(button.dataset.round); return; }
